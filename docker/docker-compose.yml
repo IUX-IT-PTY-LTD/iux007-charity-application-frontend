@@ -1,0 +1,21 @@
+networks:
+  iuxit-net:
+    external: true
+
+services:
+
+  app:
+    image: ${COMPOSE_PROJECT_NAME}_app:${DOCKER_BUILD_MODE:-dev}
+    build:
+      context: ../
+      dockerfile: docker/app/Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    tty: true
+    restart: "no"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=${APP_HTTP_PUBLISH_PORT:-3000}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
