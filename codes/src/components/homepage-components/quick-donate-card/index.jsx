@@ -11,7 +11,7 @@ const QuickDonateCard = ({
     buttonText
 }) => {
     return (
-        <div className="bg-white rounded-2xl p-5 cursor-pointer hover:-translate-y-2 transition-all relative">
+        <div className="bg-white rounded-2xl p-0 cursor-pointer hover:-translate-y-2 transition-all relative">
             <div className="overflow-hidden mx-auto md:mb-2 mb-4">
                 <Image
                     width={300}
@@ -56,7 +56,7 @@ const QuickDonateCard = ({
 
                 <div className="buttons block relative mt-4 w-full hover-breath-border cursor-pointer">
                     <Link
-                        href={"/"}
+                        href={"/checkout"}
                         className="bg-primary text-sm h-full text-white px-5 py-2 rounded-md block text-center w-full"
                     >
                         {

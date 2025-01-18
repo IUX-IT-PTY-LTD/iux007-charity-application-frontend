@@ -1,6 +1,11 @@
+'use client'
 import Image from "next/image";
 import React from "react";
 import QuickDonateCard from "../quick-donate-card";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+
 
 const Hero = () => {
   const quickDonateItems = [
@@ -45,9 +50,35 @@ const Hero = () => {
       raised: 500000,
     },
   ];
+
+  var settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoPlay: true,
+    autoPlaySpeed: 3000,
+    dots: false,
+  };
   return (
-    <div className="container mx-auto my-20">
-      <div className="grid md:grid-cols-2 items-center md:gap-8 gap-6">
+    <div className="container mx-auto">
+
+      {/* slider */}
+      <Slider {...settings}>
+        <div>
+          <Image src="/assets/img/hero.jpg" className="w-full h-[600px] object-cover rounded-md" width={800} height={600} alt="Donate Hero" />
+        </div>
+        <div>
+          <Image src="/assets/img/hero.jpg" className="w-full h-[600px] object-cover rounded-md" width={800} height={600} alt="Donate Hero" />
+        </div>
+        <div>
+          <Image src="/assets/img/hero.jpg" className="w-full h-[600px] object-cover rounded-md" width={800} height={600} alt="Donate Hero" />
+        </div>
+      </Slider>
+      {/* slider */}
+
+      {/* <div className="grid md:grid-cols-2 items-center md:gap-8 gap-6">
         <div className="max-md:order-1 max-md:text-center z-50 relative">
           <h2 className="text-gray-800 lg:text-6xl md:text-4xl text-2xl font-extrabold mb-4 md:!leading-[56px]">
             <span className="text-primary">Charity:</span> Changing{" "}
@@ -88,7 +119,7 @@ const Hero = () => {
 
         <div className="lg:h-[550px] md:h-[550px] flex items-center relative max-md:before:hidden before:absolute before:bg-[#DEE2E5] before:h-[120%] before:w-[120%] before:right-0 before:z-0">
           <Image
-            src="./assets/img/donate-hero.jpg"
+            src="/assets/img/donate-hero.jpg"
             width={800}
             height={600}
             className="rounded-md lg:w-4/5 z-50 relative"
@@ -96,7 +127,7 @@ const Hero = () => {
             unoptimized
           />
         </div>
-      </div>
+      </div> */}
 
       {/* <div className="grid md:grid-cols-3 gap-4 z-50 relative md:px-4 max-md:mt-12 mb-12">
         <div className="bg-white p-6 shadow rounded-md">
@@ -188,7 +219,7 @@ const Hero = () => {
         </div>
       </div> */}
 
-      <div className="grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 z-50 relative md:px-4 max-md:mt-12 mb-12">
+      <div className="grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 z-50 relative mt-2 max-md:mt-12 mb-12">
         {quickDonateItems.map((event) => (
           <QuickDonateCard
             key={event.id}

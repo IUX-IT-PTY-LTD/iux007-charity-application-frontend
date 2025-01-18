@@ -1,12 +1,14 @@
 "use client";
 import EventCard from "@/components/homepage-components/event-card";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
-import { FaDonate, FaHandHoldingHeart } from "react-icons/fa";
+import { FaDonate, FaHandHoldingHeart, FaTrashAlt } from "react-icons/fa";
 import { MdOutlineEmojiPeople } from "react-icons/md";
 
 const Checkout = () => {
   const [currentStep, setCurrentStep] = React.useState(1);
+  const [customDonationAmount, setCustomDonationAmount] = React.useState(0);
   const items = [
     {
       id: 1,
@@ -77,6 +79,108 @@ const Checkout = () => {
       target: 1000000,
       raised: 500000,
     },
+    {
+      id: 6,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 7,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 8,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 9,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 10,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+
+    {
+      id: 11,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 12,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 13,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 14,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+    {
+      id: 15,
+      title: "Event Name",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      date: "2024-12-12",
+      venue: "Lagos",
+      image: "/assets/img/event-img.jpg",
+      target: 1000000,
+      raised: 500000,
+    },
+
   ];
 
   const paymentMethods = [
@@ -169,9 +273,9 @@ const Checkout = () => {
           {currentStep === 1 && (
             <>
               <div className="my-6 flex justify-between items-center gap-3">
-                <button className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md">
+                <Link href={"/donations"} className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md">
                   Add More Items
-                </button>
+                </Link>
 
                 {/* currency */}
                 <div className="flex justify-between items-center gap-3">
@@ -191,111 +295,129 @@ const Checkout = () => {
               <hr />
 
               <div className="items mt-6">
-                {cartItems.map((item) => (
-                  <div key={item.id}>
-                    <div className="flex justify-between items-center gap-3 mt-3">
-                      <div className="flex gap-3 items-center">
-                        <div className="overflow-hidden w-16 h-16 rounded-lg">
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            width={100}
-                            height={100}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-800">
-                            {item.title}
-                          </h3>
-                          <p className="text-gray-600">Code: {item.code}</p>
-                        </div>
-                        <div className="flex gap-3 items-center ms-5">
-                          <button
-                            className="btn btn-primary bg-primary text-white px-3 py-1 rounded-md"
-                            onClick={() => {
-                              if (item.quantity > 1) {
-                                setCartItems((prevItems) => {
-                                  return prevItems.map((prevItem) => {
-                                    if (prevItem.id === item.id) {
-                                      return {
-                                        ...prevItem,
-                                        quantity: prevItem.quantity - 1,
-                                      };
+                {
+                  cartItems.length > 0 ?
+                    <>
+                      {cartItems.map((item) => (
+                        <div key={item.id}>
+                          <div className="flex justify-between items-center gap-3 mt-3">
+                            <div className="flex gap-3 items-center">
+                              <div className="overflow-hidden w-16 h-16 rounded-lg">
+                                <Image
+                                  src={item.image}
+                                  alt={item.title}
+                                  width={100}
+                                  height={100}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-gray-800">
+                                  {item.title}
+                                </h3>
+                                <p className="text-gray-600">Code: {item.code}</p>
+                              </div>
+                              <div className="flex gap-3 items-center ms-5">
+                                <button
+                                  className="btn btn-primary bg-primary text-white px-3 py-1 rounded-md"
+                                  onClick={() => {
+                                    if (item.quantity > 1) {
+                                      setCartItems((prevItems) => {
+                                        return prevItems.map((prevItem) => {
+                                          if (prevItem.id === item.id) {
+                                            return {
+                                              ...prevItem,
+                                              quantity: prevItem.quantity - 1,
+                                            };
+                                          }
+                                          return prevItem;
+                                        });
+                                      });
                                     }
-                                    return prevItem;
+                                  }}
+                                >
+                                  -
+                                </button>
+                                <span>{item.quantity}</span>
+                                <button
+                                  className="btn btn-primary bg-primary text-white px-3 py-1 rounded-md"
+                                  onClick={() => {
+                                    setCartItems((prevItems) => {
+                                      return prevItems.map((prevItem) => {
+                                        if (prevItem.id === item.id) {
+                                          return {
+                                            ...prevItem,
+                                            quantity: prevItem.quantity + 1,
+                                          };
+                                        }
+                                        return prevItem;
+                                      });
+                                    });
+                                  }}
+                                >
+                                  +
+                                </button>
+                              </div>
+
+                              {/* manual inputs for donation */}
+                              <div>
+                                <input
+                                  type="text"
+                                  className="border border-gray-300 rounded-md px-3 py-2"
+                                  placeholder="Enter Amount"
+                                  onChange={(e) => {
+                                    // update the current item
+                                    setCartItems((prevItems) => {
+                                      return prevItems.map((prevItem) => {
+                                        if (prevItem.id === item.id) {
+                                          return {
+                                            ...prevItem,
+                                            price:
+                                              e.target.value === "0" ||
+                                                e.target.value === ""
+                                                ? item.price
+                                                : parseFloat(e.target.value),
+                                          };
+                                        }
+                                        return prevItem;
+                                      });
+                                    });
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* add quantity increase and decrease and the price will be change accordingly */}
+
+                            <div className="flex justify-end items-center gap-3">
+                              <span className="text-gray-600">Price</span>
+                              <h3 className="text-lg font-semibold text-gray-800">
+                                ${item.price * item.quantity}
+                              </h3>
+                              {/* delete from cart */}
+                              <button
+                                className="btn btn-primary w-[40px] h-[40px] rounded-full bg-primary text-white px-3 py-1"
+                                onClick={() => {
+                                  setCartItems((prevItems) => {
+                                    return prevItems.filter(
+                                      (prevItem) => prevItem.id !== item.id
+                                    );
                                   });
-                                });
-                              }
-                            }}
-                          >
-                            -
-                          </button>
-                          <span>{item.quantity}</span>
-                          <button
-                            className="btn btn-primary bg-primary text-white px-3 py-1 rounded-md"
-                            onClick={() => {
-                              setCartItems((prevItems) => {
-                                return prevItems.map((prevItem) => {
-                                  if (prevItem.id === item.id) {
-                                    return {
-                                      ...prevItem,
-                                      quantity: prevItem.quantity + 1,
-                                    };
-                                  }
-                                  return prevItem;
-                                });
-                              });
-                            }}
-                          >
-                            +
-                          </button>
+                                }}
+                              >
+                                <FaTrashAlt />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* divider if not the last item */}
+                          {cartItems[cartItems.length - 1].id !== item.id && (
+                            <hr className="my-6" />
+                          )}
                         </div>
-
-                        {/* manual inputs for donation */}
-                        <div>
-                          <input
-                            type="text"
-                            className="border border-gray-300 rounded-md px-3 py-2"
-                            placeholder="Enter Amount"
-                            onChange={(e) => {
-                              // update the current item
-                              setCartItems((prevItems) => {
-                                return prevItems.map((prevItem) => {
-                                  if (prevItem.id === item.id) {
-                                    return {
-                                      ...prevItem,
-                                      price:
-                                        e.target.value === "0" ||
-                                          e.target.value === ""
-                                          ? item.price
-                                          : parseFloat(e.target.value),
-                                    };
-                                  }
-                                  return prevItem;
-                                });
-                              });
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* add quantity increase and decrease and the price will be change accordingly */}
-
-                      <div>
-                        <span className="text-gray-600">Price</span>
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          ${item.price * item.quantity}
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* divider if not the last item */}
-                    {cartItems[cartItems.length - 1].id !== item.id && (
-                      <hr className="my-6" />
-                    )}
-                  </div>
-                ))}
+                      ))}
+                    </> : <p className="text-xl font-bold text-primary text-center py-12">No Items Found in Cart</p>
+                }
               </div>
 
               <hr className="my-6" />
@@ -353,14 +475,26 @@ const Checkout = () => {
                     One Time Contribution Only
                   </div>
 
+                  {/* custom donation amount options as buttons, once added, the amount should be added to the input field */}
+                  <div className="flex flex-wrap gap-2 mt-6">
+                    <button className="bg-primary text-white px-3 text-sm py-1 rounded" onClick={() => setCustomDonationAmount(50)}>
+                      $50
+                    </button>
+                    <button className="bg-primary text-white px-3 text-sm py-1 rounded" onClick={() => setCustomDonationAmount(100)}>
+                      $100
+                    </button>
+                    <button className="bg-primary text-white px-3 text-sm py-1 rounded" onClick={() => setCustomDonationAmount(200)}>
+                      $200
+                    </button>
+                    <input
+                      defaultValue={customDonationAmount}
+                      type="number"
+                      placeholder="Enter amount"
+                      className="bg-gray-100 text-gray-800 px-3 py-2 text-sm w-full rounded"
+                    />
+                  </div>
+
                   <div className="flex justify-between items-center gap-3 mt-6">
-                    <div>
-                      <input
-                        type="text"
-                        className="border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Enter Amount"
-                      />
-                    </div>
                     <button className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md">
                       Contribute
                     </button>

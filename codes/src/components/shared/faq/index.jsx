@@ -322,7 +322,7 @@ const FAQ = () => {
         </div>
         <div className="grid-item">
           <Image
-            src={"./assets/img/donation-faq.jpg"}
+            src={"/assets/img/donation-faq.jpg"}
             width={800}
             height={600}
             className="rounded-md w-full h-full object-cover lg:w-4/5 z-50 relative"

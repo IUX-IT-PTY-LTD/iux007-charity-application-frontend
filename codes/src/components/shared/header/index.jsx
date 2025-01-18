@@ -1,12 +1,14 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { FaShoppingBasket, FaUser } from "react-icons/fa";
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   console.log(pathname);
 
@@ -16,7 +18,7 @@ const Header = () => {
         <div className="flex flex-wrap items-center justify-between gap-5 w-full">
           <Link href="./" className="flex justify-start items-center gap-3">
             <Image
-              src="./assets/img/logo.svg"
+              src="/assets/img/logo.svg"
               width={100}
               height={100}
               alt="logo"
@@ -58,7 +60,7 @@ const Header = () => {
               <li className="mb-6 hidden max-lg:block">
                 <Link href="./">
                   <Image
-                    src="./assets/img/logo.svg"
+                    src="/assets/img/logo.svg"
                     alt="logo"
                     width={100}
                     height={100}
@@ -67,9 +69,8 @@ const Header = () => {
                 </Link>
               </li>
               <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                  pathname === "/" ? "active" : ""
-                }`}
+                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/" ? "active" : ""
+                  }`}
               >
                 <Link
                   href="./"
@@ -78,10 +79,9 @@ const Header = () => {
                   Home
                 </Link>
               </li>
-              <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                  pathname === "/team" ? "active" : ""
-                }`}
+              {/* <li
+                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/team" ? "active" : ""
+                  }`}
               >
                 <Link
                   href="./donations"
@@ -89,23 +89,21 @@ const Header = () => {
                 >
                   Donations
                 </Link>
-              </li>
+              </li> */}
               <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                  pathname === "/feature" ? "active" : ""
-                }`}
+                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/donations" ? "active" : ""
+                  }`}
               >
                 <Link
-                  href="./"
+                  href="./donations"
                   className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
                 >
-                  Feature
+                  Events
                 </Link>
               </li>
               <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                  pathname === "/blog" ? "active" : ""
-                }`}
+                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/blog" ? "active" : ""
+                  }`}
               >
                 <Link
                   href="./"
@@ -115,9 +113,8 @@ const Header = () => {
                 </Link>
               </li>
               <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                  pathname === "/about" ? "active" : ""
-                }`}
+                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/about" ? "active" : ""
+                  }`}
               >
                 <Link
                   href="./about"
@@ -127,9 +124,8 @@ const Header = () => {
                 </Link>
               </li>
               <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                  pathname === "/contact" ? "active" : ""
-                }`}
+                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/contact" ? "active" : ""
+                  }`}
               >
                 <Link
                   href="./contact"
@@ -142,18 +138,39 @@ const Header = () => {
           </div>
 
           <div className="flex max-lg:ml-auto space-x-3">
-            <Link
-              href={"./login"}
-              className="px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
-            >
-              Login
-            </Link>
-            <Link
-              href={"./register"}
-              className="px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
-            >
-              Sign up
-            </Link>
+            {isLoggedIn ? (
+              <>
+                {/* cart */}
+                <Link
+                  href={"./checkout"}
+                  className="w-[40px] h-[40px] flex justify-center items-center text-xl relative rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
+                >
+                  <FaShoppingBasket />
+                  <span className="absolute cart-amount bg-black text-xs w-[20px] h-[20px] flex justify-center items-center rounded-full font-normal top-[-5px] right-[-5px]">0</span>
+                </Link>
+                <Link
+                  href={"./dashboard"}
+                  className="w-[40px] h-[40px] flex justify-center items-center text-xl rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
+                >
+                  <FaUser />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={"./login"}
+                  className="px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
+                >
+                  Login
+                </Link>
+                <Link
+                  href={"./register"}
+                  className="px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
 
             <button id="toggleOpen" className="lg:hidden">
               <svg

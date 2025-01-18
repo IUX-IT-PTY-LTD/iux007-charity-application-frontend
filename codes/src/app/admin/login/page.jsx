@@ -7,6 +7,15 @@ const Login = () => {
     <div className="">
       <div className="flex py-20 flex-col items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
+        <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
+            <Image
+              width={500}
+              height={500}
+              src="/assets/img/login.svg"
+              className="w-full h-full max-md:w-4/5 mx-auto block object-contain"
+              alt="Login"
+            />
+          </div>
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
             <form className="space-y-4">
               <div className="mb-8">
@@ -14,8 +23,7 @@ const Login = () => {
                   Sign in
                 </h3>
                 <p className="text-gray-500 text-sm mt-4 leading-relaxed">
-                  Sign in to your account and explore a world of possibilities.
-                  Your journey begins here.
+                  Sign in as an admin to manage your website.
                 </p>
               </div>
 
@@ -112,27 +120,9 @@ const Login = () => {
                   Log in
                 </button>
               </div>
-
-              <p className="text-sm !mt-8 text-center text-gray-800">
-                Don&apos;t have an account{" "}
-                <Link
-                  href="./register"
-                  className="text-primary font-semibold hover:underline ml-1 whitespace-nowrap"
-                >
-                  Register here
-                </Link>
-              </p>
             </form>
           </div>
-          <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
-            <Image
-              width={500}
-              height={500}
-              src="/assets/img/login.svg"
-              className="w-full h-full max-md:w-4/5 mx-auto block object-contain"
-              alt="Login"
-            />
-          </div>
+         
         </div>
       </div>
     </div>
