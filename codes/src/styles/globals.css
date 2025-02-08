@@ -34,11 +34,10 @@ li.active a::after,
 .breadcrumb li.active a::after {
   display: none;
 }
+
 .breadcrumb {
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.8),
-      rgba(255, 255, 255, 0.8)
-    ),
+  background-image: linear-gradient(rgba(255, 255, 255, 0.8),
+      rgba(255, 255, 255, 0.8)),
     url("/assets/img/bredcrumb-bg.jpg");
   background-size: cover;
   background-position: bottom;
@@ -54,6 +53,7 @@ li.active a::after,
   border-bottom: 1px solid var(--accent);
   padding-bottom: 16px;
 }
+
 .cart-item:last-child {
   border-bottom: none;
   padding-bottom: 0;
@@ -78,6 +78,7 @@ li.active a::after,
   top: 0;
   left: 0;
 }
+
 .step-line.step-2::after {
   content: "";
   position: absolute;
@@ -87,6 +88,7 @@ li.active a::after,
   top: 0;
   left: 0;
 }
+
 .step-line.step-3::after {
   content: "";
   position: absolute;
@@ -108,15 +110,19 @@ li.active a::after,
   left: 0;
   transition: 0.6s;
 }
-.card-p-0
-  .bg-white.rounded-2xl.p-5.cursor-pointer.hover\:-translate-y-2.transition-all.relative {
+
+.card-p-0 .bg-white.rounded-2xl.p-5.cursor-pointer.hover\:-translate-y-2.transition-all.relative {
   padding: 0;
 }
 
-.hover-breath-border{
+.hover-breath-border {
   animation: breath 1s infinite;
   cursor: pointer;
   border-radius: 8px;
+}
+
+.admin-layout footer {
+  display: none;
 }
 
 @keyframes breath {
@@ -124,10 +130,12 @@ li.active a::after,
     border: 2px solid var(--primary);
     outline: 2px solid transparent;
   }
+
   50% {
     border: 2px solid transparent;
     outline: 2px solid var(--primary);
   }
+
   100% {
     border: 2px solid var(--primary);
     outline: 2px solid transparent;
@@ -135,8 +143,8 @@ li.active a::after,
 }
 
 
-@media screen and (max-width: 767px){
+@media screen and (max-width: 767px) {
   .container {
     padding: 0 16px;
-}
+  }
 }

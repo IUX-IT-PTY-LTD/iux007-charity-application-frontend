@@ -4,8 +4,8 @@ import React from "react";
 
 const Login = () => {
   return (
-    <div className="">
-      <div className="flex py-20 flex-col items-center justify-center px-4">
+    <div className=" h-screen flex justify-center items-center">
+      <div className="flex py-20 flex-col w-full items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
         <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
             <Image
@@ -100,15 +100,6 @@ const Login = () => {
                   >
                     Remember me
                   </label>
-                </div>
-
-                <div className="text-sm">
-                  <Link
-                    href=""
-                    className="text-primary hover:underline font-semibold"
-                  >
-                    Forgot your password?
-                  </Link>
                 </div>
               </div>
 
