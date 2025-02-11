@@ -4,7 +4,7 @@ import React from "react";
 
 const Login = () => {
   return (
-    <div className="">
+    <div className="w-full">
       <div className="flex py-20 flex-col items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
