@@ -1,11 +1,11 @@
 import React from 'react'
 
-const AdminDashboard = () => {
+const AdminMenus = () => {
     return (
         <div>
-            Admin
+            Admin Menus
         </div>
     )
 }
 
-export default AdminDashboard
+export default AdminMenus
