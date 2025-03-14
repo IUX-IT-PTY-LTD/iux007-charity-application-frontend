@@ -5,8 +5,8 @@ import React from 'react'
 const AdminMenus = () => {
     return (
         <div>
-            <AdminPageHeader title="Menus" />
 
+            <AdminPageHeader title="Create Menu" />
             <div className="p-4">
                 <Link href="/admin/menus/create">
                     <span className="bg-blue-500 text-white py-2 px-4 rounded">Create Menu</span>

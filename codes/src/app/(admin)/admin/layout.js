@@ -10,11 +10,11 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body>
-                <div className="grid xl:grid-cols-5 lg:grid-cols-2 gap-6">
+                <div className="grid xl:grid-cols-5 lg:grid-cols-2">
                     <div className="col-span-1">
                         <AdminSidebar />
                     </div>
-                    <div className="xl:col-span-4 col-span-1 p-5 ps-0">
+                    <div className="xl:col-span-4 col-span-1 ps-0">
                         {children}
                     </div>
                 </div>

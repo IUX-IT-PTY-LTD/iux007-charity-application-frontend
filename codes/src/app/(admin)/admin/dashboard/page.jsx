@@ -7,7 +7,7 @@ import React, { useEffect } from 'react'
 const AdminDashboard = () => {
     const router = useRouter();
     useEffect(() => {
-        const token = Cookies.get('access_token_new');
+        const token = Cookies.get('admin_token');
         console.log(token);
 
         if (!token) {

@@ -41,7 +41,7 @@ const Login = () => {
         console.log(data);
 
         // set access token in cookie
-        document.cookie = `access_token_new=${data.data.access_token}`;
+        document.cookie = `admin_token=${data.data.access_token}`;
 
         // reset form
         form.reset();
