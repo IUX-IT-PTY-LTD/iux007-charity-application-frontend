@@ -538,7 +538,7 @@ const Checkout = () => {
               <form action="" className="mt-10">
                 <div className="grid lg:grid-cols-3 md:cols-2 grid-cols-1 gap-6">
                   <div>
-                    <label htmlFor="name" className="text-gray-600">
+                    <label htmlhtmlFor="name" className="text-gray-600">
                       Full Name
                     </label>
                     <input
@@ -550,7 +550,7 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="text-gray-600">
+                    <label htmlhtmlFor="email" className="text-gray-600">
                       Email
                     </label>
                     <input
@@ -562,7 +562,7 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="phone" className="text-gray-600">
+                    <label htmlhtmlFor="phone" className="text-gray-600">
                       Phone
                     </label>
                     <input
@@ -578,7 +578,7 @@ const Checkout = () => {
                   <div className="lg:col-span-3 md:col-span-2 col-span-1">
                     <div className="flex items-center gap-3">
                       <input type="checkbox" name="create-account" id="create-account" />
-                      <label htmlFor="create-account" className="text-gray-600">
+                      <label htmlhtmlFor="create-account" className="text-gray-600">
                         Create an account?
                       </label>
                     </div>

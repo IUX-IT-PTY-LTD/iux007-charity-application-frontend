@@ -1,13 +1,68 @@
+'use client';
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import getConfig from 'next/config';
+import toast from "react-hot-toast";
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const version = process.env.NEXT_PUBLIC_API_VERSION;
+
+  console.log(`${baseUrl}/admin/${version}/login`);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const form = e.target;
+    const email = form.email.value;
+    const password = form.password.value;
+
+    try {
+      const response = await fetch(`${baseUrl}/admin/${version}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+      console.log(data);
+
+      if (data.status === 'success') {
+        toast.success(data.message);
+        setLoading(false);
+        console.log(data);
+
+        // set access token in cookie
+        document.cookie = `access_token_new=${data.data.access_token}`;
+
+        // reset form
+        form.reset();
+
+        // redirect to dashboard
+        router.push('/admin/dashboard');
+      } else {
+        setError(data.message);
+        toast.error(data.message);
+      }
+    } catch (err) {
+      setLoading(false);
+      setError('An error occurred. Please try again later');
+    }
+  };
+
   return (
     <div className=" h-screen flex justify-center items-center">
       <div className="flex py-20 flex-col w-full items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
-        <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
+          <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
             <Image
               width={500}
               height={500}
@@ -17,7 +72,7 @@ const Login = () => {
             />
           </div>
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
-            <form className="space-y-4">
+            <form onSubmit={handleAdminLogin} className="space-y-4">
               <div className="mb-8">
                 <h3 className="text-gray-800 text-3xl font-extrabold">
                   Sign in
@@ -29,12 +84,12 @@ const Login = () => {
 
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
-                  User name
+                  Email
                 </label>
                 <div className="relative flex items-center">
                   <input
-                    name="username"
-                    type="text"
+                    name="email"
+                    type="email"
                     required
                     className="w-full text-sm text-gray-800 border border-gray-300 px-4 py-3 rounded-lg outline-blue-600"
                     placeholder="Enter user name"
@@ -86,7 +141,7 @@ const Login = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-4">
+              {/* <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center">
                   <input
                     id="remember-me"
@@ -95,25 +150,37 @@ const Login = () => {
                     className="h-4 w-4 shrink-0 text-primary focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label
-                    for="remember-me"
+                    htmlFor="remember-me"
                     className="ml-3 block text-sm text-gray-800"
                   >
                     Remember me
                   </label>
                 </div>
-              </div>
+              </div> */}
 
               <div className="!mt-8">
-                <button
-                  type="button"
-                  className="w-full shadow-xl py-3 px-4 text-sm tracking-wide rounded-lg text-white bg-primary hover:bg-blue-700 focus:outline-none"
-                >
-                  Log in
-                </button>
+                {
+                  loading ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full shadow-xl py-3 px-4 text-sm tracking-wide rounded-lg text-white bg-primary hover:bg-blue-700 focus:outline-none"
+                    >
+                      Loading...
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="w-full shadow-xl py-3 px-4 text-sm tracking-wide rounded-lg text-white bg-primary hover:bg-blue-700 focus:outline-none"
+                    >
+                      Log in
+                    </button>
+                  )
+                }
               </div>
             </form>
           </div>
-         
+
         </div>
       </div>
     </div>
