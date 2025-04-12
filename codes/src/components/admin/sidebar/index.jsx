@@ -1,11 +1,12 @@
 'use client'
 import Link from 'next/link'
 import React from 'react'
-import { FaHistory } from 'react-icons/fa'
+import { FaHistory, FaQuestionCircle } from 'react-icons/fa'
 import { MdDashboard } from 'react-icons/md'
 import { GrUpdate } from 'react-icons/gr'
 import { TbPasswordUser } from 'react-icons/tb'
 import { LiaSignOutAltSolid } from 'react-icons/lia'
+import { TfiLayoutSliderAlt } from "react-icons/tfi";
 
 const AdminSidebar = () => {
     // hightlight active link
@@ -68,6 +69,22 @@ const AdminSidebar = () => {
                                 setCurrentLink('/admin/contents')
                             }} className={`text-gray-600 w-full flex justify-start items-center gap-2 hover:text-primary ${currentLink === '/admin/contents' ? 'text-primary font-bold' : ''}`}>
                                 <TbPasswordUser className='inline text-2xl' /> Contents
+                            </Link>
+                        </li>
+                        <hr />
+                        <li className='w-full'>
+                            <Link href="/admin/faqs" onClick={() => {
+                                setCurrentLink('/admin/contents')
+                            }} className={`text-gray-600 w-full flex justify-start items-center gap-2 hover:text-primary ${currentLink === '/admin/faqs' ? 'text-primary font-bold' : ''}`}>
+                                <FaQuestionCircle className='inline text-2xl' /> FAQs
+                            </Link>
+                        </li>
+                        <hr />
+                        <li className='w-full'>
+                            <Link href="/admin/slider" onClick={() => {
+                                setCurrentLink('/admin/slider')
+                            }} className={`text-gray-600 w-full flex justify-start items-center gap-2 hover:text-primary ${currentLink === '/admin/slider' ? 'text-primary font-bold' : ''}`}>
+                                <TfiLayoutSliderAlt className='inline text-2xl' /> Slider
                             </Link>
                         </li>
                     </div>
