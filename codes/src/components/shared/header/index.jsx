@@ -1,14 +1,53 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { FaShoppingBasket, FaUser } from "react-icons/fa";
+import { apiService } from '@/api/services/apiService';
+import { ENDPOINTS } from '@/api/config';
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+const [menus, setMenus] = useState([]);
+const [settings, setSettings] = useState([]);
+
+const fetchMenus = async () => {
+  try {
+    const response = await apiService.get(ENDPOINTS.COMMON.MENUS);
+    console.log(response.data);
+    setMenus(response.data);
+  } catch (error) {
+    console.error('Error fetching menus:', error);
+    setMenus([]);
+  }
+};
+
+const fetchSettings = async () => {
+  try {
+    const response = await apiService.get(ENDPOINTS.COMMON.SETTINGS);
+    const settingsData = {
+      site_name: response.data.find(item => item.key === 'company_name')?.value || 'Default Name',
+      logo: response.data.find(item => item.key === 'company_logo')?.value || '/assets/img/logo.svg'
+    };
+    setSettings(settingsData);
+    console.log(settingsData);
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    setSettings({
+      site_name: 'Default Site Name',
+      logo: '/assets/img/logo.svg'
+    });
+  }
+}
+
+useEffect(() => {
+  fetchMenus();
+  fetchSettings();
+}, []);
 
   console.log(pathname);
 
@@ -26,9 +65,9 @@ const Header = () => {
             />
             <span>
               <strong className="text-primary font-semibold text-lg">
-                Charity
+                {settings?.site_name}
               </strong>
-              <span className="text-secondary font-semibold text-lg">Fund</span>
+              {/* <span className="text-secondary font-semibold text-lg">Fund</span> */}
             </span>
           </Link>
 
@@ -57,7 +96,8 @@ const Header = () => {
             </button>
 
             <ul className="nav-menu lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
-              <li className="mb-6 hidden max-lg:block">
+              
+            <li className="mb-6 hidden max-lg:block">
                 <Link href="./">
                   <Image
                     src="/assets/img/logo.svg"
@@ -68,72 +108,18 @@ const Header = () => {
                   />
                 </Link>
               </li>
-              <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/" ? "active" : ""
-                  }`}
-              >
-                <Link
-                  href="./"
-                  className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
-                >
-                  Home
-                </Link>
-              </li>
-              {/* <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/team" ? "active" : ""
-                  }`}
-              >
-                <Link
-                  href="./donations"
-                  className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
-                >
-                  Donations
-                </Link>
-              </li> */}
-              <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/donations" ? "active" : ""
-                  }`}
-              >
-                <Link
-                  href="./donations"
-                  className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
-                >
-                  Events
-                </Link>
-              </li>
-              <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/blog" ? "active" : ""
-                  }`}
-              >
-                <Link
-                  href="./"
-                  className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/about" ? "active" : ""
-                  }`}
-              >
-                <Link
-                  href="./about"
-                  className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
-                >
-                  About
-                </Link>
-              </li>
-              <li
-                className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === "/contact" ? "active" : ""
-                  }`}
-              >
-                <Link
-                  href="./contact"
-                  className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
-                >
-                  Contact
-                </Link>
-              </li>
+
+              {menus.map((menu, index) => (
+                <li key={index}  className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === '/'+ menu.slug ? "active" : ""
+                }`}>
+                  <Link
+                    href={menu.slug}
+                    className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
+                  >
+                    {menu.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

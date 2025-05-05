@@ -1,10 +1,12 @@
 'use client'
 import Image from "next/image";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import QuickDonateCard from "../quick-donate-card";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { apiService } from '@/api/services/apiService';
+import { ENDPOINTS } from '@/api/config';
 
 
 const Hero = () => {
@@ -51,6 +53,21 @@ const Hero = () => {
     },
   ];
 
+  const [sliders, setSliders] = useState([]);
+  const fetchSliders = async () => {
+    try {
+      const response = await apiService.get(ENDPOINTS.COMMON.SLIDERS);
+      const data = response.data;
+      setSliders(data);
+    } catch (error) {
+      console.error('Error fetching sliders:', error);
+    }
+  };
+
+useEffect(() => {
+    fetchSliders();
+  }, []);
+
   var settings = {
     dots: true,
     infinite: true,
@@ -65,8 +82,23 @@ const Hero = () => {
     <div className="container mx-auto">
 
       {/* slider */}
-      <Slider {...settings}>
-        <div>
+      <Slider 
+        {...settings}
+      >
+        {sliders.map((slider, index) => (
+          <div key={index} className="relative w-full h-[600px]">
+            <Image 
+              src={slider.image}
+              fill
+              className="object-contain rounded-md"
+              alt={slider.title || "Slider Image"}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+              priority={index === 0}
+              loader={({ src }) => src} // Add custom loader to handle S3 URLs
+            />
+          </div>
+        ))}
+        {/* <div>
           <Image src="/assets/img/hero.jpg" className="w-full h-[600px] object-cover rounded-md" width={800} height={600} alt="Donate Hero" />
         </div>
         <div>
@@ -74,7 +106,7 @@ const Hero = () => {
         </div>
         <div>
           <Image src="/assets/img/hero.jpg" className="w-full h-[600px] object-cover rounded-md" width={800} height={600} alt="Donate Hero" />
-        </div>
+        </div> */}
       </Slider>
       {/* slider */}
 
