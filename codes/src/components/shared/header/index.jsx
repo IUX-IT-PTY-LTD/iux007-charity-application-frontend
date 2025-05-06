@@ -50,6 +50,14 @@ useEffect(() => {
 }, []);
 
   console.log(pathname);
+  // console.log(pathname);
+
+  const toggleBurgerMenu = () => {
+    const menu = document.getElementById("collapseMenu");
+    if (menu) {
+      menu.classList.toggle("active");
+    }
+  }
 
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-[70px] tracking-wide relative z-50">
@@ -77,6 +85,7 @@ useEffect(() => {
           >
             <button
               id="toggleClose"
+              onClick={toggleBurgerMenu}
               className="lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white p-3"
             >
               <svg
@@ -158,7 +167,7 @@ useEffect(() => {
               </>
             )}
 
-            <button id="toggleOpen" className="lg:hidden">
+            <button id="toggleOpen" onClick={toggleBurgerMenu} className="lg:hidden">
               <svg
                 className="w-7 h-7"
                 fill="#000"

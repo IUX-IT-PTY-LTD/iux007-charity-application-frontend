@@ -1,5 +1,7 @@
 import LeftSidebar from "@/components/dashboard-components/sidebar"
 import "../../styles/globals.css"
+import Header from "@/components/shared/header"
+import Footer from "@/components/shared/footer"
 
 export const metadata = {
   title: 'Next.js',
@@ -10,14 +12,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className="grid xl:grid-cols-5 lg:grid-cols-2 gap-6">
-          <div className="col-span-1">
+        <Header />
+        <div className="container mx-auto py-10">
+          <div className="grid xl:grid-cols-5 lg:grid-cols-2 gap-6">
+            {/* <div className="col-span-1">
             <LeftSidebar />
-          </div>
-          <div className="xl:col-span-4 col-span-1 p-5 ps-0">
-            {children}
+          </div> */}
+            <div className="xl:col-span-5 col-span-1 p-5 ps-0">
+              {children}
+            </div>
           </div>
         </div>
+        <Footer />
       </body>
     </html>
   )
