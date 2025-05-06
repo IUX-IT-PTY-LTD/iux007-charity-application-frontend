@@ -34,7 +34,7 @@ const DonationDetails = () => {
                             Our Hot Meals for 100 Orphans program provides warm, nutritious meals to children in need this winter. Each meal brings essential nourishment and reminds them they are valued. With your support, we can bring comfort and hope to these 100 young hearts. Donate today to fill their plates—and hearts—with warmth this winter.
                         </p>
 
-                        <form action="" className='flex gap-5 mt-10'>
+                        <form action="./checkout" className='flex gap-5 mt-10'>
                             <select name="" className='currency border px-4 py-2 rounded-md w-full appearance-none' id="">
                                 <option value="USD">USD</option>
                                 <option value="PKR">PKR</option>
