@@ -1,0 +1,84 @@
+'use client'
+import Image from "next/image";
+import React, { useState, useEffect } from "react";
+import QuickDonateCard from "../quick-donate-card";
+import { apiService } from '@/api/services/apiService';
+import { ENDPOINTS } from '@/api/config';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+
+const FeaturedEvents = () => {
+  const [FeaturedEvents, setFeaturedEvents] = useState([]);
+  const fetchFeaturedEvents = async () => {
+    try {
+      const response = await apiService.get(ENDPOINTS.EVENTS.FEATURED + '?featured=1');
+      const data = response.data;
+      setFeaturedEvents(data);
+    } catch (error) {
+      console.error('Error fetching featured events:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeaturedEvents();
+  }, []);
+
+  return (
+    <div className="container mx-auto px-4 py-16 bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 text-center">
+          Featured Events
+        </h2>
+        <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+          Join us in making a difference through these carefully selected events that need your support
+        </p>
+        <Swiper
+          modules={[Navigation, Pagination]}
+          spaceBetween={30}
+          slidesPerView={1}
+          navigation
+          pagination={{ clickable: true }}
+          breakpoints={{
+            640: {
+              slidesPerView: 2,
+            },
+            1024: {
+              slidesPerView: 3,
+            },
+            1280: {
+              slidesPerView: 4,
+            },
+          }}
+          className="z-50 relative"
+        >
+          {FeaturedEvents.map((event) => (
+            <SwiperSlide key={event.id}>
+              <div className="transform transition duration-300 hover:scale-105">
+                <QuickDonateCard
+                  eventId={event.uuid}
+                  title={event.title}
+                  description={event.description}
+                  img={event.featured_image}
+                  time={new Date(event.start_date).toLocaleDateString('en-US', { 
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                  venue={event.location}
+                  fixedDonation={event.is_fixed_donation}
+                  donationAmount={event.price}
+                  showDetails={false}
+                />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+    </div>
+  );
+};
+
+export default FeaturedEvents;

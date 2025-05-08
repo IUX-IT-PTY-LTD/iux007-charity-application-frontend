@@ -23,11 +23,9 @@ export const ENDPOINTS = {
   
   // Events endpoints
   EVENTS: {
+    FEATURED: '/events',
     LIST: '/events',
     DETAILS: (id) => `/events/${id}`,
-    CREATE: '/events',
-    UPDATE: (id) => `/events/${id}`,
-    DELETE: (id) => `/events/${id}`,
   },
   
   // Donations endpoints
