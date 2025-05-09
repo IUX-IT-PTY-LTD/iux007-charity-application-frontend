@@ -7,7 +7,7 @@ import * as z from "zod";
 import { motion } from "framer-motion";
 import { useRouter } from 'next/navigation';
 
-import AdminPageHeader from "@/components/admin-page-header";
+import AdminPageHeader from "@/components/admin/header";
 import {
   Card,
   CardContent,

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import AdminPageHeader from '@/components/admin-page-header'
+import AdminPageHeader from '@/components/admin/header'
 
 const AdminEvents = () => {
     // Sample event data

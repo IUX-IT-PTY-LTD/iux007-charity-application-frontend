@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import AdminPageHeader from '@/components/admin-page-header'
+import AdminPageHeader from '@/components/admin/header'
 import { useRouter } from 'next/navigation'
 
 const AdminSliderCreate = () => {

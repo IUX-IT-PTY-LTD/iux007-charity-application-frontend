@@ -13,7 +13,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 
-import AdminPageHeader from "@/components/admin-page-header";
+import AdminPageHeader from "@/components/admin/header";
 import {
   Card,
   CardContent,

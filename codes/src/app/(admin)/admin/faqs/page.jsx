@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import AdminPageHeader from '@/components/admin-page-header'
+import AdminPageHeader from '@/components/admin/header'
 import Link from 'next/link'
 
 const AdminFAQsList = () => {

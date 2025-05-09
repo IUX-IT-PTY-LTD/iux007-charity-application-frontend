@@ -7,7 +7,7 @@ import * as z from "zod";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-import AdminPageHeader from "@/components/admin-page-header";
+import AdminPageHeader from "@/components/admin/header";
 import {
   Card,
   CardContent,
