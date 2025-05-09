@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { motion } from "framer-motion";
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 import AdminPageHeader from "@/components/admin-page-header";
 import {
@@ -37,6 +37,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Define form schema
 const formSchema = z.object({
@@ -52,7 +63,15 @@ const formSchema = z.object({
   status: z.boolean().default(true),
 });
 
-const AdminMenus = () => {
+const AdminMenuEdit = () => {
+  const params = useParams();
+  const router = useRouter();
+  const { id } = params;
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [originalSlug, setOriginalSlug] = useState("");
+
   // Define form with zod validation
   const form = useForm({
     defaultValues: {
@@ -64,33 +83,95 @@ const AdminMenus = () => {
     resolver: zodResolver(formSchema),
   });
 
-  const router = useRouter();
-
   // For form preview - use the values directly from form.watch()
-  // instead of creating a separate state that causes infinite loops
   const formPreview = form.watch();
 
+  // Fetch menu data
+  useEffect(() => {
+    const fetchMenuData = async () => {
+      setIsLoading(true);
+      try {
+        // Get menus from localStorage
+        const menus = JSON.parse(localStorage.getItem("menus") || "[]");
+        const menuData = menus.find((menu) => menu.id === id);
+
+        if (!menuData) {
+          throw new Error("Menu not found");
+        }
+
+        // Convert numeric status to boolean for form
+        const formData = {
+          ...menuData,
+          status: menuData.status === 1,
+        };
+
+        // Set original slug to track changes
+        setOriginalSlug(menuData.slug);
+
+        // Update form with fetched data
+        form.reset(formData);
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching menu:", err);
+        setError("Failed to load menu. Please try again later.");
+        setIsLoading(false);
+      }
+    };
+
+    fetchMenuData();
+  }, [id, form]);
+
   // Handle form submission
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     // Convert status boolean to number for API
     const apiData = {
       ...data,
+      id: id,
       status: data.status ? 1 : 0,
-      id: Date.now().toString(), // Generate a unique ID using timestamp
     };
 
-    console.log("Submitted data:", apiData);
+    try {
+      // Update in localStorage
+      const menus = JSON.parse(localStorage.getItem("menus") || "[]");
+      const updatedMenus = menus.map((menu) =>
+        menu.id === id ? apiData : menu
+      );
+      localStorage.setItem("menus", JSON.stringify(updatedMenus));
 
-    // Store in localStorage
-    const existingMenus = JSON.parse(localStorage.getItem("menus") || "[]");
-    existingMenus.push(apiData);
-    localStorage.setItem("menus", JSON.stringify(existingMenus));
+      // Show success message
+      toast.success("Menu updated successfully!");
 
-    // Show success message
-    toast.success("Menu created successfully!");
+      // Redirect to menus list
+      router.push("/admin/menus");
+    } catch (err) {
+      console.error("Error updating menu:", err);
+      toast.error({
+        title: "Error",
+        description: "Failed to update menu",
+      });
+    }
+  };
 
-    // Redirect to menu list
-    router.push("/admin/menus");
+  // For delete:
+  const handleDelete = async () => {
+    try {
+      // Delete from localStorage
+      const menus = JSON.parse(localStorage.getItem("menus") || "[]");
+      const filteredMenus = menus.filter((menu) => menu.id !== id);
+      localStorage.setItem("menus", JSON.stringify(filteredMenus));
+
+      // Show success message
+      toast.success("Menu deleted successfully!");
+
+      // Redirect after deletion
+      router.push("/admin/menus");
+    } catch (err) {
+      console.error("Error deleting menu:", err);
+      toast.error({
+        title: "Error",
+        description: "Failed to delete menu",
+      });
+    }
   };
 
   // Generate a slug from name
@@ -106,11 +187,87 @@ const AdminMenus = () => {
     form.setValue("slug", slug);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <p className="mt-2 text-gray-600 dark:text-gray-400">
+          Loading menu data...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <AdminPageHeader title="Edit Menu" />
+        <div className="container px-4 py-6 mx-auto max-w-5xl">
+          <Card className="bg-red-50 border-red-200">
+            <CardHeader>
+              <CardTitle className="text-red-800">Error</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-red-600">{error}</p>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={() => router.push("/admin/menus")}
+                variant="outline"
+              >
+                Back to Menus
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminPageHeader title="Create Menu" />
+      <AdminPageHeader title="Edit Menu" />
 
       <div className="container px-4 py-6 mx-auto max-w-5xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+            Editing: {form.getValues().name}
+          </h2>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push("/admin/menus")}
+            >
+              Cancel
+            </Button>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Delete Menu</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    the menu and all associated items.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Form Section */}
           <div className="md:col-span-2">
@@ -123,7 +280,7 @@ const AdminMenus = () => {
                   <CardHeader>
                     <CardTitle>Menu Information</CardTitle>
                     <CardDescription>
-                      Create a new navigation menu for your website.
+                      Update this navigation menu for your website.
                     </CardDescription>
                   </CardHeader>
 
@@ -140,7 +297,7 @@ const AdminMenus = () => {
                               {...field}
                               onChange={(e) => {
                                 field.onChange(e);
-                                if (!form.getValues("slug")) {
+                                if (originalSlug === form.getValues("slug")) {
                                   generateSlug(e.target.value);
                                 }
                               }}
@@ -217,7 +374,7 @@ const AdminMenus = () => {
                             onValueChange={(value) =>
                               field.onChange(value === "1")
                             }
-                            defaultValue={field.value ? "1" : "0"}
+                            value={field.value ? "1" : "0"}
                           >
                             <FormControl>
                               <SelectTrigger>
@@ -242,15 +399,15 @@ const AdminMenus = () => {
                     <Button
                       variant="outline"
                       type="button"
-                      onClick={() => form.reset()}
+                      onClick={() => router.push("/admin/menus")}
                     >
-                      Reset
+                      Cancel
                     </Button>
                     <Button
                       type="submit"
                       className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
-                      Save Menu
+                      Update Menu
                     </Button>
                   </CardFooter>
                 </Card>
@@ -301,8 +458,11 @@ const AdminMenus = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="text-xs text-gray-500">
-                Changes will not be saved until form is submitted
+              <CardFooter className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">ID: {id}</span>
+                <span className="text-xs text-gray-500">
+                  Last updated: {new Date().toLocaleDateString()}
+                </span>
               </CardFooter>
             </Card>
           </div>
@@ -312,4 +472,4 @@ const AdminMenus = () => {
   );
 };
 
-export default AdminMenus;
+export default AdminMenuEdit;
