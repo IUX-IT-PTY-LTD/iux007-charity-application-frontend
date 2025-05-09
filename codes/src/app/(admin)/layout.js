@@ -1,6 +1,8 @@
 import { Poppins } from "next/font/google";
 import "../../styles/globals.css"
 
+import { Toaster } from "@/components/ui/sonner"
+
 export const metadata = {
     title: "Charity",
     description: "Charity is Noble",
@@ -18,6 +20,7 @@ export default function AdminLayout({ children }) {
             <body className="admin-layout">
                 {children}
             </body>
+            <Toaster />
         </html>
     );
 }
