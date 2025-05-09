@@ -78,31 +78,31 @@ useEffect(() => {
     autoPlaySpeed: 3000,
     dots: true,
     arrows: true,
-    prevArrow: (
-      <button className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          className="w-6 h-6 text-gray-800"
-          viewBox="0 0 24 24"
-        >
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-        </svg>
-      </button>
-    ),
+    // prevArrow: (
+    //   <button className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg">
+    //     <svg
+    //       xmlns="http://www.w3.org/2000/svg"
+    //       fill="currentColor"
+    //       className="w-6 h-6 text-gray-800"
+    //       viewBox="0 0 24 24"
+    //     >
+    //       <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+    //     </svg>
+    //   </button>
+    // ),
 
-    nextArrow: (
-      <button className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          className="w-6 h-6 text-gray-800"
-          viewBox="0 0 24 24"
-        >
-          <path d="M8.59 7.41L10 6l6 6-6 6-1.41-1.41L13.17 12z" />
-        </svg>
-      </button>
-    ),
+    // nextArrow: (
+    //   <button className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg">
+    //     <svg
+    //       xmlns="http://www.w3.org/2000/svg"
+    //       fill="currentColor"
+    //       className="w-6 h-6 text-gray-800"
+    //       viewBox="0 0 24 24"
+    //     >
+    //       <path d="M8.59 7.41L10 6l6 6-6 6-1.41-1.41L13.17 12z" />
+    //     </svg>
+    //   </button>
+    // ),
   };
   return (
     <div className="container mx-auto">
