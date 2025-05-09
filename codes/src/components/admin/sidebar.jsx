@@ -17,7 +17,6 @@ import {
   Settings,
 } from "lucide-react";
 
-// Import the official shadcn UI sidebar components
 import {
   Sidebar,
   SidebarContent,
@@ -79,7 +78,7 @@ export function AdminSidebar() {
           {!sidebar.collapsed && (
             <div className="flex flex-col text-sm leading-tight">
               <span className="font-medium text-foreground truncate max-w-[120px]">
-                Admin Admin
+                Super Admin
               </span>
               <span className="text-xs text-muted-foreground">
                 Administrator

@@ -373,6 +373,7 @@ const AdminMenus = () => {
                                 handleStatusChange(menu.id, menu.status)
                               }
                               aria-label={`Toggle status for ${menu.name}`}
+                              className="data-[state=checked]:bg-black data-[state=checked]:text-white"
                             />
                             <Badge
                               variant={

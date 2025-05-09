@@ -20,8 +20,8 @@ export default function RootLayout({ children }) {
           <SidebarProvider
             defaultOpen={defaultOpen}
             style={{
-              "--sidebar-width": "280px",
-              "--sidebar-width-collapsed": "60px",
+              "--sidebar-width": "230px",
+              "--sidebar-width-collapsed": "90px",
             }}
           >
             <AdminShell>{children}</AdminShell>
