@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAdminContext } from "@/components/admin/admin-context";
+
 import {
   PlusCircle,
   Search,
@@ -64,6 +66,8 @@ import { toast } from "sonner";
 const AdminMenus = () => {
   const router = useRouter();
 
+  const { setPageTitle, setPageSubtitle } = useAdminContext();
+
   // State management
   const [menus, setMenus] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +79,11 @@ const AdminMenus = () => {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  useEffect(() => {
+    setPageTitle("Menus");
+    // setPageSubtitle("Manage your website navigation menus");
+  }, [setPageTitle, setPageSubtitle]);
 
   // Fetch menus from localStorage (for testing)
   useEffect(() => {
@@ -225,7 +234,6 @@ const AdminMenus = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-
       <div className="container px-4 py-6 mx-auto max-w-7xl">
         <Card>
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">

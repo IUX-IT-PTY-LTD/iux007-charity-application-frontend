@@ -6,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
 import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useAdminContext } from "@/components/admin/admin-context";
 
 import {
   Card,
@@ -64,6 +67,13 @@ const AdminMenus = () => {
   });
 
   const router = useRouter();
+
+  const { setPageTitle, setPageSubtitle } = useAdminContext();
+
+  useEffect(() => {
+      setPageTitle("Create New Menu Item");
+      // setPageSubtitle("Manage your website navigation menus");
+    }, [setPageTitle, setPageSubtitle]);
 
   // For form preview - use the values directly from form.watch()
   // instead of creating a separate state that causes infinite loops

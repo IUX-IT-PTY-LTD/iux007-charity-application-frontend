@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useAdminContext } from "@/components/admin/admin-context";
 
 import {
   Card,
@@ -66,6 +67,7 @@ const AdminMenuEdit = () => {
   const params = useParams();
   const router = useRouter();
   const { id } = params;
+  const { setPageTitle, setPageSubtitle } = useAdminContext();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -84,6 +86,11 @@ const AdminMenuEdit = () => {
 
   // For form preview - use the values directly from form.watch()
   const formPreview = form.watch();
+
+  useEffect(() => {
+      setPageTitle("Edit Menu Item");
+      // setPageSubtitle("Manage your website navigation menus");
+    }, [setPageTitle, setPageSubtitle]);
 
   // Fetch menu data
   useEffect(() => {
@@ -224,7 +231,6 @@ const AdminMenuEdit = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminPageHeader title="Edit Menu" />
 
       <div className="container px-4 py-6 mx-auto max-w-5xl">
         <div className="flex justify-between items-center mb-6">
