@@ -7,7 +7,6 @@ import * as z from "zod";
 import { motion } from "framer-motion";
 import { useRouter } from 'next/navigation';
 
-import AdminPageHeader from "@/components/admin/header";
 import {
   Card,
   CardContent,
@@ -108,7 +107,6 @@ const AdminMenus = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminPageHeader title="Create Menu" />
 
       <div className="container px-4 py-6 mx-auto max-w-5xl">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">

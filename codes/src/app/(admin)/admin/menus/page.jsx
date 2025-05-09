@@ -13,7 +13,6 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 
-import AdminPageHeader from "@/components/admin/header";
 import {
   Card,
   CardContent,
@@ -226,7 +225,6 @@ const AdminMenus = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminPageHeader title="Menus" />
 
       <div className="container px-4 py-6 mx-auto max-w-7xl">
         <Card>

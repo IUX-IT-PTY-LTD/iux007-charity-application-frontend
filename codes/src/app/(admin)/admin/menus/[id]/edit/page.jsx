@@ -7,7 +7,6 @@ import * as z from "zod";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-import AdminPageHeader from "@/components/admin/header";
 import {
   Card,
   CardContent,
@@ -201,7 +200,6 @@ const AdminMenuEdit = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <AdminPageHeader title="Edit Menu" />
         <div className="container px-4 py-6 mx-auto max-w-5xl">
           <Card className="bg-red-50 border-red-200">
             <CardHeader>

@@ -4,14 +4,15 @@ import React from "react";
 import { ChevronRight, Home } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useAdminContext } from "@/components/admin/admin-context"; // Import the context
 
-const AdminPageHeader = ({ title, subtitle, breadcrumbs = [] }) => {
+const AdminPageHeader = () => {
   const pathname = usePathname();
+  // Get title and subtitle from context
+  const { pageTitle, pageSubtitle } = useAdminContext();
 
-  // Generate breadcrumbs automatically if not provided
+  // Generate breadcrumbs automatically
   const autoBreadcrumbs = React.useMemo(() => {
-    if (breadcrumbs.length > 0) return breadcrumbs;
-
     // Get path segments and create breadcrumbs
     const segments = pathname.split("/").filter(Boolean);
     return segments.map((segment, index) => {
@@ -28,7 +29,7 @@ const AdminPageHeader = ({ title, subtitle, breadcrumbs = [] }) => {
         isActive: index === segments.length - 1,
       };
     });
-  }, [pathname, breadcrumbs]);
+  }, [pathname]);
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
@@ -73,11 +74,11 @@ const AdminPageHeader = ({ title, subtitle, breadcrumbs = [] }) => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {title}
+                {pageTitle}
               </h1>
-              {subtitle && (
+              {pageSubtitle && (
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {subtitle}
+                  {pageSubtitle}
                 </p>
               )}
             </div>
