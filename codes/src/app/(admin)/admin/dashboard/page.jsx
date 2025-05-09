@@ -26,14 +26,14 @@ const eventData = [
 const AdminDashboard = () => {
   const router = useRouter();
 
-  useEffect(() => {
-    const token = Cookies.get('admin_token');
-    console.log(token);
+  // useEffect(() => {
+  //   const token = Cookies.get('admin_token');
+  //   console.log(token);
 
-    if (!token) {
-      router.push('/admin');
-    }
-  }, [router]);
+  //   if (!token) {
+  //     router.push('/admin');
+  //   }
+  // }, [router]);
 
   return (
     <div className="min-h-screen flex bg-gray-100">
