@@ -15,7 +15,7 @@ const QuickDonateCard = ({
     donationAmount,
 }) => {
     return (
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mx-auto max-w-sm">
             <div className="relative">
                 <Link href={`/event-details/${eventId}`}>
                     <Image

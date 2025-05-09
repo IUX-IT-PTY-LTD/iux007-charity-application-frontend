@@ -67,7 +67,7 @@ const FAQ = () => {
     <div className="rounded-lg container mx-auto py-16">
       <div className="mb-8">
         <h2 className="sm:text-4xl text-2xl font-bold text-primary">
-          Any Questions
+          FAQ
         </h2>
       </div>
       <div className="grid lg:grid-cols-2 grid-cols-1 gap-20">

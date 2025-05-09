@@ -122,7 +122,7 @@ useEffect(() => {
                 <li key={index}  className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === '/'+ menu.slug ? "active" : ""
                 }`}>
                   <Link
-                    href={menu.slug}
+                    href={`/${menu.slug}`}
                     className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
                   >
                     {menu.name}

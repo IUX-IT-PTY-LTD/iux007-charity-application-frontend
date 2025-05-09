@@ -4,85 +4,83 @@ import React from "react";
 import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 
 const EventCard = ({
+  eventId,
   title,
   description,
   img,
   time,
   venue,
-  target,
+  targetAmount,
   raised,
   showDetails,
   buttonText
 }) => {
   return (
-    <div className="bg-white rounded-2xl p-5 cursor-pointer hover:-translate-y-2 transition-all relative">
-      {/* <div className="bg-gray-100 w-10 h-10 flex items-center justify-center rounded-full cursor-pointer absolute top-6 right-6">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16px"
-          className="fill-gray-800 inline-block"
-          viewBox="0 0 64 64"
-        >
-          <path
-            d="M45.5 4A18.53 18.53 0 0 0 32 9.86 18.5 18.5 0 0 0 0 22.5C0 40.92 29.71 59 31 59.71a2 2 0 0 0 2.06 0C34.29 59 64 40.92 64 22.5A18.52 18.52 0 0 0 45.5 4ZM32 55.64C26.83 52.34 4 36.92 4 22.5a14.5 14.5 0 0 1 26.36-8.33 2 2 0 0 0 3.27 0A14.5 14.5 0 0 1 60 22.5c0 14.41-22.83 29.83-28 33.14Z"
-            data-original="#000000"
-          ></path>
-        </svg>
-      </div> */}
-
-      <div className="overflow-hidden mx-auto md:mb-2 mb-4">
+    <div className="bg-white rounded-2xl p-5 cursor-pointer hover:-translate-y-2 transition-all relative h-full flex flex-col">
+      <div className="overflow-hidden mx-auto md:mb-2 mb-4 h-[200px]">
         <Image
           width={300}
           height={300}
           src={img}
           alt="Product 3"
           className="h-full w-full object-cover rounded-md"
+          loader={({ src }) => src}
         />
       </div>
 
-      <div>
+      <div className="flex flex-col flex-1">
         <p className="text-xs justify-start items-center gap-3 flex mb-3">
           <span className="justify-start items-center gap-1 bg-primary text-white px-3 py-1 rounded inline-flex">
             <FaClock /> {time}
           </span>
-          <span className="justify-start items-center gap-1 bg-primary text-white px-3 py-1 rounded inline-flex">
-            <FaMapMarkerAlt />
-            {venue}
-          </span>
+          {venue && (
+            <span className="justify-start items-center gap-1 bg-primary text-white px-3 py-1 rounded inline-flex">
+              <FaMapMarkerAlt />
+              {venue}
+            </span>
+          )}
         </p>
         {/* progress */}
-        {showDetails && (
-          <div className="flex justify-between items-center">
-            <span className="text-xs">
-              <span className="text-primary font-bold">
-                {raised.toLocaleString()}({Math.ceil((raised / target) * 100)}%
-                )
-              </span>
-            </span>
-            <span className="text-xs">
-              <span className="text-secondary font-bold">
-                {target.toLocaleString()}
-              </span>
-            </span>
-          </div>
-        )}
         <div className="relative w-full h-2 bg-gray-200 rounded-full mb-3">
           <div
             className="absolute h-2 bg-primary rounded-full"
-            style={{ width: `${(raised / target) * 100}%` }}
+            style={{ width: `${(raised / targetAmount) * 100}%` }}
           ></div>
         </div>
         {/* progress */}
-        <h3 className="text-lg font-extrabold text-gray-800">
-          <Link href={"/donation-details"}>
-            {title}
-          </Link>
-        </h3>
-        <p className="text-gray-600 text-sm mt-2">{description}</p>
+        <Link href={`/event-details/${eventId}`}>
+            <h3 className="text-medium font-semibold text-gray-800 mb-4 line-clamp-2 cursor-pointer hover:text-primary transition-colors">
+                {title}
+            </h3>
+        </Link>
+        <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+            {description}
+        </p>
+        {showDetails && (
+          <div className="mb-4">
+            <div className="bg-gray-50 rounded p-3">
+                <div className="flex items-baseline text-sm mb-2">
+                    <span className="font-bold text-primary">${25000 || 0}</span>
+                    <span className="text-gray-500 ml-1">raised of </span>
+                    <span className="font-bold text-primary ml-1">${targetAmount || 0}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                    <div 
+                        className="bg-primary h-1.5 rounded-full" 
+                        style={{width: `${Math.min((25000 / targetAmount * 100), 100)}%`}}
+                    ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500">
+                    <span>{100 || 0} Donors</span>
+                    <span>{Math.min((25000 / targetAmount * 100), 100).toFixed(1)}%</span>
+                </div>
+            </div>
+          </div>
 
-        <div className="buttons block relative mt-4 w-full">
+        )}
+        <div className="buttons block relative w-full mt-auto">
           <Link
-            href={"/checkout"}
+            href={`/event-details/${eventId}`}
             className="bg-primary text-sm h-full text-white px-5 py-2 rounded-md block text-center w-full"
           >
             {

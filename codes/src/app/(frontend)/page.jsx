@@ -1,7 +1,6 @@
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Events from "@/components/events";
-import Blogs from "@/components/homepage-components/blogs";
+import Events from "@/components/all-events";
 import Hero from "@/components/homepage-components/hero";
 import FeaturedEvents from "@/components/homepage-components/featured-events";
 import Operations from "@/components/homepage-components/operations";
@@ -16,7 +15,6 @@ const Home = () => {
       <Operations />
       <Events />
       <FAQ />
-      <Blogs />
     </div>
   );
 };

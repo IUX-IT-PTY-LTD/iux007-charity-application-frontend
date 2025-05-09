@@ -32,9 +32,6 @@ const FeaturedEvents = () => {
         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 text-center">
           Featured Events
         </h2>
-        <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-          Join us in making a difference through these carefully selected events that need your support
-        </p>
         <Swiper
           modules={[Navigation, Pagination]}
           spaceBetween={30}

@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { FaArrowLeft } from 'react-icons/fa'
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
+import DonationCart from '@/components/donation-cart';
 
 const EventDetails = ({params}) => {
     const {id: uuid} = params;
@@ -40,24 +41,57 @@ const EventDetails = ({params}) => {
                     <div className="bg-white p-6 shadow-lg rounded-xl border">
                         <div className="flex flex-col md:flex-row gap-8">
                             <div className="md:w-1/3">
-                                <Image 
-                                    unoptimized 
-                                    width={100} 
-                                    height={100} 
-                                    className="w-full h-[250px] object-cover rounded-lg" 
-                                    src={event.featured_image} 
-                                    alt={event.title} 
-                                />
+                                {event.featured_image ? (
+                                    <Image 
+                                        unoptimized 
+                                        width={100} 
+                                        height={100} 
+                                        className="w-full h-[250px] object-cover rounded-lg" 
+                                        src={event.featured_image} 
+                                        alt={event.title}
+                                    />
+                                ) : (
+                                    <div className="w-full h-[250px] bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+                                        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                )}
                             </div>
                             
                             <div className="md:w-2/3">
                                 <h2 className="text-2xl font-bold langar mb-4">{event.title}</h2>
                                 <p className="text-gray-600 mb-6">{event.description}</p>
                                 
-                                <div className="bg-primary/5 p-4 rounded-lg inline-flex items-center gap-3 mb-6">
-                                    <span className="text-3xl font-bold text-primary">${event.price}</span>
-                                    <span className="text-gray-600">Suggested Donation</span>
-                                </div>
+                                {event.is_fixed_donation == 0 ? (
+                                    <div className="flex flex-wrap gap-3 mb-6">
+                                        {[50, 100, 150, 200].map((amount) => (
+                                            <button
+                                                key={amount}
+                                                onClick={() => {
+                                                    const amountInput = document.getElementById('donation_amount');
+                                                    if (amountInput) {
+                                                        amountInput.value = amount;
+                                                    }
+                                                    // Remove active class from all buttons
+                                                    document.querySelectorAll('.donation-amount-btn').forEach(btn => {
+                                                        btn.classList.remove('bg-primary', 'text-white');
+                                                        btn.classList.add('bg-primary/5');
+                                                    });
+                                                    // Add active class to clicked button
+                                                    // event.currentTarget.classList.remove('bg-primary/5');
+                                                    // event.currentTarget.classList.add('bg-primary', 'text-white');
+                                                }}
+                                                className="donation-amount-btn bg-primary/5 px-6 py-3 rounded-lg hover:bg-primary/10 transition-colors"
+                                            >
+                                                <span className="text-xl font-bold text-primary">${amount}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="bg-primary/5 p-4 rounded-lg inline-flex items-center gap-3 mb-6">
+                                        <span className="text-3xl font-bold text-primary">${event.price}</span>
+                                        <span className="text-gray-600">Suggested Donation</span>
+                                    </div>
+                                )}
 
                                 <div className="mb-6">
                                     <div className="bg-gray-100 rounded-lg p-4">
@@ -72,12 +106,12 @@ const EventDetails = ({params}) => {
                                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                                             <div 
                                                 className="bg-primary h-2.5 rounded-full" 
-                                                style={{width: `${(25000 / event.target_amount * 100) || 0}%`}}
+                                                style={{width: `${Math.min((25000 / event.target_amount * 100) || 0, 100)}%`}}
                                             ></div>
                                         </div>
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-sm text-gray-500">{100 || 0} Donors</span>
-                                            <span className="text-sm text-gray-500">{((25000 / event.target_amount * 100) || 0).toFixed(1)}% Complete</span>
+                                            <span className="text-sm text-gray-500">{Math.min(((25000 / event.target_amount * 100) || 0), 100).toFixed(1)}% Complete</span>
                                         </div>
                                     </div>
                                 </div>
@@ -89,11 +123,16 @@ const EventDetails = ({params}) => {
                                         <option value="EUR">🇪🇺 EUR</option>
                                     </select>
                                     <input 
+                                        name="donation_amount"
+                                        id="donation_amount"
                                         type="number" 
                                         placeholder="Amount" 
                                         className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg" 
                                     />
-                                    <button className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    <button 
+                                        type="button"
+                                        className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                                    >
                                         Donate Now
                                     </button>
                                 </form>

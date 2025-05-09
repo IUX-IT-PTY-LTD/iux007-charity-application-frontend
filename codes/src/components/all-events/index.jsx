@@ -1,8 +1,23 @@
+'use client'
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import React from "react";
 import EventCard from "../homepage-components/event-card";
+import { apiService } from '@/api/services/apiService';
+import { ENDPOINTS } from '@/api/config';
 
 const Events = () => {
+  const [events, setEvents] = useState([]);
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await apiService.get(ENDPOINTS.EVENTS.LIST);
+        setEvents(response.data);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+    fetchEvents();
+  })
   const eventData = [
     {
       id: 1,
@@ -109,21 +124,22 @@ const Events = () => {
     <div className="bg-gray-100 py-16">
       <div className="container mx-auto">
         <div className="mx-auto">
-          <h2 className="text-4xl font-extrabold text-gray-800 mb-12">
-            Our Upcoming Events
-          </h2>
+        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 text-center">
+          All Events
+        </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 max-xl:gap-4 gap-6">
-            {eventData.map((event) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-xl:gap-4 gap-6">
+            {events.map((event) => (
               <EventCard
-                key={event.id}
+                eventId={event.uuid}
                 title={event.title}
                 description={event.description}
-                img={event.image}
-                time={event.date}
-                venue={event.venue}
-                target={event.target}
-                raised={event.raised}
+                img={event.featured_image}
+                time={event.end_date}
+                venue={event.location}
+                targetAmount={event.target_amount}
+                showDetails={true}
+                // raised={event.raised}
               />
             ))}
           </div>
