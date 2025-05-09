@@ -1,9 +1,8 @@
 import "../../../styles/globals.css";
-import { Suspense } from "react";
-import AdminSidebar from "@/components/admin/sidebar";
-import AdminPageHeader from "@/components/admin/header";
-import AdminFooter from "@/components/admin/footer";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminProvider } from "@/components/admin/admin-context";
+import { cookies } from "next/headers";
+import AdminShell from "@/components/admin/AdminShell";
 
 export const metadata = {
   title: "Charity Admin",
@@ -11,34 +10,22 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const cookieStore = cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
   return (
-    <html lang="en">
-      <body className="bg-gray-50 dark:bg-gray-900">
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-background text-foreground antialiased overflow-y-auto">
         <AdminProvider>
-          <div className="flex min-h-screen">
-            {/* Sidebar */}
-            <div className="shrink-0">
-              <AdminSidebar />
-            </div>
-
-            {/* Main Content */}
-            <div className="flex flex-col flex-1 min-w-0">
-              {/* Header - wrapped in Suspense for pathname access */}
-              <Suspense
-                fallback={
-                  <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"></div>
-                }
-              >
-                <AdminPageHeader />
-              </Suspense>
-
-              {/* Main Content Area */}
-              <main className="flex-1 p-4 md:p-6">{children}</main>
-
-              {/* Footer */}
-              <AdminFooter />
-            </div>
-          </div>
+          <SidebarProvider
+            defaultOpen={defaultOpen}
+            style={{
+              "--sidebar-width": "280px",
+              "--sidebar-width-collapsed": "60px",
+            }}
+          >
+            <AdminShell>{children}</AdminShell>
+          </SidebarProvider>
         </AdminProvider>
       </body>
     </html>

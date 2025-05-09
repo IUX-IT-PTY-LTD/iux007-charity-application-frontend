@@ -1,106 +1,60 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Menu,
-  LogOut,
+  Menu as MenuIcon,
   Calendar,
   FileText,
   HelpCircle,
   Images,
+  LogOut,
+  User,
   ChevronDown,
-  ChevronRight,
+  Plus,
+  Settings,
 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+// Import the official shadcn UI sidebar components
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
-const AdminSidebar = () => {
+export function AdminSidebar() {
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const sidebar = useSidebar();
 
-  // Define navigation items
-  const navItems = [
-    {
-      title: "Dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-      href: "/admin/dashboard",
-    },
-    {
-      title: "Menus",
-      icon: <Menu className="h-5 w-5" />,
-      href: "/admin/menus",
-    },
-    {
-      title: "Events",
-      icon: <Calendar className="h-5 w-5" />,
-      href: "/admin/events",
-    },
-    {
-      title: "Contents",
-      icon: <FileText className="h-5 w-5" />,
-      href: "/admin/contents",
-      submenu: [
-        {
-          title: "Pages",
-          href: "/admin/contents/pages",
-        },
-        {
-          title: "Blog Posts",
-          href: "/admin/contents/posts",
-        },
-      ],
-    },
-    {
-      title: "FAQs",
-      icon: <HelpCircle className="h-5 w-5" />,
-      href: "/admin/faqs",
-    },
-    {
-      title: "Slider",
-      icon: <Images className="h-5 w-5" />,
-      href: "/admin/slider",
-    },
-  ];
-
-  // Toggle mobile menu when screen size changes
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Handle logout
-  const handleLogout = () => {
-    console.log("Logging out...");
-    // Add your logout logic here
-    // router.push('/login')
-  };
-
-  // Determine if a nav item is active
+  // Check if a path is active
   const isActive = (href) => {
     if (href === "/admin/dashboard") {
       return pathname === href;
@@ -108,193 +62,219 @@ const AdminSidebar = () => {
     return pathname.startsWith(href);
   };
 
-  // Render sidebar nav item with optional tooltip when collapsed
-  const NavItem = ({ item }) => {
-    const active = isActive(item.href);
-    const [isSubmenuOpen, setIsSubmenuOpen] = useState(active);
-
-    const itemContent = (
-      <div
-        className={cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-          active
-            ? "bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-100"
-            : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-        )}
-      >
-        {item.icon}
-        {!isCollapsed && (
-          <>
-            <span className="flex-1">{item.title}</span>
-            {item.submenu && (
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform",
-                  isSubmenuOpen && "rotate-180"
-                )}
-              />
-            )}
-          </>
-        )}
-      </div>
-    );
-
-    return (
-      <div>
-        {item.submenu ? (
-          <Collapsible
-            open={isSubmenuOpen && !isCollapsed}
-            onOpenChange={setIsSubmenuOpen}
-            className="w-full"
-          >
-            <CollapsibleTrigger asChild className="w-full">
-              {isCollapsed ? (
-                <TooltipProvider>
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-pointer">{itemContent}</div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="ml-1">
-                      {item.title}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <div className="cursor-pointer">{itemContent}</div>
-              )}
-            </CollapsibleTrigger>
-
-            <CollapsibleContent className="pl-9 pt-1">
-              {item.submenu.map((subItem, i) => (
-                <Link href={subItem.href} key={i} className="block">
-                  <div
-                    className={cn(
-                      "flex items-center rounded-md py-2 pl-2 text-sm transition-colors",
-                      isActive(subItem.href)
-                        ? "text-blue-700 font-medium dark:text-blue-100"
-                        : "text-gray-600 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-100"
-                    )}
-                  >
-                    <ChevronRight className="mr-1 h-3 w-3" />
-                    <span>{subItem.title}</span>
-                  </div>
-                </Link>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-        ) : (
-          <Link href={item.href}>
-            {isCollapsed ? (
-              <TooltipProvider>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>{itemContent}</TooltipTrigger>
-                  <TooltipContent side="right" className="ml-1">
-                    {item.title}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              itemContent
-            )}
-          </Link>
-        )}
-      </div>
-    );
-  };
-
   return (
-    <div
-      className={cn(
-        "flex flex-col h-screen bg-white border-r border-gray-200 transition-all duration-300 dark:bg-gray-900 dark:border-gray-800",
-        isCollapsed ? "w-16" : "w-64"
-      )}
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     >
-      {/* Sidebar Header */}
-      <div
-        className={cn(
-          "flex items-center p-4",
-          isCollapsed ? "justify-center" : "justify-between"
-        )}
-      >
-        {!isCollapsed && (
-          <Link href="/admin/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 font-bold text-white">
-              A
-            </div>
-            <span className="text-lg font-bold">Admin</span>
-          </Link>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-        >
-          <ChevronRight
-            className={cn(
-              "h-5 w-5 transition-transform",
-              isCollapsed ? "rotate-180" : ""
-            )}
-          />
-        </Button>
-      </div>
-
-      {/* User Profile */}
-      <div
-        className={cn(
-          "border-b border-gray-200 dark:border-gray-800",
-          isCollapsed ? "py-4" : "p-4"
-        )}
-      >
-        <div
-          className={cn(
-            "flex items-center gap-3",
-            isCollapsed && "justify-center"
-          )}
-        >
-          <Avatar className="h-10 w-10">
+      {/* Sidebar Header with User Profile */}
+      <SidebarHeader className="h-16 flex items-center px-4 border-b border-border/40">
+        <div className="flex items-center gap-3 w-full">
+          <Avatar className="h-8 w-8 border border-border">
             <AvatarImage src="/assets/img/avatar.jpg" alt="Admin" />
-            <AvatarFallback>AA</AvatarFallback>
+            <AvatarFallback className="bg-primary/10 text-primary">
+              AA
+            </AvatarFallback>
           </Avatar>
-
-          {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="font-medium text-gray-900 dark:text-gray-100">
-                Super Admin
+          {!sidebar.collapsed && (
+            <div className="flex flex-col text-sm leading-tight">
+              <span className="font-medium text-foreground truncate max-w-[120px]">
+                Admin Admin
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-muted-foreground">
                 Administrator
               </span>
             </div>
           )}
+          <SidebarTrigger className="ml-auto h-8 w-8 rounded-md hover:bg-accent hover:text-accent-foreground" />
         </div>
-      </div>
+      </SidebarHeader>
 
-      {/* Navigation Menu */}
-      <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item, i) => (
-            <NavItem key={i} item={item} />
-          ))}
-        </nav>
-      </ScrollArea>
+      {/* Sidebar Content with Navigation */}
+      <SidebarContent className="px-2 py-4">
+        {/* Main Navigation */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="px-2 text-xs font-medium text-muted-foreground">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/admin/dashboard")}
+                  className={cn(
+                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    isActive("/admin/dashboard") &&
+                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  )}
+                >
+                  <Link href="/admin/dashboard">
+                    <LayoutDashboard className="h-5 w-5" />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
-      {/* Sidebar Footer */}
-      <div className="mt-auto border-t border-gray-200 p-3 dark:border-gray-800">
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-gray-700 hover:bg-red-50 hover:text-red-700 dark:text-gray-200 dark:hover:bg-red-900/20 dark:hover:text-red-100",
-            isCollapsed && "justify-center"
-          )}
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5 mr-2" />
-          {!isCollapsed && <span>Logout</span>}
-        </Button>
-      </div>
-    </div>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/admin/menus")}
+                  className={cn(
+                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    isActive("/admin/menus") &&
+                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  )}
+                >
+                  <Link href="/admin/menus">
+                    <MenuIcon className="h-5 w-5" />
+                    <span>Menus</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/admin/events")}
+                  className={cn(
+                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    isActive("/admin/events") &&
+                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  )}
+                >
+                  <Link href="/admin/events">
+                    <Calendar className="h-5 w-5" />
+                    <span>Events</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Content Management */}
+        <SidebarGroup className="mt-6">
+          <SidebarGroupLabel className="px-2 text-xs font-medium text-muted-foreground">
+            Content
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Collapsible Contents Menu */}
+              <Collapsible
+                defaultOpen={isActive("/admin/contents")}
+                className="group/collapsible w-full"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      isActive={isActive("/admin/contents")}
+                      className={cn(
+                        "w-full gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        isActive("/admin/contents") &&
+                          "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                      )}
+                    >
+                      <FileText className="h-5 w-5" />
+                      <span>Contents</span>
+                      <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent className="pt-1 pb-1">
+                    <SidebarMenu className="pl-8">
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive("/admin/contents/pages")}
+                          className={cn(
+                            "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                            isActive("/admin/contents/pages") &&
+                              "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                          )}
+                        >
+                          <Link href="/admin/contents/pages">
+                            <span>Pages</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive("/admin/contents/posts")}
+                          className={cn(
+                            "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                            isActive("/admin/contents/posts") &&
+                              "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                          )}
+                        >
+                          <Link href="/admin/contents/posts">
+                            <span>Blog Posts</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/admin/faqs")}
+                  className={cn(
+                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    isActive("/admin/faqs") &&
+                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  )}
+                >
+                  <Link href="/admin/faqs">
+                    <HelpCircle className="h-5 w-5" />
+                    <span>FAQs</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/admin/slider")}
+                  className={cn(
+                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    isActive("/admin/slider") &&
+                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  )}
+                >
+                  <Link href="/admin/slider">
+                    <Images className="h-5 w-5" />
+                    <span>Slider</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      {/* Sidebar Footer with Logout */}
+      <SidebarFooter className="border-t border-border/40 py-2 mt-auto">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => console.log("Logging out...")}
+              className="gap-3 rounded-lg px-3 py-2 text-destructive hover:bg-destructive/10 mx-2"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
-};
+}
 
-export default AdminSidebar;
+// Main content wrapper component
+export function MainContent({ children }) {
+  return <div className="flex-1 flex flex-col overflow-hidden">{children}</div>;
+}
