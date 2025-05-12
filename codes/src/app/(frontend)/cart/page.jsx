@@ -1,30 +1,30 @@
-"use client";
-import Image from "next/image";
-import React from "react";
+'use client';
+import Image from 'next/image';
+import React from 'react';
 
 const Cart = () => {
   const cartItems = [
     {
       id: 1,
-      name: "Event Name",
+      name: 'Event Name',
       amount: 500,
-      image: "/assets/img/event-img.jpg",
+      image: '/assets/img/event-img.jpg',
       quantity: 2,
       tax: 4,
     },
     {
       id: 2,
-      name: "Event Name",
+      name: 'Event Name',
       amount: 100,
-      image: "/assets/img/event-img.jpg",
+      image: '/assets/img/event-img.jpg',
       quantity: 2,
       tax: 4,
     },
     {
       id: 3,
-      name: "Event Name",
+      name: 'Event Name',
       amount: 400,
-      image: "/assets/img/event-img.jpg",
+      image: '/assets/img/event-img.jpg',
       quantity: 2,
       tax: 4,
     },
@@ -38,9 +38,7 @@ const Cart = () => {
           <div className="grid lg:grid-cols-2 gap-12">
             <div>
               <div className="bg-gray-100 p-6 rounded-md">
-                <h2 className="text-2xl font-extrabold text-gray-800">
-                  Your Cart
-                </h2>
+                <h2 className="text-2xl font-extrabold text-gray-800">Your Cart</h2>
                 <div className="space-y-4 mt-8">
                   {currentCart.map((item) => (
                     <div className="cart-item" key={item.id}>
@@ -56,9 +54,7 @@ const Cart = () => {
                         </div>
 
                         <div className="w-full">
-                          <h3 className="text-base font-semibold text-gray-800">
-                            {item.name}
-                          </h3>
+                          <h3 className="text-base font-semibold text-gray-800">{item.name}</h3>
                           <h6 className="text-sm text-gray-800 font-bold cursor-pointer mt-0.5">
                             ${item.amount * item.quantity}
                           </h6>
@@ -72,17 +68,15 @@ const Cart = () => {
                                 <svg
                                   onClick={() => {
                                     if (item.quantity > 1) {
-                                      const newCart = currentCart.map(
-                                        (cartItem) => {
-                                          if (cartItem.id === item.id) {
-                                            return {
-                                              ...cartItem,
-                                              quantity: cartItem.quantity - 1,
-                                            };
-                                          }
-                                          return cartItem;
+                                      const newCart = currentCart.map((cartItem) => {
+                                        if (cartItem.id === item.id) {
+                                          return {
+                                            ...cartItem,
+                                            quantity: cartItem.quantity - 1,
+                                          };
                                         }
-                                      );
+                                        return cartItem;
+                                      });
                                       setCurrentCart(newCart);
                                     }
                                   }}
@@ -99,17 +93,15 @@ const Cart = () => {
                                 <span className="mx-2.5">{item.quantity}</span>
                                 <svg
                                   onClick={() => {
-                                    const newCart = currentCart.map(
-                                      (cartItem) => {
-                                        if (cartItem.id === item.id) {
-                                          return {
-                                            ...cartItem,
-                                            quantity: cartItem.quantity + 1,
-                                          };
-                                        }
-                                        return cartItem;
+                                    const newCart = currentCart.map((cartItem) => {
+                                      if (cartItem.id === item.id) {
+                                        return {
+                                          ...cartItem,
+                                          quantity: cartItem.quantity + 1,
+                                        };
                                       }
-                                    );
+                                      return cartItem;
+                                    });
                                     setCurrentCart(newCart);
                                   }}
                                   xmlns="http://www.w3.org/2000/svg"
@@ -131,7 +123,7 @@ const Cart = () => {
                                   // delete item
 
                                   () => {
-                                    console.log("delete item");
+                                    console.log('delete item');
                                     const newCart = currentCart.filter(
                                       (cartItem) => cartItem.id !== item.id
                                     );
@@ -189,9 +181,7 @@ const Cart = () => {
             </div>
 
             <form>
-              <h2 className="text-2xl font-extrabold text-gray-800">
-                Payment Details
-              </h2>
+              <h2 className="text-2xl font-extrabold text-gray-800">Payment Details</h2>
               <div className="grid gap-4 mt-8">
                 <div>
                   <label className="block text-base font-semibold text-gray-800 mb-2">
@@ -214,13 +204,7 @@ const Cart = () => {
                       className="w-6 ml-3"
                       viewBox="0 0 32 20"
                     >
-                      <circle
-                        cx="10"
-                        cy="10"
-                        r="10"
-                        fill="#f93232"
-                        data-original="#f93232"
-                      />
+                      <circle cx="10" cy="10" r="10" fill="#f93232" data-original="#f93232" />
                       <path
                         fill="#fed049"
                         d="M22 0c-2.246 0-4.312.75-5.98 2H16v.014c-.396.298-.76.634-1.107.986h2.214c.308.313.592.648.855 1H14.03a9.932 9.932 0 0 0-.667 1h5.264c.188.324.365.654.518 1h-6.291a9.833 9.833 0 0 0-.377 1h7.044c.104.326.186.661.258 1h-7.563c-.067.328-.123.66-.157 1h7.881c.039.328.06.661.06 1h-8c0 .339.027.67.06 1h7.882c-.038.339-.093.672-.162 1h-7.563c.069.341.158.673.261 1h7.044a9.833 9.833 0 0 1-.377 1h-6.291c.151.344.321.678.509 1h5.264a9.783 9.783 0 0 1-.669 1H14.03c.266.352.553.687.862 1h2.215a10.05 10.05 0 0 1-1.107.986A9.937 9.937 0 0 0 22 20c5.523 0 10-4.478 10-10S27.523 0 22 0z"
@@ -249,9 +233,7 @@ const Cart = () => {
                   </div>
 
                   <div>
-                    <label className="block text-base font-semibold text-gray-800 mb-2">
-                      CVV
-                    </label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">CVV</label>
                     <input
                       type="number"
                       placeholder="XXX"
@@ -263,29 +245,24 @@ const Cart = () => {
 
               <ul className="text-gray-800 mt-8 space-y-4">
                 <li className="flex flex-wrap gap-4 text-sm">
-                  Subtotal{" "}
+                  Subtotal{' '}
                   <span className="ml-auto font-bold">
-                    $
-                    {currentCart.reduce(
-                      (acc, item) => acc + item.amount * item.quantity,
-                      0
-                    )}
+                    ${currentCart.reduce((acc, item) => acc + item.amount * item.quantity, 0)}
                   </span>
                 </li>
                 <li className="flex flex-wrap gap-4 text-sm">
-                  Tax{" "}
+                  Tax{' '}
                   <span className="ml-auto font-bold">
                     ${currentCart.reduce((acc, item) => acc + item.tax, 0)}
                   </span>
                 </li>
                 <hr className="border-gray-300" />
                 <li className="flex flex-wrap gap-4 text-sm font-bold">
-                  Total{" "}
+                  Total{' '}
                   <span className="ml-auto">
                     $
                     {currentCart.reduce(
-                      (acc, item) =>
-                        acc + item.amount * item.quantity + item.tax,
+                      (acc, item) => acc + item.amount * item.quantity + item.tax,
                       0
                     )}
                   </span>
@@ -296,7 +273,7 @@ const Cart = () => {
                 type="button"
                 className="mt-8 text-sm px-4 py-3 w-full font-semibold tracking-wide bg-purple-600 hover:bg-purple-700 text-white rounded-md"
               >
-                Make Payment{" "}
+                Make Payment{' '}
               </button>
             </form>
           </div>

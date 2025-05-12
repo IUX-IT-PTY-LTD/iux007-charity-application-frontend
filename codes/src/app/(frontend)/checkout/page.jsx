@@ -1,32 +1,32 @@
-"use client";
-import EventCard from "@/components/homepage-components/event-cards/events";
-import Image from "next/image";
-import Link from "next/link";
-import React, {useEffect, useState} from "react";
-import { FaDonate, FaHandHoldingHeart, FaTrashAlt } from "react-icons/fa";
-import { MdOutlineEmojiPeople } from "react-icons/md";
+'use client';
+import EventCard from '@/components/homepage-components/event-cards/events';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import { FaDonate, FaHandHoldingHeart, FaTrashAlt } from 'react-icons/fa';
+import { MdOutlineEmojiPeople } from 'react-icons/md';
 
 const Checkout = () => {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [adminContributionAmount, setAdminContributionAmount] = React.useState(0);
   const [cartItems, setCartItems] = useState([]);
 
-useEffect(() => {
-  // Get cart items from localStorage when component mounts
-  const cart = localStorage.getItem('cartItems');
-  if (cart) {
-    setCartItems(JSON.parse(cart));
-  }
-}, []);
+  useEffect(() => {
+    // Get cart items from localStorage when component mounts
+    const cart = localStorage.getItem('cartItems');
+    if (cart) {
+      setCartItems(JSON.parse(cart));
+    }
+  }, []);
 
   const paymentMethods = [
     {
       id: 1,
-      img: "/assets/img/4logos.png",
+      img: '/assets/img/4logos.png',
     },
     {
       id: 2,
-      img: "/assets/img/payment-card-gpay-apple.png",
+      img: '/assets/img/payment-card-gpay-apple.png',
     },
   ];
 
@@ -40,30 +40,36 @@ useEffect(() => {
             {/* Progress Steps */}
             <div className="relative flex justify-between items-center mb-12">
               <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 bg-gray-200">
-                <div className={`h-full bg-primary transition-all duration-300 ${
-                  currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'
-                }`}></div>
+                <div
+                  className={`h-full bg-primary transition-all duration-300 ${
+                    currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'
+                  }`}
+                ></div>
               </div>
-              
+
               {/* Step indicators */}
               {[
-                {icon: <FaHandHoldingHeart/>, label: 'Donation'},
-                {icon: <MdOutlineEmojiPeople/>, label: 'Donor'},
-                {icon: <FaDonate/>, label: 'Payment'}
+                { icon: <FaHandHoldingHeart />, label: 'Donation' },
+                { icon: <MdOutlineEmojiPeople />, label: 'Donor' },
+                { icon: <FaDonate />, label: 'Payment' },
               ].map((step, index) => (
                 <div key={index} className="relative z-10 text-center">
-                  <div className={`w-16 h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
-                    currentStep > index 
-                      ? 'bg-primary border-primary text-white'
-                      : currentStep === index
-                      ? 'bg-primary border-primary text-white animate-pulse'
-                      : 'bg-white border-gray-300 text-gray-400'
-                  }`}>
+                  <div
+                    className={`w-16 h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                      currentStep > index
+                        ? 'bg-primary border-primary text-white'
+                        : currentStep === index
+                          ? 'bg-primary border-primary text-white animate-pulse'
+                          : 'bg-white border-gray-300 text-gray-400'
+                    }`}
+                  >
                     <div className="text-2xl">{step.icon}</div>
                   </div>
-                  <div className={`mt-3 font-medium ${
-                    currentStep >= index + 1 ? 'text-primary' : 'text-gray-400'
-                  }`}>
+                  <div
+                    className={`mt-3 font-medium ${
+                      currentStep >= index + 1 ? 'text-primary' : 'text-gray-400'
+                    }`}
+                  >
                     {step.label}
                   </div>
                 </div>
@@ -74,13 +80,18 @@ useEffect(() => {
             {currentStep === 1 && (
               <div className="space-y-8">
                 <div className="flex justify-between items-center">
-                  <Link 
-                    href="/events" 
+                  <Link
+                    href="/events"
                     className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     <span className="mr-2">Add More Items</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
                     </svg>
                   </Link>
                 </div>
@@ -100,20 +111,18 @@ useEffect(() => {
                               loader={({ src }) => src}
                             />
                           </div>
-                          
+
                           <div>
                             <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-                            
+
                             <div className="mt-4 flex items-center space-x-4">
                               <div className="flex items-center border rounded-lg">
-                                <button 
+                                <button
                                   onClick={() => {
                                     if (item.quantity > 1) {
-                                      setCartItems(prev => 
-                                        prev.map(i => 
-                                          i.id === item.id 
-                                            ? {...i, quantity: i.quantity - 1}
-                                            : i
+                                      setCartItems((prev) =>
+                                        prev.map((i) =>
+                                          i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
                                         )
                                       );
                                     }
@@ -123,13 +132,11 @@ useEffect(() => {
                                   -
                                 </button>
                                 <span className="px-4 py-1 border-x">{item.quantity}</span>
-                                <button 
+                                <button
                                   onClick={() => {
-                                    setCartItems(prev => 
-                                      prev.map(i => 
-                                        i.id === item.id 
-                                          ? {...i, quantity: i.quantity + 1}
-                                          : i
+                                    setCartItems((prev) =>
+                                      prev.map((i) =>
+                                        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
                                       )
                                     );
                                   }}
@@ -138,19 +145,19 @@ useEffect(() => {
                                   +
                                 </button>
                               </div>
-                              
+
                               <input
                                 type="number"
                                 placeholder="Amount"
                                 className="w-32 px-2 py-1.5 rounded border border-gray-200 focus:border-primary text-sm transition-all"
-                                disabled = {item.isFixedDonation ? true : false}
+                                disabled={item.isFixedDonation ? true : false}
                                 value={item.price}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  setCartItems(prev => 
-                                    prev.map(i => 
-                                      i.id === item.id 
-                                        ? {...i, price: value ? parseFloat(value) : i.price}
+                                  setCartItems((prev) =>
+                                    prev.map((i) =>
+                                      i.id === item.id
+                                        ? { ...i, price: value ? parseFloat(value) : i.price }
                                         : i
                                     )
                                   );
@@ -163,14 +170,16 @@ useEffect(() => {
                         <div className="flex items-center space-x-6">
                           <div className="text-right">
                             <div className="text-sm text-gray-500">Price</div>
-                            <div className="text-lg font-semibold">${item.price * item.quantity}</div>
+                            <div className="text-lg font-semibold">
+                              ${item.price * item.quantity}
+                            </div>
                           </div>
-                          
+
                           <button
                             onClick={() => {
-                              setCartItems(prev => prev.filter(i => i.id !== item.id));
+                              setCartItems((prev) => prev.filter((i) => i.id !== item.id));
                               // Update localStorage after removing item
-                              const updatedCart = cartItems.filter(i => i.id !== item.id);
+                              const updatedCart = cartItems.filter((i) => i.id !== item.id);
                               localStorage.setItem('cartItems', JSON.stringify(updatedCart));
                             }}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
@@ -190,7 +199,9 @@ useEffect(() => {
                 <div className="grid lg:grid-cols-2 gap-8 pt-8 border-t">
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">Want to Contribute to Admin?</h3>
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        Want to Contribute to Admin?
+                      </h3>
                       <span className="inline-block mt-2 px-3 py-1 text-xs font-medium text-white bg-primary rounded-full">
                         One Time Contribution Only
                       </span>
@@ -198,13 +209,13 @@ useEffect(() => {
 
                     <div className="space-y-4">
                       <div className="flex flex-wrap gap-2">
-                        {[50, 100, 200].map(amount => (
+                        {[50, 100, 200].map((amount) => (
                           <button
                             key={amount}
                             onClick={() => setAdminContributionAmount(amount)}
                             className={`px-4 py-2 text-sm font-medium ${
-                              adminContributionAmount === amount 
-                                ? 'bg-primary text-white' 
+                              adminContributionAmount === amount
+                                ? 'bg-primary text-white'
                                 : 'text-primary border border-primary'
                             } rounded-lg hover:bg-primary hover:text-white transition-colors`}
                           >
@@ -212,7 +223,7 @@ useEffect(() => {
                           </button>
                         ))}
                       </div>
-                      
+
                       <input
                         type="number"
                         value={adminContributionAmount}
@@ -221,7 +232,7 @@ useEffect(() => {
                         placeholder="Enter custom amount"
                         className="w-32 px-2 py-1.5 rounded border border-gray-200 focus:border-primary text-sm transition-all"
                       />
-                      
+
                       <button className="w-full px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors">
                         Contribute
                       </button>
@@ -231,15 +242,17 @@ useEffect(() => {
                   <div className="lg:border-l lg:pl-8">
                     <div className="space-y-6">
                       <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
-                      
+
                       <div className="space-y-4">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Subtotal</span>
                           <span className="font-semibold">
-                            ${cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0) + adminContributionAmount}
+                            $
+                            {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) +
+                              adminContributionAmount}
                           </span>
                         </div>
-                        
+
                         <button
                           onClick={() => setCurrentStep(2)}
                           className="w-full px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
@@ -258,9 +271,9 @@ useEffect(() => {
               <form className="max-w-3xl mx-auto space-y-8">
                 <div className="grid md:grid-cols-3 gap-6">
                   {[
-                    {label: 'Full Name', type: 'text', placeholder: 'Enter your full name'},
-                    {label: 'Email', type: 'email', placeholder: 'Enter your email'},
-                    {label: 'Phone', type: 'tel', placeholder: 'Enter your phone number'}
+                    { label: 'Full Name', type: 'text', placeholder: 'Enter your full name' },
+                    { label: 'Email', type: 'email', placeholder: 'Enter your email' },
+                    { label: 'Phone', type: 'tel', placeholder: 'Enter your phone number' },
                   ].map((field, index) => (
                     <div key={index}>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -326,9 +339,10 @@ useEffect(() => {
                       onClick={() => setPaymentMethod(method)}
                       className={`
                         p-6 border rounded-xl cursor-pointer transition-all
-                        ${paymentMethod.id === method.id 
-                          ? 'border-primary ring-2 ring-primary/20' 
-                          : 'hover:border-gray-300'
+                        ${
+                          paymentMethod.id === method.id
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'hover:border-gray-300'
                         }
                       `}
                     >

@@ -1,9 +1,9 @@
-"use client";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { FaShoppingBasket, FaUser } from "react-icons/fa";
+'use client';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { FaShoppingBasket, FaUser } from 'react-icons/fa';
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
 
@@ -12,70 +12,65 @@ const Header = () => {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-const [menus, setMenus] = useState([]);
-const [settings, setSettings] = useState([]);
+  const [menus, setMenus] = useState([]);
+  const [settings, setSettings] = useState([]);
 
-const fetchMenus = async () => {
-  try {
-    setIsLoggedIn(false);
-    const response = await apiService.get(ENDPOINTS.COMMON.MENUS);
-    console.log(response.data);
-    setMenus(response.data);
-  } catch (error) {
-    console.error('Error fetching menus:', error);
-    setMenus([]);
-  }
-};
+  const fetchMenus = async () => {
+    try {
+      setIsLoggedIn(false);
+      const response = await apiService.get(ENDPOINTS.COMMON.MENUS);
+      console.log(response.data);
+      setMenus(response.data);
+    } catch (error) {
+      console.error('Error fetching menus:', error);
+      setMenus([]);
+    }
+  };
 
-const fetchSettings = async () => {
-  try {
-    const response = await apiService.get(ENDPOINTS.COMMON.SETTINGS);
-    const settingsData = {
-      site_name: response.data.find(item => item.key === 'company_name')?.value || 'Default Name',
-      logo: response.data.find(item => item.key === 'company_logo')?.value || '/assets/img/logo.svg'
-    };
-    setSettings(settingsData);
-    console.log(settingsData);
-  } catch (error) {
-    console.error('Error fetching settings:', error);
-    setSettings({
-      site_name: 'Default Site Name',
-      logo: '/assets/img/logo.svg'
-    });
-  }
-}
+  const fetchSettings = async () => {
+    try {
+      const response = await apiService.get(ENDPOINTS.COMMON.SETTINGS);
+      const settingsData = {
+        site_name:
+          response.data.find((item) => item.key === 'company_name')?.value || 'Default Name',
+        logo:
+          response.data.find((item) => item.key === 'company_logo')?.value ||
+          '/assets/img/logo.svg',
+      };
+      setSettings(settingsData);
+      console.log(settingsData);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      setSettings({
+        site_name: 'Default Site Name',
+        logo: '/assets/img/logo.svg',
+      });
+    }
+  };
 
-useEffect(() => {
-  fetchMenus();
-  fetchSettings();
-}, []);
+  useEffect(() => {
+    fetchMenus();
+    fetchSettings();
+  }, []);
 
   console.log(pathname);
   // console.log(pathname);
 
   const toggleBurgerMenu = () => {
-    const menu = document.getElementById("collapseMenu");
+    const menu = document.getElementById('collapseMenu');
     if (menu) {
-      menu.classList.toggle("active");
+      menu.classList.toggle('active');
     }
-  }
+  };
 
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-[70px] tracking-wide relative z-50">
       <div className="container mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-5 w-full">
           <Link href="./" className="flex justify-start items-center gap-3">
-            <Image
-              src="/assets/img/logo.svg"
-              width={100}
-              height={100}
-              alt="logo"
-              className="w-8"
-            />
+            <Image src="/assets/img/logo.svg" width={100} height={100} alt="logo" className="w-8" />
             <span>
-              <strong className="text-primary font-semibold text-lg">
-                {settings?.site_name}
-              </strong>
+              <strong className="text-primary font-semibold text-lg">{settings?.site_name}</strong>
               {/* <span className="text-secondary font-semibold text-lg">Fund</span> */}
             </span>
           </Link>
@@ -106,8 +101,7 @@ useEffect(() => {
             </button>
 
             <ul className="nav-menu lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
-              
-            <li className="mb-6 hidden max-lg:block">
+              <li className="mb-6 hidden max-lg:block">
                 <Link href="./">
                   <Image
                     src="/assets/img/logo.svg"
@@ -120,8 +114,12 @@ useEffect(() => {
               </li>
 
               {menus.map((menu, index) => (
-                <li key={index}  className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${pathname === '/'+ menu.slug ? "active" : ""
-                }`}>
+                <li
+                  key={index}
+                  className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
+                    pathname === '/' + menu.slug ? 'active' : ''
+                  }`}
+                >
                   <Link
                     href={`/${menu.slug}`}
                     className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
@@ -138,21 +136,25 @@ useEffect(() => {
               <>
                 {/* cart */}
                 <Link
-                  href={"./checkout"}
+                  href={'./checkout'}
                   className="w-[40px] h-[40px] flex justify-center items-center text-xl relative rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
                 >
                   <FaShoppingBasket />
-                  <span className="absolute cart-amount bg-black text-xs w-[20px] h-[20px] flex justify-center items-center rounded-full font-normal top-[-5px] right-[-5px]">0</span>
+                  <span className="absolute cart-amount bg-black text-xs w-[20px] h-[20px] flex justify-center items-center rounded-full font-normal top-[-5px] right-[-5px]">
+                    0
+                  </span>
                 </Link>
                 {isLoggedIn ? (
                   <div className="relative">
                     <button
-                      onClick={() => document.getElementById('userDropdown').classList.toggle('hidden')}
+                      onClick={() =>
+                        document.getElementById('userDropdown').classList.toggle('hidden')
+                      }
                       className="w-[40px] h-[40px] flex justify-center items-center text-xl rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
                     >
                       <FaUser />
                     </button>
-                    <div 
+                    <div
                       id="userDropdown"
                       className="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
                     >
@@ -182,7 +184,7 @@ useEffect(() => {
             ) : (
               <>
                 <Link
-                  href={"./login"}
+                  href={'./login'}
                   className="px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
                 >
                   Login

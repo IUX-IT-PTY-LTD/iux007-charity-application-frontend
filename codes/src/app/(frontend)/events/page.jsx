@@ -1,9 +1,9 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
-import EventCard from "@/components/homepage-components/event-cards/events";
-import Image from "next/image";
-import React, { act, useEffect, useState } from "react";
-import { apiService } from "@/api/services/apiService";
+import EventCard from '@/components/homepage-components/event-cards/events';
+import Image from 'next/image';
+import React, { act, useEffect, useState } from 'react';
+import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
 
 const Events = () => {
@@ -17,7 +17,7 @@ const Events = () => {
       const response = await apiService.get(ENDPOINTS.EVENTS.LIST);
       setEvents(response.data);
     } catch (error) {
-      console.error("Error fetching events:", error);
+      console.error('Error fetching events:', error);
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +43,8 @@ const Events = () => {
               Explore Our Donation Campaigns
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Join us in making a difference. Every contribution counts towards creating positive change in our community.
+              Join us in making a difference. Every contribution counts towards creating positive
+              change in our community.
             </p>
           </div>
 
@@ -55,7 +56,10 @@ const Events = () => {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {paginatedDonations.map((event) => (
-                  <div key={event.uuid} className="transform hover:scale-105 transition-transform duration-300">
+                  <div
+                    key={event.uuid}
+                    className="transform hover:scale-105 transition-transform duration-300"
+                  >
                     <EventCard
                       eventId={event.uuid}
                       title={event.title}
@@ -77,9 +81,10 @@ const Events = () => {
                     onClick={() => handlePageChange(index + 1)}
                     className={`
                       px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ease-in-out
-                      ${activePage === index + 1
-                        ? "bg-primary text-white shadow-lg transform scale-105"
-                        : "bg-white text-primary border-2 border-primary hover:bg-primary hover:text-white"
+                      ${
+                        activePage === index + 1
+                          ? 'bg-primary text-white shadow-lg transform scale-105'
+                          : 'bg-white text-primary border-2 border-primary hover:bg-primary hover:text-white'
                       }
                     `}
                     aria-label={`Page ${index + 1}`}

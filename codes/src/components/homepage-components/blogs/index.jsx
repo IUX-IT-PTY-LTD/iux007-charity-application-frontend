@@ -1,43 +1,43 @@
-import Image from "next/image";
-import React from "react";
+import Image from 'next/image';
+import React from 'react';
 
 const Blogs = () => {
   const blogs = [
     {
       id: 1,
-      banner: "/assets/img/blog.jpg",
-      title: "A Guide to Igniting Your Imagination",
+      banner: '/assets/img/blog.jpg',
+      title: 'A Guide to Igniting Your Imagination',
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.",
-      date: "10 FEB 2023",
-      author: "John Doe",
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.',
+      date: '10 FEB 2023',
+      author: 'John Doe',
     },
     {
       id: 2,
-      banner: "/assets/img/blog.jpg",
-      title: "A Guide to Igniting Your Imagination",
+      banner: '/assets/img/blog.jpg',
+      title: 'A Guide to Igniting Your Imagination',
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.",
-      date: "10 FEB 2023",
-      author: "John Doe",
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.',
+      date: '10 FEB 2023',
+      author: 'John Doe',
     },
     {
       id: 3,
-      banner: "/assets/img/blog.jpg",
-      title: "A Guide to Igniting Your Imagination",
+      banner: '/assets/img/blog.jpg',
+      title: 'A Guide to Igniting Your Imagination',
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.",
-      date: "10 FEB 2023",
-      author: "John Doe",
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.',
+      date: '10 FEB 2023',
+      author: 'John Doe',
     },
     {
       id: 4,
-      banner: "/assets/img/blog.jpg",
-      title: "A Guide to Igniting Your Imagination",
+      banner: '/assets/img/blog.jpg',
+      title: 'A Guide to Igniting Your Imagination',
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.",
-      date: "10 FEB 2023",
-      author: "John Doe",
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nunc et tempus blandit, metus mi consectetur felis turpis vitae ligula.',
+      date: '10 FEB 2023',
+      author: 'John Doe',
     },
   ];
   return (
@@ -65,9 +65,7 @@ const Blogs = () => {
                 <span className="text-sm block text-gray-400 mb-2">
                   {blog.date} | BY {blog.author}
                 </span>
-                <h3 className="text-xl font-bold text-gray-800">
-                  {blog.title}
-                </h3>
+                <h3 className="text-xl font-bold text-gray-800">{blog.title}</h3>
                 <hr className="my-4" />
                 <p className="text-gray-400 text-sm">{blog.description}</p>
               </div>

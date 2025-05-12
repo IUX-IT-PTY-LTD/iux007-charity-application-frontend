@@ -1,7 +1,7 @@
-'use client'
-import Image from "next/image";
-import React, { useState, useEffect } from "react";
-import FeaturedEventsCard from "../event-cards/featured-events";
+'use client';
+import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
+import FeaturedEventsCard from '../event-cards/featured-events';
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -10,10 +10,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-const FeaturedEvents = ({
-  data,
-}) => {
-
+const FeaturedEvents = ({ data }) => {
   return (
     <div className="container mx-auto px-4 py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -47,10 +44,10 @@ const FeaturedEvents = ({
                   title={event.title}
                   description={event.description}
                   img={event.featured_image}
-                  time={new Date(event.start_date).toLocaleDateString('en-US', { 
+                  time={new Date(event.start_date).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
                   })}
                   venue={event.location}
                   fixedDonation={event.is_fixed_donation}

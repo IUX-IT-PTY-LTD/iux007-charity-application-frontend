@@ -1,6 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
 
 const Footer = () => {
   return (
@@ -17,9 +17,7 @@ const Footer = () => {
                 className="w-20 mb-2"
               />
               <span>
-                <strong className="text-light font-semibold text-lg">
-                  Charity
-                </strong>
+                <strong className="text-light font-semibold text-lg">Charity</strong>
                 <span className="text-accent font-semibold text-lg">Fund</span>
               </span>
             </Link>
@@ -86,7 +84,7 @@ const Footer = () => {
 
           <div>
             <h4 className="text-white font-semibold text-lg relative max-sm:cursor-pointer">
-              Services{" "}
+              Services{' '}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16px"
@@ -104,42 +102,27 @@ const Footer = () => {
 
             <ul className="mt-6 space-y-5">
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Web Development
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Support
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Client Portal
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Resources
                 </Link>
               </li>
@@ -148,7 +131,7 @@ const Footer = () => {
 
           <div>
             <h4 className="text-white font-semibold text-lg relative max-sm:cursor-pointer">
-              Platforms{" "}
+              Platforms{' '}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16px"
@@ -165,34 +148,22 @@ const Footer = () => {
             </h4>
             <ul className="space-y-5 mt-6 max-sm:hidden">
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Hubspot
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Integration Services
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Marketing Glossar
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   UIPath
                 </Link>
               </li>
@@ -201,7 +172,7 @@ const Footer = () => {
 
           <div>
             <h4 className="text-white font-semibold text-lg relative max-sm:cursor-pointer">
-              Company{" "}
+              Company{' '}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16px"
@@ -219,42 +190,27 @@ const Footer = () => {
 
             <ul className="space-y-5 mt-6 max-sm:hidden">
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   About us
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Portfolio
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Events
                 </Link>
               </li>
@@ -263,7 +219,7 @@ const Footer = () => {
 
           <div>
             <h4 className="text-white font-semibold text-lg relative max-sm:cursor-pointer">
-              Additional{" "}
+              Additional{' '}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16px"
@@ -281,42 +237,27 @@ const Footer = () => {
 
             <ul className="space-y-5 mt-6 max-sm:hidden">
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Partners
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Sitemap
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link
-                  href="./"
-                  className="hover:text-white text-gray-300 text-sm"
-                >
+                <Link href="./" className="hover:text-white text-gray-300 text-sm">
                   News
                 </Link>
               </li>
@@ -337,18 +278,13 @@ const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link
-                href="./privacy-policy"
-                className="hover:text-white text-gray-300 text-sm"
-              >
+              <Link href="./privacy-policy" className="hover:text-white text-gray-300 text-sm">
                 Privacy Policy
               </Link>
             </li>
           </ul>
 
-          <p className="text-gray-300 text-sm md:ml-auto">
-            ©webdevmaruf. All rights reserved.
-          </p>
+          <p className="text-gray-300 text-sm md:ml-auto">©webdevmaruf. All rights reserved.</p>
         </div>
       </div>
     </footer>

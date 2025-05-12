@@ -1,11 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 const AdminBlogs = () => {
-    return (
-        <div>
-            Admin Blogs
-        </div>
-    )
-}
+  return <div>Admin Blogs</div>;
+};
 
-export default AdminBlogs
+export default AdminBlogs;

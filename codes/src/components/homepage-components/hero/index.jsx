@@ -1,14 +1,11 @@
-'use client'
-import Image from "next/image";
-import React, { useState, useEffect } from "react";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import Slider from "react-slick";
+'use client';
+import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import Slider from 'react-slick';
 
-
-const Hero = ({
-  data,
-}) => {
+const Hero = ({ data }) => {
   var settings = {
     // dots: true,
     infinite: true,
@@ -47,18 +44,15 @@ const Hero = ({
   };
   return (
     <div className="container mx-auto">
-
       {/* slider */}
-      <Slider 
-        {...settings}
-      >
+      <Slider {...settings}>
         {data.map((slider, index) => (
           <div key={index} className="relative w-full h-[600px]">
-            <Image 
+            <Image
               src={slider.image}
               fill
               className="object-contain rounded-md"
-              alt={slider.title || "Slider Image"}
+              alt={slider.title || 'Slider Image'}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
               priority={index === 0}
               loader={({ src }) => src} // Add custom loader to handle S3 URLs

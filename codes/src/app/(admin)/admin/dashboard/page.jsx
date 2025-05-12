@@ -1,11 +1,18 @@
-'use client'
+'use client';
 
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
 } from 'recharts';
 
 const donationData = [
@@ -37,7 +44,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen flex bg-gray-100">
-    
       {/* Updated Main Content */}
       <main className="flex-1 p-6">
         <h1 className="text-2xl font-semibold text-gray-800 mb-6">Admin Dashboard</h1>

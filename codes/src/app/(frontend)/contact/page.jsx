@@ -1,15 +1,14 @@
-import React from "react";
+import React from 'react';
 
 const ContactUs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
-            Get in Touch
-          </h1>
+          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">Get in Touch</h1>
           <p className="mt-4 text-xl text-gray-600">
-            We'd love to hear from you. Please fill out this form or reach us using the contact details below.
+            We'd love to hear from you. Please fill out this form or reach us using the contact
+            details below.
           </p>
         </div>
 
@@ -20,12 +19,18 @@ const ContactUs = () => {
                 <div className="flex items-center space-x-4">
                   <div className="flex-shrink-0 bg-white/10 p-4 rounded-full">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-lg font-medium text-white">Visit our office</h3>
-                    <p className="mt-1 text-white/80">123 Business Avenue, Suite 100, New York, NY 10001</p>
+                    <p className="mt-1 text-white/80">
+                      123 Business Avenue, Suite 100, New York, NY 10001
+                    </p>
                   </div>
                 </div>
 
@@ -60,7 +65,10 @@ const ContactUs = () => {
               <form className="space-y-8">
                 <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
                   <div className="relative">
-                    <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="firstName"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       First Name
                     </label>
                     <input
@@ -72,7 +80,10 @@ const ContactUs = () => {
                     />
                   </div>
                   <div className="relative">
-                    <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="lastName"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Last Name
                     </label>
                     <input
@@ -84,7 +95,10 @@ const ContactUs = () => {
                     />
                   </div>
                   <div className="sm:col-span-2 relative">
-                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Email Address
                     </label>
                     <input
@@ -96,7 +110,10 @@ const ContactUs = () => {
                     />
                   </div>
                   <div className="sm:col-span-2 relative">
-                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="phone"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Phone Number
                     </label>
                     <input
@@ -108,7 +125,10 @@ const ContactUs = () => {
                     />
                   </div>
                   <div className="sm:col-span-2 relative">
-                    <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-semibold text-gray-700 mb-2"
+                    >
                       Your Message
                     </label>
                     <textarea

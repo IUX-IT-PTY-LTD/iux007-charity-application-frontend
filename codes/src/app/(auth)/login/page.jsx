@@ -1,6 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
 
 const Login = () => {
   return (
@@ -10,19 +10,15 @@ const Login = () => {
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
             <form className="space-y-4">
               <div className="mb-8">
-                <h3 className="text-gray-800 text-3xl font-extrabold">
-                  Sign in
-                </h3>
+                <h3 className="text-gray-800 text-3xl font-extrabold">Sign in</h3>
                 <p className="text-gray-500 text-sm mt-4 leading-relaxed">
-                  Sign in to your account and explore a world of possibilities.
-                  Your journey begins here.
+                  Sign in to your account and explore a world of possibilities. Your journey begins
+                  here.
                 </p>
               </div>
 
               <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  User name
-                </label>
+                <label className="text-gray-800 text-sm mb-2 block">User name</label>
                 <div className="relative flex items-center">
                   <input
                     name="username"
@@ -38,12 +34,7 @@ const Login = () => {
                     className="w-[18px] h-[18px] absolute right-4"
                     viewBox="0 0 24 24"
                   >
-                    <circle
-                      cx="10"
-                      cy="7"
-                      r="6"
-                      data-original="#000000"
-                    ></circle>
+                    <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
                     <path
                       d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
                       data-original="#000000"
@@ -52,9 +43,7 @@ const Login = () => {
                 </div>
               </div>
               <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Password
-                </label>
+                <label className="text-gray-800 text-sm mb-2 block">Password</label>
                 <div className="relative flex items-center">
                   <input
                     name="password"
@@ -86,19 +75,13 @@ const Login = () => {
                     type="checkbox"
                     className="h-4 w-4 shrink-0 text-primary focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-3 block text-sm text-gray-800"
-                  >
+                  <label htmlFor="remember-me" className="ml-3 block text-sm text-gray-800">
                     Remember me
                   </label>
                 </div>
 
                 <div className="text-sm">
-                  <Link
-                    href=""
-                    className="text-primary hover:underline font-semibold"
-                  >
+                  <Link href="" className="text-primary hover:underline font-semibold">
                     Forgot your password?
                   </Link>
                 </div>
@@ -114,7 +97,7 @@ const Login = () => {
               </div>
 
               <p className="text-sm !mt-8 text-center text-gray-800">
-                Don&apos;t have an account{" "}
+                Don&apos;t have an account{' '}
                 <Link
                   href="./register"
                   className="text-primary font-semibold hover:underline ml-1 whitespace-nowrap"
