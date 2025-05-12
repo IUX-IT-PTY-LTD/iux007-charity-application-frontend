@@ -1,6 +1,6 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
-import EventCard from "@/components/homepage-components/event-card";
+import EventCard from "@/components/homepage-components/event-cards/events";
 import Image from "next/image";
 import React, { act } from "react";
 

@@ -1,5 +1,5 @@
 // API Base URL
-export const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION;
 
 // API Endpoints
@@ -16,14 +16,14 @@ export const ENDPOINTS = {
   },
   // Auth endpoints
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
-    LOGOUT: '/auth/logout',
+    LOGIN: '/login',
+    REGISTER: '/registration',
+    LOGOUT: '/logout',
   },
   
   // Events endpoints
   EVENTS: {
-    FEATURED: '/events',
+    FEATURED: '/events?featured=1',
     LIST: '/events',
     DETAILS: (id) => `/events/${id}`,
   },

@@ -40,14 +40,7 @@ const EventCard = ({
             </span>
           )}
         </p>
-        {/* progress */}
-        <div className="relative w-full h-2 bg-gray-200 rounded-full mb-3">
-          <div
-            className="absolute h-2 bg-primary rounded-full"
-            style={{ width: `${(raised / targetAmount) * 100}%` }}
-          ></div>
-        </div>
-        {/* progress */}
+       
         <Link href={`/event-details/${eventId}`}>
             <h3 className="text-medium font-semibold text-gray-800 mb-4 line-clamp-2 cursor-pointer hover:text-primary transition-colors">
                 {title}
@@ -56,6 +49,7 @@ const EventCard = ({
         <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
             {description}
         </p>
+        {/* progress */}
         {showDetails && (
           <div className="mb-4">
             <div className="bg-gray-50 rounded p-3">

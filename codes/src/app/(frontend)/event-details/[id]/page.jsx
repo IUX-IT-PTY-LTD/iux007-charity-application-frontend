@@ -12,17 +12,32 @@ const EventDetails = ({params}) => {
     console.log(uuid);
 
     const [event, setEvent] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const fetchEventDetails = async () => {
-        const response = await apiService.get(ENDPOINTS.EVENTS.DETAILS(uuid));
-        const data = response.data;
-        setEvent(data);
-        console.log(data);
+        try {
+            const response = await apiService.get(ENDPOINTS.EVENTS.DETAILS(uuid));
+            const data = response.data;
+            setEvent(data);
+            console.log(data);
+        } catch (error) {
+            console.error("Error fetching event details:", error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
         fetchEventDetails();
     }, []) // Added dependency array to prevent infinite loop
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+            </div>
+        )
+    }
 
     // get event details from api
     // set event details to state
@@ -49,6 +64,7 @@ const EventDetails = ({params}) => {
                                         className="w-full h-[250px] object-cover rounded-lg" 
                                         src={event.featured_image} 
                                         alt={event.title}
+                                        loader={({ src }) => src}
                                     />
                                 ) : (
                                     <div className="w-full h-[250px] bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
@@ -116,8 +132,11 @@ const EventDetails = ({params}) => {
                                     </div>
                                 </div>
 
-                                <form action="./checkout" className="flex flex-wrap gap-4">
-                                    <select className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg bg-white appearance-none">
+                                <div className="flex flex-wrap gap-4">
+                                    <select 
+                                        className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg bg-white appearance-none"
+                                        onChange={(e) => setCurrency(e.target.value)}
+                                    >
                                         <option value="USD">🇺🇸 USD</option>
                                         <option value="PKR">🇵🇰 PKR</option>
                                         <option value="EUR">🇪🇺 EUR</option>
@@ -127,15 +146,41 @@ const EventDetails = ({params}) => {
                                         id="donation_amount"
                                         type="number" 
                                         placeholder="Amount" 
-                                        className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg" 
+                                        className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg"
+                                        onChange={(e) => setAmount(e.target.value)}
                                     />
                                     <button 
-                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            const donationItem = {
+                                                id: event.uuid,
+                                                title: event.title,
+                                                amount: document.getElementById('donation_amount').value,
+                                                currency: document.querySelector('select').value,
+                                                image: event.featured_image,
+                                                quantity: 1,
+                                                price: event.price,
+                                                isFixedDonation: event.is_fixed_donation,
+                                            };
+                                            
+                                            // Add donation item to cart state
+                                            // Using React state management or Redux is preferred over sessionStorage
+                                            // This is a temporary solution - TODO: Implement proper state management
+                                            const existingCart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+                                            // Check for duplicates before adding
+                                            if (!existingCart.some(item => item.id === donationItem.id)) {
+                                              existingCart.push(donationItem);
+                                              localStorage.setItem('cartItems', JSON.stringify(existingCart));
+                                            }
+                                            
+                                            // Use Next.js router for navigation
+                                            window.location.href = '/checkout';
+                                        }}
                                         className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                                     >
                                         Donate Now
                                     </button>
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>

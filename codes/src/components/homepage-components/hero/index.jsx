@@ -1,73 +1,14 @@
 'use client'
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
-import QuickDonateCard from "../quick-donate-card";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
-import { apiService } from '@/api/services/apiService';
-import { ENDPOINTS } from '@/api/config';
 
 
-const Hero = () => {
-  const quickDonateItems = [
-    {
-      id: 1,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 2,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 3,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 4,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-  ];
-
-  const [sliders, setSliders] = useState([]);
-  const fetchSliders = async () => {
-    try {
-      const response = await apiService.get(ENDPOINTS.COMMON.SLIDERS);
-      const data = response.data;
-      setSliders(data);
-    } catch (error) {
-      console.error('Error fetching sliders:', error);
-    }
-  };
-
-useEffect(() => {
-    fetchSliders();
-  }, []);
-
+const Hero = ({
+  data,
+}) => {
   var settings = {
     // dots: true,
     infinite: true,
@@ -111,7 +52,7 @@ useEffect(() => {
       <Slider 
         {...settings}
       >
-        {sliders.map((slider, index) => (
+        {data.map((slider, index) => (
           <div key={index} className="relative w-full h-[600px]">
             <Image 
               src={slider.image}

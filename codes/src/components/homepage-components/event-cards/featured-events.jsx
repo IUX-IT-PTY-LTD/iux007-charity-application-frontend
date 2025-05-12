@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 
-const QuickDonateCard = ({
+const FeaturedEventsCard = ({
     eventId,
     title,
     description,
@@ -93,4 +93,4 @@ const QuickDonateCard = ({
     );
 };
 
-export default QuickDonateCard;
+export default FeaturedEventsCard;

@@ -1,7 +1,7 @@
 'use client'
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
-import QuickDonateCard from "../quick-donate-card";
+import FeaturedEventsCard from "../event-cards/featured-events";
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -10,21 +10,9 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-const FeaturedEvents = () => {
-  const [FeaturedEvents, setFeaturedEvents] = useState([]);
-  const fetchFeaturedEvents = async () => {
-    try {
-      const response = await apiService.get(ENDPOINTS.EVENTS.FEATURED + '?featured=1');
-      const data = response.data;
-      setFeaturedEvents(data);
-    } catch (error) {
-      console.error('Error fetching featured events:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchFeaturedEvents();
-  }, []);
+const FeaturedEvents = ({
+  data,
+}) => {
 
   return (
     <div className="container mx-auto px-4 py-16 bg-gradient-to-b from-white to-gray-50">
@@ -51,10 +39,10 @@ const FeaturedEvents = () => {
           }}
           className="z-50 relative"
         >
-          {FeaturedEvents.map((event) => (
+          {data.map((event) => (
             <SwiperSlide key={event.id}>
               <div className="transform transition duration-300 hover:scale-105">
-                <QuickDonateCard
+                <FeaturedEventsCard
                   eventId={event.uuid}
                   title={event.title}
                   description={event.description}
