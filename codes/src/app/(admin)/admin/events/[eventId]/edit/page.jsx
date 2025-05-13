@@ -137,7 +137,7 @@ export default function EditEvent({ params }) {
       try {
         // For testing: Get events from localStorage
         const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
-        const foundEvent = storedEvents.find((e) => e.id === params.id);
+        const foundEvent = storedEvents.find((e) => e.id === params.eventId);
 
         if (foundEvent) {
           setEvent(foundEvent);
@@ -167,7 +167,7 @@ export default function EditEvent({ params }) {
         }
 
         /* API Implementation (Commented out for future use)
-        const response = await fetch(`/api/events/${params.id}`);
+        const response = await fetch(`/api/events/${params.eventId}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch event');
@@ -202,10 +202,10 @@ export default function EditEvent({ params }) {
       }
     };
 
-    if (params.id) {
+    if (params.eventId) {
       fetchEvent();
     }
-  }, [params.id, router, form]);
+  }, [params.eventId, router, form]);
 
   // Track form changes
   useEffect(() => {
@@ -237,7 +237,7 @@ export default function EditEvent({ params }) {
       const allEvents = JSON.parse(localStorage.getItem("events") || "[]");
 
       // Find the index of the event to update
-      const eventIndex = allEvents.findIndex((e) => e.id === params.id);
+      const eventIndex = allEvents.findIndex((e) => e.id === params.eventId);
 
       if (eventIndex !== -1) {
         // Update the event data
@@ -282,7 +282,7 @@ export default function EditEvent({ params }) {
       });
 
       // API call with PUT method for update
-      fetch(`/api/events/${params.id}`, {
+      fetch(`/api/events/${params.eventId}`, {
         method: 'PUT',
         body: apiFormData,
       })
@@ -315,7 +315,7 @@ export default function EditEvent({ params }) {
       const allEvents = JSON.parse(localStorage.getItem("events") || "[]");
 
       // Filter out the event to delete
-      const updatedEvents = allEvents.filter((e) => e.id !== params.id);
+      const updatedEvents = allEvents.filter((e) => e.id !== params.eventId);
 
       // Save back to localStorage
       localStorage.setItem("events", JSON.stringify(updatedEvents));
@@ -327,7 +327,7 @@ export default function EditEvent({ params }) {
       router.push("/admin/events");
 
       /* API Implementation (Commented out for future use)
-      fetch(`/api/events/${params.id}`, {
+      fetch(`/api/events/${params.eventId}`, {
         method: 'DELETE',
       })
         .then(response => {
@@ -904,7 +904,7 @@ export default function EditEvent({ params }) {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between text-xs text-gray-500">
-                  <span>ID: {params.id}</span>
+                  <span>ID: {params.eventId}</span>
                   <span>
                     {hasUnsavedChanges ? "Unsaved changes" : "No changes"}
                   </span>

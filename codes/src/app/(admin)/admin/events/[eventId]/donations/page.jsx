@@ -74,7 +74,7 @@ const EventDonationsPage = ({ params }) => {
       try {
         // Fetch event data
         const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
-        const foundEvent = storedEvents.find((e) => e.id === params.id);
+        const foundEvent = storedEvents.find((e) => e.id === params.eventId);
 
         if (!foundEvent) {
           toast.error("Event not found");
@@ -85,16 +85,16 @@ const EventDonationsPage = ({ params }) => {
         setEvent(foundEvent);
 
         // Generate sample donations for testing if none exist
-        const storedDonations = localStorage.getItem(`donations_${params.id}`);
+        const storedDonations = localStorage.getItem(`donations_${params.eventId}`);
         let donationData = [];
 
         if (storedDonations) {
           donationData = JSON.parse(storedDonations);
         } else {
           // Create sample donations
-          donationData = generateSampleDonations(params.id, foundEvent);
+          donationData = generateSampleDonations(params.eventId, foundEvent);
           localStorage.setItem(
-            `donations_${params.id}`,
+            `donations_${params.eventId}`,
             JSON.stringify(donationData)
           );
         }
@@ -103,7 +103,7 @@ const EventDonationsPage = ({ params }) => {
 
         /* API Implementation (Commented out for future use)
         // Fetch event data
-        const eventResponse = await fetch(`/api/events/${params.id}`);
+        const eventResponse = await fetch(`/api/events/${params.eventId}`);
         if (!eventResponse.ok) {
           throw new Error('Failed to fetch event data');
         }
@@ -111,7 +111,7 @@ const EventDonationsPage = ({ params }) => {
         setEvent(eventData);
         
         // Fetch donation data
-        const donationsResponse = await fetch(`/api/events/${params.id}/donations`);
+        const donationsResponse = await fetch(`/api/events/${params.eventId}/donations`);
         if (!donationsResponse.ok) {
           throw new Error('Failed to fetch donations');
         }
@@ -126,10 +126,10 @@ const EventDonationsPage = ({ params }) => {
       }
     };
 
-    if (params.id) {
+    if (params.eventId) {
       fetchData();
     }
-  }, [params.id, router]);
+  }, [params.eventId, router]);
 
   // Helper function to generate sample donations for testing
   function generateSampleDonations(eventId, event) {

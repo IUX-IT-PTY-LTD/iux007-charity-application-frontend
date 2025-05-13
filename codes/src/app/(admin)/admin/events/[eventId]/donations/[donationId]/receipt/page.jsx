@@ -59,7 +59,7 @@ const ReceiptPage = ({ params }) => {
       setIsLoading(true);
 
       try {
-        if (!params.id || !params.donationId) {
+        if (!params.eventId || !params.donationId) {
           toast.error("Missing event or donation ID");
           router.push("/admin/events");
           return;
@@ -67,7 +67,7 @@ const ReceiptPage = ({ params }) => {
 
         // Fetch event data from localStorage
         const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
-        const foundEvent = storedEvents.find((e) => e.id === params.id);
+        const foundEvent = storedEvents.find((e) => e.id === params.eventId);
 
         if (!foundEvent) {
           toast.error("Event not found");
@@ -78,11 +78,11 @@ const ReceiptPage = ({ params }) => {
         setEvent(foundEvent);
 
         // Fetch donation data from localStorage
-        const storedDonations = localStorage.getItem(`donations_${params.id}`);
+        const storedDonations = localStorage.getItem(`donations_${params.eventId}`);
 
         if (!storedDonations) {
           toast.error("No donations found for this event");
-          router.push(`/admin/events/${params.id}/donations`);
+          router.push(`/admin/events/${params.eventId}/donations`);
           return;
         }
 
@@ -93,7 +93,7 @@ const ReceiptPage = ({ params }) => {
 
         if (!foundDonation) {
           toast.error("Donation not found");
-          router.push(`/admin/events/${params.id}/donations`);
+          router.push(`/admin/events/${params.eventId}/donations`);
           return;
         }
 
@@ -101,7 +101,7 @@ const ReceiptPage = ({ params }) => {
 
         /* API Implementation (Commented out for future use)
         // Fetch event data
-        const eventResponse = await fetch(`/api/events/${params.id}`);
+        const eventResponse = await fetch(`/api/events/${params.eventId}`);
         if (!eventResponse.ok) {
           throw new Error('Failed to fetch event data');
         }
@@ -109,7 +109,7 @@ const ReceiptPage = ({ params }) => {
         setEvent(eventData);
         
         // Fetch donation data
-        const donationResponse = await fetch(`/api/events/${params.id}/donations/${params.donationId}`);
+        const donationResponse = await fetch(`/api/events/${params.eventId}/donations/${params.donationId}`);
         if (!donationResponse.ok) {
           throw new Error('Failed to fetch donation data');
         }
@@ -125,7 +125,7 @@ const ReceiptPage = ({ params }) => {
     };
 
     fetchData();
-  }, [params.id, params.donationId, router]);
+  }, [params.eventId, params.donationId, router]);
 
   // Show loading state
   if (isLoading) {
@@ -149,7 +149,7 @@ const ReceiptPage = ({ params }) => {
             The donation receipt you're looking for could not be found.
           </p>
           <button
-            onClick={() => router.push(`/admin/events/${params.id}/donations`)}
+            onClick={() => router.push(`/admin/events/${params.eventId}/donations`)}
             className="text-primary hover:underline"
           >
             Return to donations
