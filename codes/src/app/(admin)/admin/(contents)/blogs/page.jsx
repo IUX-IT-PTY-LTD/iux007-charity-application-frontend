@@ -341,7 +341,7 @@ const AdminBlogList = () => {
           </div>
 
           <div className="flex gap-2 self-end">
-            <Button
+            {/* <Button
               variant="outline"
               onClick={() => {
                 // This would typically import posts
@@ -350,7 +350,7 @@ const AdminBlogList = () => {
             >
               <UploadCloud className="mr-2 h-4 w-4" />
               Import
-            </Button>
+            </Button> */}
             <Button
               onClick={() => router.push("/admin/blogs/create")}
               className="bg-blue-600 hover:bg-blue-700 text-white"

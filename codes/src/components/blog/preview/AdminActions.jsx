@@ -25,12 +25,12 @@ const AdminActions = ({ post, onDelete }) => {
 
   // Handle edit action
   const handleEdit = () => {
-    router.push(`/admin/blog/${post.id}/edit`);
+    router.push(`/admin/blogs/${post.id}/edit`);
   };
 
   // Handle back to list action
   const handleBackToList = () => {
-    router.push("/admin/blog");
+    router.push("/admin/blogs");
   };
 
   // Handle view on site action (this would link to the actual published post)
@@ -47,7 +47,7 @@ const AdminActions = ({ post, onDelete }) => {
   const handleDeleteConfirm = () => {
     onDelete(post.id);
     setIsDeleteDialogOpen(false);
-    router.push("/admin/blog");
+    router.push("/admin/blogs");
   };
 
   return (

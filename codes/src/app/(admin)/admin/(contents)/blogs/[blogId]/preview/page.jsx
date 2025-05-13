@@ -43,11 +43,11 @@ const BlogPostPreview = ({ params }) => {
         const storedPosts = JSON.parse(
           localStorage.getItem("blog_posts") || "[]"
         );
-        const foundPost = storedPosts.find((p) => p.id === params.id);
+        const foundPost = storedPosts.find((p) => p.id === params.blogId);
 
         if (!foundPost) {
           toast.error("Blog post not found");
-          router.push("/admin/blog");
+          router.push("/admin/blogs");
           return;
         }
 
@@ -75,7 +75,7 @@ const BlogPostPreview = ({ params }) => {
 
         /* API Implementation (Commented out for future use)
         // Fetch post data
-        const postResponse = await fetch(`/api/blog-posts/${params.id}`);
+        const postResponse = await fetch(`/api/blog-posts/${params.blogId}`);
         if (!postResponse.ok) {
           throw new Error('Failed to fetch blog post');
         }
@@ -108,10 +108,10 @@ const BlogPostPreview = ({ params }) => {
       }
     };
 
-    if (params.id) {
+    if (params.blogId) {
       fetchPostData();
     }
-  }, [params.id, router]);
+  }, [params.blogId, router]);
 
   // Handle post deletion
   const handleDeletePost = (postId) => {
@@ -123,7 +123,7 @@ const BlogPostPreview = ({ params }) => {
       localStorage.setItem("blog_posts", JSON.stringify(updatedPosts));
 
       toast.success("Blog post deleted successfully");
-      router.push("/admin/blog");
+      router.push("/admin/blogs");
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/blog-posts/${postId}`, {

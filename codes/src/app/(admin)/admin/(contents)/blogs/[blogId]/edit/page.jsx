@@ -152,7 +152,7 @@ export default function EditBlogPost({ params }) {
         const storedPosts = JSON.parse(
           localStorage.getItem("blog_posts") || "[]"
         );
-        const foundPost = storedPosts.find((post) => post.id === params.id);
+        const foundPost = storedPosts.find((post) => post.id === params.blogId);
 
         if (foundPost) {
           setBlogPost(foundPost);
@@ -189,7 +189,7 @@ export default function EditBlogPost({ params }) {
         }
 
         /* API Implementation (Commented out for future use)
-        const response = await fetch(`/api/blog-posts/${params.id}`);
+        const response = await fetch(`/api/blog-posts/${params.blogId}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch blog post');
@@ -231,10 +231,10 @@ export default function EditBlogPost({ params }) {
       }
     };
 
-    if (params.id) {
+    if (params.blogId) {
       fetchBlogPost();
     }
-  }, [params.id, router, form]);
+  }, [params.blogId, router, form]);
 
   // Watch for title changes to update SEO title and slug
   useEffect(() => {
@@ -334,7 +334,7 @@ export default function EditBlogPost({ params }) {
         localStorage.getItem("blog_posts") || "[]"
       );
       const updatedPosts = storedPosts.map((post) =>
-        post.id === params.id ? updatedPost : post
+        post.id === params.blogId ? updatedPost : post
       );
       localStorage.setItem("blog_posts", JSON.stringify(updatedPosts));
 
@@ -379,7 +379,7 @@ export default function EditBlogPost({ params }) {
       });
 
       // API call with PUT method for update
-      fetch(`/api/blog-posts/${params.id}`, {
+      fetch(`/api/blog-posts/${params.blogId}`, {
         method: 'PUT',
         body: apiFormData,
       })
@@ -412,7 +412,7 @@ export default function EditBlogPost({ params }) {
       const storedPosts = JSON.parse(
         localStorage.getItem("blog_posts") || "[]"
       );
-      const updatedPosts = storedPosts.filter((post) => post.id !== params.id);
+      const updatedPosts = storedPosts.filter((post) => post.id !== params.blogId);
       localStorage.setItem("blog_posts", JSON.stringify(updatedPosts));
 
       // Show success message
@@ -422,7 +422,7 @@ export default function EditBlogPost({ params }) {
       router.push("/admin/blog");
 
       /* API Implementation (Commented out for future use)
-      fetch(`/api/blog-posts/${params.id}`, {
+      fetch(`/api/blog-posts/${params.blogId}`, {
         method: 'DELETE',
       })
         .then(response => {
