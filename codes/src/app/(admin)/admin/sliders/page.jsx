@@ -538,7 +538,7 @@ const AdminSlidersList = () => {
                               variant="ghost"
                               size="icon"
                               onClick={() =>
-                                router.push(`/admin/sliders/edit/${slider.id}`)
+                                router.push(`/admin/sliders/${slider.id}/edit`)
                               }
                             >
                               <Edit className="h-4 w-4" />
