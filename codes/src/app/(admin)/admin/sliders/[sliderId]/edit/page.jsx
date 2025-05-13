@@ -105,7 +105,7 @@ export default function EditSlider({ params }) {
         const storedSliders = JSON.parse(
           localStorage.getItem("sliders") || "[]"
         );
-        const foundSlider = storedSliders.find((s) => s.id === params.id);
+        const foundSlider = storedSliders.find((s) => s.id === params.sliderId);
 
         if (foundSlider) {
           setSlider(foundSlider);
@@ -127,7 +127,7 @@ export default function EditSlider({ params }) {
         }
 
         /* API Implementation (Commented out for future use)
-        const response = await fetch(`/api/sliders/${params.id}`);
+        const response = await fetch(`/api/sliders/${params.sliderId}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch slider');
@@ -154,10 +154,10 @@ export default function EditSlider({ params }) {
       }
     };
 
-    if (params.id) {
+    if (params.sliderId) {
       fetchSlider();
     }
-  }, [params.id, router, form]);
+  }, [params.sliderId, router, form]);
 
   // Track form changes
   useEffect(() => {
@@ -206,7 +206,7 @@ export default function EditSlider({ params }) {
       const allSliders = JSON.parse(localStorage.getItem("sliders") || "[]");
 
       // Find the index of the slider to update
-      const sliderIndex = allSliders.findIndex((s) => s.id === params.id);
+      const sliderIndex = allSliders.findIndex((s) => s.id === params.sliderId);
 
       if (sliderIndex !== -1) {
         // Update the slider data
@@ -248,7 +248,7 @@ export default function EditSlider({ params }) {
       });
 
       // API call with PUT method for update
-      fetch(`/api/sliders/${params.id}`, {
+      fetch(`/api/sliders/${params.sliderId}`, {
         method: 'PUT',
         body: apiFormData,
       })
@@ -281,7 +281,7 @@ export default function EditSlider({ params }) {
       const allSliders = JSON.parse(localStorage.getItem("sliders") || "[]");
 
       // Filter out the slider to delete
-      const updatedSliders = allSliders.filter((s) => s.id !== params.id);
+      const updatedSliders = allSliders.filter((s) => s.id !== params.sliderId);
 
       // Save back to localStorage
       localStorage.setItem("sliders", JSON.stringify(updatedSliders));
@@ -293,7 +293,7 @@ export default function EditSlider({ params }) {
       router.push("/admin/sliders");
 
       /* API Implementation (Commented out for future use)
-      fetch(`/api/sliders/${params.id}`, {
+      fetch(`/api/sliders/${params.sliderId}`, {
         method: 'DELETE',
       })
         .then(response => {
@@ -625,7 +625,7 @@ export default function EditSlider({ params }) {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between text-xs text-gray-500">
-                  <span>ID: {params.id}</span>
+                  <span>ID: {params.sliderId}</span>
                   <span>
                     {hasUnsavedChanges ? "Unsaved changes" : "No changes"}
                   </span>
