@@ -66,7 +66,7 @@ const formSchema = z.object({
 const AdminMenuEdit = () => {
   const params = useParams();
   const router = useRouter();
-  const { id } = params;
+  const { menuId } = params;
   const { setPageTitle, setPageSubtitle } = useAdminContext();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -99,7 +99,7 @@ const AdminMenuEdit = () => {
       try {
         // Get menus from localStorage
         const menus = JSON.parse(localStorage.getItem("menus") || "[]");
-        const menuData = menus.find((menu) => menu.id === id);
+        const menuData = menus.find((menu) => menu.id === menuId);
 
         if (!menuData) {
           throw new Error("Menu not found");
@@ -125,14 +125,14 @@ const AdminMenuEdit = () => {
     };
 
     fetchMenuData();
-  }, [id, form]);
+  }, [menuId, form]);
 
   // Handle form submission
   const onSubmit = async (data) => {
     // Convert status boolean to number for API
     const apiData = {
       ...data,
-      id: id,
+      id: menuId,
       status: data.status ? 1 : 0,
     };
 
@@ -140,7 +140,7 @@ const AdminMenuEdit = () => {
       // Update in localStorage
       const menus = JSON.parse(localStorage.getItem("menus") || "[]");
       const updatedMenus = menus.map((menu) =>
-        menu.id === id ? apiData : menu
+        menu.id === menuId ? apiData : menu
       );
       localStorage.setItem("menus", JSON.stringify(updatedMenus));
 
@@ -163,7 +163,7 @@ const AdminMenuEdit = () => {
     try {
       // Delete from localStorage
       const menus = JSON.parse(localStorage.getItem("menus") || "[]");
-      const filteredMenus = menus.filter((menu) => menu.id !== id);
+      const filteredMenus = menus.filter((menu) => menu.id !== menuId);
       localStorage.setItem("menus", JSON.stringify(filteredMenus));
 
       // Show success message
@@ -463,7 +463,7 @@ const AdminMenuEdit = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between items-center">
-                <span className="text-xs text-gray-500">ID: {id}</span>
+                <span className="text-xs text-gray-500">ID: {menuId}</span>
                 <span className="text-xs text-gray-500">
                   Last updated: {new Date().toLocaleDateString()}
                 </span>
