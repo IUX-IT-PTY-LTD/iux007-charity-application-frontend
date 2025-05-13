@@ -1,8 +1,8 @@
-// components/donations/DonationStats.jsx
+// components/donations/UpdatedDonationStats.jsx
 "use client";
 
 import React from "react";
-import { DollarSign, Users, Clock, Calendar, TrendingUp } from "lucide-react";
+import { DollarSign, Users, Calendar } from "lucide-react";
 
 const StatCard = ({ title, value, icon: Icon, description }) => {
   return (
@@ -23,13 +23,14 @@ const StatCard = ({ title, value, icon: Icon, description }) => {
   );
 };
 
-const DonationStats = ({
+const UpdatedDonationStats = ({
   totalDonations,
   totalAmount,
   donorCount,
   averageDonation,
   eventStartDate,
   eventEndDate,
+  isFixedDonation,
 }) => {
   // Format dollar amounts
   const formatCurrency = (amount) => {
@@ -83,8 +84,13 @@ const DonationStats = ({
   const eventDuration = formatEventDates();
   const eventProgress = calculateEventProgress();
 
+  // Add donation type info to average donation description
+  const donationTypeDescription = isFixedDonation
+    ? `Fixed donation: ${formatCurrency(averageDonation)}`
+    : `Average: ${formatCurrency(averageDonation)}`;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <StatCard
         title="Total Donations"
         value={formatCurrency(totalAmount)}
@@ -96,7 +102,7 @@ const DonationStats = ({
         title="Donors"
         value={donorCount}
         icon={Users}
-        description={`Average: ${formatCurrency(averageDonation)}`}
+        description={donationTypeDescription}
       />
 
       <StatCard
@@ -105,15 +111,8 @@ const DonationStats = ({
         icon={Calendar}
         description={eventProgress}
       />
-
-      {/* <StatCard
-        title="Conversion Rate"
-        value="12.5%"
-        icon={TrendingUp}
-        description="Up 2.1% from previous event"
-      /> */}
     </div>
   );
 };
 
-export default DonationStats;
+export default UpdatedDonationStats;

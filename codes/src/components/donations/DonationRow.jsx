@@ -1,4 +1,4 @@
-// components/donations/DonationRow.jsx
+// components/donations/UpdatedDonationRow.jsx
 "use client";
 
 import React, { useState } from "react";
@@ -21,6 +21,7 @@ import {
   AlertCircle,
   RefreshCcw,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -63,8 +64,9 @@ const StatusIcon = ({ status }) => {
   }
 };
 
-const DonationRow = ({ donation, eventName }) => {
+const UpdatedDonationRow = ({ donation, eventName, isFixedDonation }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   // Format date
   const formattedDate = donation.date
@@ -79,14 +81,21 @@ const DonationRow = ({ donation, eventName }) => {
 
   // Handle receipt viewing
   const handleViewReceipt = () => {
-    // In production, this would navigate to a receipt page
-    toast.info(`Viewing receipt for donation #${donation.id}`);
+    router.push(
+      `/admin/events/${donation.event_id}/donations/${donation.id}/receipt`
+    );
   };
 
   // Handle receipt download
   const handleDownloadReceipt = () => {
-    // In production, this would trigger a download
-    toast.info(`Downloading receipt for donation #${donation.id}`);
+    // This would typically generate and download a PDF
+    // For now we'll simulate it with a toast notification
+    toast.info(`Downloading receipt for donation #${donation.id} as PDF...`);
+
+    // Simulate download delay
+    setTimeout(() => {
+      toast.success("Receipt downloaded successfully");
+    }, 1500);
   };
 
   // Handle copying donation ID to clipboard
@@ -110,30 +119,34 @@ const DonationRow = ({ donation, eventName }) => {
               }`}
             />
 
-            <div>
-              <div className="font-medium">{donation.donor_name}</div>
-              <div className="text-sm text-muted-foreground">
-                {donation.email}
+            <div className="flex items-center gap-3">
+              <div>
+                <div className="font-medium">{donation.donor_name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {donation.email}
+                </div>
               </div>
+
+              <Badge className={statusStyles[donation.status]}>
+                <StatusIcon status={donation.status} />
+                <span className="ml-1 capitalize">{donation.status}</span>
+              </Badge>
+
+              {isFixedDonation && (
+                <Badge
+                  variant="outline"
+                  className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                >
+                  Fixed
+                </Badge>
+              )}
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 ml-auto">
-            <div className="text-sm">
-              <div className="font-medium text-right">{formattedAmount}</div>
-              <div className="text-muted-foreground">
-                {donation.payment_method}
-              </div>
-            </div>
+            <div className="text-sm text-muted-foreground">{formattedDate}</div>
 
-            <Badge className={statusStyles[donation.status]}>
-              <StatusIcon status={donation.status} className="mr-1" />
-              <span className="ml-1 capitalize">{donation.status}</span>
-            </Badge>
-
-            <div className="hidden md:block text-sm text-right text-muted-foreground">
-              {formattedDate}
-            </div>
+            <div className="text-sm font-medium">{formattedAmount}</div>
           </div>
         </div>
       </CollapsibleTrigger>
@@ -258,6 +271,13 @@ const DonationRow = ({ donation, eventName }) => {
                 <div className="text-sm text-muted-foreground">{eventName}</div>
               </div>
 
+              <div>
+                <div className="text-sm font-medium">Donation Type</div>
+                <div className="text-sm text-muted-foreground">
+                  {isFixedDonation ? "Fixed Donation" : "Variable Donation"}
+                </div>
+              </div>
+
               {donation.campaign && (
                 <div>
                   <div className="text-sm font-medium">Campaign</div>
@@ -324,4 +344,4 @@ const DonationRow = ({ donation, eventName }) => {
   );
 };
 
-export default DonationRow;
+export default UpdatedDonationRow;
