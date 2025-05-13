@@ -556,7 +556,7 @@ const AdminEvents = () => {
                               variant="ghost"
                               size="icon"
                               onClick={() =>
-                                router.push(`/admin/events/edit/${event.id}`)
+                                router.push(`/admin/events/${event.id}/edit`)
                               }
                             >
                               <Edit className="h-4 w-4" />
