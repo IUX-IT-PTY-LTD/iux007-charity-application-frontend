@@ -237,16 +237,16 @@ export function AdminSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive("/admin/slider")}
+                  isActive={isActive("/admin/sliders")}
                   className={cn(
                     "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    isActive("/admin/slider") &&
+                    isActive("/admin/sliders") &&
                       "bg-primary/10 text-primary font-medium hover:bg-primary/15"
                   )}
                 >
-                  <Link href="/admin/slider">
+                  <Link href="/admin/sliders">
                     <Images className="h-5 w-5" />
-                    <span>Slider</span>
+                    <span>Sliders</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
