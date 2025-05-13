@@ -7,9 +7,9 @@ import { PlusCircle, FileText, UploadCloud, Loader2 } from "lucide-react";
 import { format, parseISO, isSameDay } from "date-fns";
 
 // Import custom components
-import PostFilters from "@/components/blog/PostFilters";
-import { PostCardGrid, PostCardList } from "@/components/blog/PostCard";
-import PostPagination from "@/components/blog/PostPagination";
+import PostFilters from "@/components/blog/list/PostFilters";
+import { PostCardGrid, PostCardList } from "@/components/blog/list/PostCard";
+import PostPagination from "@/components/blog/list/PostPagination";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";
@@ -192,7 +192,7 @@ const AdminBlogList = () => {
   const handleViewPost = (postId) => {
     // This would typically link to the public-facing post
     // For admin purposes, we'll just go to the edit page for now
-    router.push(`/admin/blogs/${postId}/edit`);
+    router.push(`/admin/blogs/${postId}/preview`);
   };
 
   const handleEditPost = (postId) => {

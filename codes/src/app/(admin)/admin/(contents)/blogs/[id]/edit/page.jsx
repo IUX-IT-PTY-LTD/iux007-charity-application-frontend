@@ -781,10 +781,10 @@ export default function EditBlogPost({ params }) {
                           "You have unsaved changes. Are you sure you want to leave?"
                         )
                       ) {
-                        router.push("/admin/blog");
+                        router.push("/admin/blogs");
                       }
                     } else {
-                      router.push("/admin/blog");
+                      router.push("/admin/blogs");
                     }
                   }}
                   type="button"

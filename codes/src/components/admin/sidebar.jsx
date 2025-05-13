@@ -185,14 +185,14 @@ export function AdminSidebar() {
                       <SidebarMenuItem>
                         <SidebarMenuButton
                           asChild
-                          isActive={isActive("/admin/contents/pages")}
+                          isActive={isActive("/admin/pages")}
                           className={cn(
                             "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                            isActive("/admin/contents/pages") &&
+                            isActive("/admin/pages") &&
                               "bg-primary/10 text-primary font-medium hover:bg-primary/15"
                           )}
                         >
-                          <Link href="/admin/contents/pages">
+                          <Link href="/admin/pages">
                             <span>Pages</span>
                           </Link>
                         </SidebarMenuButton>
@@ -200,14 +200,14 @@ export function AdminSidebar() {
                       <SidebarMenuItem>
                         <SidebarMenuButton
                           asChild
-                          isActive={isActive("/admin/contents/blogs")}
+                          isActive={isActive("/admin/blogs")}
                           className={cn(
                             "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                            isActive("/admin/contents/blogs") &&
+                            isActive("/admin/blogs") &&
                               "bg-primary/10 text-primary font-medium hover:bg-primary/15"
                           )}
                         >
-                          <Link href="/admin/contents/blogs">
+                          <Link href="/admin/blogs">
                             <span>Blog Posts</span>
                           </Link>
                         </SidebarMenuButton>
