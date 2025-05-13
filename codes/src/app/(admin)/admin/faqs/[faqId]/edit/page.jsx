@@ -100,7 +100,7 @@ export default function EditFAQ({ params }) {
       try {
         // For testing: Get FAQs from localStorage
         const storedFaqs = JSON.parse(localStorage.getItem("faqs") || "[]");
-        const foundFaq = storedFaqs.find((f) => f.id === params.id);
+        const foundFaq = storedFaqs.find((f) => f.id === params.faqId);
 
         if (foundFaq) {
           setFaq(foundFaq);
@@ -118,7 +118,7 @@ export default function EditFAQ({ params }) {
         }
 
         /* API Implementation (Commented out for future use)
-        const response = await fetch(`/api/faqs/${params.id}`);
+        const response = await fetch(`/api/faqs/${params.faqId}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch FAQ');
@@ -142,10 +142,10 @@ export default function EditFAQ({ params }) {
       }
     };
 
-    if (params.id) {
+    if (params.faqId) {
       fetchFaq();
     }
-  }, [params.id, router, form]);
+  }, [params.faqId, router, form]);
 
   // Track form changes
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function EditFAQ({ params }) {
       const allFaqs = JSON.parse(localStorage.getItem("faqs") || "[]");
 
       // Find the index of the FAQ to update
-      const faqIndex = allFaqs.findIndex((f) => f.id === params.id);
+      const faqIndex = allFaqs.findIndex((f) => f.id === params.faqId);
 
       if (faqIndex !== -1) {
         // Update the FAQ data
@@ -206,7 +206,7 @@ export default function EditFAQ({ params }) {
 
       /* API Implementation (Commented out for future use)
       // API call with PUT method for update
-      fetch(`/api/faqs/${params.id}`, {
+      fetch(`/api/faqs/${params.faqId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ export default function EditFAQ({ params }) {
       const allFaqs = JSON.parse(localStorage.getItem("faqs") || "[]");
 
       // Filter out the FAQ to delete
-      const updatedFaqs = allFaqs.filter((f) => f.id !== params.id);
+      const updatedFaqs = allFaqs.filter((f) => f.id !== params.faqId);
 
       // Save back to localStorage
       localStorage.setItem("faqs", JSON.stringify(updatedFaqs));
@@ -254,7 +254,7 @@ export default function EditFAQ({ params }) {
       router.push("/admin/faqs");
 
       /* API Implementation (Commented out for future use)
-      fetch(`/api/faqs/${params.id}`, {
+      fetch(`/api/faqs/${params.faqId}`, {
         method: 'DELETE',
       })
         .then(response => {
@@ -538,7 +538,7 @@ export default function EditFAQ({ params }) {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between text-xs text-gray-500">
-                  <span>ID: {params.id}</span>
+                  <span>ID: {params.faqId}</span>
                   <span>
                     {hasUnsavedChanges ? "Unsaved changes" : "No changes"}
                   </span>
