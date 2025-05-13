@@ -200,14 +200,14 @@ export function AdminSidebar() {
                       <SidebarMenuItem>
                         <SidebarMenuButton
                           asChild
-                          isActive={isActive("/admin/contents/posts")}
+                          isActive={isActive("/admin/contents/blogs")}
                           className={cn(
                             "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                            isActive("/admin/contents/posts") &&
+                            isActive("/admin/contents/blogs") &&
                               "bg-primary/10 text-primary font-medium hover:bg-primary/15"
                           )}
                         >
-                          <Link href="/admin/contents/posts">
+                          <Link href="/admin/contents/blogs">
                             <span>Blog Posts</span>
                           </Link>
                         </SidebarMenuButton>
