@@ -7,9 +7,9 @@ import { Loader2, FileDown, UserSearch } from "lucide-react";
 import { format, parseISO, isSameDay } from "date-fns";
 
 // Import custom components
-import UserFilters from "@/components/users/UserFilters";
-import UserRow from "@/components/users/UserRow";
-import UserStats from "@/components/users/UserStats";
+import UserFilters from "@/components/admin/users/list/UserFilters";
+import UserRow from "@/components/admin/users/list/UserRow";
+import UserStats from "@/components/admin/users/list/UserStats";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";
