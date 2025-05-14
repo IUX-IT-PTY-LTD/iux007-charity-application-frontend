@@ -41,7 +41,7 @@ const EventCard = ({
           )}
         </p>
 
-        <Link href={`/event-details/${eventId}`}>
+        <Link href={`/events/${eventId}`}>
           <h3 className="text-medium font-semibold text-gray-800 mb-4 line-clamp-2 cursor-pointer hover:text-primary transition-colors">
             {title}
           </h3>
@@ -71,7 +71,7 @@ const EventCard = ({
         )}
         <div className="buttons block relative w-full mt-auto">
           <Link
-            href={`/event-details/${eventId}`}
+            href={`/events/${eventId}`}
             className="bg-primary text-sm h-full text-white px-5 py-2 rounded-md block text-center w-full"
           >
             {buttonText || 'Donate'}
