@@ -1,53 +1,40 @@
 "use client";
 
-import { useSidebar } from "@/components/ui/sidebar";
-import { AdminSidebar, MainContent } from "@/components/admin/sidebar";
+import { AdminSidebar } from "@/components/admin/sidebar";
 import AdminPageHeader from "@/components/admin/header";
 import AdminFooter from "@/components/admin/footer";
 import { Suspense } from "react";
 
 export default function AdminShell({ children }) {
-  const sidebar = useSidebar();
-  const isCollapsed = sidebar?.collapsed;
-
-  const sidebarWidth = isCollapsed
-    ? "var(--sidebar-width-collapsed)"
-    : "var(--sidebar-width)";
-
   return (
-    <div
-      className="flex h-screen w-full transition-all duration-300 ease-in-out"
-      style={{ "--sidebar-width-current": sidebarWidth }}
-    >
-      <div
-        className="shrink-0 transition-all duration-300 ease-in-out"
-        style={{ width: "var(--sidebar-width-current)" }}
-      >
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
+      {/* Sidebar - fixed width */}
+      <aside className="h-screen w-[230px] border-r border-gray-200 dark:border-gray-800">
         <AdminSidebar />
-      </div>
+      </aside>
 
-      <div
-        className="flex-1 flex flex-col overflow-hidden transition-all duration-300"
-        style={{ width: "calc(100% - var(--sidebar-width-current))" }}
-      >
-        <MainContent>
-          <Suspense
-            fallback={
-              <div className="h-16 bg-background border-b border-border/40 flex items-center px-4">
-                <div className="h-6 w-48 bg-muted/30 rounded animate-pulse"></div>
-              </div>
-            }
-          >
-            <AdminPageHeader />
-          </Suspense>
+      {/* Main content area */}
+      <main className="flex flex-col flex-1 h-screen overflow-hidden">
+        <Suspense
+          fallback={
+            <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4">
+              <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          }
+        >
+          <AdminPageHeader />
+        </Suspense>
 
-          <div className="flex-1 overflow-auto">
-            <div className="container p-6 mx-auto max-w-7xl">{children}</div>
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-auto">
+          <div className="container py-6 px-4 mx-auto max-w-7xl">
+            {children}
           </div>
+        </div>
 
-          <AdminFooter />
-        </MainContent>
-      </div>
+        {/* Footer - always visible at bottom */}
+        <AdminFooter />
+      </main>
     </div>
   );
 }

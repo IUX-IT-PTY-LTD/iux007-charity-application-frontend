@@ -11,47 +11,72 @@ import {
   HelpCircle,
   Images,
   LogOut,
-  User,
-  ChevronDown,
-  Plus,
   Settings,
+  User,
 } from "lucide-react";
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar";
-
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+
+// Menu data structure for easy modification
+const navigationItems = [
+  {
+    id: "dashboard",
+    name: "Dashboard",
+    href: "/admin/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    id: "users",
+    name: "Users",
+    href: "/admin/users",
+    icon: User,
+  },
+  {
+    id: "menus",
+    name: "Menus",
+    href: "/admin/menus",
+    icon: MenuIcon,
+  },
+  {
+    id: "events",
+    name: "Events",
+    href: "/admin/events",
+    icon: Calendar,
+  },
+  {
+    id: "pages",
+    name: "Pages",
+    href: "/admin/pages",
+    icon: FileText,
+  },
+  {
+    id: "blogs",
+    name: "Blog Posts",
+    href: "/admin/blogs",
+    icon: FileText,
+  },
+  {
+    id: "faqs",
+    name: "FAQs",
+    href: "/admin/faqs",
+    icon: HelpCircle,
+  },
+  {
+    id: "sliders",
+    name: "Sliders",
+    href: "/admin/sliders",
+    icon: Images,
+  },
+  {
+    id: "settings",
+    name: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
+  },
+];
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const sidebar = useSidebar();
 
   // Check if a path is active
   const isActive = (href) => {
@@ -62,218 +87,59 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar
-      collapsible="icon"
-      className="border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-    >
-      {/* Sidebar Header with User Profile */}
-      <SidebarHeader className="h-16 flex items-center px-4 border-b border-border/40">
-        <div className="flex items-center gap-3 w-full">
-          <Avatar className="h-8 w-8 border border-border">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+      {/* Sidebar Header */}
+      <div className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center flex-1 gap-3">
+          <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
             <AvatarImage src="/assets/img/avatar.jpg" alt="Admin" />
-            <AvatarFallback className="bg-primary/10 text-primary">
-              AA
+            <AvatarFallback className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+              SA
             </AvatarFallback>
           </Avatar>
-          {!sidebar.collapsed && (
-            <div className="flex flex-col text-sm leading-tight">
-              <span className="font-medium text-foreground truncate max-w-[120px]">
-                Super Admin
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Administrator
-              </span>
-            </div>
-          )}
-          <SidebarTrigger className="ml-auto h-8 w-8 rounded-md hover:bg-accent hover:text-accent-foreground" />
+          <div className="flex flex-col text-sm">
+            <span className="font-medium text-gray-900 dark:text-white">
+              Super Admin
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              Administrator
+            </span>
+          </div>
         </div>
-      </SidebarHeader>
+      </div>
 
-      {/* Sidebar Content with Navigation */}
-      <SidebarContent className="px-2 py-4">
-        {/* Main Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-2 text-xs font-medium text-muted-foreground">
-            Navigation
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/dashboard")}
-                  className={cn(
-                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    isActive("/admin/dashboard") &&
-                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                  )}
-                >
-                  <Link href="/admin/dashboard">
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/menus")}
-                  className={cn(
-                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    isActive("/admin/menus") &&
-                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                  )}
-                >
-                  <Link href="/admin/menus">
-                    <MenuIcon className="h-5 w-5" />
-                    <span>Menus</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/events")}
-                  className={cn(
-                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    isActive("/admin/events") &&
-                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                  )}
-                >
-                  <Link href="/admin/events">
-                    <Calendar className="h-5 w-5" />
-                    <span>Events</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Content Management */}
-        <SidebarGroup className="mt-6">
-          <SidebarGroupLabel className="px-2 text-xs font-medium text-muted-foreground">
-            Content
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {/* Collapsible Contents Menu */}
-              <Collapsible
-                defaultOpen={isActive("/admin/contents")}
-                className="group/collapsible w-full"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
-                      isActive={isActive("/admin/contents")}
-                      className={cn(
-                        "w-full gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                        isActive("/admin/contents") &&
-                          "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                      )}
-                    >
-                      <FileText className="h-5 w-5" />
-                      <span>Contents</span>
-                      <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-
-                  <CollapsibleContent className="pt-1 pb-1">
-                    <SidebarMenu className="pl-8">
-                      <SidebarMenuItem>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActive("/admin/pages")}
-                          className={cn(
-                            "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                            isActive("/admin/pages") &&
-                              "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                          )}
-                        >
-                          <Link href="/admin/pages">
-                            <span>Pages</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActive("/admin/blogs")}
-                          className={cn(
-                            "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                            isActive("/admin/blogs") &&
-                              "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                          )}
-                        >
-                          <Link href="/admin/blogs">
-                            <span>Blog Posts</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/faqs")}
-                  className={cn(
-                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    isActive("/admin/faqs") &&
-                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                  )}
-                >
-                  <Link href="/admin/faqs">
-                    <HelpCircle className="h-5 w-5" />
-                    <span>FAQs</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/sliders")}
-                  className={cn(
-                    "gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    isActive("/admin/sliders") &&
-                      "bg-primary/10 text-primary font-medium hover:bg-primary/15"
-                  )}
-                >
-                  <Link href="/admin/sliders">
-                    <Images className="h-5 w-5" />
-                    <span>Sliders</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      {/* Sidebar Footer with Logout */}
-      <SidebarFooter className="border-t border-border/40 py-2 mt-auto">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => console.log("Logging out...")}
-              className="gap-3 rounded-lg px-3 py-2 text-destructive hover:bg-destructive/10 mx-2"
+      {/* Sidebar Navigation */}
+      <div className="flex-1 overflow-y-auto py-4 px-3">
+        <nav className="space-y-1">
+          {navigationItems.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={cn(
+                "flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
+                isActive(item.href) &&
+                  "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+              )}
             >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
-  );
-}
+              {item.icon && (
+                <item.icon className="h-5 w-5 flex-shrink-0 mr-3" />
+              )}
+              <span>{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+      </div>
 
-// Main content wrapper component
-export function MainContent({ children }) {
-  return <div className="flex-1 flex flex-col overflow-hidden">{children}</div>;
+      {/* Sidebar Footer */}
+      <div className="p-3 mt-auto border-t border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => console.log("Logging out...")}
+          className="flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0 mr-3" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  );
 }

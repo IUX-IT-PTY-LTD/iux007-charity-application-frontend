@@ -2,21 +2,21 @@
 
 import React from "react";
 import Link from "next/link";
-import { Heart, Github, ExternalLink } from "lucide-react";
+import { Github } from "lucide-react";
 
 const AdminFooter = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-gray-200 bg-white py-4 dark:border-gray-800 dark:bg-gray-900">
+    <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-3 flex-shrink-0">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
           {/* Copyright */}
           <div className="text-sm text-gray-500 dark:text-gray-400">
             &copy; {currentYear} Charity Co. All rights reserved.
           </div>
 
-          {/* Center item - can be version or status */}
+          {/* Center item - Version and Status */}
           <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
             <span>Version 0.1.0</span>
             <span
@@ -29,18 +29,16 @@ const AdminFooter = () => {
           <div className="flex items-center space-x-4">
             <Link
               href="/admin/help"
-              className="flex items-center text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+              className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
             >
               Help
             </Link>
             <Link
               href="/admin/documentation"
-              className="flex items-center text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+              className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
             >
               Docs
             </Link>
-
-            {/* Optional external link to GitHub or other resource */}
             <Link
               href="https://github.com/yourusername/yourproject"
               target="_blank"
@@ -53,10 +51,18 @@ const AdminFooter = () => {
           </div>
         </div>
 
-        {/* Optional secondary footer with additional info */}
-        <div className="mt-4 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500">
+        {/* Optional secondary footer with credit */}
+        <div className="mt-2 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500">
           <span>
-            Developed by <a href="https://iuxit.com.au/">IUX IT Pty Ltd</a>
+            Developed by{" "}
+            <a
+              href="https://iuxit.com.au/"
+              className="hover:text-gray-600 dark:hover:text-gray-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              IUX IT Pty Ltd
+            </a>
           </span>
         </div>
       </div>

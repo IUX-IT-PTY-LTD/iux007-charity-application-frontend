@@ -1,31 +1,27 @@
 import "../../../styles/globals.css";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminProvider } from "@/components/admin/admin-context";
 import { cookies } from "next/headers";
 import AdminShell from "@/components/admin/AdminShell";
+import { Toaster } from "@/components/ui/sonner";
+import { Poppins } from "next/font/google";
 
 export const metadata = {
   title: "Charity Admin",
   description: "Developed By IUX IT Pty Ltd",
 };
 
-export default function RootLayout({ children }) {
-  const cookieStore = cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
+export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="bg-background text-foreground antialiased overflow-y-auto">
+    <html lang="en" suppressHydrationWarning className={poppins.className}>
+      <body className="bg-background text-foreground antialiased">
         <AdminProvider>
-          <SidebarProvider
-            defaultOpen={defaultOpen}
-            style={{
-              "--sidebar-width": "230px",
-              "--sidebar-width-collapsed": "90px",
-            }}
-          >
-            <AdminShell>{children}</AdminShell>
-          </SidebarProvider>
+          <AdminShell>{children}</AdminShell>
+          <Toaster />
         </AdminProvider>
       </body>
     </html>
