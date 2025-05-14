@@ -51,7 +51,7 @@ import { NotificationsButton } from "@/components/admin/dashboard/Notifications"
 
 // Import Analytics Component directly - comment this out initially to test if other parts work
 // The error suggests this import might be problematic
-// import DashboardAnalytics from "@/components/admin/dashboard/Analytics";
+import { DashboardAnalytics } from "@/components/admin/dashboard/Analytics";
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -225,12 +225,12 @@ const AdminDashboard = () => {
               notifications={notifications}
               onMarkAllAsRead={handleMarkAllAsRead}
             />
-            <Button variant="ghost" size="icon">
+            {/* <Button variant="ghost" size="icon">
               <PieChart className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon">
               <ExternalLink className="h-5 w-5" />
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -293,10 +293,14 @@ const AdminDashboard = () => {
             </div>
 
             {/* Overview Tab - Simplified to just CampaignPerformance and RecentDonations */}
-            <TabsContent value="overview" className="space-y-4">
-              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                <CampaignPerformance campaigns={campaigns} />
-                <RecentDonations donations={recentDonations} />
+            <TabsContent value="overview">
+              <div className="flex flex-row gap-6">
+                <div className="flex-1">
+                  <CampaignPerformance campaigns={campaigns} />
+                </div>
+                <div className="flex-1">
+                  <RecentDonations donations={recentDonations} />
+                </div>
               </div>
             </TabsContent>
 
@@ -320,15 +324,16 @@ const AdminDashboard = () => {
                       The analytics module is currently being updated. Please
                       check back later.
                     </p>
-                    <Button
+                    {/* <Button
                       variant="outline"
                       onClick={() => router.push("/admin/analytics")}
                     >
                       Go to Analytics Page
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardContent>
               </Card>
+              {/* <DashboardAnalytics /> */}
             </TabsContent>
 
             <TabsContent value="reports">
@@ -513,7 +518,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-3">
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
@@ -555,7 +560,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>System Health</CardTitle>
             </CardHeader>
@@ -589,7 +594,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>
