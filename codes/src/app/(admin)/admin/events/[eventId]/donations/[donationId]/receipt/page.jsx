@@ -7,10 +7,10 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 // Import receipt components
-import ReceiptHeader from "@/components/donations/receipt/ReceiptHeader";
-import ReceiptContent from "@/components/donations/receipt/ReceiptContent";
-import ReceiptFooter from "@/components/donations/receipt/ReceiptFooter";
-import ReceiptActions from "@/components/donations/receipt/ReceiptActions";
+import ReceiptHeader from "@/components/admin/donations/receipt/ReceiptHeader";
+import ReceiptContent from "@/components/admin/donations/receipt/ReceiptContent";
+import ReceiptFooter from "@/components/admin/donations/receipt/ReceiptFooter";
+import ReceiptActions from "@/components/admin/donations/receipt/ReceiptActions";
 
 // Import shadcn components
 import { Card, CardContent } from "@/components/ui/card";

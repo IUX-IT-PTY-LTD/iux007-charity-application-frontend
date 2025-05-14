@@ -6,9 +6,9 @@ import { useAdminContext } from "@/components/admin/admin-context";
 import { Loader2 } from "lucide-react";
 
 // Import custom components
-import PostHeader from "@/components/blog/preview/PostHeader";
-import PostContent from "@/components/blog/preview/PostContent";
-import AdminActions from "@/components/blog/preview/AdminActions";
+import PostHeader from "@/components/admin/blog/preview/PostHeader";
+import PostContent from "@/components/admin/blog/preview/PostContent";
+import AdminActions from "@/components/admin/blog/preview/AdminActions";
 
 // Import shadcn components
 import { toast } from "sonner";

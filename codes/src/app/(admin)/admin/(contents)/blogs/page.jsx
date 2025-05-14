@@ -7,9 +7,9 @@ import { PlusCircle, FileText, UploadCloud, Loader2 } from "lucide-react";
 import { format, parseISO, isSameDay } from "date-fns";
 
 // Import custom components
-import PostFilters from "@/components/blog/list/PostFilters";
-import { PostCardGrid, PostCardList } from "@/components/blog/list/PostCard";
-import PostPagination from "@/components/blog/list/PostPagination";
+import PostFilters from "@/components/admin/blog/list/PostFilters";
+import { PostCardGrid, PostCardList } from "@/components/admin/blog/list/PostCard";
+import PostPagination from "@/components/admin/blog/list/PostPagination";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";

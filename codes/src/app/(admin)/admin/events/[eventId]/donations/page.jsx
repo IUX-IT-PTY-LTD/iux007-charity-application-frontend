@@ -7,9 +7,9 @@ import { ArrowLeft, Loader2, FileDown } from "lucide-react";
 import { format, parseISO, isSameDay } from "date-fns";
 
 // Import custom components
-import DonationFilters from "@/components/donations/DonationFilters";
-import DonationRow from "@/components/donations/DonationRow";
-import DonationStats from "@/components/donations/DonationStats";
+import DonationFilters from "@/components/admin/donations/DonationFilters";
+import DonationRow from "@/components/admin/donations/DonationRow";
+import DonationStats from "@/components/admin/donations/DonationStats";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";
