@@ -6,20 +6,19 @@ import { useRouter, usePathname } from 'next/navigation';
 import { FaShoppingBasket, FaUser } from 'react-icons/fa';
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
+import { getUser } from '@/store/features/userSlice'; // Assuming you have a UserContext
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-
+  const { user } = getUser((state) => state.user); // Get user state from Redux store
+  console.log('User:', user);
   const [menus, setMenus] = useState([]);
   const [settings, setSettings] = useState([]);
 
   const fetchMenus = async () => {
     try {
-      setIsLoggedIn(false);
       const response = await apiService.get(ENDPOINTS.COMMON.MENUS);
-      console.log(response.data);
       setMenus(response.data);
     } catch (error) {
       console.error('Error fetching menus:', error);
@@ -38,7 +37,6 @@ const Header = () => {
           '/assets/img/logo.svg',
       };
       setSettings(settingsData);
-      console.log(settingsData);
     } catch (error) {
       console.error('Error fetching settings:', error);
       setSettings({
@@ -52,9 +50,6 @@ const Header = () => {
     fetchMenus();
     fetchSettings();
   }, []);
-
-  console.log(pathname);
-  // console.log(pathname);
 
   const toggleBurgerMenu = () => {
     const menu = document.getElementById('collapseMenu');
@@ -71,7 +66,6 @@ const Header = () => {
             <Image src="/assets/img/logo.svg" width={100} height={100} alt="logo" className="w-8" />
             <span>
               <strong className="text-primary font-semibold text-lg">{settings?.site_name}</strong>
-              {/* <span className="text-secondary font-semibold text-lg">Fund</span> */}
             </span>
           </Link>
 
@@ -132,9 +126,8 @@ const Header = () => {
           </div>
 
           <div className="flex max-lg:ml-auto space-x-3">
-            {isLoggedIn ? (
+            {user ? (
               <>
-                {/* cart */}
                 <Link
                   href={'./checkout'}
                   className="w-[40px] h-[40px] flex justify-center items-center text-xl relative rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
@@ -144,52 +137,41 @@ const Header = () => {
                     0
                   </span>
                 </Link>
-                {isLoggedIn ? (
-                  <div className="relative">
-                    <button
-                      onClick={() =>
-                        document.getElementById('userDropdown').classList.toggle('hidden')
-                      }
-                      className="w-[40px] h-[40px] flex justify-center items-center text-xl rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
-                    >
-                      <FaUser />
-                    </button>
-                    <div
-                      id="userDropdown"
-                      className="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
-                    >
-                      <Link
-                        href="./profile"
-                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        href="./change-password"
-                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      >
-                        Change Password
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    href="./login"
+                <div className="relative">
+                  <button
+                    onClick={() =>
+                      document.getElementById('userDropdown').classList.toggle('hidden')
+                    }
                     className="w-[40px] h-[40px] flex justify-center items-center text-xl rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
                   >
                     <FaUser />
-                  </Link>
-                )}
+                  </button>
+                  <div
+                    id="userDropdown"
+                    className="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
+                  >
+                    <Link
+                      href="./profile"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="./change-password"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    >
+                      Change Password
+                    </Link>
+                  </div>
+                </div>
               </>
             ) : (
-              <>
-                <Link
-                  href={'./login'}
-                  className="px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
-                >
-                  Login
-                </Link>
-              </>
+              <Link
+                href={'./login'}
+                className="px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
+              >
+                Login
+              </Link>
             )}
 
             <button id="toggleOpen" onClick={toggleBurgerMenu} className="lg:hidden">

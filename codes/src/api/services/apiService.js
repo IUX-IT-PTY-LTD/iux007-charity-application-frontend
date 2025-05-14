@@ -48,7 +48,7 @@ class ApiService {
   // Get auth header
   getAuthHeader() {
     const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    return token ? { Authorization: `${token}` } : {};
   }
 }
 
