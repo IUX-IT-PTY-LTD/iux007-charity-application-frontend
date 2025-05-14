@@ -475,6 +475,9 @@ const AdminEvents = () => {
                             <div
                               className="font-medium truncate"
                               title={event.title}
+                              onClick={() =>
+                                router.push(`/admin/events/${event.id}/donations`)
+                              }
                             >
                               {event.title}
                             </div>

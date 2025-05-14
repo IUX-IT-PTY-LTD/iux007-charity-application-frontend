@@ -17,11 +17,11 @@ import {
 import { format, parseISO } from "date-fns";
 
 // Import custom components
-import RichTextEditor from "@/components/blog/create/RichTextEditor";
-import CategorySelect from "@/components/blog/create/CategorySelect";
-import TagSelect from "@/components/blog/create/TagSelect";
-import FeaturedImageUploader from "@/components/blog/create/FeaturedImageUploader";
-import SEOMetadata from "@/components/blog/create/SEOMetadata";
+import RichTextEditor from "@/components/admin/blog/create/RichTextEditor";
+import CategorySelect from "@/components/admin/blog/create/CategorySelect";
+import TagSelect from "@/components/admin/blog/create/TagSelect";
+import FeaturedImageUploader from "@/components/admin/blog/create/FeaturedImageUploader";
+import SEOMetadata from "@/components/admin/blog/create/SEOMetadata";
 
 // Import shadcn components
 import {
