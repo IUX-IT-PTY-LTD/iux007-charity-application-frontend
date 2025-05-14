@@ -1,6 +1,5 @@
 import "../../../styles/globals.css";
 import { AdminProvider } from "@/components/admin/admin-context";
-import { cookies } from "next/headers";
 import AdminShell from "@/components/admin/AdminShell";
 import { Toaster } from "@/components/ui/sonner";
 import { Poppins } from "next/font/google";
@@ -18,7 +17,7 @@ const poppins = Poppins({
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning className={poppins.className}>
-      <body className="bg-background text-foreground antialiased">
+      <body className="overflow-hidden bg-background text-foreground antialiased">
         <AdminProvider>
           <AdminShell>{children}</AdminShell>
           <Toaster />

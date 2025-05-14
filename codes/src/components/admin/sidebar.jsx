@@ -43,12 +43,12 @@ const navigationItems = [
     href: "/admin/events",
     icon: Calendar,
   },
-  {
-    id: "pages",
-    name: "Pages",
-    href: "/admin/pages",
-    icon: FileText,
-  },
+  // {
+  //   id: "pages",
+  //   name: "Pages",
+  //   href: "/admin/pages",
+  //   icon: FileText,
+  // },
   {
     id: "blogs",
     name: "Blog Posts",

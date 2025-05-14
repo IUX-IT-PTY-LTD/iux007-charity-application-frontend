@@ -7,14 +7,14 @@ import { Suspense } from "react";
 
 export default function AdminShell({ children }) {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="fixed inset-0 flex h-screen w-full bg-gray-50 dark:bg-gray-900">
       {/* Sidebar - fixed width */}
-      <aside className="h-screen w-[230px] border-r border-gray-200 dark:border-gray-800">
+      <aside className="h-full w-[230px] border-r border-gray-200 dark:border-gray-800">
         <AdminSidebar />
       </aside>
 
       {/* Main content area */}
-      <main className="flex flex-col flex-1 h-screen overflow-hidden">
+      <main className="flex flex-col flex-1 h-full">
         <Suspense
           fallback={
             <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4">
