@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
   --primary: #db375a;
@@ -21,7 +21,7 @@ li.active a {
 
 li.active a::after,
 .nav-menu li a:hover::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -8px;
   left: 0;
@@ -36,9 +36,9 @@ li.active a::after,
 }
 
 .breadcrumb {
-  background-image: linear-gradient(rgba(255, 255, 255, 0.8),
-      rgba(255, 255, 255, 0.8)),
-    url("/assets/img/bredcrumb-bg.jpg");
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+    url('/assets/img/bredcrumb-bg.jpg');
   background-size: cover;
   background-position: bottom;
   background-repeat: no-repeat;
@@ -70,7 +70,7 @@ li.active a::after,
 }
 
 .step-line.step-1::after {
-  content: "";
+  content: '';
   position: absolute;
   height: 2px;
   width: 0;
@@ -80,7 +80,7 @@ li.active a::after,
 }
 
 .step-line.step-2::after {
-  content: "";
+  content: '';
   position: absolute;
   height: 2px;
   width: 50%;
@@ -90,7 +90,7 @@ li.active a::after,
 }
 
 .step-line.step-3::after {
-  content: "";
+  content: '';
   position: absolute;
   height: 2px;
   width: 100%;
@@ -101,7 +101,7 @@ li.active a::after,
 }
 
 .step-line::before {
-  content: "";
+  content: '';
   position: absolute;
   height: 2px;
   width: 100%;
@@ -169,7 +169,7 @@ li.active a::after,
 
   li.active a::after,
   .nav-menu li a:hover::after {
-    content: "";
+    content: '';
     position: absolute;
     bottom: 0;
     left: 0;
@@ -189,16 +189,11 @@ li.active a::after,
   }
 }
 
-
 @media screen and (max-width: 767px) {
   .container {
     padding: 0 16px;
   }
 }
-
-
-
-
 
 @layer base {
   :root {

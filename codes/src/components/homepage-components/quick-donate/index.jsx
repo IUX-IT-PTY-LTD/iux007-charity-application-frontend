@@ -1,18 +1,16 @@
-import Image from "next/image";
-import React from "react";
+import Image from 'next/image';
+import React from 'react';
 
 const QuickDonate = () => {
   return (
     <div className="bg-secondary container mx-auto mt-20 mb-8">
       <div className="grid md:grid-cols-2 items-center md:max-h-[475px] overflow-hidden">
         <div className="lg:p-14 p-4">
-          <h1 className="sm:text-4xl text-2xl font-bold text-white">
-            Make a quick donation
-          </h1>
+          <h1 className="sm:text-4xl text-2xl font-bold text-white">Make a quick donation</h1>
           <p className="mt-4 text-sm text-gray-300"></p>
           <p className="mt-2 text-sm text-gray-300">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis
-            accumsan, nuncet tempus blandit, metus mi consectetur nibh.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis accumsan, nuncet tempus
+            blandit, metus mi consectetur nibh.
           </p>
           <div className="flex lg:flex-nowrap flex-wrap justify-start items-center lg:gap-5 gap-2">
             <button

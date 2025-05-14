@@ -1,9 +1,8 @@
 # Define build arguments with default values
-ARG NODE_VERSION=20.7.0
-ARG NODE_IMAGE_TYPE=slim
+ARG NODE_VERSION=22.0.0
 
 # Use the official Node.js base image with the specified version and type
-FROM node:${NODE_VERSION}-${NODE_IMAGE_TYPE}
+FROM node:${NODE_VERSION}
 
 ARG MAINTAINER="Habibur Rahman Riad <riad@gmail.com>"
 ARG UID=1000
@@ -38,9 +37,15 @@ RUN id -u node > /dev/null 2>&1 && userdel -r node || true
 RUN groupadd --gid ${GID} app && \
     useradd --uid ${UID} --create-home --system --comment "App User" --shell /bin/bash --gid app app
 
-USER app
 # Set the working directory inside the container
 WORKDIR /usr/src
+
+# Create directory and set permissions before switching user
+RUN mkdir -p /usr/src/node_modules && \
+    chown -R app:app /usr/src && \
+    chmod -R 755 /usr/src
+
+USER app
 
 # Copy source directory and package.json to the container, changing ownership to `app`
 COPY --chown=app:app $SOURCE_DIRECTORY /usr/src
@@ -52,12 +57,14 @@ RUN npm install && \
     npm cache verify
 
 # Build the application
-RUN npm run build
+# RUN npm run build
 
-# Fix permissions for the .next directory
+# Fix permissions for the .next directory and node_modules
 USER root
 RUN chown -R app:app /usr/src/.next && \
-    chmod -R 755 /usr/src/.next
+    chmod -R 755 /usr/src/.next && \
+    chown -R app:app /usr/src/node_modules && \
+    chmod -R 755 /usr/src/node_modules
 
 USER app
 # Expose port 3000 for the application

@@ -1,6 +1,6 @@
-"use client";
-import Image from "next/image";
-import React from "react";
+'use client';
+import Image from 'next/image';
+import React from 'react';
 
 const FAQ = () => {
   const handleAccordion = (e) => {
@@ -9,66 +9,58 @@ const FAQ = () => {
     const accordions = document.querySelectorAll("[role='accordion']");
     accordions.forEach((acc) => {
       if (acc !== accordion) {
-        const content = acc.querySelector("div");
-        const minus = acc.querySelector(".minus");
-        const plus = acc.querySelector(".plus");
-        content.classList.add("hidden");
-        minus.classList.add("hidden");
-        plus.classList.remove("hidden");
+        const content = acc.querySelector('div');
+        const minus = acc.querySelector('.minus');
+        const plus = acc.querySelector('.plus');
+        content.classList.add('hidden');
+        minus.classList.add('hidden');
+        plus.classList.remove('hidden');
       }
     });
-    const content = accordion.querySelector("div");
-    const minus = accordion.querySelector(".minus");
-    const plus = accordion.querySelector(".plus");
-    content.classList.toggle("hidden");
-    minus.classList.toggle("hidden");
-    plus.classList.toggle("hidden");
+    const content = accordion.querySelector('div');
+    const minus = accordion.querySelector('.minus');
+    const plus = accordion.querySelector('.plus');
+    content.classList.toggle('hidden');
+    minus.classList.toggle('hidden');
+    plus.classList.toggle('hidden');
   };
 
   const faqData = [
     {
       id: 1,
-      question: "Have you weighed the potential risks and benefits?",
-      answer:
-        "When deciding which charity to donate to, it's important to do your search.",
+      question: 'Have you weighed the potential risks and benefits?',
+      answer: "When deciding which charity to donate to, it's important to do your search.",
     },
     {
       id: 2,
-      question: "How will you gather feedback from stakeholders",
-      answer:
-        "When deciding which charity to donate to, it's important to do your search.",
+      question: 'How will you gather feedback from stakeholders',
+      answer: "When deciding which charity to donate to, it's important to do your search.",
     },
     {
       id: 3,
-      question: "There any sustainability or ethical to take into account?",
-      answer:
-        "When deciding which charity to donate to, it's important to do your search.",
+      question: 'There any sustainability or ethical to take into account?',
+      answer: "When deciding which charity to donate to, it's important to do your search.",
     },
     {
       id: 4,
-      question: "There any sustainability or ethical to take into account?",
-      answer:
-        "When deciding which charity to donate to, it's important to do your search.",
+      question: 'There any sustainability or ethical to take into account?',
+      answer: "When deciding which charity to donate to, it's important to do your search.",
     },
     {
       id: 5,
-      question: "There any sustainability or ethical to take into account?",
-      answer:
-        "When deciding which charity to donate to, it's important to do your search.",
+      question: 'There any sustainability or ethical to take into account?',
+      answer: "When deciding which charity to donate to, it's important to do your search.",
     },
     {
       id: 6,
-      question: "There any sustainability or ethical to take into account?",
-      answer:
-        "When deciding which charity to donate to, it's important to do your search.",
+      question: 'There any sustainability or ethical to take into account?',
+      answer: "When deciding which charity to donate to, it's important to do your search.",
     },
   ];
   return (
     <div className="rounded-lg container mx-auto py-16">
       <div className="mb-8">
-        <h2 className="sm:text-4xl text-2xl font-bold text-primary">
-          Any Questions
-        </h2>
+        <h2 className="sm:text-4xl text-2xl font-bold text-primary">FAQ</h2>
       </div>
       <div className="grid lg:grid-cols-2 grid-cols-1 gap-20">
         <div className="grid-item divide-y ">
@@ -322,7 +314,7 @@ const FAQ = () => {
         </div>
         <div className="grid-item">
           <Image
-            src={"/assets/img/donation-faq.jpg"}
+            src={'/assets/img/donation-faq.jpg'}
             width={800}
             height={600}
             className="rounded-md w-full h-full object-cover lg:w-4/5 z-50 relative"

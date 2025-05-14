@@ -1,10 +1,74 @@
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+'use client';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import { apiService } from '@/api/services/apiService';
+import { ENDPOINTS } from '@/api/config';
+import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from 'react-toastify';
 
 const Register = () => {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    acceptTerms: false,
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!formData.acceptTerms) {
+      toast.error('Please accept the Terms and Conditions');
+      return;
+    }
+
+    try {
+      const response = await apiService.post(ENDPOINTS.AUTH.REGISTER, {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (response && response.status === 'success') {
+        toast.success('Registration successful! Please login to continue.', {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      } else {
+        const errorMessage = 'Registration failed. Please try again.';
+        setError(response.errors);
+        toast.error(errorMessage);
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+      toast.error(err.message || 'Registration failed. Please try again.');
+    }
+  };
+
   return (
     <div className="w-full">
+      <ToastContainer />
       <div className="flex py-20 flex-col items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
           <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
@@ -17,11 +81,9 @@ const Register = () => {
             />
           </div>
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
-            <form className="w-full py-6 px-6 sm:px-6">
+            <form onSubmit={handleSubmit} className="w-full py-6 px-6 sm:px-6">
               <div className="mb-6">
-                <h3 className="text-gray-800 text-2xl font-bold">
-                  Create an account
-                </h3>
+                <h3 className="text-gray-800 text-2xl font-bold">Create an account</h3>
               </div>
 
               <div className="space-y-6">
@@ -32,6 +94,8 @@ const Register = () => {
                       name="name"
                       type="text"
                       required
+                      value={formData.name}
+                      onChange={handleChange}
                       className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
                       placeholder="Enter name"
                     />
@@ -42,12 +106,7 @@ const Register = () => {
                       className="w-4 h-4 absolute right-4"
                       viewBox="0 0 24 24"
                     >
-                      <circle
-                        cx="10"
-                        cy="7"
-                        r="6"
-                        data-original="#000000"
-                      ></circle>
+                      <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
                       <path
                         d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
                         data-original="#000000"
@@ -57,17 +116,24 @@ const Register = () => {
                 </div>
 
                 <div>
-                  <label className="text-gray-800 text-sm mb-2 block">
-                    Email Id
-                  </label>
+                  <label className="text-gray-800 text-sm mb-2 block">Email Id</label>
                   <div className="relative flex items-center">
-                    <input
-                      name="email"
-                      type="email"
-                      required
-                      className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
-                      placeholder="Enter email"
-                    />
+                    <div className="relative w-full">
+                      <input
+                        name="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={`text-gray-800 bg-white border ${error?.email ? 'border-red-500' : 'border-gray-300'} w-full text-sm px-4 py-2.5 rounded-md outline-blue-500`}
+                        placeholder="Enter email"
+                      />
+                      {error?.email && (
+                        <p className="text-red-500 text-sm mt-1 absolute">
+                          {Array.isArray(error.email) ? error.email[0] : error.email}
+                        </p>
+                      )}
+                    </div>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="#bbb"
@@ -77,16 +143,10 @@ const Register = () => {
                     >
                       <defs>
                         <clipPath id="a" clipPathUnits="userSpaceOnUse">
-                          <path
-                            d="M0 512h512V0H0Z"
-                            data-original="#000000"
-                          ></path>
+                          <path d="M0 512h512V0H0Z" data-original="#000000"></path>
                         </clipPath>
                       </defs>
-                      <g
-                        clip-path="url(#a)"
-                        transform="matrix(1.33 0 0 -1.33 0 682.667)"
-                      >
+                      <g clip-path="url(#a)" transform="matrix(1.33 0 0 -1.33 0 682.667)">
                         <path
                           fill="none"
                           stroke-miterlimit="10"
@@ -104,23 +164,33 @@ const Register = () => {
                 </div>
 
                 <div>
-                  <label className="text-gray-800 text-sm mb-2 block">
-                    Password
-                  </label>
+                  <label className="text-gray-800 text-sm mb-2 block">Password</label>
                   <div className="relative flex items-center">
-                    <input
-                      name="password"
-                      type="password"
-                      required
-                      className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
-                      placeholder="Enter password"
-                    />
+                    <div className="relative w-full">
+                      <input
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={formData.password}
+                        onChange={handleChange}
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                        title="Must have 8+ chars with lowercase, uppercase, number & special char"
+                        className={`text-gray-800 bg-white border ${error?.password ? 'border-red-500' : 'border-gray-300'} border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500`}
+                        placeholder="Enter password"
+                      />
+                      {error?.password && (
+                        <p className="text-red-500 text-sm mt-1 absolute">
+                          {Array.isArray(error.password) ? error.password[0] : error.password}
+                        </p>
+                      )}
+                    </div>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="#bbb"
                       stroke="#bbb"
                       className="w-4 h-4 absolute right-4 cursor-pointer"
                       viewBox="0 0 128 128"
+                      onClick={() => setShowPassword(!showPassword)}
                     >
                       <path
                         d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
@@ -132,20 +202,16 @@ const Register = () => {
 
                 <div className="flex items-center">
                   <input
-                    id="remember-me"
-                    name="remember-me"
+                    id="acceptTerms"
+                    name="acceptTerms"
                     type="checkbox"
-                    className="h-4 w-4 shrink-0 text-primary focus:ring-blue-500 border-gray-300 rounded"
+                    checked={formData.acceptTerms}
+                    onChange={handleChange}
+                    className="h-4 w-4 shrink-0 text-primary focus:ring-blue-500 border-gray-300 rounded mt-6"
                   />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-3 block text-sm text-gray-800"
-                  >
-                    I accept the{" "}
-                    <Link
-                      href=""
-                      className="text-primary font-semibold hover:underline ml-1"
-                    >
+                  <label htmlFor="acceptTerms" className="ml-3 block text-sm text-gray-800 mt-6">
+                    I accept the{' '}
+                    <Link href="" className="text-primary font-semibold hover:underline ml-1">
                       Terms and Conditions
                     </Link>
                   </label>
@@ -154,22 +220,19 @@ const Register = () => {
 
               <div className="!mt-12">
                 <button
-                  type="button"
+                  type="submit"
                   className="w-full py-3 px-4 tracking-wider text-sm rounded-md text-white bg-gray-700 hover:bg-gray-800 focus:outline-none"
                 >
                   Create an account
                 </button>
               </div>
-              <p className="text-gray-800 text-sm mt-6 text-center">
-                Already have an account?{" "}
-                <Link
-                  href="./login"
-                  className="text-primary font-semibold hover:underline ml-1"
-                >
-                  Login here
-                </Link>
-              </p>
             </form>
+            <p className="text-gray-800 text-sm mt-6 text-center">
+              Already have an account?{' '}
+              <Link href="./login" className="text-primary font-semibold hover:underline ml-1">
+                Login here
+              </Link>
+            </p>
           </div>
         </div>
       </div>

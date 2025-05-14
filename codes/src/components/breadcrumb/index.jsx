@@ -1,22 +1,20 @@
-"use client";
-import Link from "next/link";
-import React from "react";
+'use client';
+import Link from 'next/link';
+import React from 'react';
 
 const Breadcrumb = ({ title, links }) => {
   return (
     <div className="breadcrumb py-12">
       <div className="container mx-auto">
         <div className="text-center">
-          <h2 className="text-4xl font-extrabold text-gray-800 mb-5">
-            {title}
-          </h2>
+          <h2 className="text-4xl font-extrabold text-gray-800 mb-5">{title}</h2>
           <nav className="text-gray-500 font-semibold text-[15px]">
             <ol className="list-none p-0 inline-flex">
               {links.map((link, index) => (
                 <React.Fragment key={index}>
                   <li
                     className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                      link.active ? "active" : ""
+                      link.active ? 'active' : ''
                     }`}
                   >
                     <Link

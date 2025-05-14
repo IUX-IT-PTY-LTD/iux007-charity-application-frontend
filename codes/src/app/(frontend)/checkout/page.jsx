@@ -1,678 +1,380 @@
-"use client";
-import EventCard from "@/components/homepage-components/event-card";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
-import { FaDonate, FaHandHoldingHeart, FaTrashAlt } from "react-icons/fa";
-import { MdOutlineEmojiPeople } from "react-icons/md";
+'use client';
+import EventCard from '@/components/homepage-components/event-cards/events';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import { FaDonate, FaHandHoldingHeart, FaTrashAlt } from 'react-icons/fa';
+import { MdOutlineEmojiPeople } from 'react-icons/md';
 
 const Checkout = () => {
   const [currentStep, setCurrentStep] = React.useState(1);
-  const [customDonationAmount, setCustomDonationAmount] = React.useState(0);
-  const items = [
-    {
-      id: 1,
-      title: "Event Name",
-      code: "EVN-001",
-      image: "/assets/img/event-img.jpg",
-      price: 1000,
-      quantity: 1,
-    },
-    {
-      id: 2,
-      title: "Event Name",
-      code: "EVN-001",
-      image: "/assets/img/event-img.jpg",
-      price: 1000,
-      quantity: 1,
-    },
-  ];
+  const [adminContributionAmount, setAdminContributionAmount] = React.useState(0);
+  const [cartItems, setCartItems] = useState([]);
 
-  const moreItems = [
-    {
-      id: 1,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 2,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 3,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 4,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 5,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 6,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 7,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 8,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 9,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 10,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-
-    {
-      id: 11,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 12,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 13,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 14,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-    {
-      id: 15,
-      title: "Event Name",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      date: "2024-12-12",
-      venue: "Lagos",
-      image: "/assets/img/event-img.jpg",
-      target: 1000000,
-      raised: 500000,
-    },
-
-  ];
+  useEffect(() => {
+    // Get cart items from localStorage when component mounts
+    const cart = localStorage.getItem('cartItems');
+    if (cart) {
+      setCartItems(JSON.parse(cart));
+    }
+  }, []);
 
   const paymentMethods = [
     {
       id: 1,
-      img: "/assets/img/4logos.png",
+      img: '/assets/img/4logos.png',
     },
     {
       id: 2,
-      img: "/assets/img/payment-card-gpay-apple.png",
-    },
-    {
-      id: 3,
-      img: "/assets/img/paypal.png",
-    },
-    {
-      id: 4,
-      img: "/assets/img/crypto.png",
+      img: '/assets/img/payment-card-gpay-apple.png',
     },
   ];
 
   //   payment methods
   const [paymentMethod, setPaymentMethod] = React.useState(paymentMethods[0]);
-  const [cartItems, setCartItems] = React.useState(items);
   return (
-    <div className="py-16">
-      <div className="max-w-6xl mx-auto relative bg-white rounded-lg py-6">
-        {/* step 1 */}
-        <div className="card border p-10">
-          <div className="flex justify-between items-center gap-3 relative">
-            <div
-              className={`step-line ${currentStep === 1
-                ? "step-1"
-                : currentStep === 2
-                  ? "step-2"
-                  : "step-3"
-                }`}
-            ></div>
-            <div className="step text-center">
-              <div
-                className={`icon-holder w-[60px] h-[60px] flex justify-center items-center mx-auto border mb-1 relative z-20 rounded-full ${currentStep >= 1
-                  ? "bg-primary border-primary text-white"
-                  : "text-gray-400 bg-white border-gray-400"
+    <div className="min-h-screen bg-gray-50 py-16">
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div className="p-8">
+            {/* Progress Steps */}
+            <div className="relative flex justify-between items-center mb-12">
+              <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 bg-gray-200">
+                <div
+                  className={`h-full bg-primary transition-all duration-300 ${
+                    currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'
                   }`}
-              >
-                <FaHandHoldingHeart className="text-3xl" />
+                ></div>
               </div>
-              <span
-                className={`${currentStep >= 1 ? "text-primary" : "text-gray-400"
-                  }`}
-              >
-                Donation
-              </span>
-            </div>
-            <div className="step text-center">
-              <div
-                className={`icon-holder w-[60px] h-[60px] flex justify-center items-center mx-auto border mb-1 relative z-20 rounded-full ${currentStep >= 2
-                  ? "bg-primary border-primary text-white"
-                  : "text-gray-400 bg-white border-gray-400"
-                  }`}
-              >
-                <MdOutlineEmojiPeople className="text-3xl" />
-              </div>
-              <span
-                className={`${currentStep >= 2 ? "text-primary" : "text-gray-400"
-                  }`}
-              >
-                Donor
-              </span>
-            </div>
-            <div className="step text-center">
-              <div
-                className={`icon-holder w-[60px] h-[60px] flex justify-center items-center relative z-20 mx-auto border mb-1 rounded-full ${currentStep >= 3
-                  ? "bg-primary border-primary text-white"
-                  : "text-gray-400 bg-white border-gray-400"
-                  }`}
-              >
-                <FaDonate className="text-3xl" />
-              </div>
-              <span
-                className={`${currentStep >= 3 ? "text-primary" : "text-gray-400"
-                  }`}
-              >
-                Payment
-              </span>
-            </div>
-          </div>
 
-          {/* step 1 */}
-          {currentStep === 1 && (
-            <>
-              <div className="my-6 flex justify-between items-center gap-3">
-                <Link href={"/donations"} className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md">
-                  Add More Items
-                </Link>
-
-                {/* currency */}
-                <div className="flex justify-between items-center gap-3">
-                  <span className="text-gray-600">Currency</span>
-                  <select
-                    name="currency"
-                    id="currency"
-                    className="border border-gray-300 rounded-md px-3 py-2"
+              {/* Step indicators */}
+              {[
+                { icon: <FaHandHoldingHeart />, label: 'Donation' },
+                { icon: <MdOutlineEmojiPeople />, label: 'Donor' },
+                { icon: <FaDonate />, label: 'Payment' },
+              ].map((step, index) => (
+                <div key={index} className="relative z-10 text-center">
+                  <div
+                    className={`w-16 h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                      currentStep > index
+                        ? 'bg-primary border-primary text-white'
+                        : currentStep === index
+                          ? 'bg-primary border-primary text-white animate-pulse'
+                          : 'bg-white border-gray-300 text-gray-400'
+                    }`}
                   >
-                    <option value="usd">USD</option>
-                    <option value="cad">CAD</option>
-                    <option value="gbp">GBP</option>
-                  </select>
+                    <div className="text-2xl">{step.icon}</div>
+                  </div>
+                  <div
+                    className={`mt-3 font-medium ${
+                      currentStep >= index + 1 ? 'text-primary' : 'text-gray-400'
+                    }`}
+                  >
+                    {step.label}
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
 
-              <hr />
+            {/* Step 1: Cart */}
+            {currentStep === 1 && (
+              <div className="space-y-8">
+                <div className="flex justify-between items-center">
+                  <Link
+                    href="/events"
+                    className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    <span className="mr-2">Add More Items</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </Link>
+                </div>
 
-              <div className="items mt-6">
-                {
-                  cartItems.length > 0 ?
-                    <>
-                      {cartItems.map((item) => (
-                        <div key={item.id}>
-                          <div className="flex justify-between items-center gap-3 mt-3">
-                            <div className="flex gap-3 items-center">
-                              <div className="overflow-hidden w-16 h-16 rounded-lg">
-                                <Image
-                                  src={item.image}
-                                  alt={item.title}
-                                  width={100}
-                                  height={100}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-800">
-                                  {item.title}
-                                </h3>
-                                <p className="text-gray-600">Code: {item.code}</p>
-                              </div>
-                              <div className="flex gap-3 items-center ms-5">
+                <div className="divide-y divide-gray-100">
+                  {cartItems.length > 0 ? (
+                    cartItems.map((item) => (
+                      <div key={item.id} className="py-6 flex items-center justify-between">
+                        <div className="flex items-center space-x-6">
+                          <div className="w-24 h-24 rounded-lg overflow-hidden">
+                            <Image
+                              src={item.image}
+                              alt={item.title}
+                              width={96}
+                              height={96}
+                              className="w-full h-full object-cover"
+                              loader={({ src }) => src}
+                            />
+                          </div>
+
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+
+                            <div className="mt-4 flex items-center space-x-4">
+                              <div className="flex items-center border rounded-lg">
                                 <button
-                                  className="btn btn-primary bg-primary text-white px-3 py-1 rounded-md"
                                   onClick={() => {
                                     if (item.quantity > 1) {
-                                      setCartItems((prevItems) => {
-                                        return prevItems.map((prevItem) => {
-                                          if (prevItem.id === item.id) {
-                                            return {
-                                              ...prevItem,
-                                              quantity: prevItem.quantity - 1,
-                                            };
-                                          }
-                                          return prevItem;
-                                        });
-                                      });
+                                      setCartItems((prev) =>
+                                        prev.map((i) =>
+                                          i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
+                                        )
+                                      );
                                     }
                                   }}
+                                  className="px-3 py-1 text-gray-600 hover:bg-gray-100"
                                 >
                                   -
                                 </button>
-                                <span>{item.quantity}</span>
+                                <span className="px-4 py-1 border-x">{item.quantity}</span>
                                 <button
-                                  className="btn btn-primary bg-primary text-white px-3 py-1 rounded-md"
                                   onClick={() => {
-                                    setCartItems((prevItems) => {
-                                      return prevItems.map((prevItem) => {
-                                        if (prevItem.id === item.id) {
-                                          return {
-                                            ...prevItem,
-                                            quantity: prevItem.quantity + 1,
-                                          };
-                                        }
-                                        return prevItem;
-                                      });
-                                    });
+                                    setCartItems((prev) =>
+                                      prev.map((i) =>
+                                        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+                                      )
+                                    );
                                   }}
+                                  className="px-3 py-1 text-gray-600 hover:bg-gray-100"
                                 >
                                   +
                                 </button>
                               </div>
 
-                              {/* manual inputs for donation */}
-                              <div>
-                                <input
-                                  type="text"
-                                  className="border border-gray-300 rounded-md px-3 py-2"
-                                  placeholder="Enter Amount"
-                                  onChange={(e) => {
-                                    // update the current item
-                                    setCartItems((prevItems) => {
-                                      return prevItems.map((prevItem) => {
-                                        if (prevItem.id === item.id) {
-                                          return {
-                                            ...prevItem,
-                                            price:
-                                              e.target.value === "0" ||
-                                                e.target.value === ""
-                                                ? item.price
-                                                : parseFloat(e.target.value),
-                                          };
-                                        }
-                                        return prevItem;
-                                      });
-                                    });
-                                  }}
-                                />
-                              </div>
-                            </div>
-
-                            {/* add quantity increase and decrease and the price will be change accordingly */}
-
-                            <div className="flex justify-end items-center gap-3">
-                              <span className="text-gray-600">Price</span>
-                              <h3 className="text-lg font-semibold text-gray-800">
-                                ${item.price * item.quantity}
-                              </h3>
-                              {/* delete from cart */}
-                              <button
-                                className="btn btn-primary w-[40px] h-[40px] rounded-full bg-primary text-white px-3 py-1"
-                                onClick={() => {
-                                  setCartItems((prevItems) => {
-                                    return prevItems.filter(
-                                      (prevItem) => prevItem.id !== item.id
-                                    );
-                                  });
+                              <input
+                                type="number"
+                                placeholder="Amount"
+                                className="w-32 px-2 py-1.5 rounded border border-gray-200 focus:border-primary text-sm transition-all"
+                                disabled={item.isFixedDonation ? true : false}
+                                value={item.price}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  setCartItems((prev) =>
+                                    prev.map((i) =>
+                                      i.id === item.id
+                                        ? { ...i, price: value ? parseFloat(value) : i.price }
+                                        : i
+                                    )
+                                  );
                                 }}
-                              >
-                                <FaTrashAlt />
-                              </button>
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-6">
+                          <div className="text-right">
+                            <div className="text-sm text-gray-500">Price</div>
+                            <div className="text-lg font-semibold">
+                              ${item.price * item.quantity}
                             </div>
                           </div>
 
-                          {/* divider if not the last item */}
-                          {cartItems[cartItems.length - 1].id !== item.id && (
-                            <hr className="my-6" />
-                          )}
+                          <button
+                            onClick={() => {
+                              setCartItems((prev) => prev.filter((i) => i.id !== item.id));
+                              // Update localStorage after removing item
+                              const updatedCart = cartItems.filter((i) => i.id !== item.id);
+                              localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                          >
+                            <FaTrashAlt />
+                          </button>
                         </div>
-                      ))}
-                    </> : <p className="text-xl font-bold text-primary text-center py-12">No Items Found in Cart</p>
-                }
-              </div>
-
-              <hr className="my-6" />
-
-              {/* more items */}
-              <h2>
-                <span className="text-2xl font-semibold text-gray-800 block my-6">
-                  More Items
-                </span>
-              </h2>
-              <div className="grid xl:grid-cols-5 md:grid-cols-2 grid-cols-1 gap-4 z-50 relative max-md:mt-12 mb-12 card-p-0">
-                {moreItems.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    title={event.title}
-                    description={event.description}
-                    img={event.image}
-                    time={event.date}
-                    venue={event.venue}
-                    target={event.target}
-                    raised={event.raised}
-                    showDetails={false}
-                    buttonText="Add"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCartItems((prevItems) => {
-                        return [
-                          ...prevItems,
-                          {
-                            id: prevItems.length + 1,
-                            title: event.title,
-                            code: "EVN-001",
-                            image: event.image,
-                            price: 1000,
-                            quantity: 1,
-                          },
-                        ];
-                      });
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* want to contribute admin? */}
-              <hr />
-
-              <div className="grid lg:grid-cols-2 grid-cols-1 my-6">
-                <div className="item lg:border-r lg:pr-10">
-                  <h2 className="text-2xl font-semibold text-gray-800 block">
-                    Want to Contribute to Admin?
-                  </h2>
-
-                  {/* badge alert to show this is a one time contribution */}
-                  <div className="bg-primary text-white text-xs px-3 py-1 rounded-md inline-block mt-3">
-                    One Time Contribution Only
-                  </div>
-
-                  {/* custom donation amount options as buttons, once added, the amount should be added to the input field */}
-                  <div className="flex flex-wrap gap-2 mt-6">
-                    <button className="bg-primary text-white px-3 text-sm py-1 rounded" onClick={() => setCustomDonationAmount(50)}>
-                      $50
-                    </button>
-                    <button className="bg-primary text-white px-3 text-sm py-1 rounded" onClick={() => setCustomDonationAmount(100)}>
-                      $100
-                    </button>
-                    <button className="bg-primary text-white px-3 text-sm py-1 rounded" onClick={() => setCustomDonationAmount(200)}>
-                      $200
-                    </button>
-                    <input
-                      defaultValue={customDonationAmount}
-                      type="number"
-                      placeholder="Enter amount"
-                      className="bg-gray-100 text-gray-800 px-3 py-2 text-sm w-full rounded"
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center gap-3 mt-6">
-                    <button className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md">
-                      Contribute
-                    </button>
-                  </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-12 text-center">
+                      <p className="text-xl font-semibold text-gray-400">Your cart is empty</p>
+                    </div>
+                  )}
                 </div>
 
-                {/* checkout */}
-                <div className="item lg:pl-10 mt-6 lg:mt-0">
-                  <h2 className="text-2xl font-semibold text-gray-800 block">
-                    Checkout
-                  </h2>
-
-                  <div className="flex justify-between items-center gap-3 mt-6">
+                <div className="grid lg:grid-cols-2 gap-8 pt-8 border-t">
+                  <div className="space-y-6">
                     <div>
-                      <span className="text-gray-600">Subtotal</span>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        $
-                        {cartItems.reduce(
-                          (acc, item) => acc + item.price * item.quantity,
-                          0
-                        )}
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        Want to Contribute to Admin?
                       </h3>
+                      <span className="inline-block mt-2 px-3 py-1 text-xs font-medium text-white bg-primary rounded-full">
+                        One Time Contribution Only
+                      </span>
                     </div>
-                    <button
-                      className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md"
-                      onClick={() => {
-                        setCurrentStep(2);
-                      }}
-                    >
-                      Proceed to Doner Details
-                    </button>
+
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {[50, 100, 200].map((amount) => (
+                          <button
+                            key={amount}
+                            onClick={() => setAdminContributionAmount(amount)}
+                            className={`px-4 py-2 text-sm font-medium ${
+                              adminContributionAmount === amount
+                                ? 'bg-primary text-white'
+                                : 'text-primary border border-primary'
+                            } rounded-lg hover:bg-primary hover:text-white transition-colors`}
+                          >
+                            ${amount}
+                          </button>
+                        ))}
+                      </div>
+
+                      <input
+                        type="number"
+                        value={adminContributionAmount}
+                        onChange={(e) => setAdminContributionAmount(Number(e.target.value))}
+                        min="0"
+                        placeholder="Enter custom amount"
+                        className="w-32 px-2 py-1.5 rounded border border-gray-200 focus:border-primary text-sm transition-all"
+                      />
+
+                      <button className="w-full px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors">
+                        Contribute
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="lg:border-l lg:pl-8">
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
+
+                      <div className="space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Subtotal</span>
+                          <span className="font-semibold">
+                            $
+                            {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) +
+                              adminContributionAmount}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => setCurrentStep(2)}
+                          className="w-full px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                        >
+                          Proceed to Donor Details
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </>
-          )}
+            )}
 
-          {/* step 2 */}
-          {currentStep === 2 && (
-            <>
-              <form action="" className="mt-10">
-                <div className="grid lg:grid-cols-3 md:cols-2 grid-cols-1 gap-6">
-                  <div>
-                    <label htmlhtmlFor="name" className="text-gray-600">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter Full Name"
-                      name="name"
-                      id="name"
-                      className="border border-gray-300 rounded-md px-3 py-2 w-full"
-                    />
-                  </div>
-                  <div>
-                    <label htmlhtmlFor="email" className="text-gray-600">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="Enter Email"
-                      name="email"
-                      id="email"
-                      className="border border-gray-300 rounded-md px-3 py-2 w-full"
-                    />
-                  </div>
-                  <div>
-                    <label htmlhtmlFor="phone" className="text-gray-600">
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="Enter Phone"
-                      name="phone"
-                      id="phone"
-                      className="border border-gray-300 rounded-md px-3 py-2 w-full"
-                    />
-                  </div>
-
-                  {/* take permission to create an account */}
-                  <div className="lg:col-span-3 md:col-span-2 col-span-1">
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" name="create-account" id="create-account" />
-                      <label htmlhtmlFor="create-account" className="text-gray-600">
-                        Create an account?
+            {/* Step 2: Donor Details */}
+            {currentStep === 2 && (
+              <form className="max-w-3xl mx-auto space-y-8">
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[
+                    { label: 'Full Name', type: 'text', placeholder: 'Enter your full name' },
+                    { label: 'Email', type: 'email', placeholder: 'Enter your email' },
+                    { label: 'Phone', type: 'tel', placeholder: 'Enter your phone number' },
+                  ].map((field, index) => (
+                    <div key={index}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {field.label}
                       </label>
+                      <input
+                        type={field.type}
+                        placeholder={field.placeholder}
+                        // className="w-full form-input rounded-lg border-gray-300 p-2.5 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200 text-gray-700 text-base outline-none"
+                      />
                     </div>
-                  </div>
+                  ))}
+                </div>
 
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="create-account"
+                    className="form-checkbox rounded text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="create-account" className="ml-2 text-gray-700">
+                    Create an account for faster checkout
+                  </label>
+                </div>
 
-                  <hr className="lg:col-span-3 md:col-span-2 col-span-1" />
-
-                  {/* already have account? login */}
-                  <div className="lg:col-span-3 md:col-span-2 col-span-1">
-                    <h2 className="text-2xl font-semibold text-gray-800 block">
-                      Already have an account?
-                    </h2>
-                    <p className="text-gray-600">
-                      Login to your account to proceed with the donation.
-                    </p>
-
-                    <button className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md mt-6">
-                      Login
+                <div className="border-t pt-8">
+                  <div className="text-center space-y-4">
+                    <h3 className="text-xl font-semibold">Already have an account?</h3>
+                    <p className="text-gray-600">Sign in for a faster checkout experience</p>
+                    <button className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
+                      Sign In
                     </button>
                   </div>
-                  <hr className="lg:col-span-3 md:col-span-2 col-span-1" />
+                </div>
 
-                  <div className="lg:col-span-3 flex justify-between items-center">
-                    {/* back button */}
-                    <button
-                      type="button"
-                      className="btn btn-primary bg-secondary text-white px-5 py-2 rounded-md"
-                      onClick={() => {
-                        setCurrentStep(1);
-                      }}
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md"
-                      onClick={() => {
-                        setCurrentStep(3);
-                      }}
-                    >
-                      Proceed to Payment
-                    </button>
-                  </div>
+                <div className="flex justify-between pt-8 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Back to Cart
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(3)}
+                    className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Continue to Payment
+                  </button>
                 </div>
               </form>
-            </>
-          )}
+            )}
 
-          {/* step 3 */}
-          {currentStep === 3 && (
-            <>
-              <form action="">
-                <div className="grid mt-6 lg:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-4">
+            {/* Step 3: Payment */}
+            {currentStep === 3 && (
+              <div className="max-w-3xl mx-auto space-y-8">
+                <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
-                      className={`payment-method cursor-pointer rounded border p-10 ${paymentMethod.id === method.id ? "active bg-light" : ""
-                        }`}
-                      onClick={() => {
-                        setPaymentMethod(method);
-                      }}
+                      onClick={() => setPaymentMethod(method)}
+                      className={`
+                        p-6 border rounded-xl cursor-pointer transition-all
+                        ${
+                          paymentMethod.id === method.id
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'hover:border-gray-300'
+                        }
+                      `}
                     >
                       <Image
                         src={method.img}
                         alt="Payment Method"
                         width={100}
                         height={50}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto object-contain"
                       />
                     </div>
                   ))}
                 </div>
 
-                <div className="flex justify-between items-center gap-3 mt-10">
+                <div className="flex justify-between pt-8 border-t">
                   <button
                     type="button"
-                    className="btn btn-primary bg-secondary text-white px-5 py-2 rounded-md"
-                    onClick={() => {
-                      setCurrentStep(2);
-                    }}
+                    onClick={() => setCurrentStep(2)}
+                    className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
-                    className="btn btn-primary bg-primary text-white px-5 py-2 rounded-md"
+                    className="px-8 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                   >
-                    Pay Now
+                    Complete Payment
                   </button>
                 </div>
-              </form>
-            </>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

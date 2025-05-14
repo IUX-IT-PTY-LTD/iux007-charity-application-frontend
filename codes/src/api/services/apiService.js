@@ -1,4 +1,5 @@
 import { API_BASE_URL, API_VERSION } from '../config';
+import axios from 'axios';
 
 class ApiService {
   constructor() {
@@ -8,29 +9,29 @@ class ApiService {
   // Generic GET request
   async get(endpoint, options = {}) {
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        method: 'GET',
+      const response = await axios.get(`${this.baseUrl}${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           ...this.getAuthHeader(),
           ...options.headers,
-        }
+        },
       });
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('API GET Error:', error);
       throw error;
     }
   }
 
-  // Generic POST request 
+  // Generic POST request
   async post(endpoint, data, options = {}) {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json',
           'Access-Control-Allow-Origin': '*',
           ...this.getAuthHeader(),
           ...options.headers,
@@ -47,7 +48,7 @@ class ApiService {
   // Get auth header
   getAuthHeader() {
     const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    return token ? { Authorization: `${token}` } : {};
   }
 }
 
