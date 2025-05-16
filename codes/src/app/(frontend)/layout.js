@@ -22,13 +22,13 @@ export default function RootLayout({ children }) {
   return (
       <html lang="en">
         <body className={poppins.className}>
-          <Header />
           <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-          {children}
+            <Header />
+            {children}
+            <Footer />
           </PersistGate>
           </Provider>
-          <Footer />
         </body>
       </html>
     

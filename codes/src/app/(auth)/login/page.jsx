@@ -29,31 +29,45 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+    let errorMessage = '';
+  
     try {
       const response = await apiService.post(ENDPOINTS.AUTH.LOGIN, {
         email: formData.email,
         password: formData.password,
       });
-      
-      if (response.status === 'success') {
+
+      if (response.data && response.data.status === 'success') {
         dispatch(setUser(response.data));
         toast.success('Login successful');
-        router.push('/');
+        router.replace('/');
       } else {
-        if(response.status === 'failed') {
-          toast.error(response.error.description);
-          console.error('Login failed:', response);
-        }
+        errorMessage = response.data?.error?.description || 'User name or password wrong';
+        toast.error(errorMessage);
+        console.error('Login failed:', response);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
-      console.error('Login failed:', error);
+      console.error('Login error:', error);
+      
+      // Check if it's an axios error response
+      if (error.response) {
+        const status = error.response.status;
+        if (status === 403) {
+          errorMessage = error.response.data?.message || 'Access forbidden. Please check your credentials.';
+        } else {
+          errorMessage = error.response.data?.message || 'Login failed. Please try again.';
+        }
+      } else {
+        errorMessage = 'Network error occurred. Please try again.';
+      }
+      
+      toast.error(errorMessage);
     }
   }
 
   return (
     <div className="w-full">
+      <ToastContainer />
       <div className="flex py-20 flex-col items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
