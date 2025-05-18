@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Loader2 } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Loader2 } from 'lucide-react';
 
 // Import custom components
-import PostHeader from "@/components/admin/blog/preview/PostHeader";
-import PostContent from "@/components/admin/blog/preview/PostContent";
-import AdminActions from "@/components/admin/blog/preview/AdminActions";
+import PostHeader from '@/components/admin/blog/preview/PostHeader';
+import PostContent from '@/components/admin/blog/preview/PostContent';
+import AdminActions from '@/components/admin/blog/preview/AdminActions';
 
 // Import shadcn components
-import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
+import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
 
 const BlogPostPreview = ({ params }) => {
   const router = useRouter();
@@ -26,10 +26,10 @@ const BlogPostPreview = ({ params }) => {
   useEffect(() => {
     if (post) {
       setPageTitle(`Preview: ${post.title}`);
-      setPageSubtitle("Preview how your blog post will appear to readers");
+      setPageSubtitle('Preview how your blog post will appear to readers');
     } else {
-      setPageTitle("Blog Post Preview");
-      setPageSubtitle("Loading preview...");
+      setPageTitle('Blog Post Preview');
+      setPageSubtitle('Loading preview...');
     }
   }, [post, setPageTitle, setPageSubtitle]);
 
@@ -40,36 +40,26 @@ const BlogPostPreview = ({ params }) => {
 
       try {
         // Fetch post from localStorage
-        const storedPosts = JSON.parse(
-          localStorage.getItem("blog_posts") || "[]"
-        );
+        const storedPosts = JSON.parse(localStorage.getItem('blog_posts') || '[]');
         const foundPost = storedPosts.find((p) => p.id === params.blogId);
 
         if (!foundPost) {
-          toast.error("Blog post not found");
-          router.push("/admin/blogs");
+          toast.error('Blog post not found');
+          router.push('/admin/blogs');
           return;
         }
 
         setPost(foundPost);
 
         // Get category info
-        const storedCategories = JSON.parse(
-          localStorage.getItem("blog_categories") || "[]"
-        );
-        const foundCategory = storedCategories.find(
-          (c) => c.id === foundPost.category_id
-        );
+        const storedCategories = JSON.parse(localStorage.getItem('blog_categories') || '[]');
+        const foundCategory = storedCategories.find((c) => c.id === foundPost.category_id);
         setCategory(foundCategory || null);
 
         // Get tags info if any
         if (foundPost.tag_ids && foundPost.tag_ids.length > 0) {
-          const storedTags = JSON.parse(
-            localStorage.getItem("blog_tags") || "[]"
-          );
-          const foundTags = storedTags.filter((tag) =>
-            foundPost.tag_ids.includes(tag.id)
-          );
+          const storedTags = JSON.parse(localStorage.getItem('blog_tags') || '[]');
+          const foundTags = storedTags.filter((tag) => foundPost.tag_ids.includes(tag.id));
           setTags(foundTags);
         }
 
@@ -101,8 +91,8 @@ const BlogPostPreview = ({ params }) => {
         }
         */
       } catch (error) {
-        console.error("Error fetching blog post data:", error);
-        toast.error("Failed to load blog post");
+        console.error('Error fetching blog post data:', error);
+        toast.error('Failed to load blog post');
       } finally {
         setIsLoading(false);
       }
@@ -116,14 +106,12 @@ const BlogPostPreview = ({ params }) => {
   // Handle post deletion
   const handleDeletePost = (postId) => {
     try {
-      const storedPosts = JSON.parse(
-        localStorage.getItem("blog_posts") || "[]"
-      );
+      const storedPosts = JSON.parse(localStorage.getItem('blog_posts') || '[]');
       const updatedPosts = storedPosts.filter((post) => post.id !== postId);
-      localStorage.setItem("blog_posts", JSON.stringify(updatedPosts));
+      localStorage.setItem('blog_posts', JSON.stringify(updatedPosts));
 
-      toast.success("Blog post deleted successfully");
-      router.push("/admin/blogs");
+      toast.success('Blog post deleted successfully');
+      router.push('/admin/blogs');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/blog-posts/${postId}`, {
@@ -145,8 +133,8 @@ const BlogPostPreview = ({ params }) => {
         });
       */
     } catch (error) {
-      console.error("Error deleting post:", error);
-      toast.error("Failed to delete post");
+      console.error('Error deleting post:', error);
+      toast.error('Failed to delete post');
     }
   };
 
@@ -208,23 +196,22 @@ const BlogPostPreview = ({ params }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p>
-                  <strong>Status:</strong>{" "}
+                  <strong>Status:</strong>{' '}
                   {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
                 </p>
                 <p>
-                  <strong>Published:</strong>{" "}
+                  <strong>Published:</strong>{' '}
                   {post.publish_date
                     ? new Date(post.publish_date).toLocaleDateString()
-                    : "Not published"}
+                    : 'Not published'}
                 </p>
               </div>
               <div>
                 <p>
-                  <strong>Comments:</strong>{" "}
-                  {post.allow_comments ? "Enabled" : "Disabled"}
+                  <strong>Comments:</strong> {post.allow_comments ? 'Enabled' : 'Disabled'}
                 </p>
                 <p>
-                  <strong>Featured:</strong> {post.is_featured ? "Yes" : "No"}
+                  <strong>Featured:</strong> {post.is_featured ? 'Yes' : 'No'}
                 </p>
               </div>
             </div>

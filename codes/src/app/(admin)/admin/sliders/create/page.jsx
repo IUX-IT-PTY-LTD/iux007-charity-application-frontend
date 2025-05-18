@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Save, ArrowLeft, ImageIcon } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Save, ArrowLeft, ImageIcon } from 'lucide-react';
 
 // Import shadcn components
 import {
@@ -16,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -25,34 +25,34 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 // Define form schema with validation
 const formSchema = z.object({
   title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
+    message: 'Title must be at least 2 characters.',
   }),
   description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
+    message: 'Description must be at least 10 characters.',
   }),
   ordering: z.coerce.number().int().positive({
-    message: "Ordering must be a positive number.",
+    message: 'Ordering must be a positive number.',
   }),
-  status: z.string().default("1"),
+  status: z.string().default('1'),
   image: z.any().optional(),
 });
 
@@ -65,18 +65,18 @@ const AdminSliderCreate = () => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      title: '',
+      description: '',
       ordering: 1,
-      status: "1",
+      status: '1',
       image: null,
     },
   });
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Create Slider");
-    setPageSubtitle("Add a new slider to your homepage carousel");
+    setPageTitle('Create Slider');
+    setPageSubtitle('Add a new slider to your homepage carousel');
   }, [setPageTitle, setPageSubtitle]);
 
   // For form preview
@@ -86,7 +86,7 @@ const AdminSliderCreate = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      form.setValue("image", file);
+      form.setValue('image', file);
 
       // Create image preview
       const reader = new FileReader();
@@ -106,18 +106,18 @@ const AdminSliderCreate = () => {
       image: imagePreview, // Store the image preview URL for testing
     };
 
-    console.log("Creating slider:", newSlider);
+    console.log('Creating slider:', newSlider);
 
     // Store in localStorage for testing
-    const existingSliders = JSON.parse(localStorage.getItem("sliders") || "[]");
+    const existingSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
     existingSliders.push(newSlider);
-    localStorage.setItem("sliders", JSON.stringify(existingSliders));
+    localStorage.setItem('sliders', JSON.stringify(existingSliders));
 
     // Show success message
-    toast.success("Slider created successfully!");
+    toast.success('Slider created successfully!');
 
     // Redirect to the slider list page
-    router.push("/admin/sliders");
+    router.push('/admin/sliders');
 
     /* API Implementation (Commented out for future use)
     // For actual API implementation, we would use FormData to handle file uploads
@@ -162,7 +162,7 @@ const AdminSliderCreate = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/admin/sliders")}
+              onClick={() => router.push('/admin/sliders')}
               className="mb-2"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -174,10 +174,7 @@ const AdminSliderCreate = () => {
             {/* Form Section */}
             <div className="md:col-span-2">
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <Card>
                     <CardHeader>
                       <CardTitle>Slider Information</CardTitle>
@@ -194,10 +191,7 @@ const AdminSliderCreate = () => {
                           <FormItem>
                             <FormLabel>Slider Title</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="e.g. Summer Sale"
-                                {...field}
-                              />
+                              <Input placeholder="e.g. Summer Sale" {...field} />
                             </FormControl>
                             <FormDescription>
                               The main title displayed on the slider.
@@ -235,12 +229,7 @@ const AdminSliderCreate = () => {
                           <FormItem>
                             <FormLabel>Order Priority</FormLabel>
                             <FormControl>
-                              <Input
-                                type="number"
-                                min={1}
-                                placeholder="1"
-                                {...field}
-                              />
+                              <Input type="number" min={1} placeholder="1" {...field} />
                             </FormControl>
                             <FormDescription>
                               Lower numbers appear first in the carousel.
@@ -258,10 +247,7 @@ const AdminSliderCreate = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Status</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select a status" />
@@ -331,10 +317,7 @@ const AdminSliderCreate = () => {
                       >
                         Reset
                       </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                         <Save className="mr-2 h-4 w-4" />
                         Create Slider
                       </Button>
@@ -372,34 +355,27 @@ const AdminSliderCreate = () => {
 
                     <div>
                       <h3 className="text-lg font-semibold">
-                        {formPreview.title || "Slider Title"}
+                        {formPreview.title || 'Slider Title'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
-                          variant={
-                            formPreview.status === "1" ? "default" : "secondary"
-                          }
+                          variant={formPreview.status === '1' ? 'default' : 'secondary'}
                           className={
-                            formPreview.status === "1"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                            formPreview.status === '1'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }
                         >
-                          {formPreview.status === "1" ? "Active" : "Inactive"}
+                          {formPreview.status === '1' ? 'Active' : 'Inactive'}
                         </Badge>
-                        <span className="text-xs text-gray-500">
-                          Order: {formPreview.ordering}
-                        </span>
+                        <span className="text-xs text-gray-500">Order: {formPreview.ordering}</span>
                       </div>
                     </div>
 
                     <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                      <p className="text-xs text-gray-500 mb-2">
-                        Description Preview:
-                      </p>
+                      <p className="text-xs text-gray-500 mb-2">Description Preview:</p>
                       <p className="text-sm line-clamp-5">
-                        {formPreview.description ||
-                          "Your description will appear here..."}
+                        {formPreview.description || 'Your description will appear here...'}
                       </p>
                     </div>
                   </div>

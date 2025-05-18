@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
 
 import {
   PlusCircle,
@@ -13,7 +13,7 @@ import {
   Edit,
   Trash2,
   ArrowUpDown,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   Card,
@@ -22,11 +22,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -34,7 +34,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +42,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,15 +53,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const AdminMenus = () => {
   const router = useRouter();
@@ -71,9 +71,9 @@ const AdminMenus = () => {
   // State management
   const [menus, setMenus] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState("ordering");
-  const [sortDirection, setSortDirection] = useState("asc");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('ordering');
+  const [sortDirection, setSortDirection] = useState('asc');
   const [menuToDelete, setMenuToDelete] = useState(null);
 
   // Pagination
@@ -81,7 +81,7 @@ const AdminMenus = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
-    setPageTitle("Menus");
+    setPageTitle('Menus');
     // setPageSubtitle("Manage your website navigation menus");
   }, [setPageTitle, setPageSubtitle]);
 
@@ -92,7 +92,7 @@ const AdminMenus = () => {
 
       try {
         // For testing: check localStorage first, then fall back to sample data
-        const storedMenus = localStorage.getItem("menus");
+        const storedMenus = localStorage.getItem('menus');
         let menuData = [];
 
         if (storedMenus) {
@@ -102,39 +102,39 @@ const AdminMenus = () => {
         // If no stored menus, use sample data
         if (!menuData || menuData.length === 0) {
           menuData = [
-            { id: "1", name: "Home", slug: "home", ordering: 1, status: 1 },
-            { id: "2", name: "Blog", slug: "blog", ordering: 2, status: 1 },
+            { id: '1', name: 'Home', slug: 'home', ordering: 1, status: 1 },
+            { id: '2', name: 'Blog', slug: 'blog', ordering: 2, status: 1 },
             {
-              id: "3",
-              name: "Contact",
-              slug: "contact",
+              id: '3',
+              name: 'Contact',
+              slug: 'contact',
               ordering: 3,
               status: 0,
             },
             {
-              id: "4",
-              name: "About Us",
-              slug: "about-us",
+              id: '4',
+              name: 'About Us',
+              slug: 'about-us',
               ordering: 4,
               status: 1,
             },
             {
-              id: "5",
-              name: "Services",
-              slug: "services",
+              id: '5',
+              name: 'Services',
+              slug: 'services',
               ordering: 5,
               status: 1,
             },
           ];
 
           // Store sample data for testing
-          localStorage.setItem("menus", JSON.stringify(menuData));
+          localStorage.setItem('menus', JSON.stringify(menuData));
         }
 
         setMenus(menuData);
       } catch (error) {
-        console.error("Error fetching menus:", error);
-        toast.error("Failed to load menus");
+        console.error('Error fetching menus:', error);
+        toast.error('Failed to load menus');
       } finally {
         setIsLoading(false);
       }
@@ -146,10 +146,10 @@ const AdminMenus = () => {
   // Handle sorting
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
   };
 
@@ -159,15 +159,12 @@ const AdminMenus = () => {
       if (!searchQuery) return true;
 
       const query = searchQuery.toLowerCase();
-      return (
-        menu.name.toLowerCase().includes(query) ||
-        menu.slug.toLowerCase().includes(query)
-      );
+      return menu.name.toLowerCase().includes(query) || menu.slug.toLowerCase().includes(query);
     })
     .sort((a, b) => {
-      const modifier = sortDirection === "asc" ? 1 : -1;
+      const modifier = sortDirection === 'asc' ? 1 : -1;
 
-      if (sortField === "name" || sortField === "slug") {
+      if (sortField === 'name' || sortField === 'slug') {
         return a[sortField].localeCompare(b[sortField]) * modifier;
       } else {
         return (a[sortField] - b[sortField]) * modifier;
@@ -181,22 +178,19 @@ const AdminMenus = () => {
   // Get current items
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentMenus = sortedAndFilteredMenus.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentMenus = sortedAndFilteredMenus.slice(indexOfFirstItem, indexOfLastItem);
 
   // Handle menu deletion
   const handleDelete = (id) => {
     try {
       const updatedMenus = menus.filter((menu) => menu.id !== id);
       setMenus(updatedMenus);
-      localStorage.setItem("menus", JSON.stringify(updatedMenus));
+      localStorage.setItem('menus', JSON.stringify(updatedMenus));
 
-      toast.success("Menu deleted successfully");
+      toast.success('Menu deleted successfully');
     } catch (error) {
-      console.error("Error deleting menu:", error);
-      toast.error("Failed to delete menu");
+      console.error('Error deleting menu:', error);
+      toast.error('Failed to delete menu');
     }
   };
 
@@ -211,25 +205,23 @@ const AdminMenus = () => {
       });
 
       setMenus(updatedMenus);
-      localStorage.setItem("menus", JSON.stringify(updatedMenus));
+      localStorage.setItem('menus', JSON.stringify(updatedMenus));
 
-      toast.success(
-        `Menu ${currentStatus === 1 ? "deactivated" : "activated"} successfully`
-      );
+      toast.success(`Menu ${currentStatus === 1 ? 'deactivated' : 'activated'} successfully`);
     } catch (error) {
-      console.error("Error updating menu status:", error);
-      toast.error("Failed to update menu status");
+      console.error('Error updating menu status:', error);
+      toast.error('Failed to update menu status');
     }
   };
 
   // Column definitions for sortable headers
   const columns = [
-    { field: "id", label: "#", sortable: false },
-    { field: "name", label: "Name", sortable: true },
-    { field: "slug", label: "Slug", sortable: true },
-    { field: "ordering", label: "Order", sortable: true },
-    { field: "status", label: "Status", sortable: true },
-    { field: "actions", label: "Actions", sortable: false },
+    { field: 'id', label: '#', sortable: false },
+    { field: 'name', label: 'Name', sortable: true },
+    { field: 'slug', label: 'Slug', sortable: true },
+    { field: 'ordering', label: 'Order', sortable: true },
+    { field: 'status', label: 'Status', sortable: true },
+    { field: 'actions', label: 'Actions', sortable: false },
   ];
 
   return (
@@ -239,13 +231,11 @@ const AdminMenus = () => {
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div>
               <CardTitle>All Menus</CardTitle>
-              <CardDescription>
-                Manage your website navigation menus
-              </CardDescription>
+              <CardDescription>Manage your website navigation menus</CardDescription>
             </div>
 
             <Button
-              onClick={() => router.push("/admin/menus/create")}
+              onClick={() => router.push('/admin/menus/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -268,8 +258,8 @@ const AdminMenus = () => {
 
               <div className="flex flex-wrap items-center gap-2 self-end">
                 <span className="text-sm text-gray-500">
-                  {sortedAndFilteredMenus.length}{" "}
-                  {sortedAndFilteredMenus.length === 1 ? "menu" : "menus"} found
+                  {sortedAndFilteredMenus.length}{' '}
+                  {sortedAndFilteredMenus.length === 1 ? 'menu' : 'menus'} found
                 </span>
 
                 <DropdownMenu>
@@ -283,7 +273,7 @@ const AdminMenus = () => {
                     <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => setSearchQuery('')}
                       className="justify-between"
                     >
                       All
@@ -292,7 +282,7 @@ const AdminMenus = () => {
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("active")}
+                      onClick={() => setSearchQuery('active')}
                       className="justify-between"
                     >
                       Active
@@ -301,7 +291,7 @@ const AdminMenus = () => {
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("inactive")}
+                      onClick={() => setSearchQuery('inactive')}
                       className="justify-between"
                     >
                       Inactive
@@ -321,20 +311,12 @@ const AdminMenus = () => {
                     {columns.map((column) => (
                       <TableHead
                         key={column.field}
-                        className={
-                          column.sortable ? "cursor-pointer select-none" : ""
-                        }
-                        onClick={
-                          column.sortable
-                            ? () => handleSort(column.field)
-                            : undefined
-                        }
+                        className={column.sortable ? 'cursor-pointer select-none' : ''}
+                        onClick={column.sortable ? () => handleSort(column.field) : undefined}
                       >
                         <div className="flex items-center space-x-1">
                           <span>{column.label}</span>
-                          {column.sortable && (
-                            <ArrowUpDown className="h-3 w-3" />
-                          )}
+                          {column.sortable && <ArrowUpDown className="h-3 w-3" />}
                         </div>
                       </TableHead>
                     ))}
@@ -343,28 +325,19 @@ const AdminMenus = () => {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
                         Loading menus...
                       </TableCell>
                     </TableRow>
                   ) : sortedAndFilteredMenus.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
                         No menus found.
                       </TableCell>
                     </TableRow>
                   ) : (
                     currentMenus.map((menu, index) => (
-                      <TableRow
-                        key={menu.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
+                      <TableRow key={menu.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <TableCell className="font-medium">
                           {indexOfFirstItem + index + 1}
                         </TableCell>
@@ -377,23 +350,19 @@ const AdminMenus = () => {
                           <div className="flex items-center gap-3">
                             <Switch
                               checked={menu.status === 1}
-                              onCheckedChange={() =>
-                                handleStatusChange(menu.id, menu.status)
-                              }
+                              onCheckedChange={() => handleStatusChange(menu.id, menu.status)}
                               aria-label={`Toggle status for ${menu.name}`}
                               className="data-[state=checked]:bg-black data-[state=checked]:text-white"
                             />
                             <Badge
-                              variant={
-                                menu.status === 1 ? "success" : "destructive"
-                              }
+                              variant={menu.status === 1 ? 'success' : 'destructive'}
                               className={
                                 menu.status === 1
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
                               }
                             >
-                              {menu.status === 1 ? "Active" : "Inactive"}
+                              {menu.status === 1 ? 'Active' : 'Inactive'}
                             </Badge>
                           </div>
                         </TableCell>
@@ -402,9 +371,7 @@ const AdminMenus = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() =>
-                                router.push(`/admin/menus/${menu.id}/edit`)
-                              }
+                              onClick={() => router.push(`/admin/menus/${menu.id}/edit`)}
                             >
                               <Edit className="h-4 w-4" />
                               <span className="sr-only">Edit</span>
@@ -423,13 +390,10 @@ const AdminMenus = () => {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you absolutely sure?
-                                  </AlertDialogTitle>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This will permanently delete the "
-                                    {menu.name}" menu and all its items. This
-                                    action cannot be undone.
+                                    This will permanently delete the "{menu.name}" menu and all its
+                                    items. This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -455,8 +419,8 @@ const AdminMenus = () => {
 
           <CardFooter className="flex flex-col sm:flex-row gap-4 justify-between items-center">
             <div className="text-xs text-gray-500">
-              Showing {indexOfFirstItem + 1} to{" "}
-              {Math.min(indexOfLastItem, totalMenus)} of {totalMenus} menus
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalMenus)} of{' '}
+              {totalMenus} menus
             </div>
 
             {/* Pagination */}
@@ -473,9 +437,7 @@ const AdminMenus = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                 >
                   &lt;
@@ -493,9 +455,7 @@ const AdminMenus = () => {
                       return (
                         <Button
                           key={pageNumber}
-                          variant={
-                            currentPage === pageNumber ? "default" : "outline"
-                          }
+                          variant={currentPage === pageNumber ? 'default' : 'outline'}
                           size="sm"
                           onClick={() => setCurrentPage(pageNumber)}
                           className="w-8 h-8 p-0"
@@ -511,9 +471,7 @@ const AdminMenus = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                 >
                   &gt;

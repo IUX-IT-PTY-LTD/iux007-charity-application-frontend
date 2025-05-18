@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import * as React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Menu as MenuIcon,
@@ -13,34 +13,34 @@ import {
   LogOut,
   Settings,
   User,
-} from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 // Menu data structure for easy modification
 const navigationItems = [
   {
-    id: "dashboard",
-    name: "Dashboard",
-    href: "/admin/dashboard",
+    id: 'dashboard',
+    name: 'Dashboard',
+    href: '/admin/dashboard',
     icon: LayoutDashboard,
   },
   {
-    id: "users",
-    name: "Users",
-    href: "/admin/users",
+    id: 'users',
+    name: 'Users',
+    href: '/admin/users',
     icon: User,
   },
   {
-    id: "menus",
-    name: "Menus",
-    href: "/admin/menus",
+    id: 'menus',
+    name: 'Menus',
+    href: '/admin/menus',
     icon: MenuIcon,
   },
   {
-    id: "events",
-    name: "Events",
-    href: "/admin/events",
+    id: 'events',
+    name: 'Events',
+    href: '/admin/events',
     icon: Calendar,
   },
   // {
@@ -50,27 +50,27 @@ const navigationItems = [
   //   icon: FileText,
   // },
   {
-    id: "blogs",
-    name: "Blog Posts",
-    href: "/admin/blogs",
+    id: 'blogs',
+    name: 'Blog Posts',
+    href: '/admin/blogs',
     icon: FileText,
   },
   {
-    id: "faqs",
-    name: "FAQs",
-    href: "/admin/faqs",
+    id: 'faqs',
+    name: 'FAQs',
+    href: '/admin/faqs',
     icon: HelpCircle,
   },
   {
-    id: "sliders",
-    name: "Sliders",
-    href: "/admin/sliders",
+    id: 'sliders',
+    name: 'Sliders',
+    href: '/admin/sliders',
     icon: Images,
   },
   {
-    id: "settings",
-    name: "Settings",
-    href: "/admin/settings",
+    id: 'settings',
+    name: 'Settings',
+    href: '/admin/settings',
     icon: Settings,
   },
 ];
@@ -80,7 +80,7 @@ export function AdminSidebar() {
 
   // Check if a path is active
   const isActive = (href) => {
-    if (href === "/admin/dashboard") {
+    if (href === '/admin/dashboard') {
       return pathname === href;
     }
     return pathname.startsWith(href);
@@ -98,12 +98,8 @@ export function AdminSidebar() {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col text-sm">
-            <span className="font-medium text-gray-900 dark:text-white">
-              Super Admin
-            </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              Administrator
-            </span>
+            <span className="font-medium text-gray-900 dark:text-white">Super Admin</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Administrator</span>
           </div>
         </div>
       </div>
@@ -116,14 +112,12 @@ export function AdminSidebar() {
               key={item.id}
               href={item.href}
               className={cn(
-                "flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
+                'flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white',
                 isActive(item.href) &&
-                  "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                  'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
               )}
             >
-              {item.icon && (
-                <item.icon className="h-5 w-5 flex-shrink-0 mr-3" />
-              )}
+              {item.icon && <item.icon className="h-5 w-5 flex-shrink-0 mr-3" />}
               <span>{item.name}</span>
             </Link>
           ))}
@@ -133,7 +127,7 @@ export function AdminSidebar() {
       {/* Sidebar Footer */}
       <div className="p-3 mt-auto border-t border-gray-200 dark:border-gray-700">
         <button
-          onClick={() => console.log("Logging out...")}
+          onClick={() => console.log('Logging out...')}
           className="flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
         >
           <LogOut className="h-5 w-5 flex-shrink-0 mr-3" />

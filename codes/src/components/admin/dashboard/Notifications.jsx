@@ -1,17 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { format } from "date-fns";
-import { useRouter } from "next/navigation";
-import {
-  Bell,
-  Clock,
-  Eye,
-  Mail,
-  MoreHorizontal,
-  Settings,
-  User,
-} from "lucide-react";
+import React from 'react';
+import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import { Bell, Clock, Eye, Mail, MoreHorizontal, Settings, User } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,29 +11,23 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Component for rendering each notification
 const NotificationItem = ({ notification }) => {
   const getNotificationIcon = (type) => {
     switch (type) {
-      case "donation":
+      case 'donation':
         return <Bell className="h-5 w-5 text-blue-500" />;
-      case "user":
+      case 'user':
         return <User className="h-5 w-5 text-green-500" />;
-      case "system":
+      case 'system':
         return <Settings className="h-5 w-5 text-yellow-500" />;
-      case "message":
+      case 'message':
         return <Mail className="h-5 w-5 text-purple-500" />;
       default:
         return <Bell className="h-5 w-5 text-gray-500" />;
@@ -63,29 +49,23 @@ const NotificationItem = ({ notification }) => {
     } else if (diffInDays < 30) {
       return `${diffInDays}d ago`;
     } else {
-      return format(date, "MMM d, yyyy");
+      return format(date, 'MMM d, yyyy');
     }
   };
 
   return (
     <div
       className={`p-4 flex items-start ${
-        notification.read ? "" : "bg-blue-50 dark:bg-blue-900/20"
+        notification.read ? '' : 'bg-blue-50 dark:bg-blue-900/20'
       }`}
     >
-      <div className="mr-3 mt-0.5">
-        {getNotificationIcon(notification.type)}
-      </div>
+      <div className="mr-3 mt-0.5">{getNotificationIcon(notification.type)}</div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
           <p className="text-sm font-medium">{notification.title}</p>
-          <span className="text-xs text-gray-500">
-            {formatTimeAgo(notification.timestamp)}
-          </span>
+          <span className="text-xs text-gray-500">{formatTimeAgo(notification.timestamp)}</span>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          {notification.message}
-        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-300">{notification.message}</p>
         {notification.actionUrl && (
           <div className="mt-2">
             <Button
@@ -94,7 +74,7 @@ const NotificationItem = ({ notification }) => {
               className="p-0 h-auto text-blue-600 dark:text-blue-400"
               onClick={() => (window.location.href = notification.actionUrl)}
             >
-              {notification.actionText || "View Details"}
+              {notification.actionText || 'View Details'}
             </Button>
           </div>
         )}
@@ -106,14 +86,10 @@ const NotificationItem = ({ notification }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>
-            Mark as {notification.read ? "unread" : "read"}
-          </DropdownMenuItem>
+          <DropdownMenuItem>Mark as {notification.read ? 'unread' : 'read'}</DropdownMenuItem>
           <DropdownMenuItem>Dismiss</DropdownMenuItem>
           {notification.actionUrl && (
-            <DropdownMenuItem
-              onClick={() => (window.location.href = notification.actionUrl)}
-            >
+            <DropdownMenuItem onClick={() => (window.location.href = notification.actionUrl)}>
               View Details
             </DropdownMenuItem>
           )}
@@ -124,10 +100,7 @@ const NotificationItem = ({ notification }) => {
 };
 
 // Main Notifications Component
-const NotificationsPanel = ({
-  notifications = [],
-  onMarkAllAsRead = () => {},
-}) => {
+const NotificationsPanel = ({ notifications = [], onMarkAllAsRead = () => {} }) => {
   const router = useRouter();
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -148,17 +121,12 @@ const NotificationsPanel = ({
         {notifications.length === 0 ? (
           <div className="p-6 text-center">
             <Bell className="h-10 w-10 text-gray-300 mb-2 mx-auto" />
-            <p className="text-gray-500 dark:text-gray-400">
-              No notifications yet
-            </p>
+            <p className="text-gray-500 dark:text-gray-400">No notifications yet</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-800">
             {notifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-              />
+              <NotificationItem key={notification.id} notification={notification} />
             ))}
           </div>
         )}
@@ -167,7 +135,7 @@ const NotificationsPanel = ({
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => router.push("/admin/notifications")}
+          onClick={() => router.push('/admin/notifications')}
         >
           View All Notifications
         </Button>
@@ -189,19 +157,13 @@ const NotificationsButton = ({
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
-              {unreadCount > 9 ? "9+" : unreadCount}
+              {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="p-0 bg-transparent border-0 shadow-none"
-      >
-        <NotificationsPanel
-          notifications={notifications}
-          onMarkAllAsRead={onMarkAllAsRead}
-        />
+      <DropdownMenuContent align="end" className="p-0 bg-transparent border-0 shadow-none">
+        <NotificationsPanel notifications={notifications} onMarkAllAsRead={onMarkAllAsRead} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

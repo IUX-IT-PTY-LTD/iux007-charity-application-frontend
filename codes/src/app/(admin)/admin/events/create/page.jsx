@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { CalendarIcon, ImageIcon } from "lucide-react";
-import { format } from "date-fns";
-import { useAdminContext } from "@/components/admin/admin-context";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { CalendarIcon, ImageIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { useAdminContext } from '@/components/admin/admin-context';
 
 // Import shadcn components
 import {
@@ -17,7 +17,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -26,66 +26,62 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import { Label } from '@/components/ui/label';
 
 // Define form schema with validation
 const formSchema = z
   .object({
     title: z.string().min(2, {
-      message: "Event title must be at least 2 characters.",
+      message: 'Event title must be at least 2 characters.',
     }),
     description: z.string().min(10, {
-      message: "Description must be at least 10 characters.",
+      message: 'Description must be at least 10 characters.',
     }),
     start_date: z.date({
-      required_error: "Start date is required.",
+      required_error: 'Start date is required.',
     }),
     end_date: z
       .date({
-        required_error: "End date is required.",
+        required_error: 'End date is required.',
       })
       .refine((data) => data >= new Date(), {
-        message: "End date cannot be in the past.",
+        message: 'End date cannot be in the past.',
       }),
     price: z.coerce.number().min(0, {
-      message: "Price must be a positive number.",
+      message: 'Price must be a positive number.',
     }),
     target_amount: z.coerce.number().min(0, {
-      message: "Target amount must be a positive number.",
+      message: 'Target amount must be a positive number.',
     }),
     is_fixed_donation: z.boolean().default(false),
     location: z.string().min(2, {
-      message: "Location must be at least 2 characters.",
+      message: 'Location must be at least 2 characters.',
     }),
-    status: z.string().default("1"),
+    status: z.string().default('1'),
     is_featured: z.boolean().default(false),
     featured_image: z.any().optional(),
   })
   .refine((data) => data.end_date >= data.start_date, {
-    message: "End date must be after start date",
-    path: ["end_date"],
+    message: 'End date must be after start date',
+    path: ['end_date'],
   });
 
 const AdminEventCreate = () => {
@@ -95,7 +91,7 @@ const AdminEventCreate = () => {
   // Set page title and subtitle
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   useEffect(() => {
-    setPageTitle("Create Event");
+    setPageTitle('Create Event');
     // setPageSubtitle("Add a new event to your calendar");
   }, [setPageTitle, setPageSubtitle]);
 
@@ -103,15 +99,15 @@ const AdminEventCreate = () => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      title: '',
+      description: '',
       start_date: new Date(),
       end_date: new Date(),
       price: 0,
       target_amount: 0,
       is_fixed_donation: false,
-      location: "",
-      status: "1",
+      location: '',
+      status: '1',
       is_featured: false,
       featured_image: null,
     },
@@ -124,18 +120,18 @@ const AdminEventCreate = () => {
       id: Date.now().toString(), // Generate a unique ID for local storage
     };
 
-    console.log("Creating event:", formData);
+    console.log('Creating event:', formData);
 
     // Store in localStorage for testing
-    const existingEvents = JSON.parse(localStorage.getItem("events") || "[]");
+    const existingEvents = JSON.parse(localStorage.getItem('events') || '[]');
     existingEvents.push(formData);
-    localStorage.setItem("events", JSON.stringify(existingEvents));
+    localStorage.setItem('events', JSON.stringify(existingEvents));
 
     // Show success message
-    toast.success("Event created successfully!");
+    toast.success('Event created successfully!');
 
     // Redirect to events list
-    router.push("/admin/events");
+    router.push('/admin/events');
 
     /* API Implementation (Commented out for future use)
     // For actual API implementation, we would use FormData to handle file uploads
@@ -178,7 +174,7 @@ const AdminEventCreate = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      form.setValue("featured_image", file);
+      form.setValue('featured_image', file);
 
       // Create image preview
       const reader = new FileReader();
@@ -195,17 +191,12 @@ const AdminEventCreate = () => {
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Event Information
-              </h1> 
-               <p className="text-sm text-muted-foreground mt-1">
+              <h1 className="text-3xl font-bold tracking-tight">Event Information</h1>
+              <p className="text-sm text-muted-foreground mt-1">
                 Enter the details for your new event
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => router.push("/admin/events")}
-            >
+            <Button variant="outline" onClick={() => router.push('/admin/events')}>
               Cancel
             </Button>
           </div>
@@ -214,10 +205,7 @@ const AdminEventCreate = () => {
             {/* Form Section */}
             <div className="md:col-span-2">
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <Card>
                     <CardHeader>
                       {/* <CardTitle>Event Information</CardTitle>
@@ -233,14 +221,10 @@ const AdminEventCreate = () => {
                           <FormItem>
                             <FormLabel>Event Title</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="Spring Fundraiser Gala"
-                                {...field}
-                              />
+                              <Input placeholder="Spring Fundraiser Gala" {...field} />
                             </FormControl>
                             <FormDescription>
-                              The name of your event as it will appear to
-                              attendees
+                              The name of your event as it will appear to attendees
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -284,17 +268,14 @@ const AdminEventCreate = () => {
                                     >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
                                       {field.value ? (
-                                        format(field.value, "PPP")
+                                        format(field.value, 'PPP')
                                       ) : (
                                         <span>Pick a date</span>
                                       )}
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
-                                >
+                                <PopoverContent className="w-auto p-0" align="start">
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
@@ -303,9 +284,7 @@ const AdminEventCreate = () => {
                                   />
                                 </PopoverContent>
                               </Popover>
-                              <FormDescription>
-                                When the event begins
-                              </FormDescription>
+                              <FormDescription>When the event begins</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -326,31 +305,24 @@ const AdminEventCreate = () => {
                                     >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
                                       {field.value ? (
-                                        format(field.value, "PPP")
+                                        format(field.value, 'PPP')
                                       ) : (
                                         <span>Pick a date</span>
                                       )}
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
-                                >
+                                <PopoverContent className="w-auto p-0" align="start">
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
                                     onSelect={field.onChange}
                                     initialFocus
-                                    disabled={(date) =>
-                                      date < form.getValues("start_date")
-                                    }
+                                    disabled={(date) => date < form.getValues('start_date')}
                                   />
                                 </PopoverContent>
                               </Popover>
-                              <FormDescription>
-                                When the event concludes
-                              </FormDescription>
+                              <FormDescription>When the event concludes</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -365,16 +337,9 @@ const AdminEventCreate = () => {
                             <FormItem>
                               <FormLabel>Price ($)</FormLabel>
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  {...field}
-                                />
+                                <Input type="number" min="0" step="0.01" {...field} />
                               </FormControl>
-                              <FormDescription>
-                                Standard entry price
-                              </FormDescription>
+                              <FormDescription>Standard entry price</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -387,16 +352,9 @@ const AdminEventCreate = () => {
                             <FormItem>
                               <FormLabel>Target Amount ($)</FormLabel>
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  {...field}
-                                />
+                                <Input type="number" min="0" step="0.01" {...field} />
                               </FormControl>
-                              <FormDescription>
-                                Fundraising goal for this event
-                              </FormDescription>
+                              <FormDescription>Fundraising goal for this event</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -410,10 +368,7 @@ const AdminEventCreate = () => {
                           <FormItem>
                             <FormLabel>Location</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="123 Main St, City, State"
-                                {...field}
-                              />
+                              <Input placeholder="123 Main St, City, State" {...field} />
                             </FormControl>
                             <FormDescription>
                               Physical address or virtual meeting link
@@ -432,10 +387,7 @@ const AdminEventCreate = () => {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Status</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select a status" />
@@ -446,9 +398,7 @@ const AdminEventCreate = () => {
                                   <SelectItem value="0">Inactive</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <FormDescription>
-                                Is this event currently active?
-                              </FormDescription>
+                              <FormDescription>Is this event currently active?</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -502,10 +452,7 @@ const AdminEventCreate = () => {
                       <div>
                         <FormLabel>Featured Image</FormLabel>
                         <div className="mt-2">
-                          <Label
-                            htmlFor="featured_image"
-                            className="cursor-pointer"
-                          >
+                          <Label htmlFor="featured_image" className="cursor-pointer">
                             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center">
                               {imagePreview ? (
                                 <div className="w-full">
@@ -539,17 +486,10 @@ const AdminEventCreate = () => {
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={() => form.reset()}
-                      >
+                      <Button variant="outline" type="button" onClick={() => form.reset()}>
                         Reset
                       </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                         Create Event
                       </Button>
                     </CardFooter>
@@ -584,24 +524,20 @@ const AdminEventCreate = () => {
 
                     <div>
                       <h3 className="text-lg font-semibold">
-                        {form.watch("title") || "Event Title"}
+                        {form.watch('title') || 'Event Title'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
-                          variant={
-                            form.watch("status") === "1"
-                              ? "default"
-                              : "secondary"
-                          }
+                          variant={form.watch('status') === '1' ? 'default' : 'secondary'}
                           className={
-                            form.watch("status") === "1"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                            form.watch('status') === '1'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }
                         >
-                          {form.watch("status") === "1" ? "Active" : "Inactive"}
+                          {form.watch('status') === '1' ? 'Active' : 'Inactive'}
                         </Badge>
-                        {form.watch("is_featured") && (
+                        {form.watch('is_featured') && (
                           <Badge
                             variant="outline"
                             className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300"
@@ -616,43 +552,36 @@ const AdminEventCreate = () => {
                       <div className="grid grid-cols-3 gap-1">
                         <span className="text-muted-foreground">Dates:</span>
                         <span className="col-span-2">
-                          {form.watch("start_date") &&
-                            format(form.watch("start_date"), "MMM d, yyyy")}
-                          {" - "}
-                          {form.watch("end_date") &&
-                            format(form.watch("end_date"), "MMM d, yyyy")}
+                          {form.watch('start_date') &&
+                            format(form.watch('start_date'), 'MMM d, yyyy')}
+                          {' - '}
+                          {form.watch('end_date') && format(form.watch('end_date'), 'MMM d, yyyy')}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1 mt-1">
                         <span className="text-muted-foreground">Location:</span>
-                        <span className="col-span-2">
-                          {form.watch("location") || "TBD"}
-                        </span>
+                        <span className="col-span-2">{form.watch('location') || 'TBD'}</span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1 mt-1">
                         <span className="text-muted-foreground">Price:</span>
                         <span className="col-span-2">
-                          ${form.watch("price")}
-                          {form.watch("is_fixed_donation") && " (Fixed)"}
+                          ${form.watch('price')}
+                          {form.watch('is_fixed_donation') && ' (Fixed)'}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1 mt-1">
                         <span className="text-muted-foreground">Target:</span>
-                        <span className="col-span-2">
-                          ${form.watch("target_amount")}
-                        </span>
+                        <span className="col-span-2">${form.watch('target_amount')}</span>
                       </div>
                     </div>
 
                     <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                      <p className="text-xs text-gray-500 mb-2">
-                        Description Preview:
-                      </p>
+                      <p className="text-xs text-gray-500 mb-2">Description Preview:</p>
                       <p className="text-sm line-clamp-5">
-                        {form.watch("description") || "No description yet..."}
+                        {form.watch('description') || 'No description yet...'}
                       </p>
                     </div>
                   </div>

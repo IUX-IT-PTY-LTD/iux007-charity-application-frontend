@@ -1,15 +1,15 @@
 // components/blog/PostPagination.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const PostPagination = ({
   currentPage,
@@ -42,8 +42,8 @@ const PostPagination = ({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
       <div className="text-sm text-muted-foreground">
-        Showing <span className="font-medium">{startItem}</span> to{" "}
-        <span className="font-medium">{endItem}</span> of{" "}
+        Showing <span className="font-medium">{startItem}</span> to{' '}
+        <span className="font-medium">{endItem}</span> of{' '}
         <span className="font-medium">{totalItems}</span> posts
       </div>
 
@@ -70,7 +70,7 @@ const PostPagination = ({
             {getPageNumbers().map((page) => (
               <Button
                 key={page}
-                variant={page === currentPage ? "default" : "outline"}
+                variant={page === currentPage ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setCurrentPage(page)}
                 className="h-8 w-8 p-0"
@@ -83,9 +83,7 @@ const PostPagination = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-            }
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
           >
             Next

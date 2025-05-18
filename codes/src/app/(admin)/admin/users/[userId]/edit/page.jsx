@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { ArrowLeft, Save, Loader2, XCircle } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { ArrowLeft, Save, Loader2, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Import shadcn components
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -15,20 +15,20 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const UserEditPage = ({ params }) => {
   const router = useRouter();
@@ -41,24 +41,24 @@ const UserEditPage = ({ params }) => {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "",
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
     newsletter: false,
-    street: "",
-    city: "",
-    state: "",
-    zip: "",
-    country: "",
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
+    country: '',
   });
 
   // Format name initials for avatar
   const getInitials = (name) => {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   };
@@ -67,10 +67,10 @@ const UserEditPage = ({ params }) => {
   useEffect(() => {
     if (user) {
       setPageTitle(`Edit User - ${user.name}`);
-      setPageSubtitle("Update user information");
+      setPageSubtitle('Update user information');
     } else {
-      setPageTitle("Edit User");
-      setPageSubtitle("Loading user data...");
+      setPageTitle('Edit User');
+      setPageSubtitle('Loading user data...');
     }
   }, [user, setPageTitle, setPageSubtitle]);
 
@@ -81,18 +81,18 @@ const UserEditPage = ({ params }) => {
 
       try {
         if (!params?.userId) {
-          toast.error("Missing user ID");
-          router.push("/admin/users");
+          toast.error('Missing user ID');
+          router.push('/admin/users');
           return;
         }
 
         // Fetch user data from localStorage
-        const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+        const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
         const foundUser = storedUsers.find((u) => u.id === params.userId);
 
         if (!foundUser) {
-          toast.error("User not found");
-          router.push("/admin/users");
+          toast.error('User not found');
+          router.push('/admin/users');
           return;
         }
 
@@ -100,16 +100,16 @@ const UserEditPage = ({ params }) => {
 
         // Initialize form data
         setFormData({
-          name: foundUser.name || "",
-          email: foundUser.email || "",
-          phone: foundUser.phone || "",
-          role: foundUser.role || "",
+          name: foundUser.name || '',
+          email: foundUser.email || '',
+          phone: foundUser.phone || '',
+          role: foundUser.role || '',
           newsletter: foundUser.newsletter || false,
-          street: foundUser.address?.street || "",
-          city: foundUser.address?.city || "",
-          state: foundUser.address?.state || "",
-          zip: foundUser.address?.zip || "",
-          country: foundUser.address?.country || "",
+          street: foundUser.address?.street || '',
+          city: foundUser.address?.city || '',
+          state: foundUser.address?.state || '',
+          zip: foundUser.address?.zip || '',
+          country: foundUser.address?.country || '',
         });
 
         /* API Implementation (Commented out for future use)
@@ -136,8 +136,8 @@ const UserEditPage = ({ params }) => {
         });
         */
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to load user data");
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load user data');
       } finally {
         setIsLoading(false);
       }
@@ -189,13 +189,11 @@ const UserEditPage = ({ params }) => {
       }
 
       // Update user in localStorage
-      const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
-      const updatedUsers = storedUsers.map((u) =>
-        u.id === user.id ? updatedUser : u
-      );
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      const updatedUsers = storedUsers.map((u) => (u.id === user.id ? updatedUser : u));
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
 
-      toast.success("User updated successfully");
+      toast.success('User updated successfully');
 
       // Navigate back to user details
       setTimeout(() => {
@@ -220,8 +218,8 @@ const UserEditPage = ({ params }) => {
       router.push(`/admin/users/${user.id}/details`);
       */
     } catch (error) {
-      console.error("Error updating user:", error);
-      toast.error("Failed to update user");
+      console.error('Error updating user:', error);
+      toast.error('Failed to update user');
     } finally {
       setIsSaving(false);
     }
@@ -254,7 +252,7 @@ const UserEditPage = ({ params }) => {
             The user you're looking for could not be found.
           </p>
           <button
-            onClick={() => router.push("/admin/users")}
+            onClick={() => router.push('/admin/users')}
             className="text-primary hover:underline"
           >
             Return to users list
@@ -299,7 +297,7 @@ const UserEditPage = ({ params }) => {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => handleChange("name", e.target.value)}
+                      onChange={(e) => handleChange('name', e.target.value)}
                       required
                     />
                   </div>
@@ -310,7 +308,7 @@ const UserEditPage = ({ params }) => {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
+                      onChange={(e) => handleChange('email', e.target.value)}
                       required
                     />
                   </div>
@@ -319,8 +317,8 @@ const UserEditPage = ({ params }) => {
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
-                      value={formData.phone || ""}
-                      onChange={(e) => handleChange("phone", e.target.value)}
+                      value={formData.phone || ''}
+                      onChange={(e) => handleChange('phone', e.target.value)}
                     />
                   </div>
 
@@ -328,7 +326,7 @@ const UserEditPage = ({ params }) => {
                     <Label htmlFor="role">Role</Label>
                     <Select
                       value={formData.role}
-                      onValueChange={(value) => handleChange("role", value)}
+                      onValueChange={(value) => handleChange('role', value)}
                       required
                     >
                       <SelectTrigger id="role">
@@ -357,7 +355,7 @@ const UserEditPage = ({ params }) => {
                     <Input
                       id="street"
                       value={formData.street}
-                      onChange={(e) => handleChange("street", e.target.value)}
+                      onChange={(e) => handleChange('street', e.target.value)}
                     />
                   </div>
 
@@ -366,7 +364,7 @@ const UserEditPage = ({ params }) => {
                     <Input
                       id="city"
                       value={formData.city}
-                      onChange={(e) => handleChange("city", e.target.value)}
+                      onChange={(e) => handleChange('city', e.target.value)}
                     />
                   </div>
 
@@ -375,7 +373,7 @@ const UserEditPage = ({ params }) => {
                     <Input
                       id="state"
                       value={formData.state}
-                      onChange={(e) => handleChange("state", e.target.value)}
+                      onChange={(e) => handleChange('state', e.target.value)}
                     />
                   </div>
 
@@ -384,7 +382,7 @@ const UserEditPage = ({ params }) => {
                     <Input
                       id="zip"
                       value={formData.zip}
-                      onChange={(e) => handleChange("zip", e.target.value)}
+                      onChange={(e) => handleChange('zip', e.target.value)}
                     />
                   </div>
 
@@ -393,7 +391,7 @@ const UserEditPage = ({ params }) => {
                     <Input
                       id="country"
                       value={formData.country}
-                      onChange={(e) => handleChange("country", e.target.value)}
+                      onChange={(e) => handleChange('country', e.target.value)}
                     />
                   </div>
                 </div>
@@ -415,9 +413,7 @@ const UserEditPage = ({ params }) => {
                   <Switch
                     id="newsletter"
                     checked={formData.newsletter}
-                    onCheckedChange={(checked) =>
-                      handleChange("newsletter", checked)
-                    }
+                    onCheckedChange={(checked) => handleChange('newsletter', checked)}
                   />
                 </div>
               </div>

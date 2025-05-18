@@ -5,19 +5,65 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { FaDonate, FaHandHoldingHeart, FaTrashAlt } from 'react-icons/fa';
 import { MdOutlineEmojiPeople } from 'react-icons/md';
+import { useSelector, useDispatch } from 'react-redux';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import CheckoutForm from '@/components/stripe/CherckoutForm';
 
 const Checkout = () => {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [adminContributionAmount, setAdminContributionAmount] = React.useState(0);
   const [cartItems, setCartItems] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const userInfo = useSelector((state) => state.user.user);
+  console.log(userInfo);
+  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
+  /** Stripe Integration */
+  const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
   useEffect(() => {
     // Get cart items from localStorage when component mounts
     const cart = localStorage.getItem('cartItems');
     if (cart) {
-      setCartItems(JSON.parse(cart));
+      const parsedCart = JSON.parse(cart);
+      setCartItems(parsedCart);
+      setTotalAmount(
+        parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) +
+          adminContributionAmount
+      );
     }
   }, []);
+
+  // Add this function at the component level:
+  const handleIncreaseQuantity = (itemId) => {
+    setCartItems((prev) => {
+      const updatedCart = prev.map((i) =>
+        i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
+      );
+      // Update localStorage with new cart data
+      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+      setTotalAmount(
+        updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) +
+          adminContributionAmount
+      );
+      return updatedCart;
+    });
+  };
+
+  const handleDecreaseQuantity = (itemId) => {
+    setCartItems((prev) => {
+      const updatedCart = prev.map((i) =>
+        i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i
+      );
+      // Update localStorage with new cart data
+      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+      setTotalAmount(
+        updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) +
+          adminContributionAmount
+      );
+      return updatedCart;
+    });
+  };
 
   const paymentMethods = [
     {
@@ -41,7 +87,7 @@ const Checkout = () => {
             <div className="relative flex justify-between items-center mb-12">
               <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 bg-gray-200">
                 <div
-                  className={`h-full bg-primary transition-all duration-300 ${
+                  className={`h-full bg-primary transition-all ${
                     currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'
                   }`}
                 ></div>
@@ -55,7 +101,7 @@ const Checkout = () => {
               ].map((step, index) => (
                 <div key={index} className="relative z-10 text-center">
                   <div
-                    className={`w-16 h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                    className={`w-16 h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all ${
                       currentStep > index
                         ? 'bg-primary border-primary text-white'
                         : currentStep === index
@@ -118,28 +164,16 @@ const Checkout = () => {
                             <div className="mt-4 flex items-center space-x-4">
                               <div className="flex items-center border rounded-lg">
                                 <button
-                                  onClick={() => {
-                                    if (item.quantity > 1) {
-                                      setCartItems((prev) =>
-                                        prev.map((i) =>
-                                          i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
-                                        )
-                                      );
-                                    }
-                                  }}
+                                  onClick={() =>
+                                    item.quantity > 1 ? handleDecreaseQuantity(item.id) : null
+                                  }
                                   className="px-3 py-1 text-gray-600 hover:bg-gray-100"
                                 >
                                   -
                                 </button>
                                 <span className="px-4 py-1 border-x">{item.quantity}</span>
                                 <button
-                                  onClick={() => {
-                                    setCartItems((prev) =>
-                                      prev.map((i) =>
-                                        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-                                      )
-                                    );
-                                  }}
+                                  onClick={() => handleIncreaseQuantity(item.id)}
                                   className="px-3 py-1 text-gray-600 hover:bg-gray-100"
                                 >
                                   +
@@ -181,6 +215,13 @@ const Checkout = () => {
                               // Update localStorage after removing item
                               const updatedCart = cartItems.filter((i) => i.id !== item.id);
                               localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+                              setTotalAmount(
+                                updatedCart.reduce(
+                                  (acc, item) => acc + item.price * item.quantity,
+                                  0
+                                )
+                              );
+                              // Update totalAmount state with the updated total amount
                             }}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
                           >
@@ -244,13 +285,11 @@ const Checkout = () => {
                       <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
 
                       <div className="space-y-4">
+                        {/* Calculate total amount and store in variable for reuse */}
+
                         <div className="flex justify-between">
                           <span className="text-gray-600">Subtotal</span>
-                          <span className="font-semibold">
-                            $
-                            {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) +
-                              adminContributionAmount}
-                          </span>
+                          <span className="font-semibold">${totalAmount}</span>
                         </div>
 
                         <button
@@ -271,9 +310,27 @@ const Checkout = () => {
               <form className="max-w-3xl mx-auto space-y-8">
                 <div className="grid md:grid-cols-3 gap-6">
                   {[
-                    { label: 'Full Name', type: 'text', placeholder: 'Enter your full name' },
-                    { label: 'Email', type: 'email', placeholder: 'Enter your email' },
-                    { label: 'Phone', type: 'tel', placeholder: 'Enter your phone number' },
+                    {
+                      label: 'Full Name',
+                      type: 'text',
+                      placeholder: 'Enter your full name',
+                      value: userInfo?.name || '',
+                      key: 'name',
+                    },
+                    {
+                      label: 'Email',
+                      type: 'email',
+                      placeholder: 'Enter your email',
+                      value: userInfo?.email || '',
+                      key: 'email',
+                    },
+                    {
+                      label: 'Phone',
+                      type: 'tel',
+                      placeholder: 'Enter your phone number',
+                      value: userInfo?.phone || '',
+                      key: 'phone',
+                    },
                   ].map((field, index) => (
                     <div key={index}>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -282,14 +339,20 @@ const Checkout = () => {
                       <input
                         type={field.type}
                         placeholder={field.placeholder}
-                        // className="w-full form-input rounded-lg border-gray-300 p-2.5 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        value={field.value}
+                        onChange={(e) => {
+                          const updatedUserInfo = {
+                            ...userInfo,
+                            [field.key]: e.target.value,
+                          };
+                        }}
                         className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200 text-gray-700 text-base outline-none"
                       />
                     </div>
                   ))}
                 </div>
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <input
                     type="checkbox"
                     id="create-account"
@@ -298,17 +361,19 @@ const Checkout = () => {
                   <label htmlFor="create-account" className="ml-2 text-gray-700">
                     Create an account for faster checkout
                   </label>
-                </div>
+                </div> */}
 
-                <div className="border-t pt-8">
-                  <div className="text-center space-y-4">
-                    <h3 className="text-xl font-semibold">Already have an account?</h3>
-                    <p className="text-gray-600">Sign in for a faster checkout experience</p>
-                    <button className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
-                      Sign In
-                    </button>
+                {!isAuthenticated && (
+                  <div className="border-t pt-8">
+                    <div className="text-center space-y-4">
+                      <h3 className="text-xl font-semibold">Already have an account?</h3>
+                      <p className="text-gray-600">Sign in for a faster checkout experience</p>
+                      <button className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
+                        Sign In
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="flex justify-between pt-8 border-t">
                   <button
@@ -332,8 +397,11 @@ const Checkout = () => {
             {/* Step 3: Payment */}
             {currentStep === 3 && (
               <div className="max-w-3xl mx-auto space-y-8">
-                <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
-                  {paymentMethods.map((method) => (
+                <div className="grid">
+                  <Elements stripe={stripePromise}>
+                    <CheckoutForm totalAmount={totalAmount} />
+                  </Elements>
+                  {/* {paymentMethods.map((method) => (
                     <div
                       key={method.id}
                       onClick={() => setPaymentMethod(method)}
@@ -354,7 +422,7 @@ const Checkout = () => {
                         className="w-full h-auto object-contain"
                       />
                     </div>
-                  ))}
+                  ))} */}
                 </div>
 
                 <div className="flex justify-between pt-8 border-t">

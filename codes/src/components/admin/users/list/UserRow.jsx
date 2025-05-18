@@ -1,8 +1,8 @@
 // components/users/UserRow.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { format, parseISO } from "date-fns";
+import React from 'react';
+import { format, parseISO } from 'date-fns';
 import {
   MoreHorizontal,
   User,
@@ -13,17 +13,17 @@ import {
   Phone,
   Calendar,
   DollarSign,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -31,25 +31,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 const UserRow = ({ user, onDelete }) => {
   const router = useRouter();
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
 
   // Format date
-  const registeredDate = user.created_at
-    ? format(parseISO(user.created_at), "MMM d, yyyy")
-    : "N/A";
+  const registeredDate = user.created_at ? format(parseISO(user.created_at), 'MMM d, yyyy') : 'N/A';
 
   // Format name initials for avatar
   const getInitials = (name) => {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   };
@@ -80,7 +78,7 @@ const UserRow = ({ user, onDelete }) => {
         <div
           className="flex items-center space-x-4"
           onClick={handleViewUser}
-          style={{ cursor: "pointer" }}
+          style={{ cursor: 'pointer' }}
         >
           <Avatar className="h-10 w-10">
             <AvatarImage src={user.avatar} alt={user.name} />
@@ -102,9 +100,7 @@ const UserRow = ({ user, onDelete }) => {
 
           <div className="hidden md:flex items-center">
             <DollarSign className="h-4 w-4 mr-1 text-muted-foreground" />
-            <span className="text-sm">
-              {user.donation_count || 0} donations
-            </span>
+            <span className="text-sm">{user.donation_count || 0} donations</span>
           </div>
 
           {/* <div className="hidden md:block text-sm">
@@ -146,15 +142,11 @@ const UserRow = ({ user, onDelete }) => {
           <DialogHeader>
             <DialogTitle>Confirm User Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete user "{user.name}"? This action
-              cannot be undone.
+              Are you sure you want to delete user "{user.name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteUser}>

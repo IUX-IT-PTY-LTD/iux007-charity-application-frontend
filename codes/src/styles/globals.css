@@ -267,10 +267,6 @@ li.active a::after,
   }
 }
 
-
-
-
-
 @layer base {
   * {
     @apply border-border;

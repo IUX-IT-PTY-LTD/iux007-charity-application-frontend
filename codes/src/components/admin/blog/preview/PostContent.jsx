@@ -1,8 +1,8 @@
 // components/blog/PostContent.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { Separator } from "@/components/ui/separator";
+import React from 'react';
+import { Separator } from '@/components/ui/separator';
 
 const PostContent = ({ content }) => {
   return (

@@ -5,7 +5,7 @@ const loadInitialState = () => {
     const savedUser = localStorage.getItem('user');
     const savedAccessToken = localStorage.getItem('accessToken');
     const savedRefreshToken = localStorage.getItem('refreshToken');
-    
+
     return {
       user: savedUser ? JSON.parse(savedUser) : null,
       accessToken: savedAccessToken || null,
@@ -31,29 +31,29 @@ const userSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       // Add debug logging to check full payload structure
-      console.log("Full action payload:", action.payload);
-      
+      console.log('Full action payload:', action.payload);
+
       // Safely access nested properties
       const accessToken = action.payload?.access_token;
       const refreshToken = action.payload?.refresh_token;
       const userData = action.payload?.user || action.payload;
-      
+
       // Update localStorage
       if (accessToken) localStorage.setItem('accessToken', accessToken);
       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       if (userData) localStorage.setItem('user', JSON.stringify(userData));
-      
+
       // Update state
       state.user = userData;
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
       state.isAuthenticated = !!accessToken;
-      
+
       // Verify state updates
-      console.log("Updated state:", {
+      console.log('Updated state:', {
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
       });
     },
     getUser: (state) => {
@@ -64,7 +64,7 @@ const userSlice = createSlice({
       localStorage.removeItem('user');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      
+
       // Clear state
       state.user = null;
       state.accessToken = null;

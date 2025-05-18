@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from "react";
-import Link from "next/link";
-import { Github } from "lucide-react";
+import React from 'react';
+import Link from 'next/link';
+import { Github } from 'lucide-react';
 
 const AdminFooter = () => {
   const currentYear = new Date().getFullYear();
@@ -54,7 +54,7 @@ const AdminFooter = () => {
         {/* Optional secondary footer with credit */}
         <div className="mt-2 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500">
           <span>
-            Developed by{" "}
+            Developed by{' '}
             <a
               href="https://iuxit.com.au/"
               className="hover:text-gray-600 dark:hover:text-gray-300"

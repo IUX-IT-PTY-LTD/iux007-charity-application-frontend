@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import Header from '@/components/shared/header';
 import Footer from '@/components/shared/footer';
 import { Poppins } from 'next/font/google';
@@ -20,17 +20,16 @@ const poppins = Poppins({
 
 export default function RootLayout({ children }) {
   return (
-      <html lang="en">
-        <body className={poppins.className}>
-          <Provider store={store}>
+    <html lang="en">
+      <body className={poppins.className}>
+        <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <Header />
             {children}
             <Footer />
           </PersistGate>
-          </Provider>
-        </body>
-      </html>
-    
+        </Provider>
+      </body>
+    </html>
   );
 }

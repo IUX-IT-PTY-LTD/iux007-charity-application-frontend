@@ -1,8 +1,8 @@
 // components/users/UserStats.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { Users, DollarSign, Clock } from "lucide-react";
+import React from 'react';
+import { Users, DollarSign, Clock } from 'lucide-react';
 
 const StatCard = ({ title, value, icon: Icon, description }) => {
   return (
@@ -16,9 +16,7 @@ const StatCard = ({ title, value, icon: Icon, description }) => {
           <Icon className="h-5 w-5 text-primary" />
         </div>
       </div>
-      {description && (
-        <p className="text-xs text-muted-foreground mt-2">{description}</p>
-      )}
+      {description && <p className="text-xs text-muted-foreground mt-2">{description}</p>}
     </div>
   );
 };
@@ -32,26 +30,26 @@ const UserStats = ({
 }) => {
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
   // Format date
   const formatUpdateDate = (date) => {
-    if (!date) return "N/A";
+    if (!date) return 'N/A';
 
     const now = new Date();
     const updateDate = new Date(date);
     const diffInHours = Math.floor((now - updateDate) / (1000 * 60 * 60));
 
     if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours !== 1 ? "s" : ""} ago`;
+      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
     } else {
       const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays} day${diffInDays !== 1 ? "s" : ""} ago`;
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
     }
   };
 

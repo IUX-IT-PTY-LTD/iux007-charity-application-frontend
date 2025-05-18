@@ -1,11 +1,11 @@
 // components/blog/FeaturedImageUploader.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { ImageIcon, X, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import React, { useState } from 'react';
+import { ImageIcon, X, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 const FeaturedImageUploader = ({ value, onChange }) => {
   const [dragActive, setDragActive] = useState(false);
@@ -15,9 +15,9 @@ const FeaturedImageUploader = ({ value, onChange }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (e.type === "dragenter" || e.type === "dragover") {
+    if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
-    } else if (e.type === "dragleave") {
+    } else if (e.type === 'dragleave') {
       setDragActive(false);
     }
   };
@@ -44,7 +44,7 @@ const FeaturedImageUploader = ({ value, onChange }) => {
 
   // Process the file
   const handleFile = (file) => {
-    if (file.type.startsWith("image/")) {
+    if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => {
         onChange(e.target.result);
@@ -62,11 +62,7 @@ const FeaturedImageUploader = ({ value, onChange }) => {
     <div className="space-y-4">
       {value ? (
         <div className="relative">
-          <img
-            src={value}
-            alt="Featured"
-            className="w-full h-64 object-cover rounded-lg"
-          />
+          <img src={value} alt="Featured" className="w-full h-64 object-cover rounded-lg" />
           <Button
             variant="destructive"
             size="icon"
@@ -79,7 +75,7 @@ const FeaturedImageUploader = ({ value, onChange }) => {
       ) : (
         <div
           className={`border-2 border-dashed rounded-lg p-12 text-center ${
-            dragActive ? "border-primary bg-muted" : "border-muted-foreground"
+            dragActive ? 'border-primary bg-muted' : 'border-muted-foreground'
           }`}
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
@@ -91,12 +87,8 @@ const FeaturedImageUploader = ({ value, onChange }) => {
               <div className="rounded-full bg-muted p-4">
                 <Upload className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold">
-                Drag & drop or click to upload
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                PNG, JPG or WEBP (max. 4MB)
-              </p>
+              <h3 className="text-lg font-semibold">Drag & drop or click to upload</h3>
+              <p className="text-sm text-muted-foreground">PNG, JPG or WEBP (max. 4MB)</p>
               <Button variant="secondary" className="mt-2">
                 Select Image
               </Button>

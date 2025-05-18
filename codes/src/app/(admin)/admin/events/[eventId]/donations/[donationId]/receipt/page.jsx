@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Import receipt components
-import ReceiptHeader from "@/components/admin/donations/receipt/ReceiptHeader";
-import ReceiptContent from "@/components/admin/donations/receipt/ReceiptContent";
-import ReceiptFooter from "@/components/admin/donations/receipt/ReceiptFooter";
-import ReceiptActions from "@/components/admin/donations/receipt/ReceiptActions";
+import ReceiptHeader from '@/components/admin/donations/receipt/ReceiptHeader';
+import ReceiptContent from '@/components/admin/donations/receipt/ReceiptContent';
+import ReceiptFooter from '@/components/admin/donations/receipt/ReceiptFooter';
+import ReceiptActions from '@/components/admin/donations/receipt/ReceiptActions';
 
 // Import shadcn components
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from '@/components/ui/card';
 
 const ReceiptPage = ({ params }) => {
   const router = useRouter();
@@ -27,18 +27,18 @@ const ReceiptPage = ({ params }) => {
 
   // Organization information (in production, this would come from a config or API)
   const organizationInfo = {
-    name: "Hope Charity Foundation",
-    website: "www.hopecharityfoundation.org",
-    email: "donations@hopecharityfoundation.org",
-    phone: "+1 (555) 123-4567",
+    name: 'Hope Charity Foundation',
+    website: 'www.hopecharityfoundation.org',
+    email: 'donations@hopecharityfoundation.org',
+    phone: '+1 (555) 123-4567',
     address: {
-      line1: "123 Charity Lane",
-      line2: "Suite 101",
-      city: "Springfield",
-      state: "IL",
-      zip: "62701",
-      country: "United States",
-      taxId: "EIN: 12-3456789",
+      line1: '123 Charity Lane',
+      line2: 'Suite 101',
+      city: 'Springfield',
+      state: 'IL',
+      zip: '62701',
+      country: 'United States',
+      taxId: 'EIN: 12-3456789',
     },
   };
 
@@ -48,8 +48,8 @@ const ReceiptPage = ({ params }) => {
       setPageTitle(`Donation Receipt - ${donation.donor_name}`);
       setPageSubtitle(`Receipt for donation to ${event.title}`);
     } else {
-      setPageTitle("Donation Receipt");
-      setPageSubtitle("Loading receipt...");
+      setPageTitle('Donation Receipt');
+      setPageSubtitle('Loading receipt...');
     }
   }, [donation, event, setPageTitle, setPageSubtitle]);
 
@@ -60,18 +60,18 @@ const ReceiptPage = ({ params }) => {
 
       try {
         if (!params.eventId || !params.donationId) {
-          toast.error("Missing event or donation ID");
-          router.push("/admin/events");
+          toast.error('Missing event or donation ID');
+          router.push('/admin/events');
           return;
         }
 
         // Fetch event data from localStorage
-        const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
+        const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
         const foundEvent = storedEvents.find((e) => e.id === params.eventId);
 
         if (!foundEvent) {
-          toast.error("Event not found");
-          router.push("/admin/events");
+          toast.error('Event not found');
+          router.push('/admin/events');
           return;
         }
 
@@ -81,18 +81,16 @@ const ReceiptPage = ({ params }) => {
         const storedDonations = localStorage.getItem(`donations_${params.eventId}`);
 
         if (!storedDonations) {
-          toast.error("No donations found for this event");
+          toast.error('No donations found for this event');
           router.push(`/admin/events/${params.eventId}/donations`);
           return;
         }
 
         const donationData = JSON.parse(storedDonations);
-        const foundDonation = donationData.find(
-          (d) => d.id === params.donationId
-        );
+        const foundDonation = donationData.find((d) => d.id === params.donationId);
 
         if (!foundDonation) {
-          toast.error("Donation not found");
+          toast.error('Donation not found');
           router.push(`/admin/events/${params.eventId}/donations`);
           return;
         }
@@ -117,8 +115,8 @@ const ReceiptPage = ({ params }) => {
         setDonation(donationData);
         */
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to load receipt data");
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load receipt data');
       } finally {
         setIsLoading(false);
       }

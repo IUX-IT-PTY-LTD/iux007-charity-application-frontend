@@ -1,26 +1,24 @@
 // components/donations/receipt/ReceiptHeader.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { Heart } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import Image from "next/image";
+import React from 'react';
+import { Heart } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import Image from 'next/image';
 
 const ReceiptHeader = ({
   donationId,
   donationDate,
-  organizationName = "Charity Organization",
-  organizationLogo = "/images/logo.png", // Default logo path
+  organizationName = 'Charity Organization',
+  organizationLogo = '/images/logo.png', // Default logo path
   organizationAddress,
   organizationContact,
 }) => {
   // Format date
-  const formattedDate = donationDate
-    ? format(parseISO(donationDate), "MMMM d, yyyy")
-    : "N/A";
+  const formattedDate = donationDate ? format(parseISO(donationDate), 'MMMM d, yyyy') : 'N/A';
 
   // Generate receipt number
-  const receiptNumber = `R-${donationId.replace("DON-", "")}`;
+  const receiptNumber = `R-${donationId.replace('DON-', '')}`;
 
   return (
     <div className="mb-8">
@@ -33,9 +31,7 @@ const ReceiptHeader = ({
           <div>
             <h2 className="text-2xl font-bold">{organizationName}</h2>
             {organizationContact && (
-              <p className="text-sm text-muted-foreground">
-                {organizationContact}
-              </p>
+              <p className="text-sm text-muted-foreground">{organizationContact}</p>
             )}
           </div>
         </div>
@@ -61,8 +57,7 @@ const ReceiptHeader = ({
           <div>{organizationAddress.line1}</div>
           {organizationAddress.line2 && <div>{organizationAddress.line2}</div>}
           <div>
-            {organizationAddress.city}, {organizationAddress.state}{" "}
-            {organizationAddress.zip}
+            {organizationAddress.city}, {organizationAddress.state} {organizationAddress.zip}
           </div>
           <div>{organizationAddress.country}</div>
           {organizationAddress.taxId && (

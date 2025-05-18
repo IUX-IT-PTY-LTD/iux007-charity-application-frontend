@@ -1,17 +1,13 @@
 // components/blog/SEOMetadata.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ChevronDown, ChevronUp, Globe } from "lucide-react";
+import React, { useState } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ChevronDown, ChevronUp, Globe } from 'lucide-react';
 
 const SEOMetadata = ({ metadata, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,11 +20,7 @@ const SEOMetadata = ({ metadata, onChange }) => {
   };
 
   return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      className="w-full border rounded-lg p-4"
-    >
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full border rounded-lg p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Globe className="h-5 w-5 text-muted-foreground" />
@@ -36,11 +28,7 @@ const SEOMetadata = ({ metadata, onChange }) => {
         </div>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" size="sm">
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </CollapsibleTrigger>
       </div>
@@ -51,12 +39,11 @@ const SEOMetadata = ({ metadata, onChange }) => {
           <Input
             id="meta-title"
             placeholder="Meta title for SEO"
-            value={metadata.title || ""}
-            onChange={(e) => handleChange("title", e.target.value)}
+            value={metadata.title || ''}
+            onChange={(e) => handleChange('title', e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
-            {metadata.title?.length || 0}/60 - Recommended length is 50-60
-            characters
+            {metadata.title?.length || 0}/60 - Recommended length is 50-60 characters
           </p>
         </div>
 
@@ -65,13 +52,12 @@ const SEOMetadata = ({ metadata, onChange }) => {
           <Textarea
             id="meta-description"
             placeholder="Meta description for SEO"
-            value={metadata.description || ""}
-            onChange={(e) => handleChange("description", e.target.value)}
+            value={metadata.description || ''}
+            onChange={(e) => handleChange('description', e.target.value)}
             rows={3}
           />
           <p className="text-xs text-muted-foreground">
-            {metadata.description?.length || 0}/160 - Recommended length is
-            150-160 characters
+            {metadata.description?.length || 0}/160 - Recommended length is 150-160 characters
           </p>
         </div>
 
@@ -80,12 +66,10 @@ const SEOMetadata = ({ metadata, onChange }) => {
           <Input
             id="slug"
             placeholder="URL slug"
-            value={metadata.slug || ""}
-            onChange={(e) => handleChange("slug", e.target.value)}
+            value={metadata.slug || ''}
+            onChange={(e) => handleChange('slug', e.target.value)}
           />
-          <p className="text-xs text-muted-foreground">
-            The URL-friendly version of the title
-          </p>
+          <p className="text-xs text-muted-foreground">The URL-friendly version of the title</p>
         </div>
 
         <div className="space-y-2">
@@ -93,8 +77,8 @@ const SEOMetadata = ({ metadata, onChange }) => {
           <Input
             id="canonical-url"
             placeholder="https://example.com/original-post"
-            value={metadata.canonicalUrl || ""}
-            onChange={(e) => handleChange("canonicalUrl", e.target.value)}
+            value={metadata.canonicalUrl || ''}
+            onChange={(e) => handleChange('canonicalUrl', e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
             Use this if this content is a duplicate of content elsewhere
@@ -106,10 +90,10 @@ const SEOMetadata = ({ metadata, onChange }) => {
             <h4 className="text-sm font-medium mb-2">Search Engine Preview</h4>
             <div className="space-y-1">
               <p className="text-blue-600 text-sm font-medium truncate">
-                {metadata.title || "Title of your blog post"}
+                {metadata.title || 'Title of your blog post'}
               </p>
               <p className="text-green-700 text-xs">
-                yourdomain.com/{metadata.slug || "post-slug"}
+                yourdomain.com/{metadata.slug || 'post-slug'}
               </p>
               <p className="text-sm text-gray-600 line-clamp-2">
                 {metadata.description ||

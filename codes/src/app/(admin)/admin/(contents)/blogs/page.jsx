@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { PlusCircle, FileText, UploadCloud, Loader2 } from "lucide-react";
-import { format, parseISO, isSameDay } from "date-fns";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { PlusCircle, FileText, UploadCloud, Loader2 } from 'lucide-react';
+import { format, parseISO, isSameDay } from 'date-fns';
 
 // Import custom components
-import PostFilters from "@/components/admin/blog/list/PostFilters";
-import { PostCardGrid, PostCardList } from "@/components/admin/blog/list/PostCard";
-import PostPagination from "@/components/admin/blog/list/PostPagination";
+import PostFilters from '@/components/admin/blog/list/PostFilters';
+import { PostCardGrid, PostCardList } from '@/components/admin/blog/list/PostCard';
+import PostPagination from '@/components/admin/blog/list/PostPagination';
 
 // Import shadcn components
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -20,9 +20,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
+} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 
 const AdminBlogList = () => {
   const router = useRouter();
@@ -32,12 +32,12 @@ const AdminBlogList = () => {
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState(null);
-  const [viewMode, setViewMode] = useState("grid");
-  const [sortBy, setSortBy] = useState("newest");
+  const [viewMode, setViewMode] = useState('grid');
+  const [sortBy, setSortBy] = useState('newest');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,8 +45,8 @@ const AdminBlogList = () => {
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Blog Posts");
-    setPageSubtitle("Manage all your blog content");
+    setPageTitle('Blog Posts');
+    setPageSubtitle('Manage all your blog content');
   }, [setPageTitle, setPageSubtitle]);
 
   // Load posts and categories from localStorage
@@ -56,7 +56,7 @@ const AdminBlogList = () => {
 
       try {
         // Load posts
-        const storedPosts = localStorage.getItem("blog_posts");
+        const storedPosts = localStorage.getItem('blog_posts');
         let postData = [];
 
         if (storedPosts) {
@@ -64,11 +64,11 @@ const AdminBlogList = () => {
         } else {
           // Create sample posts if none exist
           postData = generateSamplePosts();
-          localStorage.setItem("blog_posts", JSON.stringify(postData));
+          localStorage.setItem('blog_posts', JSON.stringify(postData));
         }
 
         // Load categories
-        const storedCategories = localStorage.getItem("blog_categories");
+        const storedCategories = localStorage.getItem('blog_categories');
         let categoryData = [];
 
         if (storedCategories) {
@@ -76,20 +76,20 @@ const AdminBlogList = () => {
         } else {
           // Load sample categories
           categoryData = [
-            { id: "1", name: "Technology", slug: "technology" },
-            { id: "2", name: "Business", slug: "business" },
-            { id: "3", name: "Design", slug: "design" },
-            { id: "4", name: "Development", slug: "development" },
-            { id: "5", name: "Marketing", slug: "marketing" },
+            { id: '1', name: 'Technology', slug: 'technology' },
+            { id: '2', name: 'Business', slug: 'business' },
+            { id: '3', name: 'Design', slug: 'design' },
+            { id: '4', name: 'Development', slug: 'development' },
+            { id: '5', name: 'Marketing', slug: 'marketing' },
           ];
-          localStorage.setItem("blog_categories", JSON.stringify(categoryData));
+          localStorage.setItem('blog_categories', JSON.stringify(categoryData));
         }
 
         setPosts(postData);
         setCategories(categoryData);
       } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error("Failed to load blog posts");
+        console.error('Error loading data:', error);
+        toast.error('Failed to load blog posts');
       } finally {
         setIsLoading(false);
       }
@@ -101,8 +101,8 @@ const AdminBlogList = () => {
   // Helper function to create sample posts for demo purposes
   function generateSamplePosts() {
     const samplePosts = [];
-    const statuses = ["draft", "published", "scheduled"];
-    const categoryIds = ["1", "2", "3", "4", "5"];
+    const statuses = ['draft', 'published', 'scheduled'];
+    const categoryIds = ['1', '2', '3', '4', '5'];
     const now = new Date();
 
     // Generate 12 sample posts
@@ -114,9 +114,9 @@ const AdminBlogList = () => {
 
       // Generate a publish date based on status
       let publishDate;
-      if (status === "published") {
+      if (status === 'published') {
         publishDate = new Date(createdAt);
-      } else if (status === "scheduled") {
+      } else if (status === 'scheduled') {
         publishDate = new Date(now);
         publishDate.setDate(now.getDate() + Math.floor(Math.random() * 30) + 1); // 1-30 days in future
       } else {
@@ -128,8 +128,7 @@ const AdminBlogList = () => {
         title: `Sample Blog Post ${i}`,
         excerpt: `This is a sample excerpt for blog post ${i}. It provides a brief summary of what the post is about.`,
         content: `<h2>Introduction</h2><p>This is sample content for blog post ${i}. It would typically contain paragraphs, images, lists and other formatted content.</p><p>In a real blog post, this would be much longer and contain actual valuable information for the reader.</p><h2>Section 1</h2><p>This is the first section of the blog post with more detailed information.</p><p>You can continue reading to learn more about this topic.</p><h2>Conclusion</h2><p>This is the conclusion of the blog post, summarizing the key points discussed.</p>`,
-        category_id:
-          categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        category_id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
         tag_ids: [],
         featured_image: `https://picsum.photos/seed/blog${i}/800/600`,
         publish_date: publishDate.toISOString(),
@@ -143,7 +142,7 @@ const AdminBlogList = () => {
           title: `Sample Blog Post ${i}`,
           description: `This is a sample excerpt for blog post ${i}. It provides a brief summary of what the post is about.`,
           slug: `sample-blog-post-${i}`,
-          canonicalUrl: "",
+          canonicalUrl: '',
         },
       };
 
@@ -158,8 +157,8 @@ const AdminBlogList = () => {
     try {
       const updatedPosts = posts.filter((post) => post.id !== postId);
       setPosts(updatedPosts);
-      localStorage.setItem("blog_posts", JSON.stringify(updatedPosts));
-      toast.success("Post deleted successfully");
+      localStorage.setItem('blog_posts', JSON.stringify(updatedPosts));
+      toast.success('Post deleted successfully');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/blog-posts/${postId}`, {
@@ -183,8 +182,8 @@ const AdminBlogList = () => {
         });
       */
     } catch (error) {
-      console.error("Error deleting post:", error);
-      toast.error("Failed to delete post");
+      console.error('Error deleting post:', error);
+      toast.error('Failed to delete post');
     }
   };
 
@@ -208,23 +207,18 @@ const AdminBlogList = () => {
       const query = searchQuery.toLowerCase();
       filteredPosts = filteredPosts.filter(
         (post) =>
-          post.title.toLowerCase().includes(query) ||
-          post.excerpt.toLowerCase().includes(query)
+          post.title.toLowerCase().includes(query) || post.excerpt.toLowerCase().includes(query)
       );
     }
 
     // Apply category filter
-    if (categoryFilter !== "all") {
-      filteredPosts = filteredPosts.filter(
-        (post) => post.category_id === categoryFilter
-      );
+    if (categoryFilter !== 'all') {
+      filteredPosts = filteredPosts.filter((post) => post.category_id === categoryFilter);
     }
 
     // Apply status filter
-    if (statusFilter !== "all") {
-      filteredPosts = filteredPosts.filter(
-        (post) => post.status === statusFilter
-      );
+    if (statusFilter !== 'all') {
+      filteredPosts = filteredPosts.filter((post) => post.status === statusFilter);
     }
 
     // Apply date filter
@@ -237,26 +231,20 @@ const AdminBlogList = () => {
 
     // Apply sorting
     switch (sortBy) {
-      case "newest":
-        filteredPosts.sort(
-          (a, b) => new Date(b.publish_date) - new Date(a.publish_date)
-        );
+      case 'newest':
+        filteredPosts.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
         break;
-      case "oldest":
-        filteredPosts.sort(
-          (a, b) => new Date(a.publish_date) - new Date(b.publish_date)
-        );
+      case 'oldest':
+        filteredPosts.sort((a, b) => new Date(a.publish_date) - new Date(b.publish_date));
         break;
-      case "a-z":
+      case 'a-z':
         filteredPosts.sort((a, b) => a.title.localeCompare(b.title));
         break;
-      case "z-a":
+      case 'z-a':
         filteredPosts.sort((a, b) => b.title.localeCompare(a.title));
         break;
       default:
-        filteredPosts.sort(
-          (a, b) => new Date(b.publish_date) - new Date(a.publish_date)
-        );
+        filteredPosts.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
     }
 
     return filteredPosts;
@@ -268,9 +256,9 @@ const AdminBlogList = () => {
   // Calculate status counts for filter buttons
   const statusCounts = {
     all: posts.length,
-    published: posts.filter((post) => post.status === "published").length,
-    draft: posts.filter((post) => post.status === "draft").length,
-    scheduled: posts.filter((post) => post.status === "scheduled").length,
+    published: posts.filter((post) => post.status === 'published').length,
+    draft: posts.filter((post) => post.status === 'draft').length,
+    scheduled: posts.filter((post) => post.status === 'scheduled').length,
   };
 
   // Calculate pagination
@@ -291,11 +279,11 @@ const AdminBlogList = () => {
       <p className="text-muted-foreground text-center max-w-md mb-6">
         {posts.length === 0
           ? "You haven't created any blog posts yet. Create your first post to get started."
-          : "No posts match your current filters. Try adjusting your search or filter criteria."}
+          : 'No posts match your current filters. Try adjusting your search or filter criteria.'}
       </p>
       {posts.length === 0 ? (
         <Button
-          onClick={() => router.push("/admin/blogs/create")}
+          onClick={() => router.push('/admin/blogs/create')}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -305,9 +293,9 @@ const AdminBlogList = () => {
         <Button
           variant="outline"
           onClick={() => {
-            setSearchQuery("");
-            setCategoryFilter("all");
-            setStatusFilter("all");
+            setSearchQuery('');
+            setCategoryFilter('all');
+            setStatusFilter('all');
             setDateFilter(null);
           }}
         >
@@ -352,7 +340,7 @@ const AdminBlogList = () => {
               Import
             </Button> */}
             <Button
-              onClick={() => router.push("/admin/blogs/create")}
+              onClick={() => router.push('/admin/blogs/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -387,13 +375,13 @@ const AdminBlogList = () => {
             ) : (
               <div
                 className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                    : "space-y-4"
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
+                    : 'space-y-4'
                 }
               >
                 {paginatedPosts.map((post) =>
-                  viewMode === "grid" ? (
+                  viewMode === 'grid' ? (
                     <PostCardGrid
                       key={post.id}
                       post={post}

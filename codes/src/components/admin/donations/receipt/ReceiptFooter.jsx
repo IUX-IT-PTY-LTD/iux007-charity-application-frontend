@@ -1,15 +1,15 @@
 // components/donations/receipt/ReceiptFooter.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { Heart } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import React from 'react';
+import { Heart } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const ReceiptFooter = ({
-  organizationName = "Charity Organization",
-  organizationWebsite = "www.charityorg.org",
-  organizationEmail = "donations@charityorg.org",
-  organizationPhone = "+1 (123) 456-7890",
+  organizationName = 'Charity Organization',
+  organizationWebsite = 'www.charityorg.org',
+  organizationEmail = 'donations@charityorg.org',
+  organizationPhone = '+1 (123) 456-7890',
 }) => {
   const year = new Date().getFullYear();
 

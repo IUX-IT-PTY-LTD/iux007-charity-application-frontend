@@ -1,7 +1,7 @@
 // components/blog/RichTextEditor.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Bold,
   Italic,
@@ -19,15 +19,11 @@ import {
   Heading2,
   Heading3,
   Heading,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Dialog,
   DialogContent,
@@ -36,18 +32,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const RichTextEditor = ({ value, onChange, editorRef }) => {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkText, setLinkText] = useState("");
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkText, setLinkText] = useState('');
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageAlt, setImageAlt] = useState("");
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageAlt, setImageAlt] = useState('');
   const [imageFile, setImageFile] = useState(null);
 
   // Helper to execute commands
@@ -62,17 +58,17 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
 
   // Handle special commands
   const handleHeading = (level) => {
-    execCommand("formatBlock", `<h${level}>`);
+    execCommand('formatBlock', `<h${level}>`);
   };
 
   const handleLink = () => {
     if (linkUrl && linkText) {
       execCommand(
-        "insertHTML",
+        'insertHTML',
         `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`
       );
-      setLinkUrl("");
-      setLinkText("");
+      setLinkUrl('');
+      setLinkText('');
       setIsLinkDialogOpen(false);
     }
   };
@@ -83,22 +79,22 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         execCommand(
-          "insertHTML",
+          'insertHTML',
           `<img src="${reader.result}" alt="${imageAlt}" class="max-w-full h-auto rounded-md my-4" />`
         );
-        setImageUrl("");
-        setImageAlt("");
+        setImageUrl('');
+        setImageAlt('');
         setImageFile(null);
         setIsImageDialogOpen(false);
       };
       reader.readAsDataURL(imageFile);
     } else if (imageUrl) {
       execCommand(
-        "insertHTML",
+        'insertHTML',
         `<img src="${imageUrl}" alt="${imageAlt}" class="max-w-full h-auto rounded-md my-4" />`
       );
-      setImageUrl("");
-      setImageAlt("");
+      setImageUrl('');
+      setImageAlt('');
       setImageFile(null);
       setIsImageDialogOpen(false);
     }
@@ -112,11 +108,11 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
     if (clipboardData.files && clipboardData.files.length > 0) {
       e.preventDefault();
       const file = clipboardData.files[0];
-      if (file.type.startsWith("image/")) {
+      if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onloadend = () => {
           execCommand(
-            "insertHTML",
+            'insertHTML',
             `<img src="${reader.result}" alt="Pasted image" class="max-w-full h-auto rounded-md my-4" />`
           );
         };
@@ -142,21 +138,21 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
             <ToggleGroup type="multiple">
               <ToggleGroupItem
                 value="bold"
-                onClick={() => execCommand("bold")}
+                onClick={() => execCommand('bold')}
                 aria-label="Toggle bold"
               >
                 <Bold className="h-4 w-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="italic"
-                onClick={() => execCommand("italic")}
+                onClick={() => execCommand('italic')}
                 aria-label="Toggle italic"
               >
                 <Italic className="h-4 w-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="underline"
-                onClick={() => execCommand("underline")}
+                onClick={() => execCommand('underline')}
                 aria-label="Toggle underline"
               >
                 <Underline className="h-4 w-4" />
@@ -166,32 +162,16 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
 
           <TabsContent value="headings" className="flex flex-wrap gap-1">
             <ToggleGroup type="single">
-              <ToggleGroupItem
-                value="h1"
-                onClick={() => handleHeading(1)}
-                aria-label="Heading 1"
-              >
+              <ToggleGroupItem value="h1" onClick={() => handleHeading(1)} aria-label="Heading 1">
                 <Heading1 className="h-4 w-4" />
               </ToggleGroupItem>
-              <ToggleGroupItem
-                value="h2"
-                onClick={() => handleHeading(2)}
-                aria-label="Heading 2"
-              >
+              <ToggleGroupItem value="h2" onClick={() => handleHeading(2)} aria-label="Heading 2">
                 <Heading2 className="h-4 w-4" />
               </ToggleGroupItem>
-              <ToggleGroupItem
-                value="h3"
-                onClick={() => handleHeading(3)}
-                aria-label="Heading 3"
-              >
+              <ToggleGroupItem value="h3" onClick={() => handleHeading(3)} aria-label="Heading 3">
                 <Heading3 className="h-4 w-4" />
               </ToggleGroupItem>
-              <ToggleGroupItem
-                value="h4"
-                onClick={() => handleHeading(4)}
-                aria-label="Heading 4"
-              >
+              <ToggleGroupItem value="h4" onClick={() => handleHeading(4)} aria-label="Heading 4">
                 <Heading className="h-4 w-4" />
               </ToggleGroupItem>
             </ToggleGroup>
@@ -201,28 +181,28 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
             <ToggleGroup type="single">
               <ToggleGroupItem
                 value="ul"
-                onClick={() => execCommand("insertUnorderedList")}
+                onClick={() => execCommand('insertUnorderedList')}
                 aria-label="Bullet list"
               >
                 <List className="h-4 w-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="ol"
-                onClick={() => execCommand("insertOrderedList")}
+                onClick={() => execCommand('insertOrderedList')}
                 aria-label="Numbered list"
               >
                 <ListOrdered className="h-4 w-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="quote"
-                onClick={() => execCommand("formatBlock", "<blockquote>")}
+                onClick={() => execCommand('formatBlock', '<blockquote>')}
                 aria-label="Quote"
               >
                 <Quote className="h-4 w-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="code"
-                onClick={() => execCommand("formatBlock", "<pre>")}
+                onClick={() => execCommand('formatBlock', '<pre>')}
                 aria-label="Code block"
               >
                 <Code className="h-4 w-4" />
@@ -241,9 +221,7 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Insert Link</DialogTitle>
-                  <DialogDescription>
-                    Add a link to your content
-                  </DialogDescription>
+                  <DialogDescription>Add a link to your content</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -270,10 +248,7 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsLinkDialogOpen(false)}
-                  >
+                  <Button variant="outline" onClick={() => setIsLinkDialogOpen(false)}>
                     Cancel
                   </Button>
                   <Button onClick={handleLink}>Insert Link</Button>
@@ -281,10 +256,7 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
               </DialogContent>
             </Dialog>
 
-            <Dialog
-              open={isImageDialogOpen}
-              onOpenChange={setIsImageDialogOpen}
-            >
+            <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   <ImageIcon className="h-4 w-4 mr-2" />
@@ -294,9 +266,7 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Insert Image</DialogTitle>
-                  <DialogDescription>
-                    Add an image to your content
-                  </DialogDescription>
+                  <DialogDescription>Add an image to your content</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -336,10 +306,7 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsImageDialogOpen(false)}
-                  >
+                  <Button variant="outline" onClick={() => setIsImageDialogOpen(false)}>
                     Cancel
                   </Button>
                   <Button onClick={handleImage}>Insert Image</Button>
@@ -352,21 +319,21 @@ const RichTextEditor = ({ value, onChange, editorRef }) => {
             <ToggleGroup type="single">
               <ToggleGroupItem
                 value="left"
-                onClick={() => execCommand("justifyLeft")}
+                onClick={() => execCommand('justifyLeft')}
                 aria-label="Align left"
               >
                 <AlignLeft className="h-4 w-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="center"
-                onClick={() => execCommand("justifyCenter")}
+                onClick={() => execCommand('justifyCenter')}
                 aria-label="Align center"
               >
                 <AlignCenter className="h-4 w-4" />
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="right"
-                onClick={() => execCommand("justifyRight")}
+                onClick={() => execCommand('justifyRight')}
                 aria-label="Align right"
               >
                 <AlignRight className="h-4 w-4" />

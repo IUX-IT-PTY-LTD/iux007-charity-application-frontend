@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Save, ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Save, ArrowLeft } from 'lucide-react';
 
 // Import shadcn components
 import {
@@ -16,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -25,20 +25,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,21 +49,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 // Define form schema with validation
 const formSchema = z.object({
   question: z.string().min(5, {
-    message: "Question must be at least 5 characters.",
+    message: 'Question must be at least 5 characters.',
   }),
   answer: z.string().min(10, {
-    message: "Answer must be at least 10 characters.",
+    message: 'Answer must be at least 10 characters.',
   }),
   ordering: z.coerce.number().int().positive({
-    message: "Ordering must be a positive number.",
+    message: 'Ordering must be a positive number.',
   }),
-  status: z.string().default("1"),
+  status: z.string().default('1'),
 });
 
 // Component for the edit page
@@ -79,18 +79,18 @@ export default function EditFAQ({ params }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      question: "",
-      answer: "",
+      question: '',
+      answer: '',
       ordering: 1,
-      status: "1",
+      status: '1',
     },
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Edit FAQ");
-    setPageSubtitle("Update frequently asked question details");
+    setPageTitle('Edit FAQ');
+    setPageSubtitle('Update frequently asked question details');
   }, [setPageTitle, setPageSubtitle]);
 
   // Fetch FAQ data based on the ID
@@ -99,7 +99,7 @@ export default function EditFAQ({ params }) {
       setIsLoading(true);
       try {
         // For testing: Get FAQs from localStorage
-        const storedFaqs = JSON.parse(localStorage.getItem("faqs") || "[]");
+        const storedFaqs = JSON.parse(localStorage.getItem('faqs') || '[]');
         const foundFaq = storedFaqs.find((f) => f.id === params.faqId);
 
         if (foundFaq) {
@@ -113,8 +113,8 @@ export default function EditFAQ({ params }) {
             status: foundFaq.status,
           });
         } else {
-          toast.error("FAQ not found");
-          router.push("/admin/faqs");
+          toast.error('FAQ not found');
+          router.push('/admin/faqs');
         }
 
         /* API Implementation (Commented out for future use)
@@ -135,8 +135,8 @@ export default function EditFAQ({ params }) {
         });
         */
       } catch (error) {
-        console.error("Error fetching FAQ:", error);
-        toast.error("Failed to load FAQ data");
+        console.error('Error fetching FAQ:', error);
+        toast.error('Failed to load FAQ data');
       } finally {
         setIsLoading(false);
       }
@@ -161,20 +161,20 @@ export default function EditFAQ({ params }) {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = "";
-        return "";
+        e.returnValue = '';
+        return '';
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   // Handle form submission
   const onSubmit = (data) => {
     try {
       // Get all FAQs
-      const allFaqs = JSON.parse(localStorage.getItem("faqs") || "[]");
+      const allFaqs = JSON.parse(localStorage.getItem('faqs') || '[]');
 
       // Find the index of the FAQ to update
       const faqIndex = allFaqs.findIndex((f) => f.id === params.faqId);
@@ -190,18 +190,18 @@ export default function EditFAQ({ params }) {
         allFaqs[faqIndex] = updatedFaq;
 
         // Save back to localStorage
-        localStorage.setItem("faqs", JSON.stringify(allFaqs));
+        localStorage.setItem('faqs', JSON.stringify(allFaqs));
 
         // Show success message
-        toast.success("FAQ updated successfully");
+        toast.success('FAQ updated successfully');
 
         // Reset unsaved changes flag
         setHasUnsavedChanges(false);
 
         // Navigate back to FAQs list
-        router.push("/admin/faqs");
+        router.push('/admin/faqs');
       } else {
-        toast.error("FAQ not found");
+        toast.error('FAQ not found');
       }
 
       /* API Implementation (Commented out for future use)
@@ -230,8 +230,8 @@ export default function EditFAQ({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error updating FAQ:", error);
-      toast.error("Failed to update FAQ");
+      console.error('Error updating FAQ:', error);
+      toast.error('Failed to update FAQ');
     }
   };
 
@@ -239,19 +239,19 @@ export default function EditFAQ({ params }) {
   const handleDelete = () => {
     try {
       // Get all FAQs
-      const allFaqs = JSON.parse(localStorage.getItem("faqs") || "[]");
+      const allFaqs = JSON.parse(localStorage.getItem('faqs') || '[]');
 
       // Filter out the FAQ to delete
       const updatedFaqs = allFaqs.filter((f) => f.id !== params.faqId);
 
       // Save back to localStorage
-      localStorage.setItem("faqs", JSON.stringify(updatedFaqs));
+      localStorage.setItem('faqs', JSON.stringify(updatedFaqs));
 
       // Show success message
-      toast.success("FAQ deleted successfully");
+      toast.success('FAQ deleted successfully');
 
       // Navigate back to FAQs list
-      router.push("/admin/faqs");
+      router.push('/admin/faqs');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/faqs/${params.faqId}`, {
@@ -273,8 +273,8 @@ export default function EditFAQ({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error deleting FAQ:", error);
-      toast.error("Failed to delete FAQ");
+      console.error('Error deleting FAQ:', error);
+      toast.error('Failed to delete FAQ');
     }
   };
 
@@ -297,15 +297,11 @@ export default function EditFAQ({ params }) {
               size="sm"
               onClick={() => {
                 if (hasUnsavedChanges) {
-                  if (
-                    window.confirm(
-                      "You have unsaved changes. Are you sure you want to leave?"
-                    )
-                  ) {
-                    router.push("/admin/faqs");
+                  if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                    router.push('/admin/faqs');
                   }
                 } else {
-                  router.push("/admin/faqs");
+                  router.push('/admin/faqs');
                 }
               }}
               className="mb-2 sm:mb-0"
@@ -315,10 +311,7 @@ export default function EditFAQ({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              <AlertDialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -329,12 +322,9 @@ export default function EditFAQ({ params }) {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete this FAQ. This action cannot
-                      be undone.
+                      This will permanently delete this FAQ. This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -363,16 +353,11 @@ export default function EditFAQ({ params }) {
             {/* Form Section */}
             <div className="md:col-span-2">
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <Card>
                     <CardHeader>
                       <CardTitle>Edit FAQ</CardTitle>
-                      <CardDescription>
-                        Update this frequently asked question
-                      </CardDescription>
+                      <CardDescription>Update this frequently asked question</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <FormField
@@ -445,17 +430,13 @@ export default function EditFAQ({ params }) {
                                   <FormControl>
                                     <RadioGroupItem value="1" />
                                   </FormControl>
-                                  <FormLabel className="font-normal">
-                                    Active
-                                  </FormLabel>
+                                  <FormLabel className="font-normal">Active</FormLabel>
                                 </FormItem>
                                 <FormItem className="flex items-center space-x-2 space-y-0">
                                   <FormControl>
                                     <RadioGroupItem value="0" />
                                   </FormControl>
-                                  <FormLabel className="font-normal">
-                                    Inactive
-                                  </FormLabel>
+                                  <FormLabel className="font-normal">Inactive</FormLabel>
                                 </FormItem>
                               </RadioGroup>
                             </FormControl>
@@ -479,15 +460,12 @@ export default function EditFAQ({ params }) {
                             status: faq.status,
                           });
                           setHasUnsavedChanges(false);
-                          toast.info("Form reset to original values");
+                          toast.info('Form reset to original values');
                         }}
                       >
                         Reset Changes
                       </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                         Save Changes
                       </Button>
                     </CardFooter>
@@ -506,42 +484,35 @@ export default function EditFAQ({ params }) {
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-lg font-semibold">
-                        {form.watch("question") || "Your Question"}
+                        {form.watch('question') || 'Your Question'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
-                          variant={
-                            form.watch("status") === "1"
-                              ? "default"
-                              : "secondary"
-                          }
+                          variant={form.watch('status') === '1' ? 'default' : 'secondary'}
                           className={
-                            form.watch("status") === "1"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                            form.watch('status') === '1'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }
                         >
-                          {form.watch("status") === "1" ? "Active" : "Inactive"}
+                          {form.watch('status') === '1' ? 'Active' : 'Inactive'}
                         </Badge>
                         <span className="text-xs text-gray-500">
-                          Order: {form.watch("ordering")}
+                          Order: {form.watch('ordering')}
                         </span>
                       </div>
                     </div>
 
                     <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
                       <p className="text-sm whitespace-pre-wrap">
-                        {form.watch("answer") ||
-                          "Your answer will appear here..."}
+                        {form.watch('answer') || 'Your answer will appear here...'}
                       </p>
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between text-xs text-gray-500">
                   <span>ID: {params.faqId}</span>
-                  <span>
-                    {hasUnsavedChanges ? "Unsaved changes" : "No changes"}
-                  </span>
+                  <span>{hasUnsavedChanges ? 'Unsaved changes' : 'No changes'}</span>
                 </CardFooter>
               </Card>
             </div>
