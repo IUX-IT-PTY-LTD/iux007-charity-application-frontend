@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { ChevronRight, Home } from "lucide-react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import { useAdminContext } from "@/components/admin/admin-context";
+import React from 'react';
+import { ChevronRight, Home } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { useAdminContext } from '@/components/admin/admin-context';
 
 const AdminPageHeader = () => {
   const pathname = usePathname();
@@ -12,11 +12,10 @@ const AdminPageHeader = () => {
 
   // Generate breadcrumbs automatically
   const breadcrumbs = React.useMemo(() => {
-    const segments = pathname.split("/").filter(Boolean);
+    const segments = pathname.split('/').filter(Boolean);
     return segments.map((segment, index) => {
-      const path = `/${segments.slice(0, index + 1).join("/")}`;
-      const name =
-        segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+      const path = `/${segments.slice(0, index + 1).join('/')}`;
+      const name = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       return {
         name,
         path,
@@ -67,13 +66,9 @@ const AdminPageHeader = () => {
 
             {/* Right side: Title & Subtitle */}
             <div className="text-right">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                {pageTitle}
-              </h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">{pageTitle}</h1>
               {pageSubtitle && (
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {pageSubtitle}
-                </p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{pageSubtitle}</p>
               )}
             </div>
           </div>

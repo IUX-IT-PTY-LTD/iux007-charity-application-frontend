@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Bar, Line, Doughnut } from "recharts";
+import React, { useState, useEffect } from 'react';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Bar, Line, Doughnut } from 'recharts';
 import {
   Activity,
   ArrowRight,
@@ -24,7 +24,7 @@ import {
   Share2,
   TrendingUp,
   Users,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -32,26 +32,26 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 // Dashboard Analytics Component - can be used in different views
 const DashboardAnalytics = () => {
-  const [timeframe, setTimeframe] = useState("month");
+  const [timeframe, setTimeframe] = useState('month');
   const [donorData, setDonorData] = useState([]);
   const [donationMethods, setDonationMethods] = useState([]);
 
@@ -61,38 +61,34 @@ const DashboardAnalytics = () => {
       const data = [];
       const now = new Date();
 
-      if (timeframe === "year") {
+      if (timeframe === 'year') {
         // Monthly data for year
         for (let i = 0; i < 12; i++) {
           const date = new Date(now);
           date.setMonth(date.getMonth() - (11 - i));
           data.push({
-            name: date.toLocaleDateString("en-US", { month: "short" }),
-            "New Donors": Math.floor(Math.random() * 80) + 20,
-            "Returning Donors": Math.floor(Math.random() * 120) + 50,
+            name: date.toLocaleDateString('en-US', { month: 'short' }),
+            'New Donors': Math.floor(Math.random() * 80) + 20,
+            'Returning Donors': Math.floor(Math.random() * 120) + 50,
           });
         }
-      } else if (timeframe === "quarter") {
+      } else if (timeframe === 'quarter') {
         // Weekly data for quarter
         for (let i = 0; i < 13; i++) {
           data.push({
             name: `W${i + 1}`,
-            "New Donors": Math.floor(Math.random() * 30) + 5,
-            "Returning Donors": Math.floor(Math.random() * 40) + 10,
+            'New Donors': Math.floor(Math.random() * 30) + 5,
+            'Returning Donors': Math.floor(Math.random() * 40) + 10,
           });
         }
       } else {
         // Daily data for month
-        const daysInMonth = new Date(
-          now.getFullYear(),
-          now.getMonth() + 1,
-          0
-        ).getDate();
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
         for (let i = 1; i <= daysInMonth; i++) {
           data.push({
             name: i.toString(),
-            "New Donors": Math.floor(Math.random() * 10) + 1,
-            "Returning Donors": Math.floor(Math.random() * 15) + 2,
+            'New Donors': Math.floor(Math.random() * 10) + 1,
+            'Returning Donors': Math.floor(Math.random() * 15) + 2,
           });
         }
       }
@@ -103,10 +99,10 @@ const DashboardAnalytics = () => {
     // Generate donation methods data
     const generateDonationMethods = () => {
       setDonationMethods([
-        { name: "Credit Card", value: 58 },
-        { name: "PayPal", value: 24 },
-        { name: "Bank Transfer", value: 12 },
-        { name: "Cash", value: 6 },
+        { name: 'Credit Card', value: 58 },
+        { name: 'PayPal', value: 24 },
+        { name: 'Bank Transfer', value: 12 },
+        { name: 'Cash', value: 6 },
       ]);
     };
 
@@ -119,30 +115,28 @@ const DashboardAnalytics = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold">Analytics</h2>
-          <p className="text-muted-foreground">
-            Donation and donor metrics overview
-          </p>
+          <p className="text-muted-foreground">Donation and donor metrics overview</p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button
-            variant={timeframe === "month" ? "default" : "outline"}
+            variant={timeframe === 'month' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setTimeframe("month")}
+            onClick={() => setTimeframe('month')}
           >
             Month
           </Button>
           <Button
-            variant={timeframe === "quarter" ? "default" : "outline"}
+            variant={timeframe === 'quarter' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setTimeframe("quarter")}
+            onClick={() => setTimeframe('quarter')}
           >
             Quarter
           </Button>
           <Button
-            variant={timeframe === "year" ? "default" : "outline"}
+            variant={timeframe === 'year' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setTimeframe("year")}
+            onClick={() => setTimeframe('year')}
           >
             Year
           </Button>
@@ -171,23 +165,11 @@ const DashboardAnalytics = () => {
                 }}
               >
                 <defs>
-                  <linearGradient
-                    id="colorNewDonors"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
+                  <linearGradient id="colorNewDonors" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.8} />
                     <stop offset="95%" stopColor="#2563eb" stopOpacity={0.6} />
                   </linearGradient>
-                  <linearGradient
-                    id="colorReturningDonors"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
+                  <linearGradient id="colorReturningDonors" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0.6} />
                   </linearGradient>
@@ -272,22 +254,19 @@ const DashboardAnalytics = () => {
             </div>
             <div className="space-y-2 mt-4">
               {donationMethods.map((method, index) => (
-                <div
-                  key={method.name}
-                  className="flex items-center justify-between text-sm"
-                >
+                <div key={method.name} className="flex items-center justify-between text-sm">
                   <div className="flex items-center">
                     <div
                       className="w-3 h-3 rounded-full mr-2"
                       style={{
                         background:
                           index === 0
-                            ? "var(--color-blue-500)"
+                            ? 'var(--color-blue-500)'
                             : index === 1
-                            ? "var(--color-green-500)"
-                            : index === 2
-                            ? "var(--color-yellow-500)"
-                            : "var(--color-purple-500)",
+                              ? 'var(--color-green-500)'
+                              : index === 2
+                                ? 'var(--color-yellow-500)'
+                                : 'var(--color-purple-500)',
                       }}
                     ></div>
                     <span>{method.name}</span>
@@ -303,9 +282,7 @@ const DashboardAnalytics = () => {
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Donation Frequency
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Donation Frequency</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">2.4</div>
@@ -313,11 +290,11 @@ const DashboardAnalytics = () => {
             <div className="mt-4 h-[60px]">
               <Line
                 data={[
-                  { name: "Jan", value: 2.1 },
-                  { name: "Feb", value: 2.2 },
-                  { name: "Mar", value: 2.0 },
-                  { name: "Apr", value: 2.3 },
-                  { name: "May", value: 2.4 },
+                  { name: 'Jan', value: 2.1 },
+                  { name: 'Feb', value: 2.2 },
+                  { name: 'Mar', value: 2.0 },
+                  { name: 'Apr', value: 2.3 },
+                  { name: 'May', value: 2.4 },
                 ]}
                 margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                 type="monotone"
@@ -340,17 +317,17 @@ const DashboardAnalytics = () => {
               <span className="text-green-600 inline-flex items-center">
                 <ArrowUpRight className="h-3 w-3 mr-1" />
                 12.3%
-              </span>{" "}
+              </span>{' '}
               vs previous period
             </p>
             <div className="mt-4 h-[60px]">
               <Line
                 data={[
-                  { name: "Jan", value: 76.2 },
-                  { name: "Feb", value: 82.4 },
-                  { name: "Mar", value: 80.1 },
-                  { name: "Apr", value: 79.8 },
-                  { name: "May", value: 86.7 },
+                  { name: 'Jan', value: 76.2 },
+                  { name: 'Feb', value: 82.4 },
+                  { name: 'Mar', value: 80.1 },
+                  { name: 'Apr', value: 79.8 },
+                  { name: 'May', value: 86.7 },
                 ]}
                 margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                 type="monotone"
@@ -365,9 +342,7 @@ const DashboardAnalytics = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Recurring Rate
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Recurring Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">32.6%</div>
@@ -375,17 +350,17 @@ const DashboardAnalytics = () => {
               <span className="text-green-600 inline-flex items-center">
                 <ArrowUpRight className="h-3 w-3 mr-1" />
                 4.2%
-              </span>{" "}
+              </span>{' '}
               vs previous period
             </p>
             <div className="mt-4 h-[60px]">
               <Line
                 data={[
-                  { name: "Jan", value: 28.1 },
-                  { name: "Feb", value: 27.9 },
-                  { name: "Mar", value: 30.2 },
-                  { name: "Apr", value: 31.8 },
-                  { name: "May", value: 32.6 },
+                  { name: 'Jan', value: 28.1 },
+                  { name: 'Feb', value: 27.9 },
+                  { name: 'Mar', value: 30.2 },
+                  { name: 'Apr', value: 31.8 },
+                  { name: 'May', value: 32.6 },
                 ]}
                 margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                 type="monotone"
@@ -400,23 +375,19 @@ const DashboardAnalytics = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Donor Retention
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Donor Retention</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">68.4%</div>
-            <p className="text-xs text-muted-foreground">
-              Year-over-year retention
-            </p>
+            <p className="text-xs text-muted-foreground">Year-over-year retention</p>
             <div className="mt-4 h-[60px]">
               <Line
                 data={[
-                  { name: "Jan", value: 65.3 },
-                  { name: "Feb", value: 64.8 },
-                  { name: "Mar", value: 66.2 },
-                  { name: "Apr", value: 67.9 },
-                  { name: "May", value: 68.4 },
+                  { name: 'Jan', value: 65.3 },
+                  { name: 'Feb', value: 64.8 },
+                  { name: 'Mar', value: 66.2 },
+                  { name: 'Apr', value: 67.9 },
+                  { name: 'May', value: 68.4 },
                 ]}
                 margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                 type="monotone"
@@ -453,13 +424,10 @@ const DashboardAnalytics = () => {
           <div className="h-[400px] w-full bg-muted/20 rounded-md flex items-center justify-center">
             <div className="text-center">
               <Globe className="h-12 w-12 text-muted mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">
-                Interactive Map Visualization
-              </h3>
+              <h3 className="text-lg font-medium mb-2">Interactive Map Visualization</h3>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                This area would contain an interactive map showing donation
-                sources by geographic location. The map would be colored to
-                indicate donation density by region.
+                This area would contain an interactive map showing donation sources by geographic
+                location. The map would be colored to indicate donation density by region.
               </p>
             </div>
           </div>

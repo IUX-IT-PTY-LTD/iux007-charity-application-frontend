@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { Toaster } from 'react-hot-toast';
 import '../../styles/globals.css';
 import { Provider } from 'react-redux';
@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
           <PersistGate loading={null} persistor={persistor}>
             {children}
           </PersistGate>
-        </Provider> 
+        </Provider>
       </body>
     </html>
   );

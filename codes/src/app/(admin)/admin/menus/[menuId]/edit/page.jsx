@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useParams, useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
-import { useAdminContext } from "@/components/admin/admin-context";
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useParams, useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import { useAdminContext } from '@/components/admin/admin-context';
 
 import {
   Card,
@@ -15,9 +15,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -26,17 +26,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,18 +47,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 // Define form schema
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Menu name must be at least 2 characters.",
+    message: 'Menu name must be at least 2 characters.',
   }),
   slug: z.string().min(2, {
-    message: "Slug must be at least 2 characters.",
+    message: 'Slug must be at least 2 characters.',
   }),
   ordering: z.coerce.number().int().positive({
-    message: "Ordering must be a positive number.",
+    message: 'Ordering must be a positive number.',
   }),
   status: z.boolean().default(true),
 });
@@ -71,13 +71,13 @@ const AdminMenuEdit = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [originalSlug, setOriginalSlug] = useState("");
+  const [originalSlug, setOriginalSlug] = useState('');
 
   // Define form with zod validation
   const form = useForm({
     defaultValues: {
-      name: "",
-      slug: "",
+      name: '',
+      slug: '',
       ordering: 1,
       status: true,
     },
@@ -88,9 +88,9 @@ const AdminMenuEdit = () => {
   const formPreview = form.watch();
 
   useEffect(() => {
-      setPageTitle("Edit Menu Item");
-      // setPageSubtitle("Manage your website navigation menus");
-    }, [setPageTitle, setPageSubtitle]);
+    setPageTitle('Edit Menu Item');
+    // setPageSubtitle("Manage your website navigation menus");
+  }, [setPageTitle, setPageSubtitle]);
 
   // Fetch menu data
   useEffect(() => {
@@ -98,11 +98,11 @@ const AdminMenuEdit = () => {
       setIsLoading(true);
       try {
         // Get menus from localStorage
-        const menus = JSON.parse(localStorage.getItem("menus") || "[]");
+        const menus = JSON.parse(localStorage.getItem('menus') || '[]');
         const menuData = menus.find((menu) => menu.id === menuId);
 
         if (!menuData) {
-          throw new Error("Menu not found");
+          throw new Error('Menu not found');
         }
 
         // Convert numeric status to boolean for form
@@ -118,8 +118,8 @@ const AdminMenuEdit = () => {
         form.reset(formData);
         setIsLoading(false);
       } catch (err) {
-        console.error("Error fetching menu:", err);
-        setError("Failed to load menu. Please try again later.");
+        console.error('Error fetching menu:', err);
+        setError('Failed to load menu. Please try again later.');
         setIsLoading(false);
       }
     };
@@ -138,22 +138,20 @@ const AdminMenuEdit = () => {
 
     try {
       // Update in localStorage
-      const menus = JSON.parse(localStorage.getItem("menus") || "[]");
-      const updatedMenus = menus.map((menu) =>
-        menu.id === menuId ? apiData : menu
-      );
-      localStorage.setItem("menus", JSON.stringify(updatedMenus));
+      const menus = JSON.parse(localStorage.getItem('menus') || '[]');
+      const updatedMenus = menus.map((menu) => (menu.id === menuId ? apiData : menu));
+      localStorage.setItem('menus', JSON.stringify(updatedMenus));
 
       // Show success message
-      toast.success("Menu updated successfully!");
+      toast.success('Menu updated successfully!');
 
       // Redirect to menus list
-      router.push("/admin/menus");
+      router.push('/admin/menus');
     } catch (err) {
-      console.error("Error updating menu:", err);
+      console.error('Error updating menu:', err);
       toast.error({
-        title: "Error",
-        description: "Failed to update menu",
+        title: 'Error',
+        description: 'Failed to update menu',
       });
     }
   };
@@ -162,20 +160,20 @@ const AdminMenuEdit = () => {
   const handleDelete = async () => {
     try {
       // Delete from localStorage
-      const menus = JSON.parse(localStorage.getItem("menus") || "[]");
+      const menus = JSON.parse(localStorage.getItem('menus') || '[]');
       const filteredMenus = menus.filter((menu) => menu.id !== menuId);
-      localStorage.setItem("menus", JSON.stringify(filteredMenus));
+      localStorage.setItem('menus', JSON.stringify(filteredMenus));
 
       // Show success message
-      toast.success("Menu deleted successfully!");
+      toast.success('Menu deleted successfully!');
 
       // Redirect after deletion
-      router.push("/admin/menus");
+      router.push('/admin/menus');
     } catch (err) {
-      console.error("Error deleting menu:", err);
+      console.error('Error deleting menu:', err);
       toast.error({
-        title: "Error",
-        description: "Failed to delete menu",
+        title: 'Error',
+        description: 'Failed to delete menu',
       });
     }
   };
@@ -184,22 +182,20 @@ const AdminMenuEdit = () => {
   const generateSlug = (name) => {
     const slug = name
       .toLowerCase()
-      .replace(/\s+/g, "-") // Replace spaces with -
-      .replace(/[^\w\-]+/g, "") // Remove all non-word chars
-      .replace(/\-\-+/g, "-") // Replace multiple - with single -
-      .replace(/^-+/, "") // Trim - from start of text
-      .replace(/-+$/, ""); // Trim - from end of text
+      .replace(/\s+/g, '-') // Replace spaces with -
+      .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+      .replace(/\-\-+/g, '-') // Replace multiple - with single -
+      .replace(/^-+/, '') // Trim - from start of text
+      .replace(/-+$/, ''); // Trim - from end of text
 
-    form.setValue("slug", slug);
+    form.setValue('slug', slug);
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Loading menu data...
-        </p>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">Loading menu data...</p>
       </div>
     );
   }
@@ -216,10 +212,7 @@ const AdminMenuEdit = () => {
               <p className="text-red-600">{error}</p>
             </CardContent>
             <CardFooter>
-              <Button
-                onClick={() => router.push("/admin/menus")}
-                variant="outline"
-              >
+              <Button onClick={() => router.push('/admin/menus')} variant="outline">
                 Back to Menus
               </Button>
             </CardFooter>
@@ -231,7 +224,6 @@ const AdminMenuEdit = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-
       <div className="container px-4 py-6 mx-auto max-w-5xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -239,10 +231,7 @@ const AdminMenuEdit = () => {
           </h2>
 
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => router.push("/admin/menus")}
-            >
+            <Button variant="outline" onClick={() => router.push('/admin/menus')}>
               Cancel
             </Button>
 
@@ -254,16 +243,13 @@ const AdminMenuEdit = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    the menu and all associated items.
+                    This action cannot be undone. This will permanently delete the menu and all
+                    associated items.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -276,16 +262,11 @@ const AdminMenuEdit = () => {
           {/* Form Section */}
           <div className="md:col-span-2">
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Menu Information</CardTitle>
-                    <CardDescription>
-                      Update this navigation menu for your website.
-                    </CardDescription>
+                    <CardDescription>Update this navigation menu for your website.</CardDescription>
                   </CardHeader>
 
                   <CardContent className="space-y-4">
@@ -301,15 +282,13 @@ const AdminMenuEdit = () => {
                               {...field}
                               onChange={(e) => {
                                 field.onChange(e);
-                                if (originalSlug === form.getValues("slug")) {
+                                if (originalSlug === form.getValues('slug')) {
                                   generateSlug(e.target.value);
                                 }
                               }}
                             />
                           </FormControl>
-                          <FormDescription>
-                            The name displayed in the admin panel.
-                          </FormDescription>
+                          <FormDescription>The name displayed in the admin panel.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -329,16 +308,12 @@ const AdminMenuEdit = () => {
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() =>
-                                generateSlug(form.getValues("name"))
-                              }
+                              onClick={() => generateSlug(form.getValues('name'))}
                             >
                               Generate
                             </Button>
                           </div>
-                          <FormDescription>
-                            Used in URL and code references.
-                          </FormDescription>
+                          <FormDescription>Used in URL and code references.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -351,12 +326,7 @@ const AdminMenuEdit = () => {
                         <FormItem>
                           <FormLabel>Order Priority</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              min={1}
-                              placeholder="1"
-                              {...field}
-                            />
+                            <Input type="number" min={1} placeholder="1" {...field} />
                           </FormControl>
                           <FormDescription>
                             Lower numbers appear first in navigation.
@@ -375,10 +345,8 @@ const AdminMenuEdit = () => {
                         <FormItem>
                           <FormLabel>Menu Status</FormLabel>
                           <Select
-                            onValueChange={(value) =>
-                              field.onChange(value === "1")
-                            }
-                            value={field.value ? "1" : "0"}
+                            onValueChange={(value) => field.onChange(value === '1')}
+                            value={field.value ? '1' : '0'}
                           >
                             <FormControl>
                               <SelectTrigger>
@@ -403,14 +371,11 @@ const AdminMenuEdit = () => {
                     <Button
                       variant="outline"
                       type="button"
-                      onClick={() => router.push("/admin/menus")}
+                      onClick={() => router.push('/admin/menus')}
                     >
                       Cancel
                     </Button>
-                    <Button
-                      type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                       Update Menu
                     </Button>
                   </CardFooter>
@@ -428,34 +393,26 @@ const AdminMenuEdit = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold">
-                      {formPreview.name || "Menu Name"}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      /{formPreview.slug || "slug"}
-                    </p>
+                    <h3 className="text-lg font-semibold">{formPreview.name || 'Menu Name'}</h3>
+                    <p className="text-sm text-gray-500">/{formPreview.slug || 'slug'}</p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <Badge
-                      variant={formPreview.status ? "success" : "error"}
+                      variant={formPreview.status ? 'success' : 'error'}
                       className={
                         formPreview.status
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
                       }
                     >
-                      {formPreview.status ? "Active" : "Inactive"}
+                      {formPreview.status ? 'Active' : 'Inactive'}
                     </Badge>
-                    <span className="text-xs text-gray-500">
-                      Order: {formPreview.ordering}
-                    </span>
+                    <span className="text-xs text-gray-500">Order: {formPreview.ordering}</span>
                   </div>
 
                   <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                    <div className="text-xs text-gray-500 mb-2">
-                      Menu items will appear here
-                    </div>
+                    <div className="text-xs text-gray-500 mb-2">Menu items will appear here</div>
                     <div className="h-24 border border-dashed rounded-md flex items-center justify-center">
                       <p className="text-xs text-gray-400">No items yet</p>
                     </div>

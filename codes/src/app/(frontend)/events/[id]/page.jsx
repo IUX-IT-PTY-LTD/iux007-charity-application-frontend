@@ -170,7 +170,9 @@ const EventDetails = ({ params }) => {
                         currency: document.querySelector('select').value,
                         image: event.featured_image,
                         quantity: 1,
-                        price: event.price,
+                        price: event.is_fixed_donation
+                          ? event.price
+                          : document.getElementById('donation_amount').value,
                         isFixedDonation: event.is_fixed_donation,
                       };
 

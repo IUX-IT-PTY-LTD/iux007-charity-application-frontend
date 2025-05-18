@@ -1,23 +1,14 @@
 // components/blog/PostCard.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { format, parseISO } from "date-fns";
-import {
-  Calendar,
-  Clock,
-  Tag,
-  Edit,
-  Trash2,
-  Eye,
-  Star,
-  MessageSquare,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+import React from 'react';
+import { format, parseISO } from 'date-fns';
+import { Calendar, Clock, Tag, Edit, Trash2, Eye, Star, MessageSquare } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,52 +27,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 const statusColors = {
-  published:
-    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  draft: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
-  scheduled: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  published: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+  scheduled: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
 };
 
-const PostCardGrid = ({
-  post,
-  categories = [],
-  onView,
-  onEdit,
-  onDelete,
-  confirmDelete,
-}) => {
+const PostCardGrid = ({ post, categories = [], onView, onEdit, onDelete, confirmDelete }) => {
   const router = useRouter();
 
   // Find category name
   const category = categories.find((c) => c.id === post.category_id);
-  const categoryName = category ? category.name : "Uncategorized";
+  const categoryName = category ? category.name : 'Uncategorized';
 
   // Format date
-  const formattedDate = post.publish_date
-    ? format(parseISO(post.publish_date), "MMM d, yyyy")
-    : "";
+  const formattedDate = post.publish_date ? format(parseISO(post.publish_date), 'MMM d, yyyy') : '';
 
   return (
     <Card className="h-full flex flex-col">
       <div className="relative">
         {post.featured_image ? (
-          <img
-            src={post.featured_image}
-            alt={post.title}
-            className="w-full h-48 object-cover"
-          />
+          <img src={post.featured_image} alt={post.title} className="w-full h-48 object-cover" />
         ) : (
           <div className="w-full h-48 bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
             <span className="text-gray-400">No image</span>
           </div>
         )}
 
-        <Badge
-          className={`absolute top-2 right-2 ${statusColors[post.status]}`}
-        >
+        <Badge className={`absolute top-2 right-2 ${statusColors[post.status]}`}>
           {post.status}
         </Badge>
 
@@ -96,12 +71,8 @@ const PostCardGrid = ({
       </div>
 
       <CardContent className="flex-grow p-4">
-        <h3 className="text-lg font-semibold mb-2 line-clamp-2">
-          {post.title}
-        </h3>
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
-          {post.excerpt}
-        </p>
+        <h3 className="text-lg font-semibold mb-2 line-clamp-2">{post.title}</h3>
+        <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{post.excerpt}</p>
 
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
           <div className="flex items-center">
@@ -148,8 +119,8 @@ const PostCardGrid = ({
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete the blog post "{post.title}".
-                  This action cannot be undone.
+                  This will permanently delete the blog post "{post.title}". This action cannot be
+                  undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -169,24 +140,15 @@ const PostCardGrid = ({
   );
 };
 
-const PostCardList = ({
-  post,
-  categories = [],
-  onView,
-  onEdit,
-  onDelete,
-  confirmDelete,
-}) => {
+const PostCardList = ({ post, categories = [], onView, onEdit, onDelete, confirmDelete }) => {
   const router = useRouter();
 
   // Find category name
   const category = categories.find((c) => c.id === post.category_id);
-  const categoryName = category ? category.name : "Uncategorized";
+  const categoryName = category ? category.name : 'Uncategorized';
 
   // Format date
-  const formattedDate = post.publish_date
-    ? format(parseISO(post.publish_date), "MMM d, yyyy")
-    : "";
+  const formattedDate = post.publish_date ? format(parseISO(post.publish_date), 'MMM d, yyyy') : '';
 
   return (
     <Card className="overflow-hidden">
@@ -212,10 +174,7 @@ const PostCardList = ({
               <Badge className={statusColors[post.status]}>{post.status}</Badge>
 
               {post.is_featured && (
-                <Badge
-                  variant="secondary"
-                  className="bg-amber-100 text-amber-800"
-                >
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
                   <Star className="h-3 w-3 mr-1 fill-current" />
                   Featured
                 </Badge>
@@ -255,20 +214,12 @@ const PostCardList = ({
             </div>
 
             <div className="flex gap-2 mt-2 md:mt-0">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => onView(post.id)}
-              >
+              <Button variant="secondary" size="sm" onClick={() => onView(post.id)}>
                 <Eye className="h-4 w-4 mr-1" />
                 View
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(post.id)}
-              >
+              <Button variant="outline" size="sm" onClick={() => onEdit(post.id)}>
                 <Edit className="h-4 w-4 mr-1" />
                 Edit
               </Button>
@@ -286,12 +237,10 @@ const PostCardList = ({
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete the blog post "{post.title}".
-                      This action cannot be undone.
+                      This will permanently delete the blog post "{post.title}". This action cannot
+                      be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

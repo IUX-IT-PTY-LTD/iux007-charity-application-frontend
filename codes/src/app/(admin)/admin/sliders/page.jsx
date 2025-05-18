@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
 
 import {
   PlusCircle,
@@ -13,7 +13,7 @@ import {
   ArrowUpDown,
   Image,
   SlidersHorizontal,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   Card,
@@ -22,11 +22,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -34,7 +34,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +42,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,15 +53,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const AdminSlidersList = () => {
   const router = useRouter();
@@ -70,9 +70,9 @@ const AdminSlidersList = () => {
   // State management
   const [sliders, setSliders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState("ordering");
-  const [sortDirection, setSortDirection] = useState("asc");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('ordering');
+  const [sortDirection, setSortDirection] = useState('asc');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,8 +80,8 @@ const AdminSlidersList = () => {
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Sliders");
-    setPageSubtitle("Manage homepage carousel sliders");
+    setPageTitle('Sliders');
+    setPageSubtitle('Manage homepage carousel sliders');
   }, [setPageTitle, setPageSubtitle]);
 
   // Fetch sliders from localStorage (for testing) or API
@@ -91,7 +91,7 @@ const AdminSlidersList = () => {
 
       try {
         // Check localStorage first
-        const storedSliders = localStorage.getItem("sliders");
+        const storedSliders = localStorage.getItem('sliders');
         let sliderData = [];
 
         if (storedSliders) {
@@ -110,42 +110,41 @@ const AdminSlidersList = () => {
 
           sliderData = [
             {
-              id: "1",
-              title: "Welcome to Our Store",
+              id: '1',
+              title: 'Welcome to Our Store',
               description:
-                "Discover amazing products at unbeatable prices. Shop now and enjoy free shipping on all orders.",
+                'Discover amazing products at unbeatable prices. Shop now and enjoy free shipping on all orders.',
               ordering: 1,
-              status: "1",
+              status: '1',
               image: sampleImage1,
             },
             {
-              id: "2",
-              title: "Summer Sale",
-              description:
-                "Get up to 50% off on all summer essentials. Limited time offer!",
+              id: '2',
+              title: 'Summer Sale',
+              description: 'Get up to 50% off on all summer essentials. Limited time offer!',
               ordering: 2,
-              status: "1",
+              status: '1',
               image: sampleImage2,
             },
             {
-              id: "3",
-              title: "New Collection",
+              id: '3',
+              title: 'New Collection',
               description:
-                "Check out our latest arrivals. Trendy and fashionable items just for you.",
+                'Check out our latest arrivals. Trendy and fashionable items just for you.',
               ordering: 3,
-              status: "0",
+              status: '0',
               image: sampleImage3,
             },
           ];
 
           // Store sample data for testing
-          localStorage.setItem("sliders", JSON.stringify(sliderData));
+          localStorage.setItem('sliders', JSON.stringify(sliderData));
         }
 
         setSliders(sliderData);
       } catch (error) {
-        console.error("Error fetching sliders:", error);
-        toast.error("Failed to load sliders");
+        console.error('Error fetching sliders:', error);
+        toast.error('Failed to load sliders');
       } finally {
         setIsLoading(false);
       }
@@ -189,10 +188,10 @@ const AdminSlidersList = () => {
   // Handle sorting
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
   };
 
@@ -203,8 +202,8 @@ const AdminSlidersList = () => {
 
       const query = searchQuery.toLowerCase();
 
-      if (query === "active") return slider.status === "1";
-      if (query === "inactive") return slider.status === "0";
+      if (query === 'active') return slider.status === '1';
+      if (query === 'inactive') return slider.status === '0';
 
       return (
         slider.title.toLowerCase().includes(query) ||
@@ -212,9 +211,9 @@ const AdminSlidersList = () => {
       );
     })
     .sort((a, b) => {
-      const modifier = sortDirection === "asc" ? 1 : -1;
+      const modifier = sortDirection === 'asc' ? 1 : -1;
 
-      if (sortField === "title" || sortField === "description") {
+      if (sortField === 'title' || sortField === 'description') {
         return a[sortField].localeCompare(b[sortField]) * modifier;
       } else {
         return (Number(a[sortField]) - Number(b[sortField])) * modifier;
@@ -226,19 +225,16 @@ const AdminSlidersList = () => {
   const totalPages = Math.ceil(totalSliders / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentSliders = filteredAndSortedSliders.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentSliders = filteredAndSortedSliders.slice(indexOfFirstItem, indexOfLastItem);
 
   // Handle slider deletion
   const handleDelete = (id) => {
     try {
       const updatedSliders = sliders.filter((slider) => slider.id !== id);
       setSliders(updatedSliders);
-      localStorage.setItem("sliders", JSON.stringify(updatedSliders));
+      localStorage.setItem('sliders', JSON.stringify(updatedSliders));
 
-      toast.success("Slider deleted successfully");
+      toast.success('Slider deleted successfully');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/sliders/${id}`, {
@@ -264,8 +260,8 @@ const AdminSlidersList = () => {
         });
       */
     } catch (error) {
-      console.error("Error deleting slider:", error);
-      toast.error("Failed to delete slider");
+      console.error('Error deleting slider:', error);
+      toast.error('Failed to delete slider');
     }
   };
 
@@ -274,19 +270,15 @@ const AdminSlidersList = () => {
     try {
       const updatedSliders = sliders.map((slider) => {
         if (slider.id === id) {
-          return { ...slider, status: currentStatus === "1" ? "0" : "1" };
+          return { ...slider, status: currentStatus === '1' ? '0' : '1' };
         }
         return slider;
       });
 
       setSliders(updatedSliders);
-      localStorage.setItem("sliders", JSON.stringify(updatedSliders));
+      localStorage.setItem('sliders', JSON.stringify(updatedSliders));
 
-      toast.success(
-        `Slider ${
-          currentStatus === "1" ? "deactivated" : "activated"
-        } successfully`
-      );
+      toast.success(`Slider ${currentStatus === '1' ? 'deactivated' : 'activated'} successfully`);
 
       /* API Implementation (Commented out for future use)
       const sliderToUpdate = sliders.find(slider => slider.id === id);
@@ -325,19 +317,19 @@ const AdminSlidersList = () => {
         });
       */
     } catch (error) {
-      console.error("Error updating slider status:", error);
-      toast.error("Failed to update slider status");
+      console.error('Error updating slider status:', error);
+      toast.error('Failed to update slider status');
     }
   };
 
   // Column definitions for sortable headers
   const columns = [
-    { field: "image", label: "Image", sortable: false },
-    { field: "title", label: "Title", sortable: true },
-    { field: "description", label: "Description", sortable: true },
-    { field: "ordering", label: "Order", sortable: true },
-    { field: "status", label: "Status", sortable: true },
-    { field: "actions", label: "Actions", sortable: false },
+    { field: 'image', label: 'Image', sortable: false },
+    { field: 'title', label: 'Title', sortable: true },
+    { field: 'description', label: 'Description', sortable: true },
+    { field: 'ordering', label: 'Order', sortable: true },
+    { field: 'status', label: 'Status', sortable: true },
+    { field: 'actions', label: 'Actions', sortable: false },
   ];
 
   return (
@@ -347,13 +339,11 @@ const AdminSlidersList = () => {
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div>
               <CardTitle>Homepage Sliders</CardTitle>
-              <CardDescription>
-                Manage carousel sliders displayed on your website
-              </CardDescription>
+              <CardDescription>Manage carousel sliders displayed on your website</CardDescription>
             </div>
 
             <Button
-              onClick={() => router.push("/admin/sliders/create")}
+              onClick={() => router.push('/admin/sliders/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -376,9 +366,8 @@ const AdminSlidersList = () => {
 
               <div className="flex flex-wrap items-center gap-2 self-end">
                 <span className="text-sm text-gray-500">
-                  {filteredAndSortedSliders.length}{" "}
-                  {filteredAndSortedSliders.length === 1 ? "slider" : "sliders"}{" "}
-                  found
+                  {filteredAndSortedSliders.length}{' '}
+                  {filteredAndSortedSliders.length === 1 ? 'slider' : 'sliders'} found
                 </span>
 
                 <DropdownMenu>
@@ -392,7 +381,7 @@ const AdminSlidersList = () => {
                     <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => setSearchQuery('')}
                       className="justify-between"
                     >
                       All
@@ -401,27 +390,21 @@ const AdminSlidersList = () => {
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("active")}
+                      onClick={() => setSearchQuery('active')}
                       className="justify-between"
                     >
                       Active
                       <Badge variant="outline" className="ml-2">
-                        {
-                          sliders.filter((slider) => slider.status === "1")
-                            .length
-                        }
+                        {sliders.filter((slider) => slider.status === '1').length}
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("inactive")}
+                      onClick={() => setSearchQuery('inactive')}
                       className="justify-between"
                     >
                       Inactive
                       <Badge variant="outline" className="ml-2">
-                        {
-                          sliders.filter((slider) => slider.status === "0")
-                            .length
-                        }
+                        {sliders.filter((slider) => slider.status === '0').length}
                       </Badge>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -436,20 +419,12 @@ const AdminSlidersList = () => {
                     {columns.map((column) => (
                       <TableHead
                         key={column.field}
-                        className={
-                          column.sortable ? "cursor-pointer select-none" : ""
-                        }
-                        onClick={
-                          column.sortable
-                            ? () => handleSort(column.field)
-                            : undefined
-                        }
+                        className={column.sortable ? 'cursor-pointer select-none' : ''}
+                        onClick={column.sortable ? () => handleSort(column.field) : undefined}
                       >
                         <div className="flex items-center space-x-1">
                           <span>{column.label}</span>
-                          {column.sortable && (
-                            <ArrowUpDown className="h-3 w-3" />
-                          )}
+                          {column.sortable && <ArrowUpDown className="h-3 w-3" />}
                         </div>
                       </TableHead>
                     ))}
@@ -458,28 +433,19 @@ const AdminSlidersList = () => {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
                         Loading sliders...
                       </TableCell>
                     </TableRow>
                   ) : filteredAndSortedSliders.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
                         No sliders found.
                       </TableCell>
                     </TableRow>
                   ) : (
                     currentSliders.map((slider) => (
-                      <TableRow
-                        key={slider.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
+                      <TableRow key={slider.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <TableCell>
                           {slider.image ? (
                             <div className="h-16 w-32 overflow-hidden rounded-md">
@@ -509,26 +475,20 @@ const AdminSlidersList = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Switch
-                              checked={slider.status === "1"}
-                              onCheckedChange={() =>
-                                handleStatusChange(slider.id, slider.status)
-                              }
+                              checked={slider.status === '1'}
+                              onCheckedChange={() => handleStatusChange(slider.id, slider.status)}
                               aria-label={`Toggle status for ${slider.title}`}
                               className="data-[state=checked]:bg-black data-[state=checked]:text-white"
                             />
                             <Badge
-                              variant={
-                                slider.status === "1"
-                                  ? "success"
-                                  : "destructive"
-                              }
+                              variant={slider.status === '1' ? 'success' : 'destructive'}
                               className={
-                                slider.status === "1"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
+                                slider.status === '1'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
                               }
                             >
-                              {slider.status === "1" ? "Active" : "Inactive"}
+                              {slider.status === '1' ? 'Active' : 'Inactive'}
                             </Badge>
                           </div>
                         </TableCell>
@@ -537,9 +497,7 @@ const AdminSlidersList = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() =>
-                                router.push(`/admin/sliders/${slider.id}/edit`)
-                              }
+                              onClick={() => router.push(`/admin/sliders/${slider.id}/edit`)}
                             >
                               <Edit className="h-4 w-4" />
                               <span className="sr-only">Edit</span>
@@ -558,12 +516,10 @@ const AdminSlidersList = () => {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you absolutely sure?
-                                  </AlertDialogTitle>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This will permanently delete this slider.
-                                    This action cannot be undone.
+                                    This will permanently delete this slider. This action cannot be
+                                    undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -589,9 +545,8 @@ const AdminSlidersList = () => {
 
           <CardFooter className="flex flex-col sm:flex-row gap-4 justify-between items-center">
             <div className="text-xs text-gray-500">
-              Showing {indexOfFirstItem + 1} to{" "}
-              {Math.min(indexOfLastItem, totalSliders)} of {totalSliders}{" "}
-              sliders
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalSliders)} of{' '}
+              {totalSliders} sliders
             </div>
 
             {/* Pagination */}
@@ -608,9 +563,7 @@ const AdminSlidersList = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                 >
                   &lt;
@@ -628,9 +581,7 @@ const AdminSlidersList = () => {
                       return (
                         <Button
                           key={pageNumber}
-                          variant={
-                            currentPage === pageNumber ? "default" : "outline"
-                          }
+                          variant={currentPage === pageNumber ? 'default' : 'outline'}
                           size="sm"
                           onClick={() => setCurrentPage(pageNumber)}
                           className="w-8 h-8 p-0"
@@ -646,9 +597,7 @@ const AdminSlidersList = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                 >
                   &gt;

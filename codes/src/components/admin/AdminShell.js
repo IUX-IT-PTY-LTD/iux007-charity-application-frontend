@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { AdminSidebar } from "@/components/admin/sidebar";
-import AdminPageHeader from "@/components/admin/header";
-import AdminFooter from "@/components/admin/footer";
-import { Suspense } from "react";
+import { AdminSidebar } from '@/components/admin/sidebar';
+import AdminPageHeader from '@/components/admin/header';
+import AdminFooter from '@/components/admin/footer';
+import { Suspense } from 'react';
 
 export default function AdminShell({ children }) {
   return (
@@ -27,9 +27,7 @@ export default function AdminShell({ children }) {
 
         {/* Scrollable content area */}
         <div className="flex-1 overflow-auto">
-          <div className="container py-6 px-4 mx-auto max-w-7xl">
-            {children}
-          </div>
+          <div className="container py-6 px-4 mx-auto max-w-7xl">{children}</div>
         </div>
 
         {/* Footer - always visible at bottom */}

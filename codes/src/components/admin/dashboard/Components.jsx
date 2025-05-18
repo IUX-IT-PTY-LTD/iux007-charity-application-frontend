@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Area, Bar, Line } from "recharts";
+import React from 'react';
+import { Area, Bar, Line } from 'recharts';
 import {
   Card,
   CardContent,
@@ -9,8 +9,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Activity,
   CreditCard,
@@ -24,13 +24,13 @@ import {
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 // Component for stats cards with icon
 const StatCard = ({ title, value, description, icon, trend, trendValue }) => {
   const Icon = icon;
-  const isPositive = trend === "up";
+  const isPositive = trend === 'up';
 
   return (
     <Card>
@@ -47,7 +47,7 @@ const StatCard = ({ title, value, description, icon, trend, trendValue }) => {
           {trend && (
             <span
               className={`flex items-center text-xs font-medium ${
-                isPositive ? "text-green-600" : "text-red-600"
+                isPositive ? 'text-green-600' : 'text-red-600'
               }`}
             >
               {isPositive ? (
@@ -71,11 +71,11 @@ const OverviewChart = ({ data, timeframe }) => {
       <CardHeader>
         <CardTitle>Donation Overview</CardTitle>
         <CardDescription>
-          {timeframe === "year"
-            ? "Monthly donation amounts for the current year"
-            : timeframe === "month"
-            ? "Daily donation amounts for the current month"
-            : "Weekly donation amounts for the current quarter"}
+          {timeframe === 'year'
+            ? 'Monthly donation amounts for the current year'
+            : timeframe === 'month'
+              ? 'Daily donation amounts for the current month'
+              : 'Weekly donation amounts for the current quarter'}
         </CardDescription>
       </CardHeader>
       <CardContent className="pl-2">
@@ -125,9 +125,9 @@ const RecentDonations = ({ donations }) => {
                 ) : (
                   <span className="font-semibold text-sm">
                     {donation.donor_name
-                      .split(" ")
+                      .split(' ')
                       .map((n) => n[0])
-                      .join("")
+                      .join('')
                       .toUpperCase()
                       .substring(0, 2)}
                   </span>
@@ -135,15 +135,11 @@ const RecentDonations = ({ donations }) => {
               </div>
               <div className="space-y-1 flex-1">
                 <p className="text-sm font-medium leading-none">
-                  {donation.anonymous ? "Anonymous Donor" : donation.donor_name}
+                  {donation.anonymous ? 'Anonymous Donor' : donation.donor_name}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {donation.event_name}
-                </p>
+                <p className="text-xs text-muted-foreground">{donation.event_name}</p>
               </div>
-              <div className="ml-auto font-medium">
-                ${donation.amount.toLocaleString()}
-              </div>
+              <div className="ml-auto font-medium">${donation.amount.toLocaleString()}</div>
             </div>
           ))}
         </div>
@@ -172,36 +168,32 @@ const UpcomingEvents = ({ events }) => {
             <div key={event.id} className="flex items-start space-x-4">
               <div className="bg-muted rounded-md p-2 w-14 h-14 flex flex-col items-center justify-center text-center">
                 <span className="text-sm font-semibold">
-                  {new Date(event.start_date).toLocaleDateString("en-US", {
-                    month: "short",
+                  {new Date(event.start_date).toLocaleDateString('en-US', {
+                    month: 'short',
                   })}
                 </span>
-                <span className="text-xl font-bold">
-                  {new Date(event.start_date).getDate()}
-                </span>
+                <span className="text-xl font-bold">{new Date(event.start_date).getDate()}</span>
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold">{event.title}</h4>
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
-                      event.status === "1"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                      event.status === '1'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {event.status === "1" ? "Active" : "Inactive"}
+                    {event.status === '1' ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {event.description}
-                </p>
+                <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
                 <div className="flex items-center text-xs text-muted-foreground">
                   <Clock className="mr-1 h-3 w-3" />
                   <span>
-                    {new Date(event.start_date).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
+                    {new Date(event.start_date).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
                       hour12: true,
                     })}
                   </span>
@@ -260,12 +252,7 @@ const DonorActivity = ({ data }) => {
                 <stop offset="95%" stopColor="#4ade80" stopOpacity={0.6} />
               </linearGradient>
             </defs>
-            <Bar
-              dataKey="new"
-              name="New Donors"
-              fill="url(#colorNew)"
-              radius={[4, 4, 0, 0]}
-            />
+            <Bar dataKey="new" name="New Donors" fill="url(#colorNew)" radius={[4, 4, 0, 0]} />
             <Bar
               dataKey="returning"
               name="Returning Donors"
@@ -290,35 +277,30 @@ const CampaignPerformance = ({ campaigns }) => {
       <CardContent>
         <div className="space-y-4">
           {campaigns.map((campaign) => {
-            const percentage = Math.round(
-              (campaign.raised / campaign.target) * 100
-            );
+            const percentage = Math.round((campaign.raised / campaign.target) * 100);
             return (
               <div key={campaign.id} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-medium">{campaign.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    ${campaign.raised.toLocaleString()} / $
-                    {campaign.target.toLocaleString()}
+                    ${campaign.raised.toLocaleString()} / ${campaign.target.toLocaleString()}
                   </div>
                 </div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                   <div
                     className={`h-full ${
                       percentage < 30
-                        ? "bg-red-500"
+                        ? 'bg-red-500'
                         : percentage < 70
-                        ? "bg-yellow-500"
-                        : "bg-green-500"
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
                     }`}
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span>{percentage}% Complete</span>
-                  <span className="text-muted-foreground">
-                    {campaign.days_left} days left
-                  </span>
+                  <span className="text-muted-foreground">{campaign.days_left} days left</span>
                 </div>
               </div>
             );

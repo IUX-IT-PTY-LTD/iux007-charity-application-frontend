@@ -1,10 +1,10 @@
 // components/users/UserActionsHeader.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Edit, Trash2, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Edit, Trash2, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 const UserActionsHeader = ({ userId, userName }) => {
   const router = useRouter();
@@ -22,7 +22,7 @@ const UserActionsHeader = ({ userId, userName }) => {
 
   // Handle navigation back to users list
   const handleBack = () => {
-    router.push("/admin/users");
+    router.push('/admin/users');
   };
 
   // Handle navigation to edit user page
@@ -36,18 +36,18 @@ const UserActionsHeader = ({ userId, userName }) => {
     setShowDeleteDialog(false);
 
     // Get current users from localStorage
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
     const updatedUsers = storedUsers.filter((user) => user.id !== userId);
 
     // Update localStorage
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
 
     // Show success message
     toast.success(`User ${userName} has been deleted`);
 
     // Navigate back to users list
     setTimeout(() => {
-      router.push("/admin/users");
+      router.push('/admin/users');
     }, 500);
 
     /* API Implementation (Commented out for future use)
@@ -76,7 +76,7 @@ const UserActionsHeader = ({ userId, userName }) => {
 
     // Simulate export delay
     setTimeout(() => {
-      toast.success("User data exported successfully");
+      toast.success('User data exported successfully');
     }, 1500);
   };
 
@@ -110,15 +110,11 @@ const UserActionsHeader = ({ userId, userName }) => {
           <DialogHeader>
             <DialogTitle>Confirm User Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete user "{userName}"? This action
-              cannot be undone.
+              Are you sure you want to delete user "{userName}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete}>

@@ -1,33 +1,33 @@
 // components/blog/PostHeader.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { format, parseISO } from "date-fns";
-import { Calendar, Clock, Tag, User, Star } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import React from 'react';
+import { format, parseISO } from 'date-fns';
+import { Calendar, Clock, Tag, User, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const PostHeader = ({ post, category }) => {
   // Format date
   const formattedDate = post.publish_date
-    ? format(parseISO(post.publish_date), "MMMM d, yyyy")
-    : "";
+    ? format(parseISO(post.publish_date), 'MMMM d, yyyy')
+    : '';
 
   return (
     <div className="space-y-4">
       {/* Status badge */}
       <div className="flex flex-wrap gap-2">
-        {post.status !== "published" && (
+        {post.status !== 'published' && (
           <Badge
-            variant={post.status === "scheduled" ? "secondary" : "outline"}
+            variant={post.status === 'scheduled' ? 'secondary' : 'outline'}
             className={
-              post.status === "draft"
-                ? "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                : post.status === "scheduled"
-                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                : ""
+              post.status === 'draft'
+                ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                : post.status === 'scheduled'
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                  : ''
             }
           >
-            {post.status === "draft" ? "Draft" : "Scheduled"}
+            {post.status === 'draft' ? 'Draft' : 'Scheduled'}
           </Badge>
         )}
 
@@ -43,9 +43,7 @@ const PostHeader = ({ post, category }) => {
       </div>
 
       {/* Title */}
-      <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-        {post.title}
-      </h1>
+      <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{post.title}</h1>
 
       {/* Metadata */}
       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground pb-2">
@@ -76,9 +74,7 @@ const PostHeader = ({ post, category }) => {
 
       {/* Excerpt/Summary */}
       {post.excerpt && (
-        <p className="text-lg text-muted-foreground italic leading-relaxed">
-          {post.excerpt}
-        </p>
+        <p className="text-lg text-muted-foreground italic leading-relaxed">{post.excerpt}</p>
       )}
     </div>
   );

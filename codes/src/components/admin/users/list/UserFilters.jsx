@@ -1,11 +1,11 @@
 // components/users/UserFilters.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Search, Filter, Calendar, ChevronDown } from "lucide-react";
+import React, { useState } from 'react';
+import { Search, Filter, Calendar, ChevronDown } from 'lucide-react';
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,21 +15,17 @@ import {
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const UserFilters = ({
   searchQuery,
@@ -59,17 +55,11 @@ const UserFilters = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
             <Filter className="mr-2 h-4 w-4" />
             Filters
             <ChevronDown
-              className={`ml-2 h-4 w-4 transition-transform ${
-                showFilters ? "rotate-180" : ""
-              }`}
+              className={`ml-2 h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`}
             />
           </Button>
 
@@ -88,7 +78,7 @@ const UserFilters = ({
                     size="sm"
                     className="w-full justify-start font-normal p-4"
                   >
-                    {dateFilter ? "Clear Date Filter" : "Select Date..."}
+                    {dateFilter ? 'Clear Date Filter' : 'Select Date...'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -112,12 +102,8 @@ const UserFilters = ({
               <SelectItem value="name-z-a">Name (Z-A)</SelectItem>
               <SelectItem value="newest">Newest First</SelectItem>
               <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="donations-high">
-                Donations (High to Low)
-              </SelectItem>
-              <SelectItem value="donations-low">
-                Donations (Low to High)
-              </SelectItem>
+              <SelectItem value="donations-high">Donations (High to Low)</SelectItem>
+              <SelectItem value="donations-low">Donations (Low to High)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -148,11 +134,7 @@ const UserFilters = ({
 
           {dateFilter && (
             <div className="flex justify-end mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setDateFilter(null)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setDateFilter(null)}>
                 Clear Date Filter
               </Button>
             </div>

@@ -1,19 +1,11 @@
 // components/blog/PostFilters.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import {
-  Search,
-  Filter,
-  Calendar,
-  Tag,
-  LayoutGrid,
-  LayoutList,
-  ChevronDown,
-} from "lucide-react";
+import React, { useState } from 'react';
+import { Search, Filter, Calendar, Tag, LayoutGrid, LayoutList, ChevronDown } from 'lucide-react';
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,21 +15,17 @@ import {
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const PostFilters = ({
   searchQuery,
@@ -72,17 +60,11 @@ const PostFilters = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
             <Filter className="mr-2 h-4 w-4" />
             Filters
             <ChevronDown
-              className={`ml-2 h-4 w-4 transition-transform ${
-                showFilters ? "rotate-180" : ""
-              }`}
+              className={`ml-2 h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`}
             />
           </Button>
 
@@ -96,13 +78,8 @@ const PostFilters = ({
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={categoryFilter}
-                onValueChange={setCategoryFilter}
-              >
-                <DropdownMenuRadioItem value="all">
-                  All Categories
-                </DropdownMenuRadioItem>
+              <DropdownMenuRadioGroup value={categoryFilter} onValueChange={setCategoryFilter}>
+                <DropdownMenuRadioItem value="all">All Categories</DropdownMenuRadioItem>
                 {categories.map((category) => (
                   <DropdownMenuRadioItem key={category.id} value={category.id}>
                     {category.name}
@@ -127,7 +104,7 @@ const PostFilters = ({
                     size="sm"
                     className="w-full justify-start font-normal p-4"
                   >
-                    {dateFilter ? "Clear Date Filter" : "Select Date..."}
+                    {dateFilter ? 'Clear Date Filter' : 'Select Date...'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -156,17 +133,17 @@ const PostFilters = ({
 
           <div className="hidden md:flex border rounded-md">
             <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode("grid")}
+              onClick={() => setViewMode('grid')}
               className="h-9 rounded-r-none"
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode("list")}
+              onClick={() => setViewMode('list')}
               className="h-9 rounded-l-none"
             >
               <LayoutList className="h-4 w-4" />
@@ -179,9 +156,9 @@ const PostFilters = ({
         <div className="flex flex-wrap gap-2 py-2 items-center">
           <div className="text-sm text-muted-foreground">Status:</div>
           <Button
-            variant={statusFilter === "all" ? "default" : "outline"}
+            variant={statusFilter === 'all' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setStatusFilter("all")}
+            onClick={() => setStatusFilter('all')}
           >
             All
             <Badge variant="outline" className="ml-2">
@@ -189,9 +166,9 @@ const PostFilters = ({
             </Badge>
           </Button>
           <Button
-            variant={statusFilter === "published" ? "default" : "outline"}
+            variant={statusFilter === 'published' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setStatusFilter("published")}
+            onClick={() => setStatusFilter('published')}
           >
             Published
             <Badge variant="outline" className="ml-2">
@@ -199,9 +176,9 @@ const PostFilters = ({
             </Badge>
           </Button>
           <Button
-            variant={statusFilter === "draft" ? "default" : "outline"}
+            variant={statusFilter === 'draft' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setStatusFilter("draft")}
+            onClick={() => setStatusFilter('draft')}
           >
             Draft
             <Badge variant="outline" className="ml-2">
@@ -209,9 +186,9 @@ const PostFilters = ({
             </Badge>
           </Button>
           <Button
-            variant={statusFilter === "scheduled" ? "default" : "outline"}
+            variant={statusFilter === 'scheduled' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setStatusFilter("scheduled")}
+            onClick={() => setStatusFilter('scheduled')}
           >
             Scheduled
             <Badge variant="outline" className="ml-2">

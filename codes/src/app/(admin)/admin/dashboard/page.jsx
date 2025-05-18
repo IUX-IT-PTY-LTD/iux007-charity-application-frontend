@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Activity,
   BarChart3,
@@ -18,9 +18,9 @@ import {
   Search,
   Filter,
   Bell,
-} from "lucide-react";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from 'lucide-react';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Card,
   CardContent,
@@ -28,35 +28,35 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 // Import Dashboard Components - using destructured named imports to avoid undefined errors
 import {
   StatCard,
   CampaignPerformance,
   RecentDonations,
-} from "@/components/admin/dashboard/Components";
+} from '@/components/admin/dashboard/Components';
 
 // Import Notifications Component
-import { NotificationsButton } from "@/components/admin/dashboard/Notifications";
+import { NotificationsButton } from '@/components/admin/dashboard/Notifications';
 
 // Import Analytics Component directly - comment this out initially to test if other parts work
 // The error suggests this import might be problematic
-import { DashboardAnalytics } from "@/components/admin/dashboard/Analytics";
+import { DashboardAnalytics } from '@/components/admin/dashboard/Analytics';
 
 const AdminDashboard = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
-  const [timeframe, setTimeframe] = useState("month");
+  const [timeframe, setTimeframe] = useState('month');
   const [stats, setStats] = useState(null);
   const [recentDonations, setRecentDonations] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
@@ -65,8 +65,8 @@ const AdminDashboard = () => {
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Dashboard");
-    setPageSubtitle("Charity management overview");
+    setPageTitle('Dashboard');
+    setPageSubtitle('Charity management overview');
   }, [setPageTitle, setPageSubtitle]);
 
   // Fetch dashboard data
@@ -86,18 +86,18 @@ const AdminDashboard = () => {
         // Generate recent donations
         const recentDonationsMock = [];
         const names = [
-          "John Smith",
-          "Emma Wilson",
-          "Michael Johnson",
-          "Sarah Davis",
-          "Robert Brown",
+          'John Smith',
+          'Emma Wilson',
+          'Michael Johnson',
+          'Sarah Davis',
+          'Robert Brown',
         ];
         const events = [
-          "Winter Clothes Drive",
-          "Education for All",
-          "Food Bank Fundraiser",
-          "Flood Relief",
-          "Annual Charity Gala",
+          'Winter Clothes Drive',
+          'Education for All',
+          'Food Bank Fundraiser',
+          'Flood Relief',
+          'Annual Charity Gala',
         ];
         const now = new Date();
 
@@ -107,9 +107,7 @@ const AdminDashboard = () => {
             donor_name: names[i],
             amount: Math.floor(Math.random() * 900) + 100,
             event_name: events[i],
-            date: new Date(
-              now - Math.floor(Math.random() * 5 * 24 * 60 * 60 * 1000)
-            ).toISOString(),
+            date: new Date(now - Math.floor(Math.random() * 5 * 24 * 60 * 60 * 1000)).toISOString(),
             anonymous: i === 2, // Make one donation anonymous
           });
         }
@@ -119,21 +117,21 @@ const AdminDashboard = () => {
         const campaignsMock = [
           {
             id: 1,
-            name: "Education Fund",
+            name: 'Education Fund',
             raised: 35000,
             target: 50000,
             days_left: 15,
           },
           {
             id: 2,
-            name: "Clean Water Project",
+            name: 'Clean Water Project',
             raised: 28000,
             target: 30000,
             days_left: 7,
           },
           {
             id: 3,
-            name: "Medical Aid",
+            name: 'Medical Aid',
             raised: 12000,
             target: 40000,
             days_left: 28,
@@ -144,44 +142,43 @@ const AdminDashboard = () => {
         // Generate notifications
         const notificationsMock = [
           {
-            id: "1",
-            type: "donation",
-            title: "New Donation Received",
+            id: '1',
+            type: 'donation',
+            title: 'New Donation Received',
             message:
-              "You received a $1,200 donation from John Smith for the Education Fund campaign.",
+              'You received a $1,200 donation from John Smith for the Education Fund campaign.',
             timestamp: new Date(now - 12 * 60 * 1000).toISOString(),
             read: false,
-            actionUrl: "/admin/donations/123",
-            actionText: "View Donation",
+            actionUrl: '/admin/donations/123',
+            actionText: 'View Donation',
           },
           {
-            id: "2",
-            type: "user",
-            title: "New Volunteer Registration",
-            message:
-              "Sarah Davis has signed up as a volunteer for your organization.",
+            id: '2',
+            type: 'user',
+            title: 'New Volunteer Registration',
+            message: 'Sarah Davis has signed up as a volunteer for your organization.',
             timestamp: new Date(now - 60 * 60 * 1000).toISOString(),
             read: false,
-            actionUrl: "/admin/users/456",
-            actionText: "View Profile",
+            actionUrl: '/admin/users/456',
+            actionText: 'View Profile',
           },
           {
-            id: "3",
-            type: "system",
-            title: "Event Location Updated",
+            id: '3',
+            type: 'system',
+            title: 'Event Location Updated',
             message:
               "The Winter Clothes Drive event location has been updated to 'Community Center'.",
             timestamp: new Date(now - 3 * 60 * 60 * 1000).toISOString(),
             read: true,
-            actionUrl: "/admin/events/789",
-            actionText: "View Event",
+            actionUrl: '/admin/events/789',
+            actionText: 'View Event',
           },
         ];
         setNotifications(notificationsMock);
 
         setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error('Error fetching dashboard data:', error);
         setIsLoading(false);
       }
     };
@@ -310,19 +307,15 @@ const AdminDashboard = () => {
                 <CardHeader>
                   <CardTitle>Analytics Dashboard</CardTitle>
                   <CardDescription>
-                    Detailed analytics and metrics for your charity
-                    organization.
+                    Detailed analytics and metrics for your charity organization.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-10">
                     <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">
-                      Analytics Module
-                    </h3>
+                    <h3 className="text-lg font-medium mb-2">Analytics Module</h3>
                     <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                      The analytics module is currently being updated. Please
-                      check back later.
+                      The analytics module is currently being updated. Please check back later.
                     </p>
                     {/* <Button
                       variant="outline"
@@ -347,12 +340,8 @@ const AdminDashboard = () => {
                       <div className="flex items-center">
                         <FileText className="h-5 w-5 text-muted-foreground mr-3" />
                         <div>
-                          <p className="text-sm font-medium">
-                            Annual Donation Report 2024
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Generated on May 5, 2024
-                          </p>
+                          <p className="text-sm font-medium">Annual Donation Report 2024</p>
+                          <p className="text-xs text-muted-foreground">Generated on May 5, 2024</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -371,9 +360,7 @@ const AdminDashboard = () => {
                       <div className="flex items-center">
                         <FileText className="h-5 w-5 text-muted-foreground mr-3" />
                         <div>
-                          <p className="text-sm font-medium">
-                            Quarterly Event Performance
-                          </p>
+                          <p className="text-sm font-medium">Quarterly Event Performance</p>
                           <p className="text-xs text-muted-foreground">
                             Generated on April 12, 2024
                           </p>
@@ -395,9 +382,7 @@ const AdminDashboard = () => {
                       <div className="flex items-center">
                         <FileText className="h-5 w-5 text-muted-foreground mr-3" />
                         <div>
-                          <p className="text-sm font-medium">
-                            Donor Engagement Analysis
-                          </p>
+                          <p className="text-sm font-medium">Donor Engagement Analysis</p>
                           <p className="text-xs text-muted-foreground">
                             Generated on March 28, 2024
                           </p>
@@ -437,17 +422,11 @@ const AdminDashboard = () => {
                         <div className="flex items-center mb-1">
                           <div className="h-2 w-2 rounded-full bg-blue-500 mr-2"></div>
                           <p className="text-sm font-medium">Admin User</p>
-                          <p className="text-xs text-muted-foreground ml-2">
-                            admin@charity.org
-                          </p>
+                          <p className="text-xs text-muted-foreground ml-2">admin@charity.org</p>
                         </div>
-                        <p className="text-sm">
-                          Created a new campaign: "Summer Food Drive"
-                        </p>
+                        <p className="text-sm">Created a new campaign: "Summer Food Drive"</p>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        Today, 10:42 AM
-                      </div>
+                      <div className="text-xs text-muted-foreground">Today, 10:42 AM</div>
                     </div>
 
                     <div className="flex items-center border-b pb-4">
@@ -456,13 +435,9 @@ const AdminDashboard = () => {
                           <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
                           <p className="text-sm font-medium">System</p>
                         </div>
-                        <p className="text-sm">
-                          Automatically updated donor metrics for April
-                        </p>
+                        <p className="text-sm">Automatically updated donor metrics for April</p>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        Yesterday, 11:30 PM
-                      </div>
+                      <div className="text-xs text-muted-foreground">Yesterday, 11:30 PM</div>
                     </div>
 
                     <div className="flex items-center border-b pb-4">
@@ -470,15 +445,11 @@ const AdminDashboard = () => {
                         <div className="flex items-center mb-1">
                           <div className="h-2 w-2 rounded-full bg-blue-500 mr-2"></div>
                           <p className="text-sm font-medium">Content Editor</p>
-                          <p className="text-xs text-muted-foreground ml-2">
-                            editor@charity.org
-                          </p>
+                          <p className="text-xs text-muted-foreground ml-2">editor@charity.org</p>
                         </div>
                         <p className="text-sm">Published 3 new blog articles</p>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        Yesterday, 3:15 PM
-                      </div>
+                      <div className="text-xs text-muted-foreground">Yesterday, 3:15 PM</div>
                     </div>
 
                     <div className="flex items-center border-b pb-4">
@@ -487,13 +458,9 @@ const AdminDashboard = () => {
                           <div className="h-2 w-2 rounded-full bg-yellow-500 mr-2"></div>
                           <p className="text-sm font-medium">System Alert</p>
                         </div>
-                        <p className="text-sm">
-                          Storage quota reaching 80% capacity
-                        </p>
+                        <p className="text-sm">Storage quota reaching 80% capacity</p>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        May 12, 2024, 9:22 AM
-                      </div>
+                      <div className="text-xs text-muted-foreground">May 12, 2024, 9:22 AM</div>
                     </div>
 
                     <div className="flex items-center">
@@ -502,13 +469,9 @@ const AdminDashboard = () => {
                           <div className="h-2 w-2 rounded-full bg-red-500 mr-2"></div>
                           <p className="text-sm font-medium">Security Alert</p>
                         </div>
-                        <p className="text-sm">
-                          Failed login attempts detected
-                        </p>
+                        <p className="text-sm">Failed login attempts detected</p>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        May 10, 2024, 11:47 PM
-                      </div>
+                      <div className="text-xs text-muted-foreground">May 10, 2024, 11:47 PM</div>
                     </div>
                   </div>
                 </CardContent>
@@ -527,7 +490,7 @@ const AdminDashboard = () => {
                 <Button
                   variant="outline"
                   className="h-auto flex flex-col items-center justify-center py-4"
-                  onClick={() => router.push("/admin/events/create")}
+                  onClick={() => router.push('/admin/events/create')}
                 >
                   <Calendar className="h-8 w-8 mb-2" />
                   <span>Create Event</span>
@@ -535,7 +498,7 @@ const AdminDashboard = () => {
                 <Button
                   variant="outline"
                   className="h-auto flex flex-col items-center justify-center py-4"
-                  onClick={() => router.push("/admin/blogs/create")}
+                  onClick={() => router.push('/admin/blogs/create')}
                 >
                   <FileText className="h-8 w-8 mb-2" />
                   <span>Write Blog</span>
@@ -543,7 +506,7 @@ const AdminDashboard = () => {
                 <Button
                   variant="outline"
                   className="h-auto flex flex-col items-center justify-center py-4"
-                  onClick={() => router.push("/admin/users")}
+                  onClick={() => router.push('/admin/users')}
                 >
                   <Users className="h-8 w-8 mb-2" />
                   <span>View Users</span>

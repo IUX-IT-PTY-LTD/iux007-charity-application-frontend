@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Loader2, FileDown, UserSearch } from "lucide-react";
-import { format, parseISO, isSameDay } from "date-fns";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Loader2, FileDown, UserSearch } from 'lucide-react';
+import { format, parseISO, isSameDay } from 'date-fns';
 
 // Import custom components
-import UserFilters from "@/components/admin/users/list/UserFilters";
-import UserRow from "@/components/admin/users/list/UserRow";
-import UserStats from "@/components/admin/users/list/UserStats";
+import UserFilters from '@/components/admin/users/list/UserFilters';
+import UserRow from '@/components/admin/users/list/UserRow';
+import UserStats from '@/components/admin/users/list/UserStats';
 
 // Import shadcn components
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Pagination,
   PaginationContent,
@@ -29,16 +29,16 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
+} from '@/components/ui/pagination';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const UsersPage = () => {
   const router = useRouter();
@@ -46,22 +46,20 @@ const UsersPage = () => {
 
   // Set page title
   useEffect(() => {
-    setPageTitle("Users");
-    setPageSubtitle("Manage user accounts and permissions");
+    setPageTitle('Users');
+    setPageSubtitle('Manage user accounts and permissions');
   }, [setPageTitle, setPageSubtitle]);
 
   // State for users
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastUpdateDate, setLastUpdateDate] = useState(
-    new Date().toISOString()
-  );
+  const [lastUpdateDate, setLastUpdateDate] = useState(new Date().toISOString());
 
   // Filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState(null);
-  const [sortBy, setSortBy] = useState("name-a-z");
+  const [sortBy, setSortBy] = useState('name-a-z');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,7 +72,7 @@ const UsersPage = () => {
 
       try {
         // Check if users exist in localStorage
-        const storedUsers = localStorage.getItem("users");
+        const storedUsers = localStorage.getItem('users');
         let userData = [];
 
         if (storedUsers) {
@@ -82,7 +80,7 @@ const UsersPage = () => {
         } else {
           // Generate sample users
           userData = generateSampleUsers();
-          localStorage.setItem("users", JSON.stringify(userData));
+          localStorage.setItem('users', JSON.stringify(userData));
           setLastUpdateDate(new Date().toISOString());
         }
 
@@ -99,8 +97,8 @@ const UsersPage = () => {
         setLastUpdateDate(new Date().toISOString());
         */
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to load user data");
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load user data');
       } finally {
         setIsLoading(false);
       }
@@ -112,56 +110,55 @@ const UsersPage = () => {
   // Helper function to generate sample users for testing
   function generateSampleUsers() {
     const sampleUsers = [];
-    const roles = ["Donor", "Volunteer", "Staff", "Admin"];
+    const roles = ['Donor', 'Volunteer', 'Staff', 'Admin'];
     const firstNames = [
-      "John",
-      "Jane",
-      "Michael",
-      "Emma",
-      "David",
-      "Sarah",
-      "Robert",
-      "Emily",
-      "William",
-      "Olivia",
-      "James",
-      "Sophia",
-      "Benjamin",
-      "Isabella",
-      "Daniel",
-      "Mia",
-      "Matthew",
-      "Charlotte",
-      "Joseph",
-      "Amelia",
+      'John',
+      'Jane',
+      'Michael',
+      'Emma',
+      'David',
+      'Sarah',
+      'Robert',
+      'Emily',
+      'William',
+      'Olivia',
+      'James',
+      'Sophia',
+      'Benjamin',
+      'Isabella',
+      'Daniel',
+      'Mia',
+      'Matthew',
+      'Charlotte',
+      'Joseph',
+      'Amelia',
     ];
     const lastNames = [
-      "Smith",
-      "Johnson",
-      "Williams",
-      "Brown",
-      "Jones",
-      "Garcia",
-      "Miller",
-      "Davis",
-      "Rodriguez",
-      "Martinez",
-      "Wilson",
-      "Anderson",
-      "Taylor",
-      "Thomas",
-      "Moore",
-      "Jackson",
-      "Martin",
-      "Lee",
-      "Thompson",
-      "White",
+      'Smith',
+      'Johnson',
+      'Williams',
+      'Brown',
+      'Jones',
+      'Garcia',
+      'Miller',
+      'Davis',
+      'Rodriguez',
+      'Martinez',
+      'Wilson',
+      'Anderson',
+      'Taylor',
+      'Thomas',
+      'Moore',
+      'Jackson',
+      'Martin',
+      'Lee',
+      'Thompson',
+      'White',
     ];
 
     // Generate 50 sample users
     for (let i = 1; i <= 50; i++) {
-      const firstName =
-        firstNames[Math.floor(Math.random() * firstNames.length)];
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
       const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
       const fullName = `${firstName} ${lastName}`;
       const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`;
@@ -172,23 +169,22 @@ const UsersPage = () => {
       twoYearsAgo.setFullYear(now.getFullYear() - 2);
 
       const registrationDate = new Date(
-        twoYearsAgo.getTime() +
-          Math.random() * (now.getTime() - twoYearsAgo.getTime())
+        twoYearsAgo.getTime() + Math.random() * (now.getTime() - twoYearsAgo.getTime())
       );
 
-    //   // Random role with weighted probability
-    //   // 70% Donor, 15% Volunteer, 10% Staff, 5% Admin
-    //   let role;
-    //   const rand = Math.random();
-    //   if (rand < 0.7) {
-    //     role = "Donor";
-    //   } else if (rand < 0.85) {
-    //     role = "Volunteer";
-    //   } else if (rand < 0.95) {
-    //     role = "Staff";
-    //   } else {
-    //     role = "Admin";
-    //   }
+      //   // Random role with weighted probability
+      //   // 70% Donor, 15% Volunteer, 10% Staff, 5% Admin
+      //   let role;
+      //   const rand = Math.random();
+      //   if (rand < 0.7) {
+      //     role = "Donor";
+      //   } else if (rand < 0.85) {
+      //     role = "Volunteer";
+      //   } else if (rand < 0.95) {
+      //     role = "Staff";
+      //   } else {
+      //     role = "Admin";
+      //   }
 
       // Random number of donations (0-20)
       const donationCount = Math.floor(Math.random() * 21);
@@ -197,13 +193,11 @@ const UsersPage = () => {
       const lastActive =
         Math.random() < 0.7
           ? new Date(now - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)) // Random day in the last 30 days
-          : new Date(
-              now - Math.floor(Math.random() * 180 * 24 * 60 * 60 * 1000)
-            ); // Random day in the last 180 days
+          : new Date(now - Math.floor(Math.random() * 180 * 24 * 60 * 60 * 1000)); // Random day in the last 180 days
 
       // Create user object
       const user = {
-        id: `USER-${i.toString().padStart(3, "0")}`,
+        id: `USER-${i.toString().padStart(3, '0')}`,
         name: fullName,
         email: email,
         phone:
@@ -216,10 +210,10 @@ const UsersPage = () => {
           Math.random() < 0.5
             ? {
                 street: `${Math.floor(Math.random() * 9999) + 1} Main St`,
-                city: "Springfield",
-                state: "IL",
+                city: 'Springfield',
+                state: 'IL',
                 zip: `${Math.floor(Math.random() * 90000) + 10000}`,
-                country: "USA",
+                country: 'USA',
               }
             : null,
         created_at: registrationDate.toISOString(),
@@ -228,8 +222,7 @@ const UsersPage = () => {
         donation_count: donationCount,
         total_donated:
           donationCount > 0
-            ? Math.floor(Math.random() * 50 * donationCount) +
-              20 * donationCount
+            ? Math.floor(Math.random() * 50 * donationCount) + 20 * donationCount
             : 0,
         newsletter: Math.random() < 0.7,
         avatar: null, // No avatar for sample users
@@ -247,10 +240,7 @@ const UsersPage = () => {
     setUsers(users.filter((user) => user.id !== userId));
 
     // Update localStorage
-    localStorage.setItem(
-      "users",
-      JSON.stringify(users.filter((user) => user.id !== userId))
-    );
+    localStorage.setItem('users', JSON.stringify(users.filter((user) => user.id !== userId)));
     setLastUpdateDate(new Date().toISOString());
 
     /* API Implementation (Commented out for future use)
@@ -276,11 +266,11 @@ const UsersPage = () => {
 
   // Handle export users
   const handleExportUsers = () => {
-    toast.info("Exporting users...");
+    toast.info('Exporting users...');
     // In production, this would generate a CSV/Excel file
     // For now, we'll just show a toast message
     setTimeout(() => {
-      toast.success("Users exported successfully!");
+      toast.success('Users exported successfully!');
     }, 1500);
   };
 
@@ -314,26 +304,22 @@ const UsersPage = () => {
 
     // Apply sorting
     switch (sortBy) {
-      case "name-a-z":
+      case 'name-a-z':
         filteredUsers.sort((a, b) => a.name.localeCompare(b.name));
         break;
-      case "name-z-a":
+      case 'name-z-a':
         filteredUsers.sort((a, b) => b.name.localeCompare(a.name));
         break;
-      case "newest":
-        filteredUsers.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
+      case 'newest':
+        filteredUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         break;
-      case "oldest":
-        filteredUsers.sort(
-          (a, b) => new Date(a.created_at) - new Date(b.created_at)
-        );
+      case 'oldest':
+        filteredUsers.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         break;
-      case "donations-high":
+      case 'donations-high':
         filteredUsers.sort((a, b) => b.donation_count - a.donation_count);
         break;
-      case "donations-low":
+      case 'donations-low':
         filteredUsers.sort((a, b) => a.donation_count - b.donation_count);
         break;
     }
@@ -362,15 +348,10 @@ const UsersPage = () => {
     ).length;
 
     // Total donations made by all users
-    const totalDonations = users.reduce(
-      (sum, user) => sum + user.donation_count,
-      0
-    );
+    const totalDonations = users.reduce((sum, user) => sum + user.donation_count, 0);
 
     // Average donations per user
-    const averageDonationsPerUser = users.length
-      ? totalDonations / users.length
-      : 0;
+    const averageDonationsPerUser = users.length ? totalDonations / users.length : 0;
 
     return {
       totalUsers: users.length,
@@ -381,20 +362,20 @@ const UsersPage = () => {
   };
 
   // Get unique roles for filtering
-//   const getRoles = () => {
-//     const roles = new Set();
-//     users.forEach((user) => {
-//       if (user.role) {
-//         roles.add(user.role);
-//       }
-//     });
-//     return Array.from(roles);
-//   };
+  //   const getRoles = () => {
+  //     const roles = new Set();
+  //     users.forEach((user) => {
+  //       if (user.role) {
+  //         roles.add(user.role);
+  //       }
+  //     });
+  //     return Array.from(roles);
+  //   };
 
   // Apply filters and calculate stats
   const filteredUsers = filterAndSortUsers();
   const stats = calculateStats();
-//   const roles = getRoles();
+  //   const roles = getRoles();
 
   // Calculate pagination
   const totalUsers = filteredUsers.length;
@@ -425,15 +406,15 @@ const UsersPage = () => {
       <h3 className="text-xl font-semibold mb-2">No users found</h3>
       <p className="text-muted-foreground text-center max-w-md mb-6">
         {users.length === 0
-          ? "There are no registered users yet."
-          : "No users match your current filters. Try adjusting your search or filter criteria."}
+          ? 'There are no registered users yet.'
+          : 'No users match your current filters. Try adjusting your search or filter criteria.'}
       </p>
       {users.length > 0 && (
         <Button
           variant="outline"
           onClick={() => {
-            setSearchQuery("");
-            setRoleFilter("all");
+            setSearchQuery('');
+            setRoleFilter('all');
             setDateFilter(null);
           }}
         >
@@ -448,9 +429,7 @@ const UsersPage = () => {
       <div className="container px-4 py-6 mx-auto max-w-7xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              User Management
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
             <p className="text-sm text-muted-foreground mt-1">
               View and manage registered user accounts
             </p>
@@ -492,7 +471,7 @@ const UsersPage = () => {
               setDateFilter={setDateFilter}
               sortBy={sortBy}
               setSortBy={setSortBy}
-            //   roles={roles}
+              //   roles={roles}
             />
           </CardHeader>
 
@@ -502,11 +481,7 @@ const UsersPage = () => {
             ) : (
               <div className="border rounded-md">
                 {paginatedUsers.map((user) => (
-                  <UserRow
-                    key={user.id}
-                    user={user}
-                    onDelete={handleDeleteUser}
-                  />
+                  <UserRow key={user.id} user={user} onDelete={handleDeleteUser} />
                 ))}
               </div>
             )}
@@ -515,18 +490,15 @@ const UsersPage = () => {
           {totalUsers > 0 && (
             <CardFooter className="flex flex-col sm:flex-row justify-between items-center p-4 gap-4">
               <div className="text-sm text-muted-foreground">
-                Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                {Math.min(currentPage * itemsPerPage, totalUsers)} of{" "}
-                {totalUsers} users
+                Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+                {Math.min(currentPage * itemsPerPage, totalUsers)} of {totalUsers} users
               </div>
 
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
                     />
                   </PaginationItem>
@@ -555,9 +527,7 @@ const UsersPage = () => {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                      }
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
                     />
                   </PaginationItem>
@@ -565,9 +535,7 @@ const UsersPage = () => {
               </Pagination>
 
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  Items per page:
-                </span>
+                <span className="text-sm text-muted-foreground">Items per page:</span>
                 <Select
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => {

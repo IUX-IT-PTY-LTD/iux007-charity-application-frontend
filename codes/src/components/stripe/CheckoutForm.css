@@ -1,0 +1,81 @@
+.payment-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f7fafc;
+  padding: 20px;
+}
+
+.payment-card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+}
+
+.card-header {
+  margin-bottom: 20px;
+}
+
+.card-header h3 {
+  margin: 0 0 10px;
+  color: #32325d;
+}
+
+.card-logos {
+  display: flex;
+  gap: 10px;
+}
+
+.card-logos img {
+  height: 25px;
+  object-fit: contain;
+}
+
+.form-row {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+
+.payment-button {
+  background: #5469d4;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-button:hover {
+  background: #4a5fc1;
+}
+
+.payment-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payment-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.payment-message.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.payment-message.error {
+  background: #f8d7da;
+  color: #721c24;
+}

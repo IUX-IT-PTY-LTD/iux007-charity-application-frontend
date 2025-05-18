@@ -6,15 +6,16 @@ import { useRouter, usePathname } from 'next/navigation';
 import { FaShoppingBasket, FaUser } from 'react-icons/fa';
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
-import { getUser } from '@/store/features/userSlice'; // Assuming you have a UserContext
+import { useSelector, useDispatch } from 'react-redux';
+import { logout as logoutAction } from '@/store/features/userSlice';
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = getUser((state) => state.user); // Get user state from Redux store
-  console.log('User:', user);
+  const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   const [menus, setMenus] = useState([]);
   const [settings, setSettings] = useState([]);
+  const dispatch = useDispatch();
 
   const fetchMenus = async () => {
     try {
@@ -43,6 +44,19 @@ const Header = () => {
         site_name: 'Default Site Name',
         logo: '/assets/img/logo.svg',
       });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiService.post(ENDPOINTS.AUTH.LOGOUT);
+      localStorage.removeItem('token');
+      dispatch(logoutAction());
+      toast.success('Logout successful');
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      router.push('/login');
     }
   };
 
@@ -126,7 +140,7 @@ const Header = () => {
           </div>
 
           <div className="flex max-lg:ml-auto space-x-3">
-            {user ? (
+            {isAuthenticated ? (
               <>
                 <Link
                   href={'./checkout'}
@@ -162,6 +176,12 @@ const Header = () => {
                     >
                       Change Password
                     </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
                   </div>
                 </div>
               </>

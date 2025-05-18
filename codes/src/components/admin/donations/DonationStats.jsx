@@ -1,8 +1,8 @@
 // components/donations/UpdatedDonationStats.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { DollarSign, Users, Calendar } from "lucide-react";
+import React from 'react';
+import { DollarSign, Users, Calendar } from 'lucide-react';
 
 const StatCard = ({ title, value, icon: Icon, description }) => {
   return (
@@ -16,9 +16,7 @@ const StatCard = ({ title, value, icon: Icon, description }) => {
           <Icon className="h-5 w-5 text-primary" />
         </div>
       </div>
-      {description && (
-        <p className="text-xs text-muted-foreground mt-2">{description}</p>
-      )}
+      {description && <p className="text-xs text-muted-foreground mt-2">{description}</p>}
     </div>
   );
 };
@@ -34,29 +32,29 @@ const UpdatedDonationStats = ({
 }) => {
   // Format dollar amounts
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
   // Format dates for event duration
   const formatEventDates = () => {
-    if (!eventStartDate) return "N/A";
+    if (!eventStartDate) return 'N/A';
 
     const startDate = new Date(eventStartDate);
-    const options = { month: "short", day: "numeric", year: "numeric" };
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
 
     if (eventEndDate) {
       const endDate = new Date(eventEndDate);
       return `${startDate.toLocaleDateString(
-        "en-US",
+        'en-US',
         options
-      )} - ${endDate.toLocaleDateString("en-US", options)}`;
+      )} - ${endDate.toLocaleDateString('en-US', options)}`;
     }
 
-    return startDate.toLocaleDateString("en-US", options);
+    return startDate.toLocaleDateString('en-US', options);
   };
 
   // Calculate event progress (as days or percentage)
@@ -71,7 +69,7 @@ const UpdatedDonationStats = ({
     if (today < start) return "Event hasn't started";
 
     // If event is over
-    if (today > end) return "Event completed";
+    if (today > end) return 'Event completed';
 
     // Calculate days elapsed and total days
     const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));

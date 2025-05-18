@@ -1,11 +1,11 @@
 // components/blog/AdminActions.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Edit, Trash2, ArrowLeft, Eye, ExternalLink } from "lucide-react";
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Edit, Trash2, ArrowLeft, Eye, ExternalLink } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +16,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const AdminActions = ({ post, onDelete }) => {
   const router = useRouter();
@@ -30,14 +30,14 @@ const AdminActions = ({ post, onDelete }) => {
 
   // Handle back to list action
   const handleBackToList = () => {
-    router.push("/admin/blogs");
+    router.push('/admin/blogs');
   };
 
   // Handle view on site action (this would link to the actual published post)
   const handleViewOnSite = () => {
     // In a real implementation, this would open the actual public-facing blog post
     // For demonstration purposes, we'll just show a toast
-    toast.info("This would open the published post on your website");
+    toast.info('This would open the published post on your website');
 
     // If you have an actual URL:
     // window.open(`/blog/${post.metadata?.slug || post.id}`, '_blank');
@@ -47,7 +47,7 @@ const AdminActions = ({ post, onDelete }) => {
   const handleDeleteConfirm = () => {
     onDelete(post.id);
     setIsDeleteDialogOpen(false);
-    router.push("/admin/blogs");
+    router.push('/admin/blogs');
   };
 
   return (
@@ -59,7 +59,7 @@ const AdminActions = ({ post, onDelete }) => {
         </Button>
 
         <div className="flex gap-2">
-          {post.status === "published" && (
+          {post.status === 'published' && (
             <Button variant="outline" size="sm" onClick={handleViewOnSite}>
               <ExternalLink className="mr-2 h-4 w-4" />
               View on Site
@@ -71,10 +71,7 @@ const AdminActions = ({ post, onDelete }) => {
             Edit Post
           </Button>
 
-          <AlertDialog
-            open={isDeleteDialogOpen}
-            onOpenChange={setIsDeleteDialogOpen}
-          >
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
@@ -89,8 +86,8 @@ const AdminActions = ({ post, onDelete }) => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete the blog post "{post.title}".
-                  This action cannot be undone.
+                  This will permanently delete the blog post "{post.title}". This action cannot be
+                  undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

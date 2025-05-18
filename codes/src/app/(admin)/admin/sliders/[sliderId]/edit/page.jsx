@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Save, ArrowLeft, ImageIcon } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Save, ArrowLeft, ImageIcon } from 'lucide-react';
 
 // Import shadcn components
 import {
@@ -16,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -25,20 +25,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,21 +49,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 // Define form schema with validation
 const formSchema = z.object({
   title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
+    message: 'Title must be at least 2 characters.',
   }),
   description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
+    message: 'Description must be at least 10 characters.',
   }),
   ordering: z.coerce.number().int().positive({
-    message: "Ordering must be a positive number.",
+    message: 'Ordering must be a positive number.',
   }),
-  status: z.string().default("1"),
+  status: z.string().default('1'),
   image: z.any().optional(),
 });
 
@@ -81,19 +81,19 @@ export default function EditSlider({ params }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      title: '',
+      description: '',
       ordering: 1,
-      status: "1",
+      status: '1',
       image: null,
     },
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Edit Slider");
-    setPageSubtitle("Update slider content and settings");
+    setPageTitle('Edit Slider');
+    setPageSubtitle('Update slider content and settings');
   }, [setPageTitle, setPageSubtitle]);
 
   // Fetch slider data based on the ID
@@ -102,9 +102,7 @@ export default function EditSlider({ params }) {
       setIsLoading(true);
       try {
         // For testing: Get sliders from localStorage
-        const storedSliders = JSON.parse(
-          localStorage.getItem("sliders") || "[]"
-        );
+        const storedSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
         const foundSlider = storedSliders.find((s) => s.id === params.sliderId);
 
         if (foundSlider) {
@@ -122,8 +120,8 @@ export default function EditSlider({ params }) {
           // Set image preview
           setImagePreview(foundSlider.image);
         } else {
-          toast.error("Slider not found");
-          router.push("/admin/sliders");
+          toast.error('Slider not found');
+          router.push('/admin/sliders');
         }
 
         /* API Implementation (Commented out for future use)
@@ -147,8 +145,8 @@ export default function EditSlider({ params }) {
         setImagePreview(sliderData.image);
         */
       } catch (error) {
-        console.error("Error fetching slider:", error);
-        toast.error("Failed to load slider data");
+        console.error('Error fetching slider:', error);
+        toast.error('Failed to load slider data');
       } finally {
         setIsLoading(false);
       }
@@ -173,20 +171,20 @@ export default function EditSlider({ params }) {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = "";
-        return "";
+        e.returnValue = '';
+        return '';
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   // Handle image change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      form.setValue("image", file);
+      form.setValue('image', file);
 
       // Create image preview
       const reader = new FileReader();
@@ -203,7 +201,7 @@ export default function EditSlider({ params }) {
   const onSubmit = (data) => {
     try {
       // Get all sliders
-      const allSliders = JSON.parse(localStorage.getItem("sliders") || "[]");
+      const allSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
 
       // Find the index of the slider to update
       const sliderIndex = allSliders.findIndex((s) => s.id === params.sliderId);
@@ -220,18 +218,18 @@ export default function EditSlider({ params }) {
         allSliders[sliderIndex] = updatedSlider;
 
         // Save back to localStorage
-        localStorage.setItem("sliders", JSON.stringify(allSliders));
+        localStorage.setItem('sliders', JSON.stringify(allSliders));
 
         // Show success message
-        toast.success("Slider updated successfully");
+        toast.success('Slider updated successfully');
 
         // Reset unsaved changes flag
         setHasUnsavedChanges(false);
 
         // Navigate back to sliders list
-        router.push("/admin/sliders");
+        router.push('/admin/sliders');
       } else {
-        toast.error("Slider not found");
+        toast.error('Slider not found');
       }
 
       /* API Implementation (Commented out for future use)
@@ -269,8 +267,8 @@ export default function EditSlider({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error updating slider:", error);
-      toast.error("Failed to update slider");
+      console.error('Error updating slider:', error);
+      toast.error('Failed to update slider');
     }
   };
 
@@ -278,19 +276,19 @@ export default function EditSlider({ params }) {
   const handleDelete = () => {
     try {
       // Get all sliders
-      const allSliders = JSON.parse(localStorage.getItem("sliders") || "[]");
+      const allSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
 
       // Filter out the slider to delete
       const updatedSliders = allSliders.filter((s) => s.id !== params.sliderId);
 
       // Save back to localStorage
-      localStorage.setItem("sliders", JSON.stringify(updatedSliders));
+      localStorage.setItem('sliders', JSON.stringify(updatedSliders));
 
       // Show success message
-      toast.success("Slider deleted successfully");
+      toast.success('Slider deleted successfully');
 
       // Navigate back to sliders list
-      router.push("/admin/sliders");
+      router.push('/admin/sliders');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/sliders/${params.sliderId}`, {
@@ -312,8 +310,8 @@ export default function EditSlider({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error deleting slider:", error);
-      toast.error("Failed to delete slider");
+      console.error('Error deleting slider:', error);
+      toast.error('Failed to delete slider');
     }
   };
 
@@ -336,15 +334,11 @@ export default function EditSlider({ params }) {
               size="sm"
               onClick={() => {
                 if (hasUnsavedChanges) {
-                  if (
-                    window.confirm(
-                      "You have unsaved changes. Are you sure you want to leave?"
-                    )
-                  ) {
-                    router.push("/admin/sliders");
+                  if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                    router.push('/admin/sliders');
                   }
                 } else {
-                  router.push("/admin/sliders");
+                  router.push('/admin/sliders');
                 }
               }}
               className="mb-2 sm:mb-0"
@@ -354,10 +348,7 @@ export default function EditSlider({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              <AlertDialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -368,12 +359,10 @@ export default function EditSlider({ params }) {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete the "{slider?.title}" slider.
-                      This action cannot be undone.
+                      This will permanently delete the "{slider?.title}" slider. This action cannot
+                      be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -402,10 +391,7 @@ export default function EditSlider({ params }) {
             {/* Form Section */}
             <div className="md:col-span-2">
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <Card>
                     <CardHeader>
                       <CardTitle>Edit Slider: {slider?.title}</CardTitle>
@@ -548,15 +534,12 @@ export default function EditSlider({ params }) {
                           });
                           setImagePreview(slider.image);
                           setHasUnsavedChanges(false);
-                          toast.info("Form reset to original values");
+                          toast.info('Form reset to original values');
                         }}
                       >
                         Reset Changes
                       </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                         Save Changes
                       </Button>
                     </CardFooter>
@@ -591,44 +574,36 @@ export default function EditSlider({ params }) {
 
                     <div>
                       <h3 className="text-lg font-semibold">
-                        {form.watch("title") || "Slider Title"}
+                        {form.watch('title') || 'Slider Title'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
-                          variant={
-                            form.watch("status") === "1"
-                              ? "default"
-                              : "secondary"
-                          }
+                          variant={form.watch('status') === '1' ? 'default' : 'secondary'}
                           className={
-                            form.watch("status") === "1"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                            form.watch('status') === '1'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }
                         >
-                          {form.watch("status") === "1" ? "Active" : "Inactive"}
+                          {form.watch('status') === '1' ? 'Active' : 'Inactive'}
                         </Badge>
                         <span className="text-xs text-gray-500">
-                          Order: {form.watch("ordering")}
+                          Order: {form.watch('ordering')}
                         </span>
                       </div>
                     </div>
 
                     <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                      <p className="text-xs text-gray-500 mb-2">
-                        Description Preview:
-                      </p>
+                      <p className="text-xs text-gray-500 mb-2">Description Preview:</p>
                       <p className="text-sm line-clamp-5">
-                        {form.watch("description") || "No description..."}
+                        {form.watch('description') || 'No description...'}
                       </p>
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between text-xs text-gray-500">
                   <span>ID: {params.sliderId}</span>
-                  <span>
-                    {hasUnsavedChanges ? "Unsaved changes" : "No changes"}
-                  </span>
+                  <span>{hasUnsavedChanges ? 'Unsaved changes' : 'No changes'}</span>
                 </CardFooter>
               </Card>
             </div>

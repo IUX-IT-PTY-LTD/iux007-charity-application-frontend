@@ -1,10 +1,10 @@
 // components/donations/receipt/ReceiptContent.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { format, parseISO } from "date-fns";
-import { CheckCircle2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import React from 'react';
+import { format, parseISO } from 'date-fns';
+import { CheckCircle2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const ReceiptContent = ({
   donation,
@@ -13,41 +13,31 @@ const ReceiptContent = ({
   taxDeductible = true, // Most charity donations are tax deductible
 }) => {
   // Format donation amount
-  const formattedAmount = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  const formattedAmount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
   }).format(donation.amount);
 
   // Format date more formally for receipt
-  const formattedDate = donation.date
-    ? format(parseISO(donation.date), "MMMM d, yyyy")
-    : "N/A";
+  const formattedDate = donation.date ? format(parseISO(donation.date), 'MMMM d, yyyy') : 'N/A';
 
   return (
     <div className="space-y-6">
       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Donation to
-            </h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Donation to</h3>
             <p className="font-semibold text-lg">{eventName}</p>
-            <p className="text-sm">
-              {isFixedDonation ? "Fixed Donation" : "Variable Donation"}
-            </p>
+            <p className="text-sm">{isFixedDonation ? 'Fixed Donation' : 'Variable Donation'}</p>
           </div>
           <div className="text-right">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Amount
-            </h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Amount</h3>
             <p className="font-bold text-2xl">{formattedAmount}</p>
-            {donation.is_recurring && (
-              <p className="text-sm">Recurring donation</p>
-            )}
+            {donation.is_recurring && <p className="text-sm">Recurring donation</p>}
           </div>
         </div>
 
-        {donation.status === "completed" && (
+        {donation.status === 'completed' && (
           <div className="mt-4 bg-green-50 dark:bg-green-900/20 rounded p-3 flex items-center text-green-700 dark:text-green-400">
             <CheckCircle2 className="h-5 w-5 mr-2" />
             <span>Payment completed on {formattedDate}</span>
@@ -69,8 +59,7 @@ const ReceiptContent = ({
               <div className="text-sm pt-2">
                 <p>{donation.address.street}</p>
                 <p>
-                  {donation.address.city}, {donation.address.state}{" "}
-                  {donation.address.zip}
+                  {donation.address.city}, {donation.address.state} {donation.address.zip}
                 </p>
                 <p>{donation.address.country}</p>
               </div>
@@ -87,9 +76,7 @@ const ReceiptContent = ({
             </div>
             <div className="flex justify-between">
               <span>Transaction ID:</span>
-              <span className="font-medium">
-                {donation.transaction_id || "N/A"}
-              </span>
+              <span className="font-medium">{donation.transaction_id || 'N/A'}</span>
             </div>
             <div className="flex justify-between">
               <span>Date:</span>
@@ -106,9 +93,7 @@ const ReceiptContent = ({
       {donation.notes && (
         <div>
           <h3 className="text-base font-semibold mb-2">Additional Notes</h3>
-          <p className="text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded">
-            {donation.notes}
-          </p>
+          <p className="text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded">{donation.notes}</p>
         </div>
       )}
 
@@ -116,12 +101,9 @@ const ReceiptContent = ({
         <div>
           <h3 className="text-base font-semibold mb-2">Tribute Information</h3>
           <p className="text-sm">
-            This donation was made in {donation.tribute_info.type} of{" "}
-            {donation.tribute_info.name}.
+            This donation was made in {donation.tribute_info.type} of {donation.tribute_info.name}.
             {donation.tribute_info.message && (
-              <span className="block mt-1 italic">
-                "{donation.tribute_info.message}"
-              </span>
+              <span className="block mt-1 italic">"{donation.tribute_info.message}"</span>
             )}
           </p>
         </div>
@@ -133,14 +115,11 @@ const ReceiptContent = ({
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded text-sm">
           <p className="font-medium mb-1">Tax Information</p>
           <p>
-            This donation{" "}
-            {donation.status === "completed" ? "may be" : "would be"} tax
-            deductible to the extent allowed by law. Please keep this receipt
-            for your tax records.
+            This donation {donation.status === 'completed' ? 'may be' : 'would be'} tax deductible
+            to the extent allowed by law. Please keep this receipt for your tax records.
           </p>
           <p className="mt-2">
-            No goods or services were provided in exchange for this
-            contribution.
+            No goods or services were provided in exchange for this contribution.
           </p>
         </div>
       )}

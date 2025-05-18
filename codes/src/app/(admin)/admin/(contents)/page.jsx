@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react'
-import AdminPageHeader from '@/components/admin/header'
-import { useRouter } from 'next/navigation'
+import React, { useState, useEffect } from 'react';
+import AdminPageHeader from '@/components/admin/header';
+import { useRouter } from 'next/navigation';
 
 const AdminWebsiteContent = () => {
   const [logo, setLogo] = useState('');

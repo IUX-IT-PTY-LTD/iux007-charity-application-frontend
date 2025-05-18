@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Import custom components
-import UserProfile from "@/components/admin/users/details/UserProfile";
-import UserDonationsList from "@/components/admin/users/details/UserDonationsList";
-import UserActionsHeader from "@/components/admin/users/details/UserActionsHeader";
+import UserProfile from '@/components/admin/users/details/UserProfile';
+import UserDonationsList from '@/components/admin/users/details/UserDonationsList';
+import UserActionsHeader from '@/components/admin/users/details/UserActionsHeader';
 
 const UserDetailsPage = ({ params }) => {
   const router = useRouter();
@@ -27,8 +27,8 @@ const UserDetailsPage = ({ params }) => {
       setPageTitle(`User Details - ${user.name}`);
       setPageSubtitle(`View and manage user information`);
     } else {
-      setPageTitle("User Details");
-      setPageSubtitle("Loading user data...");
+      setPageTitle('User Details');
+      setPageSubtitle('Loading user data...');
     }
   }, [user, setPageTitle, setPageSubtitle]);
 
@@ -39,41 +39,37 @@ const UserDetailsPage = ({ params }) => {
 
       try {
         if (!params?.userId) {
-          toast.error("Missing user ID");
-          router.push("/admin/users");
+          toast.error('Missing user ID');
+          router.push('/admin/users');
           return;
         }
 
         // Fetch user data from localStorage
-        const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+        const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
         const foundUser = storedUsers.find((u) => u.id === params.userId);
 
         if (!foundUser) {
-          toast.error("User not found");
-          router.push("/admin/users");
+          toast.error('User not found');
+          router.push('/admin/users');
           return;
         }
 
         setUser(foundUser);
 
         // Fetch events data
-        const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
+        const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
         setEvents(storedEvents);
 
         // Fetch all donations from all events
         let allDonations = [];
         storedEvents.forEach((event) => {
-          const eventDonations = JSON.parse(
-            localStorage.getItem(`donations_${event.id}`) || "[]"
-          );
+          const eventDonations = JSON.parse(localStorage.getItem(`donations_${event.id}`) || '[]');
           allDonations = [...allDonations, ...eventDonations];
         });
 
         // Filter donations for this user
         // Match by email since we don't have a proper user_id in the donation data
-        const userDonations = allDonations.filter(
-          (donation) => donation.email === foundUser.email
-        );
+        const userDonations = allDonations.filter((donation) => donation.email === foundUser.email);
 
         setDonations(userDonations);
 
@@ -103,8 +99,8 @@ const UserDetailsPage = ({ params }) => {
         setDonations(donationsData);
         */
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to load user and donation data");
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load user and donation data');
       } finally {
         setIsLoading(false);
       }
@@ -135,7 +131,7 @@ const UserDetailsPage = ({ params }) => {
             The user you're looking for could not be found.
           </p>
           <button
-            onClick={() => router.push("/admin/users")}
+            onClick={() => router.push('/admin/users')}
             className="text-primary hover:underline"
           >
             Return to users list

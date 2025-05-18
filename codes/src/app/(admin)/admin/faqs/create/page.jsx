@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { Save, ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { Save, ArrowLeft } from 'lucide-react';
 
 // Import shadcn components
 import {
@@ -16,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -25,34 +25,34 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { toast } from 'sonner';
 
 // Define form schema with validation
 const formSchema = z.object({
   question: z.string().min(5, {
-    message: "Question must be at least 5 characters.",
+    message: 'Question must be at least 5 characters.',
   }),
   answer: z.string().min(10, {
-    message: "Answer must be at least 10 characters.",
+    message: 'Answer must be at least 10 characters.',
   }),
   ordering: z.coerce.number().int().positive({
-    message: "Ordering must be a positive number.",
+    message: 'Ordering must be a positive number.',
   }),
-  status: z.string().default("1"),
+  status: z.string().default('1'),
 });
 
 const AdminCreateFAQ = () => {
@@ -61,18 +61,18 @@ const AdminCreateFAQ = () => {
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Create New FAQ");
-    setPageSubtitle("Add frequently asked questions for your users");
+    setPageTitle('Create New FAQ');
+    setPageSubtitle('Add frequently asked questions for your users');
   }, [setPageTitle, setPageSubtitle]);
 
   // Initialize form with validation
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      question: "",
-      answer: "",
+      question: '',
+      answer: '',
       ordering: 1,
-      status: "1",
+      status: '1',
     },
   });
 
@@ -87,18 +87,18 @@ const AdminCreateFAQ = () => {
       id: Date.now().toString(), // Generate a unique ID using timestamp
     };
 
-    console.log("New FAQ submitted:", newFAQ);
+    console.log('New FAQ submitted:', newFAQ);
 
     // Store in localStorage for testing
-    const existingFAQs = JSON.parse(localStorage.getItem("faqs") || "[]");
+    const existingFAQs = JSON.parse(localStorage.getItem('faqs') || '[]');
     existingFAQs.push(newFAQ);
-    localStorage.setItem("faqs", JSON.stringify(existingFAQs));
+    localStorage.setItem('faqs', JSON.stringify(existingFAQs));
 
     // Show success message
-    toast.success("FAQ created successfully!");
+    toast.success('FAQ created successfully!');
 
     // Redirect to the FAQ list page
-    router.push("/admin/faqs");
+    router.push('/admin/faqs');
 
     /* API Implementation (Commented out for future use)
     // API call to save the FAQ
@@ -132,7 +132,7 @@ const AdminCreateFAQ = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/admin/faqs")}
+              onClick={() => router.push('/admin/faqs')}
               className="mb-2"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -144,10 +144,7 @@ const AdminCreateFAQ = () => {
             {/* Form Section */}
             <div className="md:col-span-2">
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <Card>
                     <CardHeader>
                       <CardTitle>FAQ Information</CardTitle>
@@ -164,10 +161,7 @@ const AdminCreateFAQ = () => {
                           <FormItem>
                             <FormLabel>Question</FormLabel>
                             <FormControl>
-                              <Input
-                                placeholder="e.g. How do I reset my password?"
-                                {...field}
-                              />
+                              <Input placeholder="e.g. How do I reset my password?" {...field} />
                             </FormControl>
                             <FormDescription>
                               Enter the question as it should appear to users.
@@ -205,12 +199,7 @@ const AdminCreateFAQ = () => {
                           <FormItem>
                             <FormLabel>Order Priority</FormLabel>
                             <FormControl>
-                              <Input
-                                type="number"
-                                min={1}
-                                placeholder="1"
-                                {...field}
-                              />
+                              <Input type="number" min={1} placeholder="1" {...field} />
                             </FormControl>
                             <FormDescription>
                               Lower numbers appear first in the FAQ list.
@@ -238,17 +227,13 @@ const AdminCreateFAQ = () => {
                                   <FormControl>
                                     <RadioGroupItem value="1" />
                                   </FormControl>
-                                  <FormLabel className="font-normal">
-                                    Active
-                                  </FormLabel>
+                                  <FormLabel className="font-normal">Active</FormLabel>
                                 </FormItem>
                                 <FormItem className="flex items-center space-x-2 space-y-0">
                                   <FormControl>
                                     <RadioGroupItem value="0" />
                                   </FormControl>
-                                  <FormLabel className="font-normal">
-                                    Inactive
-                                  </FormLabel>
+                                  <FormLabel className="font-normal">Inactive</FormLabel>
                                 </FormItem>
                               </RadioGroup>
                             </FormControl>
@@ -262,17 +247,10 @@ const AdminCreateFAQ = () => {
                     </CardContent>
 
                     <CardFooter className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={() => form.reset()}
-                      >
+                      <Button variant="outline" type="button" onClick={() => form.reset()}>
                         Reset
                       </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                         <Save className="mr-2 h-4 w-4" />
                         Create FAQ
                       </Button>
@@ -292,31 +270,26 @@ const AdminCreateFAQ = () => {
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-lg font-semibold">
-                        {formPreview.question || "Your Question"}
+                        {formPreview.question || 'Your Question'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
-                          variant={
-                            formPreview.status === "1" ? "default" : "secondary"
-                          }
+                          variant={formPreview.status === '1' ? 'default' : 'secondary'}
                           className={
-                            formPreview.status === "1"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                            formPreview.status === '1'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }
                         >
-                          {formPreview.status === "1" ? "Active" : "Inactive"}
+                          {formPreview.status === '1' ? 'Active' : 'Inactive'}
                         </Badge>
-                        <span className="text-xs text-gray-500">
-                          Order: {formPreview.ordering}
-                        </span>
+                        <span className="text-xs text-gray-500">Order: {formPreview.ordering}</span>
                       </div>
                     </div>
 
                     <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
                       <p className="text-sm whitespace-pre-wrap">
-                        {formPreview.answer ||
-                          "Your answer will appear here..."}
+                        {formPreview.answer || 'Your answer will appear here...'}
                       </p>
                     </div>
                   </div>

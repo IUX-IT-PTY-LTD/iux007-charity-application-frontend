@@ -1,11 +1,11 @@
 // components/donations/DonationFilters.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Search, Filter, Calendar, Download, ChevronDown } from "lucide-react";
+import React, { useState } from 'react';
+import { Search, Filter, Calendar, Download, ChevronDown } from 'lucide-react';
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,21 +15,17 @@ import {
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const DonationFilters = ({
   searchQuery,
@@ -65,17 +61,11 @@ const DonationFilters = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
             <Filter className="mr-2 h-4 w-4" />
             Filters
             <ChevronDown
-              className={`ml-2 h-4 w-4 transition-transform ${
-                showFilters ? "rotate-180" : ""
-              }`}
+              className={`ml-2 h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`}
             />
           </Button>
 
@@ -94,7 +84,7 @@ const DonationFilters = ({
                     size="sm"
                     className="w-full justify-start font-normal p-4"
                   >
-                    {dateFilter ? "Clear Date Filter" : "Select Date..."}
+                    {dateFilter ? 'Clear Date Filter' : 'Select Date...'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -135,9 +125,9 @@ const DonationFilters = ({
           <div className="flex flex-wrap gap-2 py-2 items-center">
             <div className="text-sm text-muted-foreground">Status:</div>
             <Button
-              variant={statusFilter === "all" ? "default" : "outline"}
+              variant={statusFilter === 'all' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter("all")}
+              onClick={() => setStatusFilter('all')}
             >
               All
               <Badge variant="outline" className="ml-2">
@@ -145,9 +135,9 @@ const DonationFilters = ({
               </Badge>
             </Button>
             <Button
-              variant={statusFilter === "completed" ? "default" : "outline"}
+              variant={statusFilter === 'completed' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter("completed")}
+              onClick={() => setStatusFilter('completed')}
             >
               Completed
               <Badge variant="outline" className="ml-2">
@@ -155,9 +145,9 @@ const DonationFilters = ({
               </Badge>
             </Button>
             <Button
-              variant={statusFilter === "pending" ? "default" : "outline"}
+              variant={statusFilter === 'pending' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter("pending")}
+              onClick={() => setStatusFilter('pending')}
             >
               Pending
               <Badge variant="outline" className="ml-2">
@@ -165,9 +155,9 @@ const DonationFilters = ({
               </Badge>
             </Button>
             <Button
-              variant={statusFilter === "failed" ? "default" : "outline"}
+              variant={statusFilter === 'failed' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter("failed")}
+              onClick={() => setStatusFilter('failed')}
             >
               Failed
               <Badge variant="outline" className="ml-2">
@@ -175,9 +165,9 @@ const DonationFilters = ({
               </Badge>
             </Button>
             <Button
-              variant={statusFilter === "refunded" ? "default" : "outline"}
+              variant={statusFilter === 'refunded' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setStatusFilter("refunded")}
+              onClick={() => setStatusFilter('refunded')}
             >
               Refunded
               <Badge variant="outline" className="ml-2">
@@ -189,16 +179,16 @@ const DonationFilters = ({
           <div className="flex flex-wrap gap-2 py-2 items-center">
             <div className="text-sm text-muted-foreground">Payment Method:</div>
             <Button
-              variant={paymentMethodFilter === "all" ? "default" : "outline"}
+              variant={paymentMethodFilter === 'all' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setPaymentMethodFilter("all")}
+              onClick={() => setPaymentMethodFilter('all')}
             >
               All Methods
             </Button>
             {paymentMethods.map((method) => (
               <Button
                 key={method}
-                variant={paymentMethodFilter === method ? "default" : "outline"}
+                variant={paymentMethodFilter === method ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setPaymentMethodFilter(method)}
               >

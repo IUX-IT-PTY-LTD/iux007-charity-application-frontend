@@ -1,8 +1,8 @@
 // components/users/UserProfile.jsx
-"use client";
+'use client';
 
-import React from "react";
-import { format, parseISO } from "date-fns";
+import React from 'react';
+import { format, parseISO } from 'date-fns';
 import {
   Mail,
   Phone,
@@ -14,38 +14,38 @@ import {
   Bell,
   CheckCircle,
   XCircle,
-} from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+} from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 const UserProfile = ({ user }) => {
   if (!user) return null;
 
   // Format registration date
   const registeredDate = user.created_at
-    ? format(parseISO(user.created_at), "MMMM d, yyyy")
-    : "N/A";
+    ? format(parseISO(user.created_at), 'MMMM d, yyyy')
+    : 'N/A';
 
   // Format last active date
   const lastActiveDate = user.last_active
     ? format(parseISO(user.last_active), "MMMM d, yyyy 'at' h:mm a")
-    : "N/A";
+    : 'N/A';
 
   // Format total donated amount
-  const formattedTotalDonated = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  const formattedTotalDonated = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     maximumFractionDigits: 0,
   }).format(user.total_donated || 0);
 
   // Format name initials for avatar
   const getInitials = (name) => {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .slice(0, 2);
   };
@@ -62,9 +62,7 @@ const UserProfile = ({ user }) => {
             <div className="flex items-center gap-4 mb-4">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="text-lg">
-                  {getInitials(user.name)}
-                </AvatarFallback>
+                <AvatarFallback className="text-lg">{getInitials(user.name)}</AvatarFallback>
               </Avatar>
               <div>
                 <h2 className="text-2xl font-bold">{user.name}</h2>
@@ -91,8 +89,7 @@ const UserProfile = ({ user }) => {
                   <div>
                     <p>{user.address.street}</p>
                     <p>
-                      {user.address.city}, {user.address.state}{" "}
-                      {user.address.zip}
+                      {user.address.city}, {user.address.state} {user.address.zip}
                     </p>
                     <p>{user.address.country}</p>
                   </div>
@@ -133,18 +130,14 @@ const UserProfile = ({ user }) => {
                   <UserIcon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Donation Count</span>
                 </div>
-                <p className="font-semibold">
-                  {user.donation_count || 0} donations
-                </p>
+                <p className="font-semibold">{user.donation_count || 0} donations</p>
               </div>
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Bell className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">
-                  Newsletter Subscription
-                </span>
+                <span className="text-sm font-medium">Newsletter Subscription</span>
               </div>
               <div className="flex items-center">
                 {user.newsletter ? (

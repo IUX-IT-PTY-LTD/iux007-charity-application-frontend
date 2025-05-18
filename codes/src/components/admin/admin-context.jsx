@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from 'react';
 
 // Create context
 const AdminContext = createContext({
-  pageTitle: "Dashboard",
+  pageTitle: 'Dashboard',
   setPageTitle: () => {},
-  pageSubtitle: "",
+  pageSubtitle: '',
   setPageSubtitle: () => {},
 });
 
@@ -15,8 +15,8 @@ export const useAdminContext = () => useContext(AdminContext);
 
 // Provider component
 export const AdminProvider = ({ children }) => {
-  const [pageTitle, setPageTitle] = useState("Dashboard");
-  const [pageSubtitle, setPageSubtitle] = useState("");
+  const [pageTitle, setPageTitle] = useState('Dashboard');
+  const [pageSubtitle, setPageSubtitle] = useState('');
 
   const value = {
     pageTitle,
@@ -25,7 +25,5 @@ export const AdminProvider = ({ children }) => {
     setPageSubtitle,
   };
 
-  return (
-    <AdminContext.Provider value={value}>{children}</AdminContext.Provider>
-  );
+  return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 };

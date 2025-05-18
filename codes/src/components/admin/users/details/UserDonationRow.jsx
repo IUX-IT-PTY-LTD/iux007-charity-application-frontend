@@ -1,8 +1,8 @@
 // components/users/UserDonationRow.jsx
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { format, parseISO } from "date-fns";
+import React, { useState } from 'react';
+import { format, parseISO } from 'date-fns';
 import {
   ChevronDown,
   Receipt,
@@ -20,44 +20,34 @@ import {
   XCircle,
   AlertCircle,
   RefreshCcw,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "sonner";
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
 
 // Status badge styles
 const statusStyles = {
-  completed:
-    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  pending: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  failed: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  refunded: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300",
+  completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  pending: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  failed: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+  refunded: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
 };
 
 // Status icons
 const StatusIcon = ({ status }) => {
   switch (status) {
-    case "completed":
+    case 'completed':
       return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    case "pending":
+    case 'pending':
       return <Clock className="h-4 w-4 text-blue-600" />;
-    case "failed":
+    case 'failed':
       return <XCircle className="h-4 w-4 text-red-600" />;
-    case "refunded":
+    case 'refunded':
       return <RefreshCcw className="h-4 w-4 text-amber-600" />;
     default:
       return <AlertCircle className="h-4 w-4 text-gray-600" />;
@@ -71,19 +61,17 @@ const UserDonationRow = ({ donation, eventName }) => {
   // Format date
   const formattedDate = donation.date
     ? format(parseISO(donation.date), "MMM d, yyyy 'at' h:mm a")
-    : "N/A";
+    : 'N/A';
 
   // Format amount with dollar sign
-  const formattedAmount = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  const formattedAmount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
   }).format(donation.amount);
 
   // Handle receipt viewing
   const handleViewReceipt = () => {
-    router.push(
-      `/admin/events/${donation.event_id}/donations/${donation.id}/receipt`
-    );
+    router.push(`/admin/events/${donation.event_id}/donations/${donation.id}/receipt`);
   };
 
   // Handle receipt download
@@ -92,14 +80,14 @@ const UserDonationRow = ({ donation, eventName }) => {
 
     // Simulate download delay
     setTimeout(() => {
-      toast.success("Receipt downloaded successfully");
+      toast.success('Receipt downloaded successfully');
     }, 1500);
   };
 
   // Handle copying donation ID to clipboard
   const handleCopyId = () => {
     navigator.clipboard.writeText(donation.id);
-    toast.success("Donation ID copied to clipboard");
+    toast.success('Donation ID copied to clipboard');
   };
 
   return (
@@ -112,17 +100,13 @@ const UserDonationRow = ({ donation, eventName }) => {
         <div className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
           <div className="flex items-center gap-3">
             <ChevronDown
-              className={`h-5 w-5 flex-shrink-0 transition-transform ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`h-5 w-5 flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
             />
 
             <div className="flex items-center gap-3">
               <div>
                 <div className="font-medium">{eventName}</div>
-                <div className="text-sm text-muted-foreground">
-                  {donation.id}
-                </div>
+                <div className="text-sm text-muted-foreground">{donation.id}</div>
               </div>
 
               <Badge className={statusStyles[donation.status]}>
@@ -170,9 +154,7 @@ const UserDonationRow = ({ donation, eventName }) => {
                   <div>
                     <div className="font-medium">{formattedAmount}</div>
                     {donation.is_recurring && (
-                      <div className="text-sm text-muted-foreground">
-                        Recurring
-                      </div>
+                      <div className="text-sm text-muted-foreground">Recurring</div>
                     )}
                   </div>
                 </div>
@@ -189,9 +171,7 @@ const UserDonationRow = ({ donation, eventName }) => {
 
                 <div className="flex items-center">
                   <Clipboard className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <div className="text-sm">
-                    Transaction ID: {donation.transaction_id || "N/A"}
-                  </div>
+                  <div className="text-sm">Transaction ID: {donation.transaction_id || 'N/A'}</div>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -225,18 +205,14 @@ const UserDonationRow = ({ donation, eventName }) => {
               {donation.campaign && (
                 <div>
                   <div className="text-sm font-medium">Campaign</div>
-                  <div className="text-sm text-muted-foreground">
-                    {donation.campaign}
-                  </div>
+                  <div className="text-sm text-muted-foreground">{donation.campaign}</div>
                 </div>
               )}
 
               {donation.notes && (
                 <div className="col-span-2">
                   <div className="text-sm font-medium">Notes</div>
-                  <div className="text-sm text-muted-foreground">
-                    {donation.notes}
-                  </div>
+                  <div className="text-sm text-muted-foreground">{donation.notes}</div>
                 </div>
               )}
 
@@ -244,12 +220,9 @@ const UserDonationRow = ({ donation, eventName }) => {
                 <div className="col-span-2">
                   <div className="text-sm font-medium">Tribute Information</div>
                   <div className="text-sm text-muted-foreground">
-                    In {donation.tribute_info.type} of{" "}
-                    {donation.tribute_info.name}
+                    In {donation.tribute_info.type} of {donation.tribute_info.name}
                     {donation.tribute_info.message && (
-                      <div className="mt-1 italic">
-                        "{donation.tribute_info.message}"
-                      </div>
+                      <div className="mt-1 italic">"{donation.tribute_info.message}"</div>
                     )}
                   </div>
                 </div>

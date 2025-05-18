@@ -1,8 +1,8 @@
 // components/blog/TagSelect.jsx
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { PlusCircle, X } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { PlusCircle, X } from 'lucide-react';
 
 import {
   Dialog,
@@ -12,11 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Command,
   CommandEmpty,
@@ -24,42 +24,38 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { toast } from "sonner";
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { toast } from 'sonner';
 
 const TagSelect = ({ value = [], onChange }) => {
   const [tags, setTags] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagSlug, setNewTagSlug] = useState("");
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagSlug, setNewTagSlug] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Load tags from localStorage
   useEffect(() => {
-    const storedTags = localStorage.getItem("blog_tags");
+    const storedTags = localStorage.getItem('blog_tags');
 
     if (storedTags) {
       setTags(JSON.parse(storedTags));
     } else {
       // Set default tags if none exist
       const defaultTags = [
-        { id: "1", name: "JavaScript", slug: "javascript" },
-        { id: "2", name: "React", slug: "react" },
-        { id: "3", name: "CSS", slug: "css" },
-        { id: "4", name: "HTML", slug: "html" },
-        { id: "5", name: "Node.js", slug: "nodejs" },
-        { id: "6", name: "Web Development", slug: "web-development" },
-        { id: "7", name: "UX Design", slug: "ux-design" },
-        { id: "8", name: "SEO", slug: "seo" },
-        { id: "9", name: "Productivity", slug: "productivity" },
+        { id: '1', name: 'JavaScript', slug: 'javascript' },
+        { id: '2', name: 'React', slug: 'react' },
+        { id: '3', name: 'CSS', slug: 'css' },
+        { id: '4', name: 'HTML', slug: 'html' },
+        { id: '5', name: 'Node.js', slug: 'nodejs' },
+        { id: '6', name: 'Web Development', slug: 'web-development' },
+        { id: '7', name: 'UX Design', slug: 'ux-design' },
+        { id: '8', name: 'SEO', slug: 'seo' },
+        { id: '9', name: 'Productivity', slug: 'productivity' },
       ];
 
-      localStorage.setItem("blog_tags", JSON.stringify(defaultTags));
+      localStorage.setItem('blog_tags', JSON.stringify(defaultTags));
       setTags(defaultTags);
     }
   }, []);
@@ -68,11 +64,11 @@ const TagSelect = ({ value = [], onChange }) => {
   const generateSlug = (name) => {
     return name
       .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\-\-+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
   };
 
   // Handle name change and auto-generate slug
@@ -85,13 +81,13 @@ const TagSelect = ({ value = [], onChange }) => {
   // Add new tag
   const handleAddTag = () => {
     if (!newTagName.trim()) {
-      toast.error("Tag name cannot be empty");
+      toast.error('Tag name cannot be empty');
       return;
     }
 
     // Check if tag with same slug already exists
     if (tags.some((tag) => tag.slug === newTagSlug)) {
-      toast.error("A tag with this name already exists");
+      toast.error('A tag with this name already exists');
       return;
     }
 
@@ -103,18 +99,18 @@ const TagSelect = ({ value = [], onChange }) => {
 
     const updatedTags = [...tags, newTag];
     setTags(updatedTags);
-    localStorage.setItem("blog_tags", JSON.stringify(updatedTags));
+    localStorage.setItem('blog_tags', JSON.stringify(updatedTags));
 
     // Add the new tag to selected tags
     const updatedValue = [...value, newTag.id];
     onChange(updatedValue);
 
     // Reset and close dialog
-    setNewTagName("");
-    setNewTagSlug("");
+    setNewTagName('');
+    setNewTagSlug('');
     setIsDialogOpen(false);
 
-    toast.success("Tag added successfully");
+    toast.success('Tag added successfully');
   };
 
   // Toggle tag selection
@@ -177,9 +173,7 @@ const TagSelect = ({ value = [], onChange }) => {
                     >
                       <div
                         className={`mr-2 h-4 w-4 border rounded ${
-                          value.includes(tag.id)
-                            ? "bg-primary border-primary"
-                            : "border-input"
+                          value.includes(tag.id) ? 'bg-primary border-primary' : 'border-input'
                         }`}
                       >
                         {value.includes(tag.id) && (
@@ -206,9 +200,7 @@ const TagSelect = ({ value = [], onChange }) => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Tag</DialogTitle>
-              <DialogDescription>
-                Create a new tag for your blog posts
-              </DialogDescription>
+              <DialogDescription>Create a new tag for your blog posts</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">

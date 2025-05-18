@@ -1,27 +1,20 @@
-"use client";
+'use client';
 
-import React, { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { useAdminContext } from "@/components/admin/admin-context";
-import {
-  CalendarIcon,
-  Save,
-  ArrowLeft,
-  Eye,
-  Clock,
-  Trash2,
-} from "lucide-react";
-import { format, parseISO } from "date-fns";
+import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { CalendarIcon, Save, ArrowLeft, Eye, Clock, Trash2 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 
 // Import custom components
-import RichTextEditor from "@/components/admin/blog/create/RichTextEditor";
-import CategorySelect from "@/components/admin/blog/create/CategorySelect";
-import TagSelect from "@/components/admin/blog/create/TagSelect";
-import FeaturedImageUploader from "@/components/admin/blog/create/FeaturedImageUploader";
-import SEOMetadata from "@/components/admin/blog/create/SEOMetadata";
+import RichTextEditor from '@/components/admin/blog/create/RichTextEditor';
+import CategorySelect from '@/components/admin/blog/create/CategorySelect';
+import TagSelect from '@/components/admin/blog/create/TagSelect';
+import FeaturedImageUploader from '@/components/admin/blog/create/FeaturedImageUploader';
+import SEOMetadata from '@/components/admin/blog/create/SEOMetadata';
 
 // Import shadcn components
 import {
@@ -31,7 +24,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -40,26 +33,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,34 +59,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 // Define form schema with validation
 const formSchema = z.object({
   title: z.string().min(5, {
-    message: "Title must be at least 5 characters.",
+    message: 'Title must be at least 5 characters.',
   }),
   excerpt: z
     .string()
     .min(10, {
-      message: "Excerpt must be at least 10 characters.",
+      message: 'Excerpt must be at least 10 characters.',
     })
     .max(300, {
-      message: "Excerpt must not exceed 300 characters.",
+      message: 'Excerpt must not exceed 300 characters.',
     }),
   content: z.string().min(50, {
-    message: "Content must be at least 50 characters.",
+    message: 'Content must be at least 50 characters.',
   }),
   category_id: z.string({
-    required_error: "Please select a category.",
+    required_error: 'Please select a category.',
   }),
   tag_ids: z.array(z.string()).optional().default([]),
   featured_image: z.any().optional(),
   publish_date: z.date({
-    required_error: "Please select a date.",
+    required_error: 'Please select a date.',
   }),
-  status: z.string().default("draft"),
+  status: z.string().default('draft'),
   is_featured: z.boolean().default(false),
   allow_comments: z.boolean().default(true),
   estimated_read_time: z.string().optional(),
@@ -107,12 +96,12 @@ export default function EditBlogPost({ params }) {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const editorRef = useRef(null);
-  const [activeTab, setActiveTab] = useState("edit");
+  const [activeTab, setActiveTab] = useState('edit');
   const [seoMetadata, setSeoMetadata] = useState({
-    title: "",
-    description: "",
-    slug: "",
-    canonicalUrl: "",
+    title: '',
+    description: '',
+    slug: '',
+    canonicalUrl: '',
   });
   const [blogPost, setBlogPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -123,24 +112,24 @@ export default function EditBlogPost({ params }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      excerpt: "",
-      content: "",
-      category_id: "",
+      title: '',
+      excerpt: '',
+      content: '',
+      category_id: '',
       tag_ids: [],
       featured_image: null,
       publish_date: new Date(),
-      status: "draft",
+      status: 'draft',
       is_featured: false,
       allow_comments: true,
-      estimated_read_time: "",
+      estimated_read_time: '',
     },
   });
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Edit Blog Post");
-    setPageSubtitle("Update your blog post content and settings");
+    setPageTitle('Edit Blog Post');
+    setPageSubtitle('Update your blog post content and settings');
   }, [setPageTitle, setPageSubtitle]);
 
   // Fetch blog post data based on ID
@@ -149,9 +138,7 @@ export default function EditBlogPost({ params }) {
       setIsLoading(true);
       try {
         // For testing: Get blog posts from localStorage
-        const storedPosts = JSON.parse(
-          localStorage.getItem("blog_posts") || "[]"
-        );
+        const storedPosts = JSON.parse(localStorage.getItem('blog_posts') || '[]');
         const foundPost = storedPosts.find((post) => post.id === params.blogId);
 
         if (foundPost) {
@@ -180,12 +167,12 @@ export default function EditBlogPost({ params }) {
               title: foundPost.title,
               description: foundPost.excerpt,
               slug: generateSlug(foundPost.title),
-              canonicalUrl: "",
+              canonicalUrl: '',
             });
           }
         } else {
-          toast.error("Blog post not found");
-          router.push("/admin/blog");
+          toast.error('Blog post not found');
+          router.push('/admin/blog');
         }
 
         /* API Implementation (Commented out for future use)
@@ -224,8 +211,8 @@ export default function EditBlogPost({ params }) {
         }
         */
       } catch (error) {
-        console.error("Error fetching blog post:", error);
-        toast.error("Failed to load blog post data");
+        console.error('Error fetching blog post:', error);
+        toast.error('Failed to load blog post data');
       } finally {
         setIsLoading(false);
       }
@@ -242,24 +229,17 @@ export default function EditBlogPost({ params }) {
       setHasUnsavedChanges(true);
 
       // Update SEO title and slug when post title changes
-      if (name === "title") {
+      if (name === 'title') {
         const title = values.title;
 
-        if (
-          title &&
-          (!seoMetadata.title || seoMetadata.title === blogPost?.title)
-        ) {
+        if (title && (!seoMetadata.title || seoMetadata.title === blogPost?.title)) {
           setSeoMetadata((prev) => ({
             ...prev,
             title,
           }));
         }
 
-        if (
-          title &&
-          (!seoMetadata.slug ||
-            seoMetadata.slug === generateSlug(blogPost?.title))
-        ) {
+        if (title && (!seoMetadata.slug || seoMetadata.slug === generateSlug(blogPost?.title))) {
           setSeoMetadata((prev) => ({
             ...prev,
             slug: generateSlug(title),
@@ -268,10 +248,10 @@ export default function EditBlogPost({ params }) {
       }
 
       // Update estimated read time when content changes
-      if (name === "content") {
+      if (name === 'content') {
         const content = values.content;
         const readTime = calculateReadTime(content);
-        form.setValue("estimated_read_time", readTime);
+        form.setValue('estimated_read_time', readTime);
       }
     });
 
@@ -283,37 +263,37 @@ export default function EditBlogPost({ params }) {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = "";
-        return "";
+        e.returnValue = '';
+        return '';
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   // Generate slug from text
   const generateSlug = (text) => {
-    if (!text) return "";
+    if (!text) return '';
 
     return text
       .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\-\-+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
   };
 
   // Calculate estimated read time
   const calculateReadTime = (content) => {
     // Strip HTML tags
-    const text = content.replace(/<\/?[^>]+(>|$)/g, "");
+    const text = content.replace(/<\/?[^>]+(>|$)/g, '');
     // Count words (approximately)
     const words = text.split(/\s+/).length;
     // Average reading speed: 200-250 words per minute
     const minutes = Math.ceil(words / 225);
-    return minutes > 0 ? `${minutes} min read` : "< 1 min read";
+    return minutes > 0 ? `${minutes} min read` : '< 1 min read';
   };
 
   // Handle form submission
@@ -327,27 +307,23 @@ export default function EditBlogPost({ params }) {
         updated_at: new Date().toISOString(),
       };
 
-      console.log("Updating blog post:", updatedPost);
+      console.log('Updating blog post:', updatedPost);
 
       // Update in localStorage for testing
-      const storedPosts = JSON.parse(
-        localStorage.getItem("blog_posts") || "[]"
-      );
+      const storedPosts = JSON.parse(localStorage.getItem('blog_posts') || '[]');
       const updatedPosts = storedPosts.map((post) =>
         post.id === params.blogId ? updatedPost : post
       );
-      localStorage.setItem("blog_posts", JSON.stringify(updatedPosts));
+      localStorage.setItem('blog_posts', JSON.stringify(updatedPosts));
 
       // Show success message
-      toast.success(
-        `Blog post ${data.status === "published" ? "published" : "updated"}!`
-      );
+      toast.success(`Blog post ${data.status === 'published' ? 'published' : 'updated'}!`);
 
       // Reset unsaved changes flag
       setHasUnsavedChanges(false);
 
       // Redirect to blog posts list
-      router.push("/admin/blog");
+      router.push('/admin/blog');
 
       /* API Implementation (Commented out for future use)
       // For actual API implementation, we would use FormData for file uploads
@@ -400,8 +376,8 @@ export default function EditBlogPost({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error updating blog post:", error);
-      toast.error("Failed to update blog post");
+      console.error('Error updating blog post:', error);
+      toast.error('Failed to update blog post');
     }
   };
 
@@ -409,17 +385,15 @@ export default function EditBlogPost({ params }) {
   const handleDelete = () => {
     try {
       // Remove from localStorage for testing
-      const storedPosts = JSON.parse(
-        localStorage.getItem("blog_posts") || "[]"
-      );
+      const storedPosts = JSON.parse(localStorage.getItem('blog_posts') || '[]');
       const updatedPosts = storedPosts.filter((post) => post.id !== params.blogId);
-      localStorage.setItem("blog_posts", JSON.stringify(updatedPosts));
+      localStorage.setItem('blog_posts', JSON.stringify(updatedPosts));
 
       // Show success message
-      toast.success("Blog post deleted successfully");
+      toast.success('Blog post deleted successfully');
 
       // Redirect to blog posts list
-      router.push("/admin/blog");
+      router.push('/admin/blog');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/blog-posts/${params.blogId}`, {
@@ -441,16 +415,15 @@ export default function EditBlogPost({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error deleting blog post:", error);
-      toast.error("Failed to delete blog post");
+      console.error('Error deleting blog post:', error);
+      toast.error('Failed to delete blog post');
     }
   };
 
   // Preview mode
   const renderPreview = () => {
     const formData = form.getValues();
-    const readTime =
-      formData.estimated_read_time || calculateReadTime(formData.content);
+    const readTime = formData.estimated_read_time || calculateReadTime(formData.content);
 
     return (
       <div className="max-w-4xl mx-auto">
@@ -463,14 +436,12 @@ export default function EditBlogPost({ params }) {
             />
           )}
 
-          <h1 className="text-3xl font-bold mb-4">
-            {formData.title || "Blog Post Title"}
-          </h1>
+          <h1 className="text-3xl font-bold mb-4">{formData.title || 'Blog Post Title'}</h1>
 
           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
             <div className="flex items-center">
               <CalendarIcon className="h-4 w-4 mr-1" />
-              {format(formData.publish_date, "MMMM d, yyyy")}
+              {format(formData.publish_date, 'MMMM d, yyyy')}
             </div>
             <div className="flex items-center">
               <Clock className="h-4 w-4 mr-1" />
@@ -479,7 +450,7 @@ export default function EditBlogPost({ params }) {
           </div>
 
           <p className="text-lg text-muted-foreground italic mb-6">
-            {formData.excerpt || "This is a preview of your blog post excerpt."}
+            {formData.excerpt || 'This is a preview of your blog post excerpt.'}
           </p>
 
           <Separator className="my-8" />
@@ -487,9 +458,7 @@ export default function EditBlogPost({ params }) {
           <div
             className="prose max-w-full dark:prose-invert"
             dangerouslySetInnerHTML={{
-              __html:
-                formData.content ||
-                "<p>Your blog content will appear here...</p>",
+              __html: formData.content || '<p>Your blog content will appear here...</p>',
             }}
           />
         </div>
@@ -523,15 +492,8 @@ export default function EditBlogPost({ params }) {
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full pl-3 text-left font-normal"
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                      <Button variant="outline" className="w-full pl-3 text-left font-normal">
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -573,11 +535,9 @@ export default function EditBlogPost({ params }) {
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  {field.value === "draft" &&
-                    "Save as draft to continue editing later"}
-                  {field.value === "published" && "Publish immediately"}
-                  {field.value === "scheduled" &&
-                    "Schedule for future publication"}
+                  {field.value === 'draft' && 'Save as draft to continue editing later'}
+                  {field.value === 'published' && 'Publish immediately'}
+                  {field.value === 'scheduled' && 'Schedule for future publication'}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -591,15 +551,10 @@ export default function EditBlogPost({ params }) {
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                 <div className="space-y-0.5">
                   <FormLabel>Featured Post</FormLabel>
-                  <FormDescription>
-                    Display this post in featured sections
-                  </FormDescription>
+                  <FormDescription>Display this post in featured sections</FormDescription>
                 </div>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
               </FormItem>
             )}
@@ -612,25 +567,17 @@ export default function EditBlogPost({ params }) {
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                 <div className="space-y-0.5">
                   <FormLabel>Allow Comments</FormLabel>
-                  <FormDescription>
-                    Enable commenting on this post
-                  </FormDescription>
+                  <FormDescription>Enable commenting on this post</FormDescription>
                 </div>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
               </FormItem>
             )}
           />
 
           <div className="pt-4">
-            <AlertDialog
-              open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
-            >
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" className="w-full">
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -641,17 +588,13 @@ export default function EditBlogPost({ params }) {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    the blog post "{blogPost?.title}" and remove all of its data
-                    from our servers.
+                    This action cannot be undone. This will permanently delete the blog post "
+                    {blogPost?.title}" and remove all of its data from our servers.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -672,14 +615,10 @@ export default function EditBlogPost({ params }) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <FeaturedImageUploader
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
+                  <FeaturedImageUploader value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormDescription>
-                  This image will be displayed at the top of your post and in
-                  social shares
+                  This image will be displayed at the top of your post and in social shares
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -700,14 +639,9 @@ export default function EditBlogPost({ params }) {
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <FormControl>
-                  <CategorySelect
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
+                  <CategorySelect value={field.value} onChange={field.onChange} />
                 </FormControl>
-                <FormDescription>
-                  Select a primary category for your post
-                </FormDescription>
+                <FormDescription>Select a primary category for your post</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -722,9 +656,7 @@ export default function EditBlogPost({ params }) {
                 <FormControl>
                   <TagSelect value={field.value} onChange={field.onChange} />
                 </FormControl>
-                <FormDescription>
-                  Add tags to help readers discover your content
-                </FormDescription>
+                <FormDescription>Add tags to help readers discover your content</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -742,7 +674,7 @@ export default function EditBlogPost({ params }) {
             <span className="col-span-2">
               {blogPost?.created_at
                 ? format(new Date(blogPost.created_at), "PPP 'at' h:mm a")
-                : "Unknown"}
+                : 'Unknown'}
             </span>
           </div>
           <div className="grid grid-cols-3 gap-1">
@@ -750,14 +682,12 @@ export default function EditBlogPost({ params }) {
             <span className="col-span-2">
               {blogPost?.updated_at
                 ? format(new Date(blogPost.updated_at), "PPP 'at' h:mm a")
-                : "Unknown"}
+                : 'Unknown'}
             </span>
           </div>
           <div className="grid grid-cols-3 gap-1">
             <span className="font-medium">Post ID:</span>
-            <span className="col-span-2 font-mono text-xs">
-              {blogPost?.id || "Unknown"}
-            </span>
+            <span className="col-span-2 font-mono text-xs">{blogPost?.id || 'Unknown'}</span>
           </div>
         </CardContent>
       </Card>
@@ -777,14 +707,12 @@ export default function EditBlogPost({ params }) {
                   onClick={() => {
                     if (hasUnsavedChanges) {
                       if (
-                        window.confirm(
-                          "You have unsaved changes. Are you sure you want to leave?"
-                        )
+                        window.confirm('You have unsaved changes. Are you sure you want to leave?')
                       ) {
-                        router.push("/admin/blogs");
+                        router.push('/admin/blogs');
                       }
                     } else {
-                      router.push("/admin/blogs");
+                      router.push('/admin/blogs');
                     }
                   }}
                   type="button"
@@ -799,10 +727,7 @@ export default function EditBlogPost({ params }) {
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <SelectTrigger className="w-[120px]">
                             <SelectValue placeholder="Status" />
                           </SelectTrigger>
@@ -816,21 +741,14 @@ export default function EditBlogPost({ params }) {
                     )}
                   />
 
-                  <Button
-                    type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
+                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                     <Save className="mr-2 h-4 w-4" />
                     Save Changes
                   </Button>
                 </div>
               </div>
 
-              <Tabs
-                defaultValue="edit"
-                value={activeTab}
-                onValueChange={setActiveTab}
-              >
+              <Tabs defaultValue="edit" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="edit">Edit</TabsTrigger>
                   <TabsTrigger value="preview">Preview</TabsTrigger>
@@ -872,8 +790,8 @@ export default function EditBlogPost({ params }) {
                                 />
                               </FormControl>
                               <FormDescription>
-                                Maximum 300 characters. This will be used in
-                                search results and social media shares.
+                                Maximum 300 characters. This will be used in search results and
+                                social media shares.
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -903,27 +821,17 @@ export default function EditBlogPost({ params }) {
                     <Card className="mt-6">
                       <CardHeader>
                         <CardTitle>SEO & Metadata</CardTitle>
-                        <CardDescription>
-                          Optimize your post for search engines
-                        </CardDescription>
+                        <CardDescription>Optimize your post for search engines</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <SEOMetadata
-                          metadata={seoMetadata}
-                          onChange={setSeoMetadata}
-                        />
+                        <SEOMetadata metadata={seoMetadata} onChange={setSeoMetadata} />
                       </CardContent>
                     </Card>
                   </TabsContent>
 
-                  <TabsContent
-                    value="preview"
-                    className="lg:col-span-2 m-0 p-0"
-                  >
+                  <TabsContent value="preview" className="lg:col-span-2 m-0 p-0">
                     <Card>
-                      <CardContent className="pt-6">
-                        {renderPreview()}
-                      </CardContent>
+                      <CardContent className="pt-6">{renderPreview()}</CardContent>
                     </Card>
                   </TabsContent>
 

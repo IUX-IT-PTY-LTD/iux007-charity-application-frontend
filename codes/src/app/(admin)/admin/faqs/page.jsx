@@ -1,7 +1,7 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
 
 import {
   PlusCircle,
@@ -12,7 +12,7 @@ import {
   ArrowUpDown,
   MessageSquare,
   HelpCircle,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   Card,
@@ -21,11 +21,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -33,7 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +41,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,15 +52,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const AdminFAQsList = () => {
   const router = useRouter();
@@ -69,9 +69,9 @@ const AdminFAQsList = () => {
   // State management
   const [faqs, setFaqs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState("ordering");
-  const [sortDirection, setSortDirection] = useState("asc");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('ordering');
+  const [sortDirection, setSortDirection] = useState('asc');
   const [faqToDelete, setFaqToDelete] = useState(null);
 
   // Pagination
@@ -80,8 +80,8 @@ const AdminFAQsList = () => {
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("FAQs");
-    setPageSubtitle("Manage frequently asked questions for your users");
+    setPageTitle('FAQs');
+    setPageSubtitle('Manage frequently asked questions for your users');
   }, [setPageTitle, setPageSubtitle]);
 
   // Fetch FAQs from localStorage (for testing) or API
@@ -91,7 +91,7 @@ const AdminFAQsList = () => {
 
       try {
         // Check localStorage first
-        const storedFaqs = localStorage.getItem("faqs");
+        const storedFaqs = localStorage.getItem('faqs');
         let faqData = [];
 
         if (storedFaqs) {
@@ -102,55 +102,55 @@ const AdminFAQsList = () => {
         if (!faqData || faqData.length === 0) {
           faqData = [
             {
-              id: "1",
-              question: "What is your return policy?",
+              id: '1',
+              question: 'What is your return policy?',
               answer:
                 "We offer a 30-day money-back guarantee on all our products. If you're not satisfied with your purchase, you can return it within 30 days for a full refund.",
               ordering: 1,
-              status: "1",
+              status: '1',
             },
             {
-              id: "2",
-              question: "How long does shipping take?",
+              id: '2',
+              question: 'How long does shipping take?',
               answer:
-                "Standard shipping takes 3-5 business days within the continental US. International shipping can take 7-14 business days depending on the destination.",
+                'Standard shipping takes 3-5 business days within the continental US. International shipping can take 7-14 business days depending on the destination.',
               ordering: 2,
-              status: "1",
+              status: '1',
             },
             {
-              id: "3",
-              question: "Do you offer international shipping?",
+              id: '3',
+              question: 'Do you offer international shipping?',
               answer:
-                "Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by location. Please check our shipping page for more details.",
+                'Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by location. Please check our shipping page for more details.',
               ordering: 3,
-              status: "0",
+              status: '0',
             },
             {
-              id: "4",
-              question: "How can I track my order?",
+              id: '4',
+              question: 'How can I track my order?',
               answer:
                 "Once your order ships, you'll receive a confirmation email with a tracking number. You can use this number to track your package on our website or the carrier's site.",
               ordering: 4,
-              status: "1",
+              status: '1',
             },
             {
-              id: "5",
-              question: "What payment methods do you accept?",
+              id: '5',
+              question: 'What payment methods do you accept?',
               answer:
-                "We accept Visa, Mastercard, American Express, PayPal, and Apple Pay. All payments are securely processed and encrypted.",
+                'We accept Visa, Mastercard, American Express, PayPal, and Apple Pay. All payments are securely processed and encrypted.',
               ordering: 5,
-              status: "1",
+              status: '1',
             },
           ];
 
           // Store sample data for testing
-          localStorage.setItem("faqs", JSON.stringify(faqData));
+          localStorage.setItem('faqs', JSON.stringify(faqData));
         }
 
         setFaqs(faqData);
       } catch (error) {
-        console.error("Error fetching FAQs:", error);
-        toast.error("Failed to load FAQs");
+        console.error('Error fetching FAQs:', error);
+        toast.error('Failed to load FAQs');
       } finally {
         setIsLoading(false);
       }
@@ -194,10 +194,10 @@ const AdminFAQsList = () => {
   // Handle sorting
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
   };
 
@@ -208,18 +208,15 @@ const AdminFAQsList = () => {
 
       const query = searchQuery.toLowerCase();
 
-      if (query === "active") return faq.status === "1";
-      if (query === "inactive") return faq.status === "0";
+      if (query === 'active') return faq.status === '1';
+      if (query === 'inactive') return faq.status === '0';
 
-      return (
-        faq.question.toLowerCase().includes(query) ||
-        faq.answer.toLowerCase().includes(query)
-      );
+      return faq.question.toLowerCase().includes(query) || faq.answer.toLowerCase().includes(query);
     })
     .sort((a, b) => {
-      const modifier = sortDirection === "asc" ? 1 : -1;
+      const modifier = sortDirection === 'asc' ? 1 : -1;
 
-      if (sortField === "question" || sortField === "answer") {
+      if (sortField === 'question' || sortField === 'answer') {
         return a[sortField].localeCompare(b[sortField]) * modifier;
       } else {
         return (Number(a[sortField]) - Number(b[sortField])) * modifier;
@@ -231,19 +228,16 @@ const AdminFAQsList = () => {
   const totalPages = Math.ceil(totalFaqs / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentFaqs = filteredAndSortedFaqs.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentFaqs = filteredAndSortedFaqs.slice(indexOfFirstItem, indexOfLastItem);
 
   // Handle FAQ deletion
   const handleDelete = (id) => {
     try {
       const updatedFaqs = faqs.filter((faq) => faq.id !== id);
       setFaqs(updatedFaqs);
-      localStorage.setItem("faqs", JSON.stringify(updatedFaqs));
+      localStorage.setItem('faqs', JSON.stringify(updatedFaqs));
 
-      toast.success("FAQ deleted successfully");
+      toast.success('FAQ deleted successfully');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/faqs/${id}`, {
@@ -269,8 +263,8 @@ const AdminFAQsList = () => {
         });
       */
     } catch (error) {
-      console.error("Error deleting FAQ:", error);
-      toast.error("Failed to delete FAQ");
+      console.error('Error deleting FAQ:', error);
+      toast.error('Failed to delete FAQ');
     }
   };
 
@@ -279,19 +273,15 @@ const AdminFAQsList = () => {
     try {
       const updatedFaqs = faqs.map((faq) => {
         if (faq.id === id) {
-          return { ...faq, status: currentStatus === "1" ? "0" : "1" };
+          return { ...faq, status: currentStatus === '1' ? '0' : '1' };
         }
         return faq;
       });
 
       setFaqs(updatedFaqs);
-      localStorage.setItem("faqs", JSON.stringify(updatedFaqs));
+      localStorage.setItem('faqs', JSON.stringify(updatedFaqs));
 
-      toast.success(
-        `FAQ ${
-          currentStatus === "1" ? "deactivated" : "activated"
-        } successfully`
-      );
+      toast.success(`FAQ ${currentStatus === '1' ? 'deactivated' : 'activated'} successfully`);
 
       /* API Implementation (Commented out for future use)
       const faqToUpdate = faqs.find(faq => faq.id === id);
@@ -330,18 +320,18 @@ const AdminFAQsList = () => {
         });
       */
     } catch (error) {
-      console.error("Error updating FAQ status:", error);
-      toast.error("Failed to update FAQ status");
+      console.error('Error updating FAQ status:', error);
+      toast.error('Failed to update FAQ status');
     }
   };
 
   // Column definitions for sortable headers
   const columns = [
-    { field: "ordering", label: "#", sortable: true },
-    { field: "question", label: "Question", sortable: true },
-    { field: "answer", label: "Answer", sortable: true },
-    { field: "status", label: "Status", sortable: true },
-    { field: "actions", label: "Actions", sortable: false },
+    { field: 'ordering', label: '#', sortable: true },
+    { field: 'question', label: 'Question', sortable: true },
+    { field: 'answer', label: 'Answer', sortable: true },
+    { field: 'status', label: 'Status', sortable: true },
+    { field: 'actions', label: 'Actions', sortable: false },
   ];
 
   return (
@@ -351,13 +341,11 @@ const AdminFAQsList = () => {
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div>
               <CardTitle>Frequently Asked Questions</CardTitle>
-              <CardDescription>
-                Manage FAQs displayed on your website
-              </CardDescription>
+              <CardDescription>Manage FAQs displayed on your website</CardDescription>
             </div>
 
             <Button
-              onClick={() => router.push("/admin/faqs/create")}
+              onClick={() => router.push('/admin/faqs/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -380,8 +368,8 @@ const AdminFAQsList = () => {
 
               <div className="flex flex-wrap items-center gap-2 self-end">
                 <span className="text-sm text-gray-500">
-                  {filteredAndSortedFaqs.length}{" "}
-                  {filteredAndSortedFaqs.length === 1 ? "FAQ" : "FAQs"} found
+                  {filteredAndSortedFaqs.length}{' '}
+                  {filteredAndSortedFaqs.length === 1 ? 'FAQ' : 'FAQs'} found
                 </span>
 
                 <DropdownMenu>
@@ -395,7 +383,7 @@ const AdminFAQsList = () => {
                     <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => setSearchQuery('')}
                       className="justify-between"
                     >
                       All
@@ -404,21 +392,21 @@ const AdminFAQsList = () => {
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("active")}
+                      onClick={() => setSearchQuery('active')}
                       className="justify-between"
                     >
                       Active
                       <Badge variant="outline" className="ml-2">
-                        {faqs.filter((faq) => faq.status === "1").length}
+                        {faqs.filter((faq) => faq.status === '1').length}
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => setSearchQuery("inactive")}
+                      onClick={() => setSearchQuery('inactive')}
                       className="justify-between"
                     >
                       Inactive
                       <Badge variant="outline" className="ml-2">
-                        {faqs.filter((faq) => faq.status === "0").length}
+                        {faqs.filter((faq) => faq.status === '0').length}
                       </Badge>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -433,20 +421,12 @@ const AdminFAQsList = () => {
                     {columns.map((column) => (
                       <TableHead
                         key={column.field}
-                        className={
-                          column.sortable ? "cursor-pointer select-none" : ""
-                        }
-                        onClick={
-                          column.sortable
-                            ? () => handleSort(column.field)
-                            : undefined
-                        }
+                        className={column.sortable ? 'cursor-pointer select-none' : ''}
+                        onClick={column.sortable ? () => handleSort(column.field) : undefined}
                       >
                         <div className="flex items-center space-x-1">
                           <span>{column.label}</span>
-                          {column.sortable && (
-                            <ArrowUpDown className="h-3 w-3" />
-                          )}
+                          {column.sortable && <ArrowUpDown className="h-3 w-3" />}
                         </div>
                       </TableHead>
                     ))}
@@ -455,31 +435,20 @@ const AdminFAQsList = () => {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
                         Loading FAQs...
                       </TableCell>
                     </TableRow>
                   ) : filteredAndSortedFaqs.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
                         No FAQs found.
                       </TableCell>
                     </TableRow>
                   ) : (
                     currentFaqs.map((faq) => (
-                      <TableRow
-                        key={faq.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <TableCell className="font-medium">
-                          {faq.ordering}
-                        </TableCell>
+                      <TableRow key={faq.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <TableCell className="font-medium">{faq.ordering}</TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
                             <HelpCircle className="h-4 w-4 text-blue-500" />
@@ -496,24 +465,20 @@ const AdminFAQsList = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Switch
-                              checked={faq.status === "1"}
-                              onCheckedChange={() =>
-                                handleStatusChange(faq.id, faq.status)
-                              }
+                              checked={faq.status === '1'}
+                              onCheckedChange={() => handleStatusChange(faq.id, faq.status)}
                               aria-label={`Toggle status for ${faq.question}`}
                               className="data-[state=checked]:bg-black data-[state=checked]:text-white"
                             />
                             <Badge
-                              variant={
-                                faq.status === "1" ? "success" : "destructive"
-                              }
+                              variant={faq.status === '1' ? 'success' : 'destructive'}
                               className={
-                                faq.status === "1"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
+                                faq.status === '1'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
                               }
                             >
-                              {faq.status === "1" ? "Active" : "Inactive"}
+                              {faq.status === '1' ? 'Active' : 'Inactive'}
                             </Badge>
                           </div>
                         </TableCell>
@@ -522,9 +487,7 @@ const AdminFAQsList = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() =>
-                                router.push(`/admin/faqs/${faq.id}/edit`)
-                              }
+                              onClick={() => router.push(`/admin/faqs/${faq.id}/edit`)}
                             >
                               <Edit className="h-4 w-4" />
                               <span className="sr-only">Edit</span>
@@ -543,12 +506,10 @@ const AdminFAQsList = () => {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you absolutely sure?
-                                  </AlertDialogTitle>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This will permanently delete this FAQ. This
-                                    action cannot be undone.
+                                    This will permanently delete this FAQ. This action cannot be
+                                    undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -574,8 +535,8 @@ const AdminFAQsList = () => {
 
           <CardFooter className="flex flex-col sm:flex-row gap-4 justify-between items-center">
             <div className="text-xs text-gray-500">
-              Showing {indexOfFirstItem + 1} to{" "}
-              {Math.min(indexOfLastItem, totalFaqs)} of {totalFaqs} FAQs
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalFaqs)} of{' '}
+              {totalFaqs} FAQs
             </div>
 
             {/* Pagination */}
@@ -592,9 +553,7 @@ const AdminFAQsList = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                 >
                   &lt;
@@ -612,9 +571,7 @@ const AdminFAQsList = () => {
                       return (
                         <Button
                           key={pageNumber}
-                          variant={
-                            currentPage === pageNumber ? "default" : "outline"
-                          }
+                          variant={currentPage === pageNumber ? 'default' : 'outline'}
                           size="sm"
                           onClick={() => setCurrentPage(pageNumber)}
                           className="w-8 h-8 p-0"
@@ -630,9 +587,7 @@ const AdminFAQsList = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                 >
                   &gt;

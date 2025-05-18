@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAdminContext } from "@/components/admin/admin-context";
-import { ArrowLeft, Loader2, FileDown } from "lucide-react";
-import { format, parseISO, isSameDay } from "date-fns";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/admin-context';
+import { ArrowLeft, Loader2, FileDown } from 'lucide-react';
+import { format, parseISO, isSameDay } from 'date-fns';
 
 // Import custom components
-import DonationFilters from "@/components/admin/donations/DonationFilters";
-import DonationRow from "@/components/admin/donations/DonationRow";
-import DonationStats from "@/components/admin/donations/DonationStats";
+import DonationFilters from '@/components/admin/donations/DonationFilters';
+import DonationRow from '@/components/admin/donations/DonationRow';
+import DonationStats from '@/components/admin/donations/DonationStats';
 
 // Import shadcn components
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Pagination,
   PaginationContent,
@@ -29,10 +29,16 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+} from '@/components/ui/pagination';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const EventDonationsPage = ({ params }) => {
   const router = useRouter();
@@ -44,12 +50,12 @@ const EventDonationsPage = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState(null);
-  const [paymentMethodFilter, setPaymentMethodFilter] = useState("all");
-  const [amountFilter, setAmountFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState('all');
+  const [amountFilter, setAmountFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,8 +67,8 @@ const EventDonationsPage = ({ params }) => {
       setPageTitle(`Donations - ${event.title}`);
       setPageSubtitle(`Manage and track donations for this event`);
     } else {
-      setPageTitle("Event Donations");
-      setPageSubtitle("Loading donation data...");
+      setPageTitle('Event Donations');
+      setPageSubtitle('Loading donation data...');
     }
   }, [event, setPageTitle, setPageSubtitle]);
 
@@ -73,12 +79,12 @@ const EventDonationsPage = ({ params }) => {
 
       try {
         // Fetch event data
-        const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
+        const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
         const foundEvent = storedEvents.find((e) => e.id === params.eventId);
 
         if (!foundEvent) {
-          toast.error("Event not found");
-          router.push("/admin/events");
+          toast.error('Event not found');
+          router.push('/admin/events');
           return;
         }
 
@@ -93,10 +99,7 @@ const EventDonationsPage = ({ params }) => {
         } else {
           // Create sample donations
           donationData = generateSampleDonations(params.eventId, foundEvent);
-          localStorage.setItem(
-            `donations_${params.eventId}`,
-            JSON.stringify(donationData)
-          );
+          localStorage.setItem(`donations_${params.eventId}`, JSON.stringify(donationData));
         }
 
         setDonations(donationData);
@@ -119,8 +122,8 @@ const EventDonationsPage = ({ params }) => {
         setDonations(donationsData);
         */
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to load event and donation data");
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load event and donation data');
       } finally {
         setIsLoading(false);
       }
@@ -134,37 +137,31 @@ const EventDonationsPage = ({ params }) => {
   // Helper function to generate sample donations for testing
   function generateSampleDonations(eventId, event) {
     const sampleDonations = [];
-    const statuses = ["completed", "pending", "failed", "refunded"];
-    const paymentMethods = [
-      "Credit Card",
-      "PayPal",
-      "Bank Transfer",
-      "Cash",
-      "Check",
-    ];
+    const statuses = ['completed', 'pending', 'failed', 'refunded'];
+    const paymentMethods = ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash', 'Check'];
     const firstNames = [
-      "John",
-      "Jane",
-      "Michael",
-      "Emma",
-      "David",
-      "Sarah",
-      "Robert",
-      "Emily",
-      "William",
-      "Olivia",
+      'John',
+      'Jane',
+      'Michael',
+      'Emma',
+      'David',
+      'Sarah',
+      'Robert',
+      'Emily',
+      'William',
+      'Olivia',
     ];
     const lastNames = [
-      "Smith",
-      "Johnson",
-      "Williams",
-      "Brown",
-      "Jones",
-      "Garcia",
-      "Miller",
-      "Davis",
-      "Rodriguez",
-      "Martinez",
+      'Smith',
+      'Johnson',
+      'Williams',
+      'Brown',
+      'Jones',
+      'Garcia',
+      'Miller',
+      'Davis',
+      'Rodriguez',
+      'Martinez',
     ];
     const now = new Date();
     const eventStartDate = event.start_date
@@ -175,16 +172,14 @@ const EventDonationsPage = ({ params }) => {
     const donationCount = Math.floor(Math.random() * 25) + 25;
 
     for (let i = 1; i <= donationCount; i++) {
-      const firstName =
-        firstNames[Math.floor(Math.random() * firstNames.length)];
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
       const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
       const donorName = `${firstName} ${lastName}`;
       const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`;
 
       // Random donation date between event start and now
       const donationDate = new Date(
-        eventStartDate.getTime() +
-          Math.random() * (now.getTime() - eventStartDate.getTime())
+        eventStartDate.getTime() + Math.random() * (now.getTime() - eventStartDate.getTime())
       );
 
       // Random donation amount between $5 and $1000
@@ -195,40 +190,35 @@ const EventDonationsPage = ({ params }) => {
       let status;
       const rand = Math.random();
       if (rand < 0.7) {
-        status = "completed";
+        status = 'completed';
       } else if (rand < 0.85) {
-        status = "pending";
+        status = 'pending';
       } else if (rand < 0.95) {
-        status = "failed";
+        status = 'failed';
       } else {
-        status = "refunded";
+        status = 'refunded';
       }
 
       // Random payment method
-      const paymentMethod =
-        paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+      const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
 
       // Generate a transaction ID for completed donations
       const transactionId =
-        status === "completed"
-          ? `TXN-${Math.floor(Math.random() * 1000000)}`
-          : null;
+        status === 'completed' ? `TXN-${Math.floor(Math.random() * 1000000)}` : null;
 
       // 30% chance of having additional notes
       const hasNotes = Math.random() < 0.3;
-      const notes = hasNotes
-        ? `Note from donor: Thank you for organizing this event!`
-        : null;
+      const notes = hasNotes ? `Note from donor: Thank you for organizing this event!` : null;
 
       // 20% chance of having address info
       const hasAddress = Math.random() < 0.2;
       const address = hasAddress
         ? {
             street: `${Math.floor(Math.random() * 9999) + 1} Main St`,
-            city: "Springfield",
-            state: "IL",
+            city: 'Springfield',
+            state: 'IL',
             zip: `${Math.floor(Math.random() * 90000) + 10000}`,
-            country: "USA",
+            country: 'USA',
           }
         : null;
 
@@ -237,14 +227,14 @@ const EventDonationsPage = ({ params }) => {
 
       // 15% chance of being a tribute donation
       const hasTribute = Math.random() < 0.15;
-      const tributeTypes = ["memory", "honor"];
+      const tributeTypes = ['memory', 'honor'];
       const tributeInfo = hasTribute
         ? {
             type: tributeTypes[Math.floor(Math.random() * tributeTypes.length)],
             name: `${
               firstNames[Math.floor(Math.random() * firstNames.length)]
             } ${lastNames[Math.floor(Math.random() * lastNames.length)]}`,
-            message: Math.random() < 0.5 ? "Thinking of you always." : null,
+            message: Math.random() < 0.5 ? 'Thinking of you always.' : null,
           }
         : null;
 
@@ -255,7 +245,7 @@ const EventDonationsPage = ({ params }) => {
       const donation = {
         id: `DON-${eventId}-${i}`,
         event_id: eventId,
-        donor_name: anonymous ? "Anonymous Donor" : donorName,
+        donor_name: anonymous ? 'Anonymous Donor' : donorName,
         email: email,
         phone:
           Math.random() < 0.5
@@ -274,7 +264,7 @@ const EventDonationsPage = ({ params }) => {
         anonymous: anonymous,
         tribute_info: tributeInfo,
         is_recurring: isRecurring,
-        campaign: Math.random() < 0.3 ? "Summer Fundraiser" : null,
+        campaign: Math.random() < 0.3 ? 'Summer Fundraiser' : null,
       };
 
       sampleDonations.push(donation);
@@ -294,16 +284,13 @@ const EventDonationsPage = ({ params }) => {
         (donation) =>
           donation.donor_name.toLowerCase().includes(query) ||
           donation.email.toLowerCase().includes(query) ||
-          (donation.transaction_id &&
-            donation.transaction_id.toLowerCase().includes(query))
+          (donation.transaction_id && donation.transaction_id.toLowerCase().includes(query))
       );
     }
 
     // Apply status filter
-    if (statusFilter !== "all") {
-      filteredDonations = filteredDonations.filter(
-        (donation) => donation.status === statusFilter
-      );
+    if (statusFilter !== 'all') {
+      filteredDonations = filteredDonations.filter((donation) => donation.status === statusFilter);
     }
 
     // Apply date filter
@@ -315,66 +302,58 @@ const EventDonationsPage = ({ params }) => {
     }
 
     // Apply payment method filter
-    if (paymentMethodFilter !== "all") {
+    if (paymentMethodFilter !== 'all') {
       filteredDonations = filteredDonations.filter(
         (donation) => donation.payment_method === paymentMethodFilter
       );
     }
 
     // Apply amount filter
-    if (amountFilter !== "all") {
+    if (amountFilter !== 'all') {
       switch (amountFilter) {
-        case "under-50":
-          filteredDonations = filteredDonations.filter(
-            (donation) => donation.amount < 50
-          );
+        case 'under-50':
+          filteredDonations = filteredDonations.filter((donation) => donation.amount < 50);
           break;
-        case "50-100":
+        case '50-100':
           filteredDonations = filteredDonations.filter(
             (donation) => donation.amount >= 50 && donation.amount <= 100
           );
           break;
-        case "100-500":
+        case '100-500':
           filteredDonations = filteredDonations.filter(
             (donation) => donation.amount > 100 && donation.amount <= 500
           );
           break;
-        case "500-1000":
+        case '500-1000':
           filteredDonations = filteredDonations.filter(
             (donation) => donation.amount > 500 && donation.amount <= 1000
           );
           break;
-        case "over-1000":
-          filteredDonations = filteredDonations.filter(
-            (donation) => donation.amount > 1000
-          );
+        case 'over-1000':
+          filteredDonations = filteredDonations.filter((donation) => donation.amount > 1000);
           break;
       }
     }
 
     // Apply sorting
     switch (sortBy) {
-      case "newest":
+      case 'newest':
         filteredDonations.sort((a, b) => new Date(b.date) - new Date(a.date));
         break;
-      case "oldest":
+      case 'oldest':
         filteredDonations.sort((a, b) => new Date(a.date) - new Date(b.date));
         break;
-      case "amount-high":
+      case 'amount-high':
         filteredDonations.sort((a, b) => b.amount - a.amount);
         break;
-      case "amount-low":
+      case 'amount-low':
         filteredDonations.sort((a, b) => a.amount - b.amount);
         break;
-      case "name-a-z":
-        filteredDonations.sort((a, b) =>
-          a.donor_name.localeCompare(b.donor_name)
-        );
+      case 'name-a-z':
+        filteredDonations.sort((a, b) => a.donor_name.localeCompare(b.donor_name));
         break;
-      case "name-z-a":
-        filteredDonations.sort((a, b) =>
-          b.donor_name.localeCompare(a.donor_name)
-        );
+      case 'name-z-a':
+        filteredDonations.sort((a, b) => b.donor_name.localeCompare(a.donor_name));
         break;
     }
 
@@ -393,15 +372,10 @@ const EventDonationsPage = ({ params }) => {
     }
 
     // Count only completed donations for most stats
-    const completedDonations = donations.filter(
-      (d) => d.status === "completed"
-    );
+    const completedDonations = donations.filter((d) => d.status === 'completed');
 
     // Total amount of completed donations
-    const totalAmount = completedDonations.reduce(
-      (sum, donation) => sum + donation.amount,
-      0
-    );
+    const totalAmount = completedDonations.reduce((sum, donation) => sum + donation.amount, 0);
 
     // Get unique donors
     const uniqueDonors = new Set();
@@ -414,9 +388,7 @@ const EventDonationsPage = ({ params }) => {
     });
 
     // Calculate average donation
-    const averageDonation = completedDonations.length
-      ? totalAmount / completedDonations.length
-      : 0;
+    const averageDonation = completedDonations.length ? totalAmount / completedDonations.length : 0;
 
     return {
       totalDonations: completedDonations.length,
@@ -439,11 +411,11 @@ const EventDonationsPage = ({ params }) => {
 
   // Handle export donations
   const handleExportDonations = () => {
-    toast.info("Exporting donations...");
+    toast.info('Exporting donations...');
     // In production, this would generate a CSV/Excel file
     // For now, we'll just show a toast message
     setTimeout(() => {
-      toast.success("Donations exported successfully!");
+      toast.success('Donations exported successfully!');
     }, 1500);
   };
 
@@ -455,10 +427,10 @@ const EventDonationsPage = ({ params }) => {
   // Calculate status counts for filter buttons
   const statusCounts = {
     all: donations.length,
-    completed: donations.filter((d) => d.status === "completed").length,
-    pending: donations.filter((d) => d.status === "pending").length,
-    failed: donations.filter((d) => d.status === "failed").length,
-    refunded: donations.filter((d) => d.status === "refunded").length,
+    completed: donations.filter((d) => d.status === 'completed').length,
+    pending: donations.filter((d) => d.status === 'pending').length,
+    failed: donations.filter((d) => d.status === 'failed').length,
+    refunded: donations.filter((d) => d.status === 'refunded').length,
   };
 
   // Calculate pagination
@@ -491,17 +463,17 @@ const EventDonationsPage = ({ params }) => {
       <p className="text-muted-foreground text-center max-w-md mb-6">
         {donations.length === 0
           ? "This event doesn't have any donations yet."
-          : "No donations match your current filters. Try adjusting your search or filter criteria."}
+          : 'No donations match your current filters. Try adjusting your search or filter criteria.'}
       </p>
       {donations.length > 0 && (
         <Button
           variant="outline"
           onClick={() => {
-            setSearchQuery("");
-            setStatusFilter("all");
+            setSearchQuery('');
+            setStatusFilter('all');
             setDateFilter(null);
-            setPaymentMethodFilter("all");
-            setAmountFilter("all");
+            setPaymentMethodFilter('all');
+            setAmountFilter('all');
           }}
         >
           Clear All Filters
@@ -517,7 +489,7 @@ const EventDonationsPage = ({ params }) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/admin/events")}
+            onClick={() => router.push('/admin/events')}
             className="mb-2 sm:mb-0"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -526,9 +498,7 @@ const EventDonationsPage = ({ params }) => {
 
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{event.title}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Donations and contributions
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Donations and contributions</p>
           </div>
         </div>
 
@@ -569,11 +539,7 @@ const EventDonationsPage = ({ params }) => {
             ) : (
               <div className="space-y-1">
                 {paginatedDonations.map((donation) => (
-                  <DonationRow
-                    key={donation.id}
-                    donation={donation}
-                    eventName={event.title}
-                  />
+                  <DonationRow key={donation.id} donation={donation} eventName={event.title} />
                 ))}
               </div>
             )}
@@ -582,18 +548,15 @@ const EventDonationsPage = ({ params }) => {
           {totalDonations > 0 && (
             <CardFooter className="flex flex-col sm:flex-row justify-between items-center p-4 gap-4">
               <div className="text-sm text-muted-foreground">
-                Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                {Math.min(currentPage * itemsPerPage, totalDonations)} of{" "}
-                {totalDonations} donations
+                Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
+                {Math.min(currentPage * itemsPerPage, totalDonations)} of {totalDonations} donations
               </div>
 
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
                     />
                   </PaginationItem>
@@ -622,9 +585,7 @@ const EventDonationsPage = ({ params }) => {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                      }
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
                     />
                   </PaginationItem>
@@ -632,9 +593,7 @@ const EventDonationsPage = ({ params }) => {
               </Pagination>
 
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  Items per page:
-                </span>
+                <span className="text-sm text-muted-foreground">Items per page:</span>
                 <Select
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => {

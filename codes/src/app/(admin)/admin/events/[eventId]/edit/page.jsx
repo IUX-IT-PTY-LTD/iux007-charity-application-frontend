@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { format, parseISO } from "date-fns";
-import { CalendarIcon, ImageIcon, ArrowLeft, Save } from "lucide-react";
-import { useAdminContext } from "@/components/admin/admin-context";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { format, parseISO } from 'date-fns';
+import { CalendarIcon, ImageIcon, ArrowLeft, Save } from 'lucide-react';
+import { useAdminContext } from '@/components/admin/admin-context';
 
 // Import shadcn components
 import {
@@ -17,7 +17,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -26,27 +26,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,42 +53,42 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
+import { Label } from '@/components/ui/label';
 
 // Define form schema with validation
 const formSchema = z
   .object({
     title: z.string().min(2, {
-      message: "Event title must be at least 2 characters.",
+      message: 'Event title must be at least 2 characters.',
     }),
     description: z.string().min(10, {
-      message: "Description must be at least 10 characters.",
+      message: 'Description must be at least 10 characters.',
     }),
     start_date: z.date({
-      required_error: "Start date is required.",
+      required_error: 'Start date is required.',
     }),
     end_date: z.date({
-      required_error: "End date is required.",
+      required_error: 'End date is required.',
     }),
     price: z.coerce.number().min(0, {
-      message: "Price must be a positive number.",
+      message: 'Price must be a positive number.',
     }),
     target_amount: z.coerce.number().min(0, {
-      message: "Target amount must be a positive number.",
+      message: 'Target amount must be a positive number.',
     }),
     is_fixed_donation: z.boolean().default(false),
     location: z.string().min(2, {
-      message: "Location must be at least 2 characters.",
+      message: 'Location must be at least 2 characters.',
     }),
-    status: z.string().default("1"),
+    status: z.string().default('1'),
     is_featured: z.boolean().default(false),
     featured_image: z.any().optional(),
   })
   .refine((data) => data.end_date >= data.start_date, {
-    message: "End date must be after start date",
-    path: ["end_date"],
+    message: 'End date must be after start date',
+    path: ['end_date'],
   });
 
 // Component for the edit page
@@ -109,25 +105,25 @@ export default function EditEvent({ params }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      title: '',
+      description: '',
       start_date: new Date(),
       end_date: new Date(),
       price: 0,
       target_amount: 0,
       is_fixed_donation: false,
-      location: "",
-      status: "1",
+      location: '',
+      status: '1',
       is_featured: false,
       featured_image: null,
     },
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   // Set page title and subtitle
   useEffect(() => {
-    setPageTitle("Edit Event");
-    setPageSubtitle("Update event details and settings");
+    setPageTitle('Edit Event');
+    setPageSubtitle('Update event details and settings');
   }, [setPageTitle, setPageSubtitle]);
 
   // Fetch event data based on the ID
@@ -136,7 +132,7 @@ export default function EditEvent({ params }) {
       setIsLoading(true);
       try {
         // For testing: Get events from localStorage
-        const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
+        const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
         const foundEvent = storedEvents.find((e) => e.id === params.eventId);
 
         if (foundEvent) {
@@ -162,8 +158,8 @@ export default function EditEvent({ params }) {
             setImagePreview(foundEvent.featured_image);
           }
         } else {
-          toast.error("Event not found");
-          router.push("/admin/events");
+          toast.error('Event not found');
+          router.push('/admin/events');
         }
 
         /* API Implementation (Commented out for future use)
@@ -195,8 +191,8 @@ export default function EditEvent({ params }) {
         }
         */
       } catch (error) {
-        console.error("Error fetching event:", error);
-        toast.error("Failed to load event data");
+        console.error('Error fetching event:', error);
+        toast.error('Failed to load event data');
       } finally {
         setIsLoading(false);
       }
@@ -221,20 +217,20 @@ export default function EditEvent({ params }) {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = "";
-        return "";
+        e.returnValue = '';
+        return '';
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   // Handle form submission
   const onSubmit = (data) => {
     try {
       // Get all events
-      const allEvents = JSON.parse(localStorage.getItem("events") || "[]");
+      const allEvents = JSON.parse(localStorage.getItem('events') || '[]');
 
       // Find the index of the event to update
       const eventIndex = allEvents.findIndex((e) => e.id === params.eventId);
@@ -252,18 +248,18 @@ export default function EditEvent({ params }) {
         allEvents[eventIndex] = updatedEvent;
 
         // Save back to localStorage
-        localStorage.setItem("events", JSON.stringify(allEvents));
+        localStorage.setItem('events', JSON.stringify(allEvents));
 
         // Show success message
-        toast.success("Event updated successfully");
+        toast.success('Event updated successfully');
 
         // Reset unsaved changes flag
         setHasUnsavedChanges(false);
 
         // Navigate back to events list
-        router.push("/admin/events");
+        router.push('/admin/events');
       } else {
-        toast.error("Event not found");
+        toast.error('Event not found');
       }
 
       /* API Implementation (Commented out for future use)
@@ -303,8 +299,8 @@ export default function EditEvent({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error updating event:", error);
-      toast.error("Failed to update event");
+      console.error('Error updating event:', error);
+      toast.error('Failed to update event');
     }
   };
 
@@ -312,19 +308,19 @@ export default function EditEvent({ params }) {
   const handleDelete = () => {
     try {
       // Get all events
-      const allEvents = JSON.parse(localStorage.getItem("events") || "[]");
+      const allEvents = JSON.parse(localStorage.getItem('events') || '[]');
 
       // Filter out the event to delete
       const updatedEvents = allEvents.filter((e) => e.id !== params.eventId);
 
       // Save back to localStorage
-      localStorage.setItem("events", JSON.stringify(updatedEvents));
+      localStorage.setItem('events', JSON.stringify(updatedEvents));
 
       // Show success message
-      toast.success("Event deleted successfully");
+      toast.success('Event deleted successfully');
 
       // Navigate back to events list
-      router.push("/admin/events");
+      router.push('/admin/events');
 
       /* API Implementation (Commented out for future use)
       fetch(`/api/events/${params.eventId}`, {
@@ -346,8 +342,8 @@ export default function EditEvent({ params }) {
         });
       */
     } catch (error) {
-      console.error("Error deleting event:", error);
-      toast.error("Failed to delete event");
+      console.error('Error deleting event:', error);
+      toast.error('Failed to delete event');
     }
   };
 
@@ -355,7 +351,7 @@ export default function EditEvent({ params }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      form.setValue("featured_image", file);
+      form.setValue('featured_image', file);
 
       // Create image preview
       const reader = new FileReader();
@@ -387,15 +383,11 @@ export default function EditEvent({ params }) {
               size="sm"
               onClick={() => {
                 if (hasUnsavedChanges) {
-                  if (
-                    window.confirm(
-                      "You have unsaved changes. Are you sure you want to leave?"
-                    )
-                  ) {
-                    router.push("/admin/events");
+                  if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                    router.push('/admin/events');
                   }
                 } else {
-                  router.push("/admin/events");
+                  router.push('/admin/events');
                 }
               }}
               className="mb-2 sm:mb-0"
@@ -405,10 +397,7 @@ export default function EditEvent({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              <AlertDialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -419,12 +408,10 @@ export default function EditEvent({ params }) {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete the "{event?.title}" event.
-                      This action cannot be undone.
+                      This will permanently delete the "{event?.title}" event. This action cannot be
+                      undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -453,16 +440,11 @@ export default function EditEvent({ params }) {
             {/* Form Section */}
             <div className="md:col-span-2">
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <Card>
                     <CardHeader>
                       <CardTitle>Edit Event: {event?.title}</CardTitle>
-                      <CardDescription>
-                        Update the details for this event
-                      </CardDescription>
+                      <CardDescription>Update the details for this event</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <FormField
@@ -475,8 +457,7 @@ export default function EditEvent({ params }) {
                               <Input {...field} />
                             </FormControl>
                             <FormDescription>
-                              The name of your event as it will appear to
-                              attendees
+                              The name of your event as it will appear to attendees
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -516,17 +497,14 @@ export default function EditEvent({ params }) {
                                     >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
                                       {field.value ? (
-                                        format(field.value, "PPP")
+                                        format(field.value, 'PPP')
                                       ) : (
                                         <span>Pick a date</span>
                                       )}
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
-                                >
+                                <PopoverContent className="w-auto p-0" align="start">
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
@@ -535,9 +513,7 @@ export default function EditEvent({ params }) {
                                   />
                                 </PopoverContent>
                               </Popover>
-                              <FormDescription>
-                                When the event begins
-                              </FormDescription>
+                              <FormDescription>When the event begins</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -558,31 +534,24 @@ export default function EditEvent({ params }) {
                                     >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
                                       {field.value ? (
-                                        format(field.value, "PPP")
+                                        format(field.value, 'PPP')
                                       ) : (
                                         <span>Pick a date</span>
                                       )}
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
-                                >
+                                <PopoverContent className="w-auto p-0" align="start">
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
                                     onSelect={field.onChange}
                                     initialFocus
-                                    disabled={(date) =>
-                                      date < form.getValues("start_date")
-                                    }
+                                    disabled={(date) => date < form.getValues('start_date')}
                                   />
                                 </PopoverContent>
                               </Popover>
-                              <FormDescription>
-                                When the event concludes
-                              </FormDescription>
+                              <FormDescription>When the event concludes</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -597,16 +566,9 @@ export default function EditEvent({ params }) {
                             <FormItem>
                               <FormLabel>Price ($)</FormLabel>
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  {...field}
-                                />
+                                <Input type="number" min="0" step="0.01" {...field} />
                               </FormControl>
-                              <FormDescription>
-                                Standard entry price
-                              </FormDescription>
+                              <FormDescription>Standard entry price</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -619,16 +581,9 @@ export default function EditEvent({ params }) {
                             <FormItem>
                               <FormLabel>Target Amount ($)</FormLabel>
                               <FormControl>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  {...field}
-                                />
+                                <Input type="number" min="0" step="0.01" {...field} />
                               </FormControl>
-                              <FormDescription>
-                                Fundraising goal for this event
-                              </FormDescription>
+                              <FormDescription>Fundraising goal for this event</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -676,9 +631,7 @@ export default function EditEvent({ params }) {
                                   <SelectItem value="0">Inactive</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <FormDescription>
-                                Is this event currently active?
-                              </FormDescription>
+                              <FormDescription>Is this event currently active?</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -732,10 +685,7 @@ export default function EditEvent({ params }) {
                       <div>
                         <FormLabel>Featured Image</FormLabel>
                         <div className="mt-2">
-                          <Label
-                            htmlFor="featured_image"
-                            className="cursor-pointer"
-                          >
+                          <Label htmlFor="featured_image" className="cursor-pointer">
                             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center">
                               {imagePreview ? (
                                 <div className="w-full">
@@ -787,15 +737,12 @@ export default function EditEvent({ params }) {
                           });
                           setImagePreview(event.featured_image);
                           setHasUnsavedChanges(false);
-                          toast.info("Form reset to original values");
+                          toast.info('Form reset to original values');
                         }}
                       >
                         Reset Changes
                       </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                         Save Changes
                       </Button>
                     </CardFooter>
@@ -830,24 +777,20 @@ export default function EditEvent({ params }) {
 
                     <div>
                       <h3 className="text-lg font-semibold">
-                        {form.watch("title") || "Event Title"}
+                        {form.watch('title') || 'Event Title'}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
-                          variant={
-                            form.watch("status") === "1"
-                              ? "default"
-                              : "secondary"
-                          }
+                          variant={form.watch('status') === '1' ? 'default' : 'secondary'}
                           className={
-                            form.watch("status") === "1"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                            form.watch('status') === '1'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }
                         >
-                          {form.watch("status") === "1" ? "Active" : "Inactive"}
+                          {form.watch('status') === '1' ? 'Active' : 'Inactive'}
                         </Badge>
-                        {form.watch("is_featured") && (
+                        {form.watch('is_featured') && (
                           <Badge
                             variant="outline"
                             className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300"
@@ -862,52 +805,43 @@ export default function EditEvent({ params }) {
                       <div className="grid grid-cols-3 gap-1">
                         <span className="text-muted-foreground">Dates:</span>
                         <span className="col-span-2">
-                          {form.watch("start_date") &&
-                            format(form.watch("start_date"), "MMM d, yyyy")}
-                          {" - "}
-                          {form.watch("end_date") &&
-                            format(form.watch("end_date"), "MMM d, yyyy")}
+                          {form.watch('start_date') &&
+                            format(form.watch('start_date'), 'MMM d, yyyy')}
+                          {' - '}
+                          {form.watch('end_date') && format(form.watch('end_date'), 'MMM d, yyyy')}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1 mt-1">
                         <span className="text-muted-foreground">Location:</span>
-                        <span className="col-span-2">
-                          {form.watch("location") || "TBD"}
-                        </span>
+                        <span className="col-span-2">{form.watch('location') || 'TBD'}</span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1 mt-1">
                         <span className="text-muted-foreground">Price:</span>
                         <span className="col-span-2">
-                          ${form.watch("price")}
-                          {form.watch("is_fixed_donation") && " (Fixed)"}
+                          ${form.watch('price')}
+                          {form.watch('is_fixed_donation') && ' (Fixed)'}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1 mt-1">
                         <span className="text-muted-foreground">Target:</span>
-                        <span className="col-span-2">
-                          ${form.watch("target_amount")}
-                        </span>
+                        <span className="col-span-2">${form.watch('target_amount')}</span>
                       </div>
                     </div>
 
                     <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                      <p className="text-xs text-gray-500 mb-2">
-                        Description Preview:
-                      </p>
+                      <p className="text-xs text-gray-500 mb-2">Description Preview:</p>
                       <p className="text-sm line-clamp-5">
-                        {form.watch("description") || "No description yet..."}
+                        {form.watch('description') || 'No description yet...'}
                       </p>
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between text-xs text-gray-500">
                   <span>ID: {params.eventId}</span>
-                  <span>
-                    {hasUnsavedChanges ? "Unsaved changes" : "No changes"}
-                  </span>
+                  <span>{hasUnsavedChanges ? 'Unsaved changes' : 'No changes'}</span>
                 </CardFooter>
               </Card>
             </div>
