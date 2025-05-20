@@ -5,11 +5,14 @@ import React, { useState, useEffect } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
-import DonationCart from '@/components/donation-cart';
+import { useRouter } from 'next/navigation';
+import { setUserCart } from '@/store/features/userSlice';
+import { useDispatch } from 'react-redux';
 
 const EventDetails = ({ params }) => {
   const { id: uuid } = params;
-  console.log(uuid);
+  const router = useRouter();
+  const dispatch = useDispatch();
 
   const [event, setEvent] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +29,40 @@ const EventDetails = ({ params }) => {
       setLoading(false);
     }
   };
+
+  const handleDonation = async (e) => {
+    e.preventDefault();
+    const amount = document.getElementById('donation_amount').value;
+    if (!amount || amount <= 0) {
+      e.preventDefault();
+      alert('Please enter a valid donation amount');
+      return;
+    }
+    const donationItem = {
+      id: event.uuid,
+      title: event.title,
+      amount: document.getElementById('donation_amount').value,
+      currency: document.querySelector('select').value,
+      image: event.featured_image,
+      quantity: 1,
+      price: event.is_fixed_donation
+        ? event.price
+        : document.getElementById('donation_amount').value,
+      isFixedDonation: event.is_fixed_donation,
+    };
+  
+    // Add donation item to cart state
+    // Using React state management or Redux is preferred over sessionStorage
+    // This is a temporary solution - TODO: Implement proper state management
+    const existingCart = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    // Check for duplicates before adding
+    if (!existingCart.some((item) => item.id === donationItem.id)) {
+      existingCart.push(donationItem);
+      localStorage.setItem('cartItems', JSON.stringify(existingCart));
+      dispatch(setUserCart(existingCart));
+    }
+    router.push('/checkout');
+  }
 
   useEffect(() => {
     fetchEventDetails();
@@ -156,39 +193,14 @@ const EventDetails = ({ params }) => {
                     name="donation_amount"
                     id="donation_amount"
                     type="number"
+                    required
+                    min="1"
                     placeholder="Amount"
                     className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg"
                     onChange={(e) => setAmount(e.target.value)}
                   />
                   <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const donationItem = {
-                        id: event.uuid,
-                        title: event.title,
-                        amount: document.getElementById('donation_amount').value,
-                        currency: document.querySelector('select').value,
-                        image: event.featured_image,
-                        quantity: 1,
-                        price: event.is_fixed_donation
-                          ? event.price
-                          : document.getElementById('donation_amount').value,
-                        isFixedDonation: event.is_fixed_donation,
-                      };
-
-                      // Add donation item to cart state
-                      // Using React state management or Redux is preferred over sessionStorage
-                      // This is a temporary solution - TODO: Implement proper state management
-                      const existingCart = JSON.parse(localStorage.getItem('cartItems') || '[]');
-                      // Check for duplicates before adding
-                      if (!existingCart.some((item) => item.id === donationItem.id)) {
-                        existingCart.push(donationItem);
-                        localStorage.setItem('cartItems', JSON.stringify(existingCart));
-                      }
-
-                      // Use Next.js router for navigation
-                      window.location.href = '/checkout';
-                    }}
+                    onClick={handleDonation}
                     className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     Donate Now

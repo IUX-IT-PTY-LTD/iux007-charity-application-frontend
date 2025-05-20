@@ -5,12 +5,18 @@ const loadInitialState = () => {
     const savedUser = localStorage.getItem('user');
     const savedAccessToken = localStorage.getItem('accessToken');
     const savedRefreshToken = localStorage.getItem('refreshToken');
+    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const cartCount = cartItems.length;
 
     return {
       user: savedUser ? JSON.parse(savedUser) : null,
       accessToken: savedAccessToken || null,
       refreshToken: savedRefreshToken || null,
       isAuthenticated: !!savedAccessToken,
+      cart: {
+        cartItems: cartItems,
+        cartCount: cartCount,
+      }
     };
   } catch (error) {
     console.error('Error loading auth state:', error);
@@ -19,6 +25,8 @@ const loadInitialState = () => {
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      cartItems: [],
+      cartCount: 0,
     };
   }
 };
@@ -71,8 +79,13 @@ const userSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
     },
+    setUserCart: (state, action) => {
+      state.cart.cartItems = action.payload;
+      state.cart.cartCount = action.payload.length;
+      // localStorage.setItem('cartItems', JSON.stringify(action.payload));
+    },
   },
 });
 
-export const { setUser, logout, getUser } = userSlice.actions;
+export const { setUser, logout, getUser, setUserCart } = userSlice.actions;
 export default userSlice.reducer;

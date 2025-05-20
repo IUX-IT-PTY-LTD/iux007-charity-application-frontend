@@ -9,8 +9,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '@/components/stripe/CherckoutForm';
+import { setUserCart } from '@/store/features/userSlice';
 
 const Checkout = () => {
+  const dispatch = useDispatch();
   const [currentStep, setCurrentStep] = useState(1);
   const [adminContributionAmount, setAdminContributionAmount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
@@ -300,6 +302,7 @@ useEffect(() => {
                                       0
                                     )
                                   );
+                                  dispatch(setUserCart(updatedCart));
                                 }}
                                 className="p-3 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
                               >
