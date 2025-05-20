@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { apiService } from '@/api/services/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { useRouter } from 'next/navigation';
-import { ToastContainer, toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import './CheckoutForm.css';
+
 const CARD_ELEMENT_OPTIONS = {
   style: {
     base: {
@@ -24,58 +25,100 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-export default function CheckoutForm({ totalAmount }) {
+export default function CheckoutForm({ totalAmount, donationData }) {
+  console.log('donationData:', donationData);
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsProcessing(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsProcessing(true);
 
-    try {
-      // Ensure totalAmount is a valid number
-      const amount = parseFloat(totalAmount);
-      if (isNaN(amount)) {
-        throw new Error('Invalid amount');
-      }
-
-      const res = await apiService.post(ENDPOINTS.PAYMENTS.STRIPE_PAYMENT_INTENT, {
-        total_amount: amount, // Convert to cents for Stripe
-      });
-
-      const {
-        data: { client_secret: clientSecret },
-      } = res;
-
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-        },
-      });
-
-      if (result.error) {
-        setMessage(result.error.message);
-      } else {
-        if (result.paymentIntent.status === 'succeeded') {
-          setMessage('Payment succeeded!');
-          toast.success('Payment successful');
-          router.push('/');
-        }
-      }
-    } catch (err) {
-      setMessage('An error occurred while processing your payment.');
-      console.error('Payment error:', err);
+  try {
+    const amount = validateAmount(totalAmount);
+    const paymentIntent = await createPaymentIntent(amount);
+    const donationResult = await processDonation(paymentIntent.payment_intent_id);
+    
+    if (donationResult.success) {
+      await processStripePayment(paymentIntent.client_secret);
     }
-
+  } catch (err) {
+    handleError(err);
+  } finally {
     setIsProcessing(false);
-  };
+  }
+};
+
+// Validate payment amount
+const validateAmount = (amount) => {
+  const parsedAmount = parseFloat(amount);
+  if (isNaN(parsedAmount)) {
+    throw new Error('Invalid amount');
+  }
+  return parsedAmount;
+};
+
+// Create Stripe payment intent
+const createPaymentIntent = async (amount) => {
+  const response = await apiService.post(ENDPOINTS.PAYMENTS.STRIPE_PAYMENT_INTENT, {
+    total_amount: amount,
+  });
+  return response.data;
+};
+
+// Process donation
+const processDonation = async (clientSecret) => {
+  donationData.payment_intent_id = clientSecret;
+  const response = await apiService.post(ENDPOINTS.DONATIONS.CREATE, donationData);
+  
+  if (response.status === 'success') {
+    localStorage.removeItem('cartItems');
+    return { success: true };
+  }
+  
+  setMessage('An error occurred while processing your payment.');
+  console.error('Payment error:', response);
+  return { success: false };
+};
+
+// Process Stripe payment
+const processStripePayment = async (clientSecret) => {
+  const result = await stripe.confirmCardPayment(clientSecret, {
+    payment_method: {
+      card: elements.getElement(CardElement),
+    },
+  });
+
+  if (result.error) {
+    setMessage(result.error.message);
+    return;
+  }
+
+  if (result.paymentIntent.status === 'succeeded') {
+    setMessage('Payment succeeded!');
+    // Show success popup
+    await Swal.fire({
+      icon: 'success',
+      title: 'Payment Successful!',
+      text: 'Thank you for your donation. Your payment has been processed successfully.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#3085d6'
+    });
+    router.push('/');
+  }
+};
+
+// Handle errors
+const handleError = (error) => {
+  setMessage('An error occurred while processing your payment.');
+  console.error('Payment error:', error);
+};
 
   return (
     <div className="payment-form-container">
-      <ToastContainer />
       <div className="payment-card">
         <div className="card-header">
           <h3>Enter Payment Details</h3>

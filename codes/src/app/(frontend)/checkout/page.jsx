@@ -11,28 +11,60 @@ import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '@/components/stripe/CherckoutForm';
 
 const Checkout = () => {
-  const [currentStep, setCurrentStep] = React.useState(1);
-  const [adminContributionAmount, setAdminContributionAmount] = React.useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [adminContributionAmount, setAdminContributionAmount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [checkoutData, setCheckoutData] = useState(null);
   const userInfo = useSelector((state) => state.user.user);
   console.log(userInfo);
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   /** Stripe Integration */
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-  useEffect(() => {
-    // Get cart items from localStorage when component mounts
-    const cart = localStorage.getItem('cartItems');
-    if (cart) {
-      const parsedCart = JSON.parse(cart);
-      setCartItems(parsedCart);
-      setTotalAmount(
-        parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) +
-          adminContributionAmount
-      );
-    }
-  }, []);
+useEffect(() => {
+  // Get cart items from localStorage when component mounts
+  const cart = localStorage.getItem('cartItems');
+  if (cart) {
+    const parsedCart = JSON.parse(cart);
+    setCartItems(parsedCart);
+    
+    // Calculate subtotal from cart items
+    const subtotal = parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    
+    // Set admin contribution amount (5% of subtotal)
+    const adminContrib = subtotal * 0.05;
+    setAdminContributionAmount(adminContrib);
+    
+    // Set total amount (subtotal + admin contribution)
+    setTotalAmount(subtotal + adminContrib);
+
+    // Build checkout data structure
+    const checkoutDataObj = {
+      donations: parsedCart.map(item => ({
+        event_id: item.id,
+        quantity: item.quantity,
+        amount: item.price,
+        notes: item.note || ""
+      })),
+      currency_id: 1, // Assuming default currency ID is 1
+      total_price: subtotal,
+      type: "single",
+      admin_contribution: adminContrib,
+      payment_intent_id: "" // This will be set after Stripe creates payment intent
+    };
+    
+    setCheckoutData(checkoutDataObj);
+  }
+}, []);
+
+// Update total amount whenever admin contribution changes
+useEffect(() => {
+  if (cartItems.length > 0) {
+    const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    setTotalAmount(subtotal + adminContributionAmount);
+  }
+}, [adminContributionAmount, cartItems]);
 
   // Add this function at the component level:
   const handleIncreaseQuantity = (itemId) => {
@@ -42,10 +74,18 @@ const Checkout = () => {
       );
       // Update localStorage with new cart data
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-      setTotalAmount(
-        updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) +
-          adminContributionAmount
-      );
+      const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      setTotalAmount(newSubtotal + adminContributionAmount);
+      setCheckoutData({
+        ...checkoutData,
+        total_price: newSubtotal + adminContributionAmount,
+        donations: checkoutData.donations.map(donation => 
+          donation.event_id === itemId 
+            ? { ...donation, quantity: donation.quantity + 1 }
+            : donation
+        )
+      })
+      setAdminContributionAmount(newSubtotal * 0.05);
       return updatedCart;
     });
   };
@@ -57,10 +97,18 @@ const Checkout = () => {
       );
       // Update localStorage with new cart data
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-      setTotalAmount(
-        updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) +
-          adminContributionAmount
-      );
+      const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      setTotalAmount(newSubtotal + adminContributionAmount);
+      setCheckoutData({
+        ...checkoutData,
+        total_price: newSubtotal + adminContributionAmount,
+        donations: checkoutData.donations.map(donation => 
+          donation.event_id === itemId 
+            ? { ...donation, quantity: donation.quantity - 1 }
+            : donation
+        )
+      })
+      setAdminContributionAmount(newSubtotal * 0.05);
       return updatedCart;
     });
   };
@@ -145,88 +193,120 @@ const Checkout = () => {
                 <div className="divide-y divide-gray-100">
                   {cartItems.length > 0 ? (
                     cartItems.map((item) => (
-                      <div key={item.id} className="py-6 flex items-center justify-between">
-                        <div className="flex items-center space-x-6">
-                          <div className="w-24 h-24 rounded-lg overflow-hidden">
-                            <Image
-                              src={item.image}
-                              alt={item.title}
-                              width={96}
-                              height={96}
-                              className="w-full h-full object-cover"
-                              loader={({ src }) => src}
-                            />
-                          </div>
-
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-
-                            <div className="mt-4 flex items-center space-x-4">
-                              <div className="flex items-center border rounded-lg">
-                                <button
-                                  onClick={() =>
-                                    item.quantity > 1 ? handleDecreaseQuantity(item.id) : null
-                                  }
-                                  className="px-3 py-1 text-gray-600 hover:bg-gray-100"
-                                >
-                                  -
-                                </button>
-                                <span className="px-4 py-1 border-x">{item.quantity}</span>
-                                <button
-                                  onClick={() => handleIncreaseQuantity(item.id)}
-                                  className="px-3 py-1 text-gray-600 hover:bg-gray-100"
-                                >
-                                  +
-                                </button>
+                      <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300">
+                        <div className="p-6">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                            {/* Image and Details Section */}
+                            <div className="flex flex-col md:flex-row gap-6">
+                              <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
+                                <Image
+                                  src={item.image}
+                                  alt={item.title}
+                                  width={192}
+                                  height={192}
+                                  className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                                  loader={({ src }) => src}
+                                />
                               </div>
 
-                              <input
-                                type="number"
-                                placeholder="Amount"
-                                className="w-32 px-2 py-1.5 rounded border border-gray-200 focus:border-primary text-sm transition-all"
-                                disabled={item.isFixedDonation ? true : false}
-                                value={item.price}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  setCartItems((prev) =>
-                                    prev.map((i) =>
-                                      i.id === item.id
-                                        ? { ...i, price: value ? parseFloat(value) : i.price }
-                                        : i
+                              <div className="flex-grow space-y-4">
+                                <h3 className="text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+                                  {item.title}
+                                </h3>
+
+                                {/* Quantity Controls */}
+                                <div className="flex flex-wrap items-center gap-4">
+                                  <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                                    <button
+                                      onClick={() => item.quantity > 1 ? handleDecreaseQuantity(item.id) : null}
+                                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                      disabled={item.quantity <= 1}
+                                    >
+                                      -
+                                    </button>
+                                    <span className="px-6 py-2 font-medium border-x border-gray-200 bg-white">
+                                      {item.quantity}
+                                    </span>
+                                    <button
+                                      onClick={() => handleIncreaseQuantity(item.id)}
+                                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+
+                                  <input
+                                    type="number"
+                                    placeholder="Amount"
+                                    className="w-32 px-4 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
+                                    disabled={item.isFixedDonation}
+                                    value={item.price}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      setCartItems((prev) =>
+                                        prev.map((i) =>
+                                          i.id === item.id
+                                            ? { ...i, price: value ? parseFloat(value) : i.price }
+                                            : i
+                                        )
+                                      );
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Notes Section */}
+                                <div className="relative">
+                                  <textarea
+                                    placeholder="Add a note for this item..."
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all resize-none"
+                                    value={item.note || ''}
+                                    onChange={(e) => {
+                                      const note = e.target.value;
+                                      setCartItems((prev) =>
+                                        prev.map((i) =>
+                                          i.id === item.id
+                                            ? { ...i, note }
+                                            : i
+                                        )
+                                      );
+                                      const updatedCart = cartItems.map(i => 
+                                        i.id === item.id ? { ...i, note } : i
+                                      );
+                                      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+                                    }}
+                                    rows={2}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Price and Actions Section */}
+                            <div className="flex flex-col items-end gap-4">
+                              <div className="text-right">
+                                <div className="text-sm text-gray-500">Total Price</div>
+                                <div className="text-2xl font-bold text-primary">
+                                  ${(item.price * item.quantity).toFixed(2)}
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  setCartItems((prev) => prev.filter((i) => i.id !== item.id));
+                                  const updatedCart = cartItems.filter((i) => i.id !== item.id);
+                                  localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+                                  setTotalAmount(
+                                    updatedCart.reduce(
+                                      (acc, item) => acc + item.price * item.quantity,
+                                      0
                                     )
                                   );
                                 }}
-                              />
+                                className="p-3 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
+                              >
+                                <FaTrashAlt className="w-5 h-5 transform group-hover:scale-110 transition-transform" />
+                              </button>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="flex items-center space-x-6">
-                          <div className="text-right">
-                            <div className="text-sm text-gray-500">Price</div>
-                            <div className="text-lg font-semibold">
-                              ${item.price * item.quantity}
-                            </div>
-                          </div>
-
-                          <button
-                            onClick={() => {
-                              setCartItems((prev) => prev.filter((i) => i.id !== item.id));
-                              // Update localStorage after removing item
-                              const updatedCart = cartItems.filter((i) => i.id !== item.id);
-                              localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-                              setTotalAmount(
-                                updatedCart.reduce(
-                                  (acc, item) => acc + item.price * item.quantity,
-                                  0
-                                )
-                              );
-                              // Update totalAmount state with the updated total amount
-                            }}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                          >
-                            <FaTrashAlt />
-                          </button>
                         </div>
                       </div>
                     ))
@@ -249,34 +329,22 @@ const Checkout = () => {
                     </div>
 
                     <div className="space-y-4">
-                      <div className="flex flex-wrap gap-2">
-                        {[50, 100, 200].map((amount) => (
-                          <button
-                            key={amount}
-                            onClick={() => setAdminContributionAmount(amount)}
-                            className={`px-4 py-2 text-sm font-medium ${
-                              adminContributionAmount === amount
-                                ? 'bg-primary text-white'
-                                : 'text-primary border border-primary'
-                            } rounded-lg hover:bg-primary hover:text-white transition-colors`}
-                          >
-                            ${amount}
-                          </button>
-                        ))}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={adminContributionAmount}
+                          onChange={(e) => {
+                            const value = Math.max(0, Number(e.target.value));
+                            setAdminContributionAmount(value);
+                          }}
+                          min="0"
+                          placeholder="Admin contribution amount"
+                          className="w-48 px-4 py-2 rounded-lg border border-gray-200 focus:border-primary text-sm transition-all"
+                        />
+                        <span className="text-sm text-gray-500">
+                          (Suggested: ${adminContributionAmount})
+                        </span>
                       </div>
-
-                      <input
-                        type="number"
-                        value={adminContributionAmount}
-                        onChange={(e) => setAdminContributionAmount(Number(e.target.value))}
-                        min="0"
-                        placeholder="Enter custom amount"
-                        className="w-32 px-2 py-1.5 rounded border border-gray-200 focus:border-primary text-sm transition-all"
-                      />
-
-                      <button className="w-full px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors">
-                        Contribute
-                      </button>
                     </div>
                   </div>
 
@@ -295,6 +363,7 @@ const Checkout = () => {
                         <button
                           onClick={() => setCurrentStep(2)}
                           className="w-full px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                          disabled={cartItems.length === 0}
                         >
                           Proceed to Donor Details
                         </button>
@@ -332,27 +401,40 @@ const Checkout = () => {
                       key: 'phone',
                     },
                   ].map((field, index) => (
-                    <div key={index}>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div key={index} className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">
                         {field.label}
                       </label>
-                      <input
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        value={field.value}
-                        onChange={(e) => {
-                          const updatedUserInfo = {
-                            ...userInfo,
-                            [field.key]: e.target.value,
-                          };
-                        }}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200 text-gray-700 text-base outline-none"
-                      />
+                      <div className="relative">
+                        <input
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          value={field.value}
+                          onChange={(e) => {
+                            const updatedUserInfo = {
+                              ...userInfo,
+                              [field.key]: e.target.value,
+                            };
+                          }}
+                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+                            focus:border-primary focus:ring-2 focus:ring-primary/20 
+                            transition-all duration-200 text-gray-700 
+                            placeholder:text-gray-400 text-base outline-none
+                            hover:border-gray-300"
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          {field.type === 'email' && (
+                            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                {/* <div className="flex items-center">
+                <div className="flex items-center">
                   <input
                     type="checkbox"
                     id="create-account"
@@ -361,7 +443,7 @@ const Checkout = () => {
                   <label htmlFor="create-account" className="ml-2 text-gray-700">
                     Create an account for faster checkout
                   </label>
-                </div> */}
+                </div>
 
                 {!isAuthenticated && (
                   <div className="border-t pt-8">
@@ -399,7 +481,7 @@ const Checkout = () => {
               <div className="max-w-3xl mx-auto space-y-8">
                 <div className="grid">
                   <Elements stripe={stripePromise}>
-                    <CheckoutForm totalAmount={totalAmount} />
+                    <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
                   </Elements>
                   {/* {paymentMethods.map((method) => (
                     <div
