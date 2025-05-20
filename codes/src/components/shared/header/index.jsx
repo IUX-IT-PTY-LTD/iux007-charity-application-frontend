@@ -9,10 +9,12 @@ import { ENDPOINTS } from '@/api/config';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout as logoutAction } from '@/store/features/userSlice';
 
+
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
+  const cartCount = useSelector((state) => state.user.cart.cartCount);
   const [menus, setMenus] = useState([]);
   const [settings, setSettings] = useState([]);
   const dispatch = useDispatch();
@@ -148,7 +150,7 @@ const Header = () => {
                 >
                   <FaShoppingBasket />
                   <span className="absolute cart-amount bg-black text-xs w-[20px] h-[20px] flex justify-center items-center rounded-full font-normal top-[-5px] right-[-5px]">
-                    0
+                    {cartCount}
                   </span>
                 </Link>
                 <div className="relative">
