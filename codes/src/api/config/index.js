@@ -1,5 +1,5 @@
 // API Base URL
-export const API_BASE_URL = 'http://localhost:9094/api';
+export const API_BASE_URL = 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
 export const API_VERSION = 'v1';
 
 // API Endpoints
@@ -14,6 +14,8 @@ export const ENDPOINTS = {
   },
   // Auth endpoints
   AUTH: {
+    EMAIL_VERIFICATION: '/email-verification',
+    CODE_VERIFICATION: '/code-verification',
     LOGIN: '/login',
     REGISTER: '/registration',
     LOGOUT: '/logout',
@@ -40,8 +42,8 @@ export const ENDPOINTS = {
 
   // User endpoints
   USER: {
-    PROFILE: '/user/profile',
-    UPDATE_PROFILE: '/user/profile/update',
-    DONATION_HISTORY: '/user/donations',
+    PROFILE: '/profile',
+    UPDATE_PROFILE: '/profile',
+    DONATION_HISTORY: '/donations',
   },
 };

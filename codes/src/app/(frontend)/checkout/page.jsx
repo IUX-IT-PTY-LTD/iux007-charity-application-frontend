@@ -115,6 +115,25 @@ useEffect(() => {
     });
   };
 
+  const handleRemoveItem = (itemId) => {
+    setCartItems((prev) => prev.filter((i) => i.id !== itemId));
+    const updatedCart = cartItems.filter((i) => i.id !== itemId);
+    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    setTotalAmount(
+      updatedCart.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      )
+    );
+    setAdminContributionAmount(
+      updatedCart.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      ) * 0.05
+    );
+    dispatch(setUserCart(updatedCart))
+  }
+
   const paymentMethods = [
     {
       id: 1,
@@ -292,18 +311,7 @@ useEffect(() => {
                               </div>
 
                               <button
-                                onClick={() => {
-                                  setCartItems((prev) => prev.filter((i) => i.id !== item.id));
-                                  const updatedCart = cartItems.filter((i) => i.id !== item.id);
-                                  localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-                                  setTotalAmount(
-                                    updatedCart.reduce(
-                                      (acc, item) => acc + item.price * item.quantity,
-                                      0
-                                    )
-                                  );
-                                  dispatch(setUserCart(updatedCart));
-                                }}
+                                onClick={() => handleRemoveItem(item.id)}
                                 className="p-3 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
                               >
                                 <FaTrashAlt className="w-5 h-5 transform group-hover:scale-110 transition-transform" />
@@ -335,7 +343,7 @@ useEffect(() => {
                       <div className="flex items-center gap-2">
                         <input
                           type="number"
-                          value={adminContributionAmount}
+                          value={adminContributionAmount.toFixed(2)}
                           onChange={(e) => {
                             const value = Math.max(0, Number(e.target.value));
                             setAdminContributionAmount(value);
@@ -345,7 +353,7 @@ useEffect(() => {
                           className="w-48 px-4 py-2 rounded-lg border border-gray-200 focus:border-primary text-sm transition-all"
                         />
                         <span className="text-sm text-gray-500">
-                          (Suggested: ${adminContributionAmount})
+                          (Suggested : ${adminContributionAmount.toFixed(2)})
                         </span>
                       </div>
                     </div>

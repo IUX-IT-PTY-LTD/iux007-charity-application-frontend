@@ -16,6 +16,7 @@ const EventDetails = ({ params }) => {
 
   const [event, setEvent] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [amount, setAmount] = useState(0);
 
   const fetchEventDetails = async () => {
     try {
@@ -42,7 +43,6 @@ const EventDetails = ({ params }) => {
       id: event.uuid,
       title: event.title,
       amount: document.getElementById('donation_amount').value,
-      currency: document.querySelector('select').value,
       image: event.featured_image,
       quantity: 1,
       price: event.is_fixed_donation
@@ -145,7 +145,6 @@ const EventDetails = ({ params }) => {
                 ) : (
                   <div className="bg-primary/5 p-4 rounded-lg inline-flex items-center gap-3 mb-6">
                     <span className="text-3xl font-bold text-primary">${event.price}</span>
-                    <span className="text-gray-600">Suggested Donation</span>
                   </div>
                 )}
 
@@ -181,14 +180,14 @@ const EventDetails = ({ params }) => {
                 </div>
 
                 <div className="flex flex-wrap gap-4">
-                  <select
+                  {/* <select
                     className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg bg-white appearance-none"
                     onChange={(e) => setCurrency(e.target.value)}
                   >
                     <option value="USD">🇺🇸 USD</option>
                     <option value="PKR">🇵🇰 PKR</option>
                     <option value="EUR">🇪🇺 EUR</option>
-                  </select>
+                  </select> */}
                   <input
                     name="donation_amount"
                     id="donation_amount"
@@ -197,7 +196,14 @@ const EventDetails = ({ params }) => {
                     min="1"
                     placeholder="Amount"
                     className="flex-1 min-w-[120px] border px-4 py-2.5 rounded-lg"
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value) && value >= 0) {
+                        setAmount(value);
+                      }
+                    }}
+                    value={event.is_fixed_donation ? event.price : amount || undefined}
+                    disabled={event.is_fixed_donation}
                   />
                   <button
                     onClick={handleDonation}

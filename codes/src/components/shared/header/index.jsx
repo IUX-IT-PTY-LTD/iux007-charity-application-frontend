@@ -155,9 +155,19 @@ const Header = () => {
                 </Link>
                 <div className="relative">
                   <button
-                    onClick={() =>
-                      document.getElementById('userDropdown').classList.toggle('hidden')
-                    }
+                    onClick={() => {
+                      const dropdown = document.getElementById('userDropdown');
+                      dropdown.classList.toggle('hidden');
+
+                      // Add click event listener to close dropdown when clicking outside
+                      const closeDropdown = (e) => {
+                        if (!dropdown.contains(e.target) && e.target.tagName !== 'BUTTON') {
+                          dropdown.classList.add('hidden');
+                          document.removeEventListener('click', closeDropdown);
+                        }
+                      };
+                      document.addEventListener('click', closeDropdown);
+                    }}
                     className="w-[40px] h-[40px] flex justify-center items-center text-xl rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
                   >
                     <FaUser />
@@ -168,19 +178,24 @@ const Header = () => {
                   >
                     <Link
                       href="./profile"
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => document.getElementById('userDropdown').classList.add('hidden')}
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
                     >
                       Profile
                     </Link>
                     <Link
                       href="./change-password"
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => document.getElementById('userDropdown').classList.add('hidden')}
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
                     >
                       Change Password
                     </Link>
                     <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={(e) => {
+                        document.getElementById('userDropdown').classList.add('hidden');
+                        handleLogout(e);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200"
                     >
                       Logout
                     </button>

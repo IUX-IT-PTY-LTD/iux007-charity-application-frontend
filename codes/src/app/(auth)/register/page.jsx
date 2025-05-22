@@ -9,11 +9,15 @@ import { ToastContainer, toast } from 'react-toastify';
 
 const Register = () => {
   const router = useRouter();
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
+    otp: '',
+    name: '',
     password: '',
-    acceptTerms: false,
+    phone: '',
+    address: '',
+    acceptTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
@@ -26,10 +30,49 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleEmailVerification = async (e) => {
     e.preventDefault();
     setError(null);
+    try {
+      const response = await apiService.post(ENDPOINTS.AUTH.EMAIL_VERIFICATION, {
+        email: formData.email
+      });
 
+      if (response && response.status === 'success') {
+        toast.success(response.message);
+        setStep(2);
+      } else {
+        setError(response.errors);
+        toast.error('Email verification failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Email verification error:', err);
+      toast.error(err.message || 'Email verification failed');
+    }
+  };
+
+  const handleOTPVerification = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await apiService.post(ENDPOINTS.AUTH.CODE_VERIFICATION, {
+        email: formData.email,
+        code: formData.otp
+      });
+
+      if (response && response.status === 'success') {
+        toast.success(response.message);
+        setStep(3);
+      } else {
+        toast.error('Invalid OTP. Please try again.');
+      }
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      toast.error(err.message || 'OTP verification failed');
+    }
+  };
+
+  const handleRegistration = async (e) => {
+    e.preventDefault();
     if (!formData.acceptTerms) {
       toast.error('Please accept the Terms and Conditions');
       return;
@@ -40,29 +83,22 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        phone: formData.phone,
+        address: formData.address
       });
 
       if (response && response.status === 'success') {
-        toast.success('Registration successful! Please login to continue.', {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-
+        toast.success('Registration successful! Please login to continue.');
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       } else {
-        const errorMessage = 'Registration failed. Please try again.';
         setError(response.errors);
-        toast.error(errorMessage);
+        toast.error('Registration failed. Please try again.');
       }
     } catch (err) {
       console.error('Registration error:', err);
-      toast.error(err.message || 'Registration failed. Please try again.');
+      toast.error(err.message || 'Registration failed');
     }
   };
 
@@ -81,15 +117,100 @@ const Register = () => {
             />
           </div>
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
-            <form onSubmit={handleSubmit} className="w-full py-6 px-6 sm:px-6">
-              <div className="mb-6">
-                <h3 className="text-gray-800 text-2xl font-bold">Create an account</h3>
-              </div>
+            {step === 1 && (
+              <form onSubmit={handleEmailVerification} className="w-full py-6 px-6 sm:px-6">
+                <div className="mb-6">
+                  <h3 className="text-gray-800 text-2xl font-bold">Create an account</h3>
+                  <p className="text-gray-600 text-sm mt-2">Step 1 of 3: Email Verification</p>
+                </div>
 
-              <div className="space-y-6">
-                <div>
-                  <label className="text-gray-800 text-sm mb-2 block">Name</label>
-                  <div className="relative flex items-center">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-gray-800 text-sm mb-2 block">Email</label>
+                    <input
+                      name="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`text-gray-800 bg-white border ${error?.email ? 'border-red-500' : 'border-gray-300'} w-full text-sm px-4 py-2.5 rounded-md outline-blue-500`}
+                      placeholder="Enter email"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full mt-6 py-3 px-4 text-white bg-primary hover:bg-primary/90 rounded-md transition duration-200"
+                >
+                  Send Verification Code
+                </button>
+              </form>
+            )}
+
+            {step === 2 && (
+              <form onSubmit={handleOTPVerification} className="w-full py-6 px-6 sm:px-6">
+                <div className="mb-6">
+                  <h3 className="text-gray-800 text-2xl font-bold">Verify Email</h3>
+                  <p className="text-gray-600 text-sm mt-2">Step 2 of 3: Enter OTP</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-gray-800 text-sm mb-2 block">Enter OTP</label>
+                    <div className="flex gap-2 mb-2">
+                      {[...Array(4)].map((_, index) => (
+                        <input
+                          key={index}
+                          name="otp"
+                          type="text"
+                          maxLength="1"
+                          required
+                          value={formData.otp[index] || ''}
+                          onChange={(e) => {
+                            const newOtp = formData.otp.split('');
+                            newOtp[index] = e.target.value;
+                            setFormData(prev => ({
+                              ...prev,
+                              otp: newOtp.join('')
+                            }));
+                            
+                            if (e.target.value && index < 5) {
+                              e.target.nextElementSibling?.focus();
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
+                              e.target.previousElementSibling?.focus();
+                            }
+                          }}
+                          className="w-12 h-12 text-center text-xl font-semibold text-gray-800 bg-white border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-gray-500 text-sm">Please enter the 6-digit code sent to your email</p>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full mt-6 py-3 px-4 text-white bg-primary hover:bg-primary/90 rounded-md transition duration-200"
+                >
+                  Verify Code
+                </button>
+              </form>
+            )}
+
+            {step === 3 && (
+              <form onSubmit={handleRegistration} className="w-full py-6 px-6 sm:px-6">
+                <div className="mb-6">
+                  <h3 className="text-gray-800 text-2xl font-bold">Complete Registration</h3>
+                  <p className="text-gray-600 text-sm mt-2">Step 3 of 3: Personal Information</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-gray-800 text-sm mb-2 block">Name</label>
                     <input
                       name="name"
                       type="text"
@@ -99,137 +220,86 @@ const Register = () => {
                       className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
                       placeholder="Enter name"
                     />
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="#bbb"
-                      stroke="#bbb"
-                      className="w-4 h-4 absolute right-4"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
-                      <path
-                        d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
-                        data-original="#000000"
-                      ></path>
-                    </svg>
                   </div>
-                </div>
 
-                <div>
-                  <label className="text-gray-800 text-sm mb-2 block">Email Id</label>
-                  <div className="relative flex items-center">
-                    <div className="relative w-full">
-                      <input
-                        name="email"
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={`text-gray-800 bg-white border ${error?.email ? 'border-red-500' : 'border-gray-300'} w-full text-sm px-4 py-2.5 rounded-md outline-blue-500`}
-                        placeholder="Enter email"
-                      />
-                      {error?.email && (
-                        <p className="text-red-500 text-sm mt-1 absolute">
-                          {Array.isArray(error.email) ? error.email[0] : error.email}
-                        </p>
-                      )}
-                    </div>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="#bbb"
-                      stroke="#bbb"
-                      className="w-4 h-4 absolute right-4"
-                      viewBox="0 0 682.667 682.667"
-                    >
-                      <defs>
-                        <clipPath id="a" clipPathUnits="userSpaceOnUse">
-                          <path d="M0 512h512V0H0Z" data-original="#000000"></path>
-                        </clipPath>
-                      </defs>
-                      <g clip-path="url(#a)" transform="matrix(1.33 0 0 -1.33 0 682.667)">
-                        <path
-                          fill="none"
-                          stroke-miterlimit="10"
-                          stroke-width="40"
-                          d="M452 444H60c-22.091 0-40-17.909-40-40v-39.446l212.127-157.782c14.17-10.54 33.576-10.54 47.746 0L492 364.554V404c0 22.091-17.909 40-40 40Z"
-                          data-original="#000000"
-                        ></path>
-                        <path
-                          d="M472 274.9V107.999c0-11.027-8.972-20-20-20H60c-11.028 0-20 8.973-20 20V274.9L0 304.652V107.999c0-33.084 26.916-60 60-60h392c33.084 0 60 26.916 60 60v196.653Z"
-                          data-original="#000000"
-                        ></path>
-                      </g>
-                    </svg>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-gray-800 text-sm mb-2 block">Password</label>
-                  <div className="relative flex items-center">
-                    <div className="relative w-full">
+                  <div>
+                    <label className="text-gray-800 text-sm mb-2 block">Password</label>
+                    <div className="relative">
                       <input
                         name="password"
                         type={showPassword ? 'text' : 'password'}
                         required
                         value={formData.password}
                         onChange={handleChange}
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                        title="Must have 8+ chars with lowercase, uppercase, number & special char"
-                        className={`text-gray-800 bg-white border ${error?.password ? 'border-red-500' : 'border-gray-300'} border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500`}
+                        className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
                         placeholder="Enter password"
                       />
-                      {error?.password && (
-                        <p className="text-red-500 text-sm mt-1 absolute">
-                          {Array.isArray(error.password) ? error.password[0] : error.password}
-                        </p>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                      >
+                        {showPassword ? '👁️' : '👁️‍🗨️'}
+                      </button>
                     </div>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="#bbb"
-                      stroke="#bbb"
-                      className="w-4 h-4 absolute right-4 cursor-pointer"
-                      viewBox="0 0 128 128"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      <path
-                        d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
-                        data-original="#000000"
-                      ></path>
-                    </svg>
+                  </div>
+
+                  <div>
+                    <label className="text-gray-800 text-sm mb-2 block">Phone</label>
+                    <input
+                      name="phone"
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-gray-800 text-sm mb-2 block">Address</label>
+                    <textarea
+                      name="address"
+                      required
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
+                      placeholder="Enter address"
+                      rows="3"
+                    />
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      id="acceptTerms"
+                      name="acceptTerms"
+                      type="checkbox"
+                      checked={formData.acceptTerms}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-800">
+                      I accept the{' '}
+                      <Link href="" className="text-blue-600 hover:underline">
+                        Terms and Conditions
+                      </Link>
+                    </label>
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <input
-                    id="acceptTerms"
-                    name="acceptTerms"
-                    type="checkbox"
-                    checked={formData.acceptTerms}
-                    onChange={handleChange}
-                    className="h-4 w-4 shrink-0 text-primary focus:ring-blue-500 border-gray-300 rounded mt-6"
-                  />
-                  <label htmlFor="acceptTerms" className="ml-3 block text-sm text-gray-800 mt-6">
-                    I accept the{' '}
-                    <Link href="" className="text-primary font-semibold hover:underline ml-1">
-                      Terms and Conditions
-                    </Link>
-                  </label>
-                </div>
-              </div>
-
-              <div className="!mt-12">
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 tracking-wider text-sm rounded-md text-white bg-gray-700 hover:bg-gray-800 focus:outline-none"
+                  className="w-full mt-6 py-3 px-4 text-white bg-primary hover:bg-primary/90 rounded-md transition duration-200"
                 >
-                  Create an account
+                  Complete Registration
                 </button>
-              </div>
-            </form>
+              </form>
+            )}
+
             <p className="text-gray-800 text-sm mt-6 text-center">
               Already have an account?{' '}
-              <Link href="./login" className="text-primary font-semibold hover:underline ml-1">
+              <Link href="./login" className="text-blue-600 hover:underline">
                 Login here
               </Link>
             </p>
