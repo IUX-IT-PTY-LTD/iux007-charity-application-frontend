@@ -67,6 +67,12 @@ const userSlice = createSlice({
     getUser: (state) => {
       return state.user;
     },
+    updateUser: (state, action) => {
+      // Update user data
+      state.user = { ...state.user, ...action.payload };
+      // Update localStorage
+      localStorage.setItem('user', JSON.stringify(state.user));
+    },
     logout: (state) => {
       // Clear localStorage
       localStorage.removeItem('user');
@@ -87,5 +93,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, logout, getUser, setUserCart } = userSlice.actions;
+export const { setUser, logout, getUser, setUserCart, updateUser } = userSlice.actions;
 export default userSlice.reducer;
