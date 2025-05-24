@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 // Import custom components
-import EventForm from '@/components/admin/events/EventForm';
-import EventPreview from '@/components/admin/events/EventPreview';
-import { eventFormSchema, defaultEventValues } from '@/components/admin/events/eventSchema';
+import EventForm from '@/components/admin/events/create/EventForm';
+import EventPreview from '@/components/admin/events/create/EventPreview';
+import { eventFormSchema, defaultEventValues } from '@/components/admin/events/create/eventSchema';
 
 // Import service
 import {
