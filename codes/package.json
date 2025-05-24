@@ -37,7 +37,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
-    "framer-motion": "^12.10.5",
+    "framer-motion": "^12.12.2",
     "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5",
     "jspdf": "^3.0.1",
