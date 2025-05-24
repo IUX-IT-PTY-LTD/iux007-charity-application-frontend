@@ -2,7 +2,7 @@
  * Service file for handling event-related API requests
  */
 
-import { getAuthToken } from './authService';
+import { getAuthToken } from './MainauthService';
 
 // Make sure these environment variables are properly set in your .env.local file
 const baseUrl =
@@ -108,7 +108,9 @@ export const createEvent = async (eventData) => {
       method: 'POST',
       body: formData,
       headers: getAuthHeaders(),
+      // Important for CORS
       mode: 'cors',
+      credentials: 'include',
     });
 
     return handleResponse(response);
@@ -131,6 +133,7 @@ export const getAllEvents = async () => {
       method: 'GET',
       headers: getAuthHeaders(),
       mode: 'cors',
+      credentials: 'include',
     });
 
     return handleResponse(response);
@@ -154,6 +157,7 @@ export const getEventById = async (eventId) => {
       method: 'GET',
       headers: getAuthHeaders(),
       mode: 'cors',
+      credentials: 'include',
     });
 
     return handleResponse(response);
@@ -192,6 +196,7 @@ export const updateEvent = async (eventId, eventData) => {
       body: formData,
       headers: getAuthHeaders(),
       mode: 'cors',
+      credentials: 'include',
     });
 
     return handleResponse(response);
@@ -220,6 +225,7 @@ export const updateEventStatus = async (eventId, status) => {
       body: formData,
       headers: getAuthHeaders(),
       mode: 'cors',
+      credentials: 'include',
     });
 
     return handleResponse(response);
@@ -243,6 +249,7 @@ export const deleteEvent = async (eventId) => {
       method: 'DELETE',
       headers: getAuthHeaders(),
       mode: 'cors',
+      credentials: 'include',
     });
 
     return handleResponse(response);
