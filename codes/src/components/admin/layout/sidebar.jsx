@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Menu as MenuIcon,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 // Menu data structure for easy modification
 const navigationItems = [
@@ -77,6 +78,8 @@ const navigationItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   // Check if a path is active
   const isActive = (href) => {
@@ -84,6 +87,57 @@ export function AdminSidebar() {
       return pathname === href;
     }
     return pathname.startsWith(href);
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+      const version = process.env.NEXT_PUBLIC_API_VERSION;
+
+      // Get the admin token from cookies
+      const cookies = document.cookie.split(';');
+      const adminTokenCookie = cookies.find((cookie) => cookie.trim().startsWith('admin_token='));
+      const adminToken = adminTokenCookie ? adminTokenCookie.split('=')[1] : null;
+
+      if (!adminToken) {
+        // If no token exists, just redirect to login
+        router.push('/admin/login');
+        return;
+      }
+
+      // Call logout API
+      const response = await fetch(`${baseUrl}/admin/${version}/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: adminToken, // The token is already in Bearer format
+        },
+      });
+
+      const data = await response.json();
+
+      // Clear the admin token cookie regardless of API response
+      document.cookie = 'admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+      // Show success message
+      toast.success('Logged out successfully');
+
+      // Redirect to login page
+      router.push('/admin/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+
+      // Even if API call fails, clear cookie and redirect
+      document.cookie = 'admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      router.push('/admin/login');
+
+      toast.error('An error occurred during logout');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -127,11 +181,15 @@ export function AdminSidebar() {
       {/* Sidebar Footer */}
       <div className="p-3 mt-auto border-t border-gray-200 dark:border-gray-700">
         <button
-          onClick={() => console.log('Logging out...')}
-          className="flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={cn(
+            'flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20',
+            isLoggingOut && 'opacity-70 cursor-not-allowed'
+          )}
         >
           <LogOut className="h-5 w-5 flex-shrink-0 mr-3" />
-          <span>Logout</span>
+          <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
         </button>
       </div>
     </div>
