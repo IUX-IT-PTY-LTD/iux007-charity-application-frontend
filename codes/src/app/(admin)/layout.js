@@ -110,6 +110,8 @@ export default function AdminLayout({ children }) {
   );
 }
 
+// ---------------------- WITH COOKIES FOR AUTH ------------------------------------------------
+
 // 'use client';
 
 // import { Poppins } from 'next/font/google';
