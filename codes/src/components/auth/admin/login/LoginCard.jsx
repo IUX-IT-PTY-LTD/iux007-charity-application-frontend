@@ -6,7 +6,7 @@ import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 // Import auth service
-import { login } from '@/api/services/admin/MainauthService';
+import { login } from '@/api/services/admin/authService';
 
 const LoginCard = () => {
   const router = useRouter();

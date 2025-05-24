@@ -1,25 +1,15 @@
 /**
  * Service file for handling admin authentication API requests
+ * Integrated with the application's apiService
  */
 
-// Make sure these environment variables are properly set in your .env.local file
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL || 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
+import { apiService } from './apiService';
+
+// Make sure these variables match what the backend expects
 const version = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
-// Auth token key in localStorage
-const AUTH_TOKEN_KEY = 'admin_token';
-
-/**
- * Log configuration details - helpful for debugging
- */
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  console.log('Auth API Configuration:', {
-    baseUrl,
-    version,
-    tokenKey: AUTH_TOKEN_KEY,
-  });
-}
+// Auth token key in localStorage - using what apiService expects
+const AUTH_TOKEN_KEY = 'accessToken';
 
 /**
  * Get auth token from localStorage
@@ -48,26 +38,6 @@ export const removeAuthToken = () => {
 };
 
 /**
- * Handle API response
- * @param {Response} response - Fetch API response
- * @returns {Promise} - Promise resolving to JSON data or throwing detailed error
- */
-const handleResponse = async (response) => {
-  const data = await response.json();
-
-  if (!response.ok) {
-    // Create a more detailed error object
-    const error = new Error(data.message || 'API request failed');
-    error.status = response.status;
-    error.statusText = response.statusText;
-    error.data = data;
-    throw error;
-  }
-
-  return data;
-};
-
-/**
  * Login user with email and password
  * @param {string} email - User email
  * @param {string} password - User password
@@ -75,18 +45,12 @@ const handleResponse = async (response) => {
  */
 export const login = async (email, password) => {
   try {
-    console.log('Attempting login with:', { email, url: `${baseUrl}/admin/${version}/login` });
+    console.log('Attempting login with:', { email });
 
-    const response = await fetch(`${baseUrl}/admin/${version}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-      mode: 'cors',
+    const data = await apiService.post(`/admin/${version}/login`, {
+      email,
+      password,
     });
-
-    const data = await handleResponse(response);
 
     // Set token in localStorage if login successful
     if (data.status === 'success' && data.data && data.data.access_token) {
@@ -107,16 +71,7 @@ export const login = async (email, password) => {
  */
 export const register = async (userData) => {
   try {
-    const response = await fetch(`${baseUrl}/admin/${version}/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-      mode: 'cors',
-    });
-
-    const data = await handleResponse(response);
+    const data = await apiService.post(`/admin/${version}/register`, userData);
 
     // Set token in localStorage if returned with registration
     if (data.status === 'success' && data.data && data.data.access_token) {
@@ -137,16 +92,7 @@ export const register = async (userData) => {
  */
 export const forgotPassword = async (email) => {
   try {
-    const response = await fetch(`${baseUrl}/admin/${version}/forgot-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-      mode: 'cors',
-    });
-
-    return await handleResponse(response);
+    return await apiService.post(`/admin/${version}/forgot-password`, { email });
   } catch (error) {
     console.error('Forgot password error:', error);
     throw error;
@@ -162,20 +108,11 @@ export const forgotPassword = async (email) => {
  */
 export const resetPassword = async (token, password, passwordConfirmation) => {
   try {
-    const response = await fetch(`${baseUrl}/admin/${version}/reset-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        token,
-        password,
-        password_confirmation: passwordConfirmation,
-      }),
-      mode: 'cors',
+    return await apiService.post(`/admin/${version}/reset-password`, {
+      token,
+      password,
+      password_confirmation: passwordConfirmation,
     });
-
-    return await handleResponse(response);
   } catch (error) {
     console.error('Reset password error:', error);
     throw error;
@@ -193,15 +130,7 @@ export const logout = async () => {
       throw new Error('Not authenticated');
     }
 
-    const response = await fetch(`${baseUrl}/admin/${version}/logout`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      mode: 'cors',
-    });
-
-    const data = await handleResponse(response);
+    const data = await apiService.post(`/admin/${version}/logout`, {});
 
     // Remove token on successful logout
     removeAuthToken();
@@ -234,15 +163,7 @@ export const getCurrentUser = async () => {
       throw new Error('Not authenticated');
     }
 
-    const response = await fetch(`${baseUrl}/admin/${version}/me`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      mode: 'cors',
-    });
-
-    return await handleResponse(response);
+    return await apiService.get(`/admin/${version}/me`);
   } catch (error) {
     console.error('Get current user error:', error);
     throw error;

@@ -1,117 +1,48 @@
 /**
  * Service file for handling event-related API requests
+ * Integrated with the application's apiService
  */
 
+import { apiService } from './apiService';
 import { getAuthToken } from './authService';
 
-// Make sure these environment variables are properly set in your .env.local file
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL || 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
+// API version - match what's in your environment
 const version = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
 /**
- * Log configuration details - helpful for debugging
- */
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  console.log('API Configuration:', {
-    baseUrl,
-    version,
-    fullUrl: `${baseUrl}/admin/${version}/events`,
-  });
-}
-
-/**
- * Handle API response
- * @param {Response} response - Fetch API response
- * @returns {Promise} - Promise resolving to JSON data or throwing detailed error
- */
-const handleResponse = async (response) => {
-  const data = await response.json();
-
-  if (!response.ok) {
-    // Create a more detailed error object
-    const error = new Error(data.message || 'API request failed');
-    error.status = response.status;
-    error.statusText = response.statusText;
-    error.data = data;
-
-    console.error('API Error:', {
-      endpoint: response.url,
-      status: response.status,
-      message: data.message || 'Unknown error',
-      data: data,
-    });
-
-    throw error;
-  }
-
-  return data;
-};
-
-/**
- * Get headers with authentication
- * @returns {Object} - Headers object with Authorization if authenticated
- */
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-  const headers = {};
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  return headers;
-};
-
-/**
- * Check if user is authenticated and throw error if not
- * @throws {Error} - If not authenticated
- */
-const requireAuth = () => {
-  if (!getAuthToken()) {
-    throw new Error('Authentication required. Please log in.');
-  }
-};
-
-/**
  * Create a new event
- * @param {Object|FormData} eventData - Event data to be created (can be object or FormData)
+ * @param {Object|FormData} eventData - Event data to be created
  * @returns {Promise} - Promise resolving to the created event
- * @throws {Error} - Detailed error with status and message
  */
 export const createEvent = async (eventData) => {
   try {
-    requireAuth();
-
-    let formData;
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
 
     // If eventData is already FormData, use it directly
     if (eventData instanceof FormData) {
-      formData = eventData;
-    } else {
-      // Otherwise create a new FormData and append all event data
-      formData = new FormData();
-      Object.keys(eventData).forEach((key) => {
-        formData.append(key, eventData[key]);
+      return await apiService.post(`/admin/${version}/events`, eventData, {
+        headers: {
+          // Remove Content-Type to let browser set it with boundary
+          'Content-Type': null,
+        },
       });
     }
 
-    // Log request details for debugging
-    console.log('Creating event:', {
-      url: `${baseUrl}/admin/${version}/events`,
-      method: 'POST',
-      headers: getAuthHeaders(),
-      formDataKeys: [...formData.keys()],
-    });
+    // If eventData contains File objects, convert to FormData
+    if (hasFileFields(eventData)) {
+      const formData = convertToFormData(eventData);
+      return await apiService.post(`/admin/${version}/events`, formData, {
+        headers: {
+          // Remove Content-Type to let browser set it with boundary
+          'Content-Type': null,
+        },
+      });
+    }
 
-    const response = await fetch(`${baseUrl}/admin/${version}/events`, {
-      method: 'POST',
-      body: formData,
-      headers: getAuthHeaders(),
-      mode: 'cors',
-    });
-
-    return handleResponse(response);
+    // Otherwise use regular JSON
+    return await apiService.post(`/admin/${version}/events`, eventData);
   } catch (error) {
     console.error('Error creating event:', error);
     throw error;
@@ -121,19 +52,14 @@ export const createEvent = async (eventData) => {
 /**
  * Get all events
  * @returns {Promise} - Promise resolving to array of events
- * @throws {Error} - Detailed error with status and message
  */
 export const getAllEvents = async () => {
   try {
-    requireAuth();
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
 
-    const response = await fetch(`${baseUrl}/admin/${version}/events`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-      mode: 'cors',
-    });
-
-    return handleResponse(response);
+    return await apiService.get(`/admin/${version}/events`);
   } catch (error) {
     console.error('Error fetching events:', error);
     throw error;
@@ -144,19 +70,14 @@ export const getAllEvents = async () => {
  * Get a single event by ID
  * @param {number|string} eventId - ID of the event to fetch
  * @returns {Promise} - Promise resolving to the event
- * @throws {Error} - Detailed error with status and message
  */
 export const getEventById = async (eventId) => {
   try {
-    requireAuth();
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
 
-    const response = await fetch(`${baseUrl}/admin/${version}/events/${eventId}`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-      mode: 'cors',
-    });
-
-    return handleResponse(response);
+    return await apiService.get(`/admin/${version}/events/${eventId}`);
   } catch (error) {
     console.error('Error fetching event:', error);
     throw error;
@@ -166,35 +87,47 @@ export const getEventById = async (eventId) => {
 /**
  * Update an existing event
  * @param {number|string} eventId - ID of the event to update
- * @param {Object} eventData - Updated event data
+ * @param {Object|FormData} eventData - Updated event data
  * @returns {Promise} - Promise resolving to the updated event
- * @throws {Error} - Detailed error with status and message
  */
 export const updateEvent = async (eventId, eventData) => {
   try {
-    requireAuth();
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
 
-    let formData;
-
-    // If eventData is already FormData, use it directly
+    // If eventData is already FormData, use it directly with method spoofing
     if (eventData instanceof FormData) {
-      formData = eventData;
-    } else {
-      // Otherwise create a new FormData and append all event data
-      formData = new FormData();
-      Object.keys(eventData).forEach((key) => {
-        formData.append(key, eventData[key]);
+      // Add _method=PUT for Laravel to handle it properly if not already added
+      if (!eventData.has('_method')) {
+        eventData.append('_method', 'PUT');
+      }
+
+      return await apiService.post(`/admin/${version}/events/${eventId}`, eventData, {
+        headers: {
+          // Remove Content-Type to let browser set it with boundary
+          'Content-Type': null,
+        },
       });
     }
 
-    const response = await fetch(`${baseUrl}/admin/${version}/events/${eventId}`, {
-      method: 'PUT',
-      body: formData,
-      headers: getAuthHeaders(),
-      mode: 'cors',
-    });
+    // If eventData contains File objects, convert to FormData with method spoofing
+    if (hasFileFields(eventData)) {
+      const formData = convertToFormData(eventData);
 
-    return handleResponse(response);
+      // Add _method=PUT for Laravel to handle it properly
+      formData.append('_method', 'PUT');
+
+      return await apiService.post(`/admin/${version}/events/${eventId}`, formData, {
+        headers: {
+          // Remove Content-Type to let browser set it with boundary
+          'Content-Type': null,
+        },
+      });
+    }
+
+    // Otherwise use regular JSON with PUT
+    return await apiService.put(`/admin/${version}/events/${eventId}`, eventData);
   } catch (error) {
     console.error('Error updating event:', error);
     throw error;
@@ -206,23 +139,14 @@ export const updateEvent = async (eventId, eventData) => {
  * @param {number|string} eventId - ID of the event to update status
  * @param {string|number} status - New status (0 for inactive, 1 for active)
  * @returns {Promise} - Promise resolving to the status update result
- * @throws {Error} - Detailed error with status and message
  */
 export const updateEventStatus = async (eventId, status) => {
   try {
-    requireAuth();
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
 
-    const formData = new FormData();
-    formData.append('status', status);
-
-    const response = await fetch(`${baseUrl}/admin/${version}/events/status/${eventId}`, {
-      method: 'PATCH',
-      body: formData,
-      headers: getAuthHeaders(),
-      mode: 'cors',
-    });
-
-    return handleResponse(response);
+    return await apiService.patch(`/admin/${version}/events/status/${eventId}`, { status });
   } catch (error) {
     console.error('Error updating event status:', error);
     throw error;
@@ -233,19 +157,15 @@ export const updateEventStatus = async (eventId, status) => {
  * Delete an event
  * @param {number|string} eventId - ID of the event to delete
  * @returns {Promise} - Promise resolving to the deletion result
- * @throws {Error} - Detailed error with status and message
  */
 export const deleteEvent = async (eventId) => {
   try {
-    requireAuth();
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
 
-    const response = await fetch(`${baseUrl}/admin/${version}/events/${eventId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-      mode: 'cors',
-    });
-
-    return handleResponse(response);
+    // Using apiService directly
+    return await apiService.delete(`/admin/${version}/events/${eventId}`);
   } catch (error) {
     console.error('Error deleting event:', error);
     throw error;
@@ -332,6 +252,10 @@ export const formatEventDataForSubmission = (data) => {
     formattedData.feature_image = data.feature_image_url;
     // Remove the file if it exists
     delete formattedData.featured_image;
+  } else if (data.featured_image instanceof File) {
+    // Rename to match backend expectation
+    formattedData.feature_image = data.featured_image;
+    delete formattedData.featured_image;
   }
 
   // Clean up temporary fields
@@ -339,4 +263,60 @@ export const formatEventDataForSubmission = (data) => {
   delete formattedData.feature_image_url;
 
   return formattedData;
+};
+
+/**
+ * Helper to check if object contains any File objects (for determining if FormData is needed)
+ * @param {Object} obj - Object to check
+ * @returns {boolean} - True if object contains File objects
+ */
+const hasFileFields = (obj) => {
+  return Object.values(obj).some(
+    (value) =>
+      value instanceof File ||
+      value instanceof FileList ||
+      (value instanceof Array && value.some((item) => item instanceof File))
+  );
+};
+
+/**
+ * Convert an object to FormData
+ * @param {Object} obj - Object to convert
+ * @returns {FormData} - FormData object
+ */
+const convertToFormData = (obj) => {
+  const formData = new FormData();
+
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    if (value instanceof FileList) {
+      // Handle FileList objects
+      for (let i = 0; i < value.length; i++) {
+        formData.append(`${key}[${i}]`, value[i]);
+      }
+    } else if (Array.isArray(value) && value.some((item) => item instanceof File)) {
+      // Handle arrays with File objects
+      value.forEach((item, index) => {
+        if (item instanceof File) {
+          formData.append(`${key}[${index}]`, item);
+        } else {
+          formData.append(`${key}[${index}]`, item);
+        }
+      });
+    } else if (value instanceof File) {
+      // Handle single File objects
+      formData.append(key, value);
+    } else if (typeof value === 'object' && value !== null && !(value instanceof File)) {
+      // Handle nested objects
+      formData.append(key, JSON.stringify(value));
+    } else {
+      // Handle primitive values
+      formData.append(key, value);
+    }
+  });
+
+  return formData;
 };

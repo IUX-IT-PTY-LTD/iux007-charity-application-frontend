@@ -11,15 +11,15 @@ import { toast } from 'sonner';
 // Import custom components
 import EventForm from '@/components/admin/events/EventForm';
 import EventPreview from '@/components/admin/events/EventPreview';
-import {
-  eventFormSchema,
-  defaultEventValues,
-  formatEventDataForSubmission,
-} from '@/components/admin/events/eventSchema';
+import { eventFormSchema, defaultEventValues } from '@/components/admin/events/eventSchema';
 
 // Import service
-import { createEvent, validateEventData } from '@/api/services/admin/eventService';
-import { isAuthenticated } from '@/api/services/admin/MainauthService';
+import {
+  createEvent,
+  validateEventData,
+  formatEventDataForSubmission,
+} from '@/api/services/admin/eventService';
+import { isAuthenticated } from '@/api/services/admin/authService';
 
 const AdminEventCreate = () => {
   const router = useRouter();
@@ -61,20 +61,32 @@ const AdminEventCreate = () => {
       // Format data for API submission
       const formattedData = formatEventDataForSubmission(data);
 
-      // Create FormData for submission
+      // Debug
+      console.log('Formatted data for submission:', formattedData);
+
+      // Create FormData for submission with proper field names
       const formData = new FormData();
 
-      // Append all data to FormData
+      // Append all data to FormData with correct field names
       Object.keys(formattedData).forEach((key) => {
-        // Handle file upload case
-        if (key === 'featured_image' && formattedData[key] instanceof File) {
-          formData.append('feature_image', formattedData[key]);
+        if (key === 'featured_image' || key === 'feature_image') {
+          // Always use feature_image (with no 'd') as the backend expects
+          const fieldValue = formattedData[key];
+
+          if (fieldValue instanceof File) {
+            // If it's a file upload
+            formData.append('feature_image', fieldValue);
+          } else if (typeof fieldValue === 'string' && fieldValue.startsWith('http')) {
+            // If it's a URL
+            formData.append('feature_image', fieldValue);
+          }
         } else {
           formData.append(key, formattedData[key]);
         }
       });
 
-      // Submit to API using the updated event service
+      // Submit to API using the event service
+      console.log('FormData being sent:', formData);
       const response = await createEvent(formData);
 
       if (response.status === 'success') {
