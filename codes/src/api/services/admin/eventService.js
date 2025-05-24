@@ -11,7 +11,7 @@ const version = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
 /**
  * Create a new event
- * @param {Object|FormData} eventData - Event data to be created
+ * @param {Object} eventData - Event data to be created
  * @returns {Promise} - Promise resolving to the created event
  */
 export const createEvent = async (eventData) => {
@@ -65,7 +65,7 @@ export const getEventById = async (eventId) => {
 /**
  * Update an existing event
  * @param {number|string} eventId - ID of the event to update
- * @param {Object|FormData} eventData - Updated event data
+ * @param {Object} eventData - Updated event data
  * @returns {Promise} - Promise resolving to the updated event
  */
 export const updateEvent = async (eventId, eventData) => {
@@ -111,7 +111,6 @@ export const deleteEvent = async (eventId) => {
       throw new Error('Authentication required. Please log in.');
     }
 
-    // Using apiService directly
     return await apiService.delete(`/admin/${version}/events/${eventId}`);
   } catch (error) {
     console.error('Error deleting event:', error);
