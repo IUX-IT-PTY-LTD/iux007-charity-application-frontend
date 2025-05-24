@@ -4,7 +4,7 @@ import React from 'react';
 import { ChevronRight, Home } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 
 const AdminPageHeader = () => {
   const pathname = usePathname();

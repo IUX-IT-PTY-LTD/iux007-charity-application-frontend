@@ -1,8 +1,8 @@
 'use client';
 
-import { AdminSidebar } from '@/components/admin/sidebar';
-import AdminPageHeader from '@/components/admin/header';
-import AdminFooter from '@/components/admin/footer';
+import { AdminSidebar } from '@/components/admin/layout/sidebar';
+import AdminPageHeader from '@/components/admin/layout/header';
+import AdminFooter from '@/components/admin/layout/footer';
 import { Suspense } from 'react';
 
 export default function AdminShell({ children }) {

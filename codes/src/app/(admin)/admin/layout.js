@@ -1,6 +1,6 @@
 import '../../../styles/globals.css';
-import { AdminProvider } from '@/components/admin/admin-context';
-import AdminShell from '@/components/admin/AdminShell';
+import { AdminProvider } from '@/components/admin/layout/admin-context';
+import AdminShell from '@/components/admin/layout/AdminShell';
 import { Toaster } from '@/components/ui/sonner';
 import { Poppins } from 'next/font/google';
 

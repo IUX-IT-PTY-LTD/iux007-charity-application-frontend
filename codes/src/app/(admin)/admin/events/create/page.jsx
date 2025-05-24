@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { CalendarIcon, ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 
 // Import shadcn components
 import {
