@@ -158,17 +158,22 @@ const AdminEvents = () => {
   // Handle status toggle
   const handleStatusChange = async (id, currentStatus) => {
     try {
-      const newStatus = currentStatus === 'active' ? '0' : '1';
-      const response = await updateEventStatus(id, newStatus);
+      // Convert between API's string representation and our numeric representation
+      // API expects 0 or 1, but stores as "active" or "inactive"
+      const isCurrentlyActive = currentStatus === 'active';
+      const newStatusValue = isCurrentlyActive ? '0' : '1';
+      const newStatusLabel = isCurrentlyActive ? 'inactive' : 'active';
+
+      const response = await updateEventStatus(id, newStatusValue);
 
       if (response.status === 'success') {
         // Update local state to avoid refetching
         const updatedAllEvents = allEvents.map((event) =>
-          event.id === id ? { ...event, status: newStatus === '1' ? 'active' : 'inactive' } : event
+          event.id === id ? { ...event, status: newStatusLabel } : event
         );
 
         setAllEvents(updatedAllEvents);
-        toast.success(`Event ${newStatus === '1' ? 'activated' : 'deactivated'} successfully`);
+        toast.success(`Event ${isCurrentlyActive ? 'deactivated' : 'activated'} successfully`);
       } else {
         throw new Error(response.message || 'Failed to update event status');
       }

@@ -93,7 +93,12 @@ export const updateEventStatus = async (eventId, status) => {
       throw new Error('Authentication required. Please log in.');
     }
 
-    return await apiService.patch(`/admin/${version}/events/status/${eventId}`, { status });
+    console.log(`Updating event ${eventId} status to ${status}`);
+
+    // Make sure we're sending the status value the API expects
+    return await apiService.patch(`/admin/${version}/events/status/${eventId}`, {
+      status: status,
+    });
   } catch (error) {
     console.error('Error updating event status:', error);
     throw error;

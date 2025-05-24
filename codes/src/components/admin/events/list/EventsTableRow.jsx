@@ -21,6 +21,9 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
     }
   };
 
+  // Check if status is active - handle both string and boolean cases
+  const isActive = event.status === 'active';
+
   return (
     <TableRow key={event.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
       <TableCell className="font-medium">{rowNumber}</TableCell>
@@ -92,18 +95,16 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
       <TableCell>
         <div className="flex items-center gap-3">
           <Switch
-            checked={event.status === 'active'}
+            checked={isActive}
             onCheckedChange={() => handleStatusChange(event.id, event.status)}
             aria-label={`Toggle status for ${event.title}`}
             className="data-[state=checked]:bg-black data-[state=checked]:text-white"
           />
           <Badge
-            variant={event.status === 'active' ? 'success' : 'destructive'}
-            className={
-              event.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }
+            variant={isActive ? 'success' : 'destructive'}
+            className={isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
           >
-            {event.status === 'active' ? 'Active' : 'Inactive'}
+            {isActive ? 'Active' : 'Inactive'}
           </Badge>
         </div>
       </TableCell>
