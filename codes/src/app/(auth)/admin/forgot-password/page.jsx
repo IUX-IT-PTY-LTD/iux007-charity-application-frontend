@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
-import LoginCard from '@/components/auth/admin/login/LoginCard';
+import ForgotPasswordCard from '@/components/auth/admin/forgot-password/ForgotPasswordCard';
 import '@/components/auth/admin/Style.css';
 
-const AdminLoginPage = () => {
+const AdminForgotPasswordPage = () => {
   return (
     <>
       <Toaster position="top-right" />
@@ -15,10 +15,10 @@ const AdminLoginPage = () => {
           <div className="gradient-circle circle-2"></div>
           <div className="gradient-circle circle-3"></div>
         </div>
-        <LoginCard />
+        <ForgotPasswordCard />
       </div>
     </>
   );
 };
 
-export default AdminLoginPage;
+export default AdminForgotPasswordPage;

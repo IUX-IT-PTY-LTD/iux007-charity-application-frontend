@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
-import LoginCard from '@/components/auth/admin/login/LoginCard';
+import RegisterCard from '@/components/auth/admin/register/RegisterCard';
 import '@/components/auth/admin/Style.css';
 
-const AdminLoginPage = () => {
+const AdminRegisterPage = () => {
   return (
     <>
       <Toaster position="top-right" />
@@ -15,10 +15,10 @@ const AdminLoginPage = () => {
           <div className="gradient-circle circle-2"></div>
           <div className="gradient-circle circle-3"></div>
         </div>
-        <LoginCard />
+        <RegisterCard />
       </div>
     </>
   );
 };
 
-export default AdminLoginPage;
+export default AdminRegisterPage;

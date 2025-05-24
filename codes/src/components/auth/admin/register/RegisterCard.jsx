@@ -5,51 +5,82 @@ import { toast } from 'react-hot-toast';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
-const LoginCard = () => {
+const RegisterCard = () => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const version = process.env.NEXT_PUBLIC_API_VERSION;
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords don't match");
+      toast.error("Passwords don't match");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${baseUrl}/admin/${version}/login`, {
+      const response = await fetch(`${baseUrl}/admin/${version}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role_id: 1,
+        }),
       });
 
       const data = await response.json();
       setLoading(false);
 
       if (data.status === 'success') {
-        // Set access token in cookie
-        document.cookie = `admin_token=${data.data.access_token}`;
+        // Set access token in cookie if provided
+        if (data.data && data.data.access_token) {
+          document.cookie = `admin_token=${data.data.access_token}`;
+        }
 
         // Show success toast
-        toast.success('Login successful!');
+        toast.success('Registration successful!');
 
-        // Redirect to dashboard
-        router.push('/admin/dashboard');
+        // Redirect to login or dashboard
+        router.push('/admin/login');
       } else {
-        setError(data.message || 'Invalid credentials');
-        toast.error(data.message || 'Invalid credentials');
+        setError(data.message || 'Registration failed');
+        toast.error(data.message || 'Registration failed');
       }
     } catch (err) {
       setLoading(false);
@@ -67,21 +98,38 @@ const LoginCard = () => {
           </div>
         </div>
 
-        <h1 className="title">Welcome back</h1>
-        <p className="subtitle">Please enter your details to sign in.</p>
+        <h1 className="title">Create account</h1>
+        <p className="subtitle">Please fill in your information to get started</p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="input-group">
+            <label htmlFor="name" className="sr-only">
+              Full Name
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              className="input-field"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
           <div className="input-group">
             <label htmlFor="email" className="sr-only">
               Email
             </label>
             <input
               id="email"
+              name="email"
               type="email"
               className="input-field"
               placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
               required
             />
           </div>
@@ -93,11 +141,12 @@ const LoginCard = () => {
             <div className="password-input-wrapper">
               <input
                 id="password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 className="input-field pr-10"
                 placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleChange}
                 required
               />
               <button
@@ -115,27 +164,42 @@ const LoginCard = () => {
             </div>
           </div>
 
-          <div className="remember-me">
-            <label className="checkbox-container">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
-              />
-              <span className="checkmark"></span>
-              <span>Remember me</span>
+          <div className="input-group">
+            <label htmlFor="confirmPassword" className="sr-only">
+              Confirm Password
             </label>
-            <Link href="/admin/forgot-password" className="forgot-password">
-              Forgot password?
-            </Link>
+            <div className="password-input-wrapper">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                className="input-field pr-10"
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={toggleConfirmPasswordVisibility}
+                tabIndex="-1"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="password-icon" size={18} />
+                ) : (
+                  <Eye className="password-icon" size={18} />
+                )}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="submit-button" disabled={loading}>
             {loading ? (
-              'Signing in...'
+              'Creating account...'
             ) : (
               <>
-                Sign in
+                Create Account
                 <ArrowRight className="arrow-icon" size={18} />
               </>
             )}
@@ -170,9 +234,9 @@ const LoginCard = () => {
 
         <div className="create-account">
           <p>
-            Don't have an account?{' '}
-            <Link href="/admin/register" className="create-link">
-              Create Account
+            Already have an account?{' '}
+            <Link href="/admin/login" className="create-link">
+              Sign in
             </Link>
           </p>
         </div>
@@ -183,4 +247,4 @@ const LoginCard = () => {
   );
 };
 
-export default LoginCard;
+export default RegisterCard;
