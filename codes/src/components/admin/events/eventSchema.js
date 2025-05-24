@@ -31,9 +31,7 @@ export const eventFormSchema = z
     }),
     status: z.string().default('1'),
     is_featured: z.boolean().default(false),
-    featured_image: z.any().optional(),
-    image_upload_type: z.string().default('file'),
-    feature_image_url: z.string().optional(),
+    feature_image: z.any().optional(),
   })
   .refine((data) => data.end_date >= data.start_date, {
     message: 'End date must be after start date',
@@ -52,9 +50,7 @@ export const defaultEventValues = {
   location: '',
   status: '1',
   is_featured: false,
-  featured_image: null,
-  image_upload_type: 'file',
-  feature_image_url: '',
+  feature_image: null,
 };
 
 // Helper to format form data for API submission
@@ -71,17 +67,6 @@ export const formatEventDataForSubmission = (data) => {
     is_fixed_donation: data.is_fixed_donation ? '1' : '0',
     is_featured: data.is_featured ? '1' : '0',
   };
-
-  // Handle image differently based on upload type
-  if (data.image_upload_type === 'url' && data.feature_image_url) {
-    formattedData.feature_image = data.feature_image_url;
-    // Remove the file if it exists
-    delete formattedData.featured_image;
-  }
-
-  // Clean up temporary fields
-  delete formattedData.image_upload_type;
-  delete formattedData.feature_image_url;
 
   return formattedData;
 };

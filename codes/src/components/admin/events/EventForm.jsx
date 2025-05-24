@@ -38,13 +38,12 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      form.setValue('featured_image', file);
-      form.setValue('image_upload_type', 'file');
-
-      // Create image preview
+      // Convert image file to base64
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        const base64String = reader.result;
+        setImagePreview(base64String);
+        form.setValue('feature_image', base64String);
       };
       reader.readAsDataURL(file);
     }
@@ -52,19 +51,11 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
 
   // If we already have an image (for edit mode)
   React.useEffect(() => {
-    const featuredImage = form.getValues('featured_image');
-    // Set default image upload type
-    if (!form.getValues('image_upload_type')) {
-      form.setValue('image_upload_type', 'file');
-    }
+    const featureImage = form.getValues('feature_image');
 
     // Set image preview if available
-    if (featuredImage && typeof featuredImage === 'string' && !imagePreview) {
-      setImagePreview(featuredImage);
-      if (featuredImage.startsWith('http')) {
-        form.setValue('image_upload_type', 'url');
-        form.setValue('feature_image_url', featuredImage);
-      }
+    if (featureImage && typeof featureImage === 'string' && !imagePreview) {
+      setImagePreview(featureImage);
     }
   }, [form, imagePreview]);
 
@@ -289,96 +280,37 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
             <div>
               <FormLabel>Featured Image</FormLabel>
               <div className="mt-2 space-y-4">
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <FormField
-                      control={form.control}
-                      name="image_upload_type"
-                      render={({ field }) => (
+                <div>
+                  <Label htmlFor="feature_image" className="cursor-pointer">
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center">
+                      {imagePreview ? (
+                        <div className="w-full">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="h-48 object-cover rounded-md mx-auto"
+                          />
+                          <p className="text-sm text-center mt-2 text-muted-foreground">
+                            Click to change image
+                          </p>
+                        </div>
+                      ) : (
                         <>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <input
-                                type="radio"
-                                id="upload_file"
-                                checked={field.value !== 'url'}
-                                onChange={() => form.setValue('image_upload_type', 'file')}
-                              />
-                            </FormControl>
-                            <Label htmlFor="upload_file">Upload Image</Label>
-                          </FormItem>
-
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <input
-                                type="radio"
-                                id="image_url"
-                                checked={field.value === 'url'}
-                                onChange={() => form.setValue('image_upload_type', 'url')}
-                              />
-                            </FormControl>
-                            <Label htmlFor="image_url">Image URL</Label>
-                          </FormItem>
+                          <ImageIcon className="h-10 w-10 text-gray-400" />
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            Click to upload an image (PNG, JPG)
+                          </p>
                         </>
                       )}
-                    />
-                  </div>
-
-                  {form.watch('image_upload_type') === 'url' ? (
-                    <FormField
-                      control={form.control}
-                      name="feature_image_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="https://example.com/image.jpg"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                setImagePreview(e.target.value);
-                                form.setValue('featured_image', e.target.value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  ) : (
-                    <div>
-                      <Label htmlFor="featured_image" className="cursor-pointer">
-                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center">
-                          {imagePreview ? (
-                            <div className="w-full">
-                              <img
-                                src={imagePreview}
-                                alt="Preview"
-                                className="h-48 object-cover rounded-md mx-auto"
-                              />
-                              <p className="text-sm text-center mt-2 text-muted-foreground">
-                                Click to change image
-                              </p>
-                            </div>
-                          ) : (
-                            <>
-                              <ImageIcon className="h-10 w-10 text-gray-400" />
-                              <p className="mt-2 text-sm text-muted-foreground">
-                                Click to upload an image (PNG, JPG)
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      </Label>
-                      <Input
-                        id="featured_image"
-                        type="file"
-                        onChange={handleImageChange}
-                        className="hidden"
-                        accept="image/*"
-                      />
                     </div>
-                  )}
+                  </Label>
+                  <Input
+                    id="feature_image"
+                    type="file"
+                    onChange={handleImageChange}
+                    className="hidden"
+                    accept="image/*"
+                  />
                 </div>
               </div>
             </div>

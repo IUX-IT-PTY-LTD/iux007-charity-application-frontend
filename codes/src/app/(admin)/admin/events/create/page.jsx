@@ -49,6 +49,7 @@ const AdminEventCreate = () => {
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
+      console.log('Form data before validation:', data);
 
       // Validate event data
       const { isValid, errors } = validateEventData(data);
@@ -64,30 +65,8 @@ const AdminEventCreate = () => {
       // Debug
       console.log('Formatted data for submission:', formattedData);
 
-      // Create FormData for submission with proper field names
-      const formData = new FormData();
-
-      // Append all data to FormData with correct field names
-      Object.keys(formattedData).forEach((key) => {
-        if (key === 'featured_image' || key === 'feature_image') {
-          // Always use feature_image (with no 'd') as the backend expects
-          const fieldValue = formattedData[key];
-
-          if (fieldValue instanceof File) {
-            // If it's a file upload
-            formData.append('feature_image', fieldValue);
-          } else if (typeof fieldValue === 'string' && fieldValue.startsWith('http')) {
-            // If it's a URL
-            formData.append('feature_image', fieldValue);
-          }
-        } else {
-          formData.append(key, formattedData[key]);
-        }
-      });
-
-      // Submit to API using the event service
-      console.log('FormData being sent:', formData);
-      const response = await createEvent(formData);
+      // Submit to API
+      const response = await createEvent(formattedData);
 
       if (response.status === 'success') {
         toast.success(response.message || 'Event created successfully!');

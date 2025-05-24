@@ -15,9 +15,9 @@ const EventPreview = ({ form }) => {
       <CardContent>
         <div className="space-y-4">
           <div>
-            {formValues.featured_image && typeof formValues.featured_image === 'string' ? (
+            {formValues.feature_image && typeof formValues.feature_image === 'string' ? (
               <img
-                src={formValues.featured_image}
+                src={formValues.feature_image}
                 alt="Event"
                 className="w-full h-32 object-cover rounded-md"
               />

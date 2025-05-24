@@ -20,28 +20,6 @@ export const createEvent = async (eventData) => {
       throw new Error('Authentication required. Please log in.');
     }
 
-    // If eventData is already FormData, use it directly
-    if (eventData instanceof FormData) {
-      return await apiService.post(`/admin/${version}/events`, eventData, {
-        headers: {
-          // Remove Content-Type to let browser set it with boundary
-          'Content-Type': null,
-        },
-      });
-    }
-
-    // If eventData contains File objects, convert to FormData
-    if (hasFileFields(eventData)) {
-      const formData = convertToFormData(eventData);
-      return await apiService.post(`/admin/${version}/events`, formData, {
-        headers: {
-          // Remove Content-Type to let browser set it with boundary
-          'Content-Type': null,
-        },
-      });
-    }
-
-    // Otherwise use regular JSON
     return await apiService.post(`/admin/${version}/events`, eventData);
   } catch (error) {
     console.error('Error creating event:', error);
@@ -96,37 +74,6 @@ export const updateEvent = async (eventId, eventData) => {
       throw new Error('Authentication required. Please log in.');
     }
 
-    // If eventData is already FormData, use it directly with method spoofing
-    if (eventData instanceof FormData) {
-      // Add _method=PUT for Laravel to handle it properly if not already added
-      if (!eventData.has('_method')) {
-        eventData.append('_method', 'PUT');
-      }
-
-      return await apiService.post(`/admin/${version}/events/${eventId}`, eventData, {
-        headers: {
-          // Remove Content-Type to let browser set it with boundary
-          'Content-Type': null,
-        },
-      });
-    }
-
-    // If eventData contains File objects, convert to FormData with method spoofing
-    if (hasFileFields(eventData)) {
-      const formData = convertToFormData(eventData);
-
-      // Add _method=PUT for Laravel to handle it properly
-      formData.append('_method', 'PUT');
-
-      return await apiService.post(`/admin/${version}/events/${eventId}`, formData, {
-        headers: {
-          // Remove Content-Type to let browser set it with boundary
-          'Content-Type': null,
-        },
-      });
-    }
-
-    // Otherwise use regular JSON with PUT
     return await apiService.put(`/admin/${version}/events/${eventId}`, eventData);
   } catch (error) {
     console.error('Error updating event:', error);
@@ -247,76 +194,5 @@ export const formatEventDataForSubmission = (data) => {
     is_featured: data.is_featured ? '1' : '0',
   };
 
-  // Handle image differently based on upload type
-  if (data.image_upload_type === 'url' && data.feature_image_url) {
-    formattedData.feature_image = data.feature_image_url;
-    // Remove the file if it exists
-    delete formattedData.featured_image;
-  } else if (data.featured_image instanceof File) {
-    // Rename to match backend expectation
-    formattedData.feature_image = data.featured_image;
-    delete formattedData.featured_image;
-  }
-
-  // Clean up temporary fields
-  delete formattedData.image_upload_type;
-  delete formattedData.feature_image_url;
-
   return formattedData;
-};
-
-/**
- * Helper to check if object contains any File objects (for determining if FormData is needed)
- * @param {Object} obj - Object to check
- * @returns {boolean} - True if object contains File objects
- */
-const hasFileFields = (obj) => {
-  return Object.values(obj).some(
-    (value) =>
-      value instanceof File ||
-      value instanceof FileList ||
-      (value instanceof Array && value.some((item) => item instanceof File))
-  );
-};
-
-/**
- * Convert an object to FormData
- * @param {Object} obj - Object to convert
- * @returns {FormData} - FormData object
- */
-const convertToFormData = (obj) => {
-  const formData = new FormData();
-
-  Object.entries(obj).forEach(([key, value]) => {
-    if (value === undefined || value === null) {
-      return;
-    }
-
-    if (value instanceof FileList) {
-      // Handle FileList objects
-      for (let i = 0; i < value.length; i++) {
-        formData.append(`${key}[${i}]`, value[i]);
-      }
-    } else if (Array.isArray(value) && value.some((item) => item instanceof File)) {
-      // Handle arrays with File objects
-      value.forEach((item, index) => {
-        if (item instanceof File) {
-          formData.append(`${key}[${index}]`, item);
-        } else {
-          formData.append(`${key}[${index}]`, item);
-        }
-      });
-    } else if (value instanceof File) {
-      // Handle single File objects
-      formData.append(key, value);
-    } else if (typeof value === 'object' && value !== null && !(value instanceof File)) {
-      // Handle nested objects
-      formData.append(key, JSON.stringify(value));
-    } else {
-      // Handle primitive values
-      formData.append(key, value);
-    }
-  });
-
-  return formData;
 };
