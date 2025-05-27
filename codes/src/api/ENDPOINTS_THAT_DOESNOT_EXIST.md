@@ -31,5 +31,24 @@ GET ALL SLIDER OR ANY SLIDER ENDPOINT DOESN'T RETURN THE SLIDER STATUS DATA. ALS
 I DON"T EVEN KNOW IF THE SLIDER STATUS IS A THING OR NOT.
 
 
+**FAQ Service:**
+THE ENDPOINTS FOR FAQs ARE NOT FOLLOWING RESTFUL CONVENTION. Explanation is provided in the previous service for the same concerns. Please refer to that.
+
+**Contact Us:**
+I don't understand why there's a need or reason for several contact us list and everything. Shouldn't it be just one contact information that will be available everywhere?
+
+**IMPORTANT NOTE:**
+PLEASE MAKE SURE TO PROVIDE THE FOLLOWING ENDPOINTS FOR EVERY CATEGORY:
+
+GET - to get all the records of a single category
+POST - to create a record within that category
+GET - to fetch the record by ID within that category
+PUT - to update the record by ID
+DELETE - to delete the record
+
+*IF THE RECORD REQUIRES CERTAIN DATA SPECIFIC UPDATES (e.g. status change), provide the following for that data field:*
+GET - to fetch the record's specific field data by ID
+POST/ PUT - to update that specific field's data by ID
+
 
 

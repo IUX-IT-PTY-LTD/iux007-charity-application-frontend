@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/faqs/create/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -41,6 +43,17 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 
+// Import API services
+import {
+  createFaq,
+  getAllFaqs,
+  validateFaqData,
+  formatFaqDataForSubmission,
+  isOrderingInUse,
+  getNextAvailableOrdering,
+} from '@/api/services/admin/faqService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
 // Define form schema with validation
 const formSchema = z.object({
   question: z.string().min(5, {
@@ -58,12 +71,42 @@ const formSchema = z.object({
 const AdminCreateFAQ = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingFaqs, setExistingFaqs] = useState([]);
 
   // Set page title and subtitle
   useEffect(() => {
     setPageTitle('Create New FAQ');
     setPageSubtitle('Add frequently asked questions for your users');
   }, [setPageTitle, setPageSubtitle]);
+
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Fetch existing FAQs to get next available ordering
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const response = await getAllFaqs();
+        if (response.status === 'success' && response.data) {
+          setExistingFaqs(response.data);
+
+          // Set next available ordering number
+          const nextOrdering = getNextAvailableOrdering(response.data);
+          form.setValue('ordering', nextOrdering);
+        }
+      } catch (error) {
+        console.error('Error fetching FAQs:', error);
+      }
+    };
+
+    fetchFaqs();
+  }, []);
 
   // Initialize form with validation
   const form = useForm({
@@ -80,48 +123,49 @@ const AdminCreateFAQ = () => {
   const formPreview = form.watch();
 
   // Handle form submission
-  const onSubmit = (data) => {
-    // Generate a unique ID for the new FAQ
-    const newFAQ = {
-      ...data,
-      id: Date.now().toString(), // Generate a unique ID using timestamp
-    };
+  const onSubmit = async (data) => {
+    try {
+      setIsSubmitting(true);
 
-    console.log('New FAQ submitted:', newFAQ);
+      // Validate FAQ data
+      const { isValid, errors } = validateFaqData(data);
+      if (!isValid) {
+        errors.forEach((error) => toast.error(error));
+        setIsSubmitting(false);
+        return;
+      }
 
-    // Store in localStorage for testing
-    const existingFAQs = JSON.parse(localStorage.getItem('faqs') || '[]');
-    existingFAQs.push(newFAQ);
-    localStorage.setItem('faqs', JSON.stringify(existingFAQs));
+      // Check if ordering is already in use
+      if (isOrderingInUse(data.ordering, existingFaqs)) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+        setIsSubmitting(false);
+        return;
+      }
 
-    // Show success message
-    toast.success('FAQ created successfully!');
+      // Format data for API submission
+      const formattedData = formatFaqDataForSubmission(data);
 
-    // Redirect to the FAQ list page
-    router.push('/admin/faqs');
+      // Submit to API
+      const response = await createFaq(formattedData);
 
-    /* API Implementation (Commented out for future use)
-    // API call to save the FAQ
-    fetch('/api/faqs', {
-      method: 'POST',
-      body: JSON.stringify(newFAQ),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        toast.success("FAQ created successfully!");
+      if (response.status === 'success') {
+        toast.success(response.message || 'FAQ created successfully!');
         router.push('/admin/faqs');
-      })
-      .catch(error => {
-        console.error('Error creating FAQ:', error);
-        toast.error("Failed to create FAQ. Please try again.");
-      });
-    */
+      } else {
+        toast.error(response.message || 'Failed to create FAQ');
+      }
+    } catch (error) {
+      console.error('Error creating FAQ:', error);
+
+      // Handle the ordering error from API
+      if (error.message && error.message.includes('ordering has already been taken')) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+      } else {
+        toast.error(error.message || 'An error occurred while creating the FAQ');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -202,7 +246,8 @@ const AdminCreateFAQ = () => {
                               <Input type="number" min={1} placeholder="1" {...field} />
                             </FormControl>
                             <FormDescription>
-                              Lower numbers appear first in the FAQ list.
+                              Lower numbers appear first in the FAQ list. Each FAQ must have a
+                              unique ordering number.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -247,12 +292,28 @@ const AdminCreateFAQ = () => {
                     </CardContent>
 
                     <CardFooter className="flex justify-between">
-                      <Button variant="outline" type="button" onClick={() => form.reset()}>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => {
+                          form.reset({
+                            question: '',
+                            answer: '',
+                            ordering: getNextAvailableOrdering(existingFaqs),
+                            status: '1',
+                          });
+                        }}
+                        disabled={isSubmitting}
+                      >
                         Reset
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={isSubmitting}
+                      >
                         <Save className="mr-2 h-4 w-4" />
-                        Create FAQ
+                        {isSubmitting ? 'Creating...' : 'Create FAQ'}
                       </Button>
                     </CardFooter>
                   </Card>

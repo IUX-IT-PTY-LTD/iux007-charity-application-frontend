@@ -1,4 +1,7 @@
+// src/app/(admin)/admin/faqs/page.jsx
+
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
@@ -62,6 +65,16 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 
+// Import API services
+import {
+  getAllFaqs,
+  updateFaq,
+  deleteFaq,
+  searchFaqs,
+  sortFaqsByOrdering,
+} from '@/api/services/admin/faqService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
 const AdminFAQsList = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
@@ -72,7 +85,9 @@ const AdminFAQsList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('ordering');
   const [sortDirection, setSortDirection] = useState('asc');
-  const [faqToDelete, setFaqToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isStatusUpdating, setIsStatusUpdating] = useState(false);
+  const [selectedFaqId, setSelectedFaqId] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,108 +99,33 @@ const AdminFAQsList = () => {
     setPageSubtitle('Manage frequently asked questions for your users');
   }, [setPageTitle, setPageSubtitle]);
 
-  // Fetch FAQs from localStorage (for testing) or API
+  // Check authentication
   useEffect(() => {
-    const fetchFaqs = () => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Fetch FAQs from API
+  useEffect(() => {
+    const fetchFaqs = async () => {
       setIsLoading(true);
 
       try {
-        // Check localStorage first
-        const storedFaqs = localStorage.getItem('faqs');
-        let faqData = [];
+        const response = await getAllFaqs();
 
-        if (storedFaqs) {
-          faqData = JSON.parse(storedFaqs);
+        if (response.status === 'success' && response.data) {
+          setFaqs(response.data);
+        } else {
+          toast.error('Failed to load FAQs');
         }
-
-        // If no stored FAQs, use sample data
-        if (!faqData || faqData.length === 0) {
-          faqData = [
-            {
-              id: '1',
-              question: 'What is your return policy?',
-              answer:
-                "We offer a 30-day money-back guarantee on all our products. If you're not satisfied with your purchase, you can return it within 30 days for a full refund.",
-              ordering: 1,
-              status: '1',
-            },
-            {
-              id: '2',
-              question: 'How long does shipping take?',
-              answer:
-                'Standard shipping takes 3-5 business days within the continental US. International shipping can take 7-14 business days depending on the destination.',
-              ordering: 2,
-              status: '1',
-            },
-            {
-              id: '3',
-              question: 'Do you offer international shipping?',
-              answer:
-                'Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by location. Please check our shipping page for more details.',
-              ordering: 3,
-              status: '0',
-            },
-            {
-              id: '4',
-              question: 'How can I track my order?',
-              answer:
-                "Once your order ships, you'll receive a confirmation email with a tracking number. You can use this number to track your package on our website or the carrier's site.",
-              ordering: 4,
-              status: '1',
-            },
-            {
-              id: '5',
-              question: 'What payment methods do you accept?',
-              answer:
-                'We accept Visa, Mastercard, American Express, PayPal, and Apple Pay. All payments are securely processed and encrypted.',
-              ordering: 5,
-              status: '1',
-            },
-          ];
-
-          // Store sample data for testing
-          localStorage.setItem('faqs', JSON.stringify(faqData));
-        }
-
-        setFaqs(faqData);
       } catch (error) {
         console.error('Error fetching FAQs:', error);
-        toast.error('Failed to load FAQs');
+        toast.error(error.message || 'Failed to load FAQs');
       } finally {
         setIsLoading(false);
       }
-
-      /* API Implementation (Commented out for future use)
-      // Fetch from API
-      fetch('/api/faqs')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch FAQs');
-          }
-          return response.json();
-        })
-        .then(data => {
-          setFaqs(data);
-          // Optionally cache in localStorage
-          localStorage.setItem("faqs", JSON.stringify(data));
-        })
-        .catch(error => {
-          console.error('Error fetching FAQs:', error);
-          toast.error("Failed to load FAQs. Please try again.");
-          
-          // Fall back to localStorage or sample data if API fails
-          const storedFaqs = JSON.parse(localStorage.getItem("faqs") || "[]");
-          if (storedFaqs.length > 0) {
-            setFaqs(storedFaqs);
-          } else {
-            // Use sample data as last resort
-            setFaqs(sampleFaqs);
-          }
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-      */
     };
 
     fetchFaqs();
@@ -208,8 +148,8 @@ const AdminFAQsList = () => {
 
       const query = searchQuery.toLowerCase();
 
-      if (query === 'active') return faq.status === '1';
-      if (query === 'inactive') return faq.status === '0';
+      if (query === 'active') return faq.status === '1' || faq.status === 1;
+      if (query === 'inactive') return faq.status === '0' || faq.status === 0;
 
       return faq.question.toLowerCase().includes(query) || faq.answer.toLowerCase().includes(query);
     })
@@ -231,98 +171,85 @@ const AdminFAQsList = () => {
   const currentFaqs = filteredAndSortedFaqs.slice(indexOfFirstItem, indexOfLastItem);
 
   // Handle FAQ deletion
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     try {
-      const updatedFaqs = faqs.filter((faq) => faq.id !== id);
-      setFaqs(updatedFaqs);
-      localStorage.setItem('faqs', JSON.stringify(updatedFaqs));
+      setIsDeleting(true);
+      setSelectedFaqId(id);
 
-      toast.success('FAQ deleted successfully');
+      const response = await deleteFaq(id);
 
-      /* API Implementation (Commented out for future use)
-      fetch(`/api/faqs/${id}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to delete FAQ');
-          }
-          
-          // Update state after successful deletion
-          const updatedFaqs = faqs.filter(faq => faq.id !== id);
-          setFaqs(updatedFaqs);
-          
-          // Update localStorage for offline capability
-          localStorage.setItem("faqs", JSON.stringify(updatedFaqs));
-          
-          toast.success("FAQ deleted successfully");
-        })
-        .catch(error => {
-          console.error('Error deleting FAQ:', error);
-          toast.error("Failed to delete FAQ. Please try again.");
-        });
-      */
+      if (response.status === 'success') {
+        // Update state after successful deletion
+        const updatedFaqs = faqs.filter((faq) => faq.id !== id);
+        setFaqs(updatedFaqs);
+
+        toast.success('FAQ deleted successfully');
+      } else {
+        toast.error(response.message || 'Failed to delete FAQ');
+      }
     } catch (error) {
       console.error('Error deleting FAQ:', error);
-      toast.error('Failed to delete FAQ');
+      toast.error(error.message || 'Failed to delete FAQ');
+    } finally {
+      setIsDeleting(false);
+      setSelectedFaqId(null);
     }
   };
 
   // Handle status toggle
-  const handleStatusChange = (id, currentStatus) => {
+  const handleStatusChange = async (id, currentStatus) => {
     try {
-      const updatedFaqs = faqs.map((faq) => {
-        if (faq.id === id) {
-          return { ...faq, status: currentStatus === '1' ? '0' : '1' };
-        }
-        return faq;
-      });
+      setIsStatusUpdating(true);
+      setSelectedFaqId(id);
 
-      setFaqs(updatedFaqs);
-      localStorage.setItem('faqs', JSON.stringify(updatedFaqs));
+      const faqToUpdate = faqs.find((faq) => faq.id === id);
 
-      toast.success(`FAQ ${currentStatus === '1' ? 'deactivated' : 'activated'} successfully`);
+      // Convert status to number if it's a string
+      const currentStatusNum =
+        typeof currentStatus === 'string' ? parseInt(currentStatus, 10) : currentStatus;
 
-      /* API Implementation (Commented out for future use)
-      const faqToUpdate = faqs.find(faq => faq.id === id);
-      const updatedStatus = currentStatus === "1" ? "0" : "1";
-      
-      fetch(`/api/faqs/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: updatedStatus }),
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to update FAQ status');
+      // Toggle status (0 to 1 or 1 to 0)
+      const newStatus = currentStatusNum === 1 ? 0 : 1;
+
+      // Prepare update data
+      const updateData = {
+        ...faqToUpdate,
+        status: newStatus,
+      };
+
+      const response = await updateFaq(id, updateData);
+
+      if (response.status === 'success') {
+        // Update state after successful update
+        const updatedFaqs = faqs.map((faq) => {
+          if (faq.id === id) {
+            return {
+              ...faq,
+              status: newStatus,
+            };
           }
-          
-          // Update state after successful update
-          const updatedFaqs = faqs.map(faq => {
-            if (faq.id === id) {
-              return { ...faq, status: updatedStatus };
-            }
-            return faq;
-          });
-          
-          setFaqs(updatedFaqs);
-          
-          // Update localStorage for offline capability
-          localStorage.setItem("faqs", JSON.stringify(updatedFaqs));
-          
-          toast.success(`FAQ ${currentStatus === "1" ? "deactivated" : "activated"} successfully`);
-        })
-        .catch(error => {
-          console.error('Error updating FAQ status:', error);
-          toast.error("Failed to update FAQ status. Please try again.");
+          return faq;
         });
-      */
+
+        setFaqs(updatedFaqs);
+
+        toast.success(`FAQ ${currentStatusNum === 1 ? 'deactivated' : 'activated'} successfully`);
+      } else {
+        toast.error(response.message || 'Failed to update FAQ status');
+      }
     } catch (error) {
       console.error('Error updating FAQ status:', error);
-      toast.error('Failed to update FAQ status');
+      toast.error(error.message || 'Failed to update FAQ status');
+    } finally {
+      setIsStatusUpdating(false);
+      setSelectedFaqId(null);
     }
+  };
+
+  // Format status value to make sure it's consistent
+  const getStatusValue = (status) => {
+    if (status === '1' || status === 1) return 1;
+    return 0;
   };
 
   // Column definitions for sortable headers
@@ -397,7 +324,7 @@ const AdminFAQsList = () => {
                     >
                       Active
                       <Badge variant="outline" className="ml-2">
-                        {faqs.filter((faq) => faq.status === '1').length}
+                        {faqs.filter((faq) => getStatusValue(faq.status) === 1).length}
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -406,7 +333,7 @@ const AdminFAQsList = () => {
                     >
                       Inactive
                       <Badge variant="outline" className="ml-2">
-                        {faqs.filter((faq) => faq.status === '0').length}
+                        {faqs.filter((faq) => getStatusValue(faq.status) === 0).length}
                       </Badge>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -465,20 +392,21 @@ const AdminFAQsList = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Switch
-                              checked={faq.status === '1'}
+                              checked={getStatusValue(faq.status) === 1}
                               onCheckedChange={() => handleStatusChange(faq.id, faq.status)}
                               aria-label={`Toggle status for ${faq.question}`}
                               className="data-[state=checked]:bg-black data-[state=checked]:text-white"
+                              disabled={isStatusUpdating && selectedFaqId === faq.id}
                             />
                             <Badge
-                              variant={faq.status === '1' ? 'success' : 'destructive'}
+                              variant={getStatusValue(faq.status) === 1 ? 'success' : 'destructive'}
                               className={
-                                faq.status === '1'
+                                getStatusValue(faq.status) === 1
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
                               }
                             >
-                              {faq.status === '1' ? 'Active' : 'Inactive'}
+                              {getStatusValue(faq.status) === 1 ? 'Active' : 'Inactive'}
                             </Badge>
                           </div>
                         </TableCell>
@@ -499,6 +427,7 @@ const AdminFAQsList = () => {
                                   variant="ghost"
                                   size="icon"
                                   className="text-red-600 hover:text-red-800 hover:bg-red-100"
+                                  disabled={isDeleting && selectedFaqId === faq.id}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                   <span className="sr-only">Delete</span>
@@ -518,7 +447,9 @@ const AdminFAQsList = () => {
                                     onClick={() => handleDelete(faq.id)}
                                     className="bg-red-600 hover:bg-red-700 text-white"
                                   >
-                                    Delete
+                                    {isDeleting && selectedFaqId === faq.id
+                                      ? 'Deleting...'
+                                      : 'Delete'}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
