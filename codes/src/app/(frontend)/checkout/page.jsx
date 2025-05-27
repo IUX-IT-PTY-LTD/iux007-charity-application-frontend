@@ -10,9 +10,11 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '@/components/stripe/CherckoutForm';
 import { setUserCart } from '@/store/features/userSlice';
+import { useRouter } from 'next/navigation';
 
 const Checkout = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [adminContributionAmount, setAdminContributionAmount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
@@ -69,28 +71,37 @@ useEffect(() => {
 }, [adminContributionAmount, cartItems]);
 
   // Add this function at the component level:
-  const handleIncreaseQuantity = (itemId) => {
-    setCartItems((prev) => {
-      const updatedCart = prev.map((i) =>
-        i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
-      );
-      // Update localStorage with new cart data
-      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-      const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      setTotalAmount(newSubtotal + adminContributionAmount);
-      setCheckoutData({
-        ...checkoutData,
-        total_price: newSubtotal + adminContributionAmount,
-        donations: checkoutData.donations.map(donation => 
-          donation.event_id === itemId 
-            ? { ...donation, quantity: donation.quantity + 1 }
-            : donation
-        )
-      })
-      setAdminContributionAmount(newSubtotal * 0.05);
-      return updatedCart;
+const handleIncreaseQuantity = (itemId) => {
+  setCartItems((prev) => {
+    const updatedCart = prev.map((i) =>
+      i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
+    );
+    // Update localStorage with new cart data
+    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    
+    const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const newAdminContribution = newSubtotal * 0.05;
+    
+    // Update admin contribution first
+    setAdminContributionAmount(newAdminContribution);
+    
+    // Update total with new subtotal and new admin contribution
+    setTotalAmount(newSubtotal + newAdminContribution);
+    
+    setCheckoutData({
+      ...checkoutData,
+      total_price: newSubtotal,
+      admin_contribution: newAdminContribution,
+      donations: checkoutData.donations.map(donation => 
+        donation.event_id === itemId 
+          ? { ...donation, quantity: donation.quantity + 1 }
+          : donation
+      )
     });
-  };
+
+    return updatedCart;
+  });
+};
 
   const handleDecreaseQuantity = (itemId) => {
     setCartItems((prev) => {
@@ -100,10 +111,14 @@ useEffect(() => {
       // Update localStorage with new cart data
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
       const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      setTotalAmount(newSubtotal + adminContributionAmount);
+      const newAdminContribution = newSubtotal * 0.05;
+      setAdminContributionAmount(newAdminContribution);
+
+      setTotalAmount(newSubtotal + newAdminContribution);
       setCheckoutData({
         ...checkoutData,
-        total_price: newSubtotal + adminContributionAmount,
+        total_price: newSubtotal,
+        admin_contribution: newAdminContribution,
         donations: checkoutData.donations.map(donation => 
           donation.event_id === itemId 
             ? { ...donation, quantity: donation.quantity - 1 }
@@ -461,7 +476,10 @@ useEffect(() => {
                     <div className="text-center space-y-4">
                       <h3 className="text-xl font-semibold">Already have an account?</h3>
                       <p className="text-gray-600">Sign in for a faster checkout experience</p>
-                      <button className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
+                      <button 
+                        onClick={() => router.push('/login')}
+                        className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+                      >
                         Sign In
                       </button>
                     </div>

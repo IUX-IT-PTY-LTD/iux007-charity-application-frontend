@@ -88,10 +88,13 @@ const userSlice = createSlice({
     setUserCart: (state, action) => {
       state.cart.cartItems = action.payload;
       state.cart.cartCount = action.payload.length;
-      // localStorage.setItem('cartItems', JSON.stringify(action.payload));
+    },
+    removeUserCart: (state) => {
+      state.cart.cartItems = [];
+      state.cart.cartCount = 0;
     },
   },
 });
 
-export const { setUser, logout, getUser, setUserCart, updateUser } = userSlice.actions;
+export const { setUser, logout, getUser, setUserCart, updateUser, removeUserCart } = userSlice.actions;
 export default userSlice.reducer;

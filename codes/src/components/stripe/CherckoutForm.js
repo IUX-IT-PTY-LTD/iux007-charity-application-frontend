@@ -6,6 +6,8 @@ import { ENDPOINTS } from '@/api/config';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
 import './CheckoutForm.css';
+import { removeUserCart } from '@/store/features/userSlice';
+import { useDispatch } from 'react-redux';
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -28,6 +30,7 @@ const CARD_ELEMENT_OPTIONS = {
 export default function CheckoutForm({ totalAmount, donationData }) {
   console.log('donationData:', donationData);
   const router = useRouter();
+  const dispatch = useDispatch();
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState('');
@@ -76,6 +79,7 @@ const processDonation = async (clientSecret) => {
   
   if (response.status === 'success') {
     localStorage.removeItem('cartItems');
+    dispatch(removeUserCart());
     return { success: true };
   }
   
