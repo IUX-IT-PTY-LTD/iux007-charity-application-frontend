@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useRouter } from 'next/navigation'
 import { useSelector, useDispatch } from'react-redux';
-import  { apiService } from '@/api/services/apiService';
+import  { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { updateUser } from '@/store/features/userSlice'
 import { toast, ToastContainer } from 'react-toastify';

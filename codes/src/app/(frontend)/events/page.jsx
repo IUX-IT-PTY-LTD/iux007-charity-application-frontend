@@ -3,7 +3,7 @@
 import EventCard from '@/components/homepage-components/event-cards/events';
 import Image from 'next/image';
 import React, { act, useEffect, useState } from 'react';
-import { apiService } from '@/api/services/apiService';
+import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 
 const Events = () => {
