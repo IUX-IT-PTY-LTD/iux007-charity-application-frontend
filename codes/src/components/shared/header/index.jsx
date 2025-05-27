@@ -142,9 +142,7 @@ const Header = () => {
           </div>
 
           <div className="flex max-lg:ml-auto space-x-3">
-            {isAuthenticated ? (
-              <>
-                <Link
+            <Link
                   href={'./checkout'}
                   className="w-[40px] h-[40px] flex justify-center items-center text-xl relative rounded-full font-bold text-white border-2 border-primary bg-primary transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]"
                 >
@@ -153,6 +151,9 @@ const Header = () => {
                     {cartCount}
                   </span>
                 </Link>
+            {isAuthenticated ? (
+              <>
+               
                 <div className="relative">
                   <button
                     onClick={() => {
