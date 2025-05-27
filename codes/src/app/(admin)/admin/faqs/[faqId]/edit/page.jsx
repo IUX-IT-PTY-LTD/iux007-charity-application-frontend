@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/faqs/[faqId]/edit/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -5,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Save, ArrowLeft } from 'lucide-react';
 
 // Import shadcn components
@@ -52,6 +54,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
+// Import API services
+import {
+  getFaqById,
+  getAllFaqs,
+  updateFaq,
+  deleteFaq,
+  validateFaqData,
+  formatFaqDataForSubmission,
+  isOrderingInUse,
+} from '@/api/services/admin/faqService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
 // Define form schema with validation
 const formSchema = z.object({
   question: z.string().min(5, {
@@ -72,8 +86,12 @@ export default function EditFAQ({ params }) {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const [faq, setFaq] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [originalFormData, setOriginalFormData] = useState(null);
+  const [existingFaqs, setExistingFaqs] = useState([]);
 
   // Initialize form
   const form = useForm({
@@ -93,57 +111,65 @@ export default function EditFAQ({ params }) {
     setPageSubtitle('Update frequently asked question details');
   }, [setPageTitle, setPageSubtitle]);
 
-  // Fetch FAQ data based on the ID
+  // Check authentication
   useEffect(() => {
-    const fetchFaq = async () => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Fetch FAQ data and all FAQs for ordering validation
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        // For testing: Get FAQs from localStorage
-        const storedFaqs = JSON.parse(localStorage.getItem('faqs') || '[]');
-        const foundFaq = storedFaqs.find((f) => f.id === params.faqId);
+        // Fetch all FAQs for ordering validation
+        const faqsResponse = await getAllFaqs();
 
-        if (foundFaq) {
-          setFaq(foundFaq);
+        if (faqsResponse.status === 'success' && faqsResponse.data) {
+          const allFaqs = faqsResponse.data;
+          setExistingFaqs(allFaqs);
 
-          // Set form values
-          form.reset({
-            question: foundFaq.question,
-            answer: foundFaq.answer,
-            ordering: Number(foundFaq.ordering),
-            status: foundFaq.status,
-          });
+          // Fetch the specific FAQ to edit
+          const faqResponse = await getFaqById(params.faqId);
+
+          if (faqResponse.status === 'success' && faqResponse.data) {
+            const fetchedFaq = faqResponse.data;
+            setFaq(fetchedFaq);
+
+            // Create form values from the FAQ data
+            const formValues = {
+              question: fetchedFaq.question || '',
+              answer: fetchedFaq.answer || '',
+              ordering: Number(fetchedFaq.ordering) || 1,
+              status: fetchedFaq.status?.toString() || '1',
+            };
+
+            // Set form values
+            form.reset(formValues);
+
+            // Store original form data for reset functionality
+            setOriginalFormData(formValues);
+          } else {
+            toast.error('FAQ not found');
+            router.push('/admin/faqs');
+          }
         } else {
-          toast.error('FAQ not found');
+          toast.error('Failed to load FAQs data');
           router.push('/admin/faqs');
         }
-
-        /* API Implementation (Commented out for future use)
-        const response = await fetch(`/api/faqs/${params.faqId}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch FAQ');
-        }
-        
-        const faqData = await response.json();
-        setFaq(faqData);
-        
-        form.reset({
-          question: faqData.question,
-          answer: faqData.answer,
-          ordering: Number(faqData.ordering),
-          status: faqData.status,
-        });
-        */
       } catch (error) {
-        console.error('Error fetching FAQ:', error);
-        toast.error('Failed to load FAQ data');
+        console.error('Error fetching FAQ data:', error);
+        toast.error(error.message || 'Failed to load FAQ data');
+        router.push('/admin/faqs');
       } finally {
         setIsLoading(false);
       }
     };
 
     if (params.faqId) {
-      fetchFaq();
+      fetchData();
     }
   }, [params.faqId, router, form]);
 
@@ -171,110 +197,85 @@ export default function EditFAQ({ params }) {
   }, [hasUnsavedChanges]);
 
   // Handle form submission
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     try {
-      // Get all FAQs
-      const allFaqs = JSON.parse(localStorage.getItem('faqs') || '[]');
+      setIsSubmitting(true);
 
-      // Find the index of the FAQ to update
-      const faqIndex = allFaqs.findIndex((f) => f.id === params.faqId);
+      // Validate FAQ data
+      const { isValid, errors } = validateFaqData({
+        ...data,
+        id: params.faqId, // Include ID for validation
+      });
 
-      if (faqIndex !== -1) {
-        // Update the FAQ data
-        const updatedFaq = {
-          ...allFaqs[faqIndex],
-          ...data,
-        };
-
-        // Update the array
-        allFaqs[faqIndex] = updatedFaq;
-
-        // Save back to localStorage
-        localStorage.setItem('faqs', JSON.stringify(allFaqs));
-
-        // Show success message
-        toast.success('FAQ updated successfully');
-
-        // Reset unsaved changes flag
-        setHasUnsavedChanges(false);
-
-        // Navigate back to FAQs list
-        router.push('/admin/faqs');
-      } else {
-        toast.error('FAQ not found');
+      if (!isValid) {
+        errors.forEach((error) => toast.error(error));
+        setIsSubmitting(false);
+        return;
       }
 
-      /* API Implementation (Commented out for future use)
-      // API call with PUT method for update
-      fetch(`/api/faqs/${params.faqId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          toast.success("FAQ updated successfully");
-          setHasUnsavedChanges(false);
-          router.push('/admin/faqs');
-        })
-        .catch(error => {
-          console.error('Error updating FAQ:', error);
-          toast.error("Failed to update FAQ. Please try again.");
-        });
-      */
+      // Check if ordering is already in use by other FAQs
+      if (isOrderingInUse(data.ordering, existingFaqs, params.faqId)) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Format data for API submission
+      const formattedData = formatFaqDataForSubmission(data);
+
+      // Submit to API
+      const response = await updateFaq(params.faqId, formattedData);
+
+      if (response.status === 'success') {
+        toast.success(response.message || 'FAQ updated successfully!');
+        setHasUnsavedChanges(false);
+        router.push('/admin/faqs');
+      } else {
+        toast.error(response.message || 'Failed to update FAQ');
+      }
     } catch (error) {
       console.error('Error updating FAQ:', error);
-      toast.error('Failed to update FAQ');
+
+      // Handle the ordering error from API
+      if (error.message && error.message.includes('ordering has already been taken')) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+      } else {
+        toast.error(error.message || 'An error occurred while updating the FAQ');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Handle FAQ deletion
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
-      // Get all FAQs
-      const allFaqs = JSON.parse(localStorage.getItem('faqs') || '[]');
+      setIsDeleting(true);
 
-      // Filter out the FAQ to delete
-      const updatedFaqs = allFaqs.filter((f) => f.id !== params.faqId);
+      // Call API to delete FAQ
+      const response = await deleteFaq(params.faqId);
 
-      // Save back to localStorage
-      localStorage.setItem('faqs', JSON.stringify(updatedFaqs));
-
-      // Show success message
-      toast.success('FAQ deleted successfully');
-
-      // Navigate back to FAQs list
-      router.push('/admin/faqs');
-
-      /* API Implementation (Commented out for future use)
-      fetch(`/api/faqs/${params.faqId}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(() => {
-          toast.success("FAQ deleted successfully");
-          router.push('/admin/faqs');
-        })
-        .catch(error => {
-          console.error('Error deleting FAQ:', error);
-          toast.error("Failed to delete FAQ. Please try again.");
-        });
-      */
+      if (response.status === 'success') {
+        toast.success(response.message || 'FAQ deleted successfully!');
+        router.push('/admin/faqs');
+      } else {
+        toast.error(response.message || 'Failed to delete FAQ');
+      }
     } catch (error) {
       console.error('Error deleting FAQ:', error);
-      toast.error('Failed to delete FAQ');
+      toast.error(error.message || 'An error occurred while deleting the FAQ');
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  // Reset form to original values
+  const handleReset = () => {
+    if (originalFormData) {
+      form.reset(originalFormData);
+      setHasUnsavedChanges(false);
+      toast.info('Form reset to original values');
     }
   };
 
@@ -316,8 +317,9 @@ export default function EditFAQ({ params }) {
                   <Button
                     variant="outline"
                     className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                    disabled={isDeleting}
                   >
-                    Delete FAQ
+                    {isDeleting ? 'Deleting...' : 'Delete FAQ'}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -342,9 +344,10 @@ export default function EditFAQ({ params }) {
               <Button
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isSubmitting}
               >
                 <Save className="mr-2 h-4 w-4" />
-                Save Changes
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </div>
@@ -404,7 +407,8 @@ export default function EditFAQ({ params }) {
                               <Input type="number" min={1} {...field} />
                             </FormControl>
                             <FormDescription>
-                              Lower numbers appear first in the FAQ list.
+                              Lower numbers appear first in the FAQ list. Each FAQ must have a
+                              unique ordering number.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -452,21 +456,17 @@ export default function EditFAQ({ params }) {
                       <Button
                         variant="outline"
                         type="button"
-                        onClick={() => {
-                          form.reset({
-                            question: faq.question,
-                            answer: faq.answer,
-                            ordering: Number(faq.ordering),
-                            status: faq.status,
-                          });
-                          setHasUnsavedChanges(false);
-                          toast.info('Form reset to original values');
-                        }}
+                        onClick={handleReset}
+                        disabled={isSubmitting}
                       >
                         Reset Changes
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                        Save Changes
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
                       </Button>
                     </CardFooter>
                   </Card>

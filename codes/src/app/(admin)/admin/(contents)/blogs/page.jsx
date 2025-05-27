@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { PlusCircle, FileText, UploadCloud, Loader2 } from 'lucide-react';
 import { format, parseISO, isSameDay } from 'date-fns';
 

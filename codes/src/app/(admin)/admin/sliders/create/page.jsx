@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/sliders/create/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -5,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Save, ArrowLeft, ImageIcon } from 'lucide-react';
 
 // Import shadcn components
@@ -41,6 +43,18 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
+// Import API services
+import {
+  createSlider,
+  getAllSliders,
+  validateSliderData,
+  formatSliderDataForSubmission,
+  isOrderingInUse,
+  getNextAvailableOrdering,
+  prepareImageForSubmission,
+} from '@/api/services/admin/sliderService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
 // Define form schema with validation
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -60,6 +74,8 @@ const AdminSliderCreate = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const [imagePreview, setImagePreview] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingSliders, setExistingSliders] = useState([]);
 
   // Initialize form with validation
   const form = useForm({
@@ -79,6 +95,34 @@ const AdminSliderCreate = () => {
     setPageSubtitle('Add a new slider to your homepage carousel');
   }, [setPageTitle, setPageSubtitle]);
 
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Fetch existing sliders to get next available ordering
+  useEffect(() => {
+    const fetchSliders = async () => {
+      try {
+        const response = await getAllSliders();
+        if (response.status === 'success' && response.data) {
+          setExistingSliders(response.data);
+
+          // Set next available ordering number
+          const nextOrdering = getNextAvailableOrdering(response.data);
+          form.setValue('ordering', nextOrdering);
+        }
+      } catch (error) {
+        console.error('Error fetching sliders:', error);
+      }
+    };
+
+    fetchSliders();
+  }, [form]);
+
   // For form preview
   const formPreview = form.watch();
 
@@ -86,6 +130,20 @@ const AdminSliderCreate = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type and size
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Please upload a valid image file (JPEG, PNG, GIF, WEBP)');
+        return;
+      }
+
+      // Maximum file size (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error('Image file size should be less than 5MB');
+        return;
+      }
+
       form.setValue('image', file);
 
       // Create image preview
@@ -98,60 +156,60 @@ const AdminSliderCreate = () => {
   };
 
   // Handle form submission
-  const onSubmit = (data) => {
-    // Generate a unique ID for the new slider
-    const newSlider = {
-      ...data,
-      id: Date.now().toString(), // Generate a unique ID using timestamp
-      image: imagePreview, // Store the image preview URL for testing
-    };
+  const onSubmit = async (data) => {
+    try {
+      setIsSubmitting(true);
 
-    console.log('Creating slider:', newSlider);
-
-    // Store in localStorage for testing
-    const existingSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
-    existingSliders.push(newSlider);
-    localStorage.setItem('sliders', JSON.stringify(existingSliders));
-
-    // Show success message
-    toast.success('Slider created successfully!');
-
-    // Redirect to the slider list page
-    router.push('/admin/sliders');
-
-    /* API Implementation (Commented out for future use)
-    // For actual API implementation, we would use FormData to handle file uploads
-    const apiFormData = new FormData();
-    
-    // Add all form fields to FormData
-    Object.keys(data).forEach(key => {
-      if (key === 'image' && data[key]) {
-        apiFormData.append(key, data[key]);
-      } else {
-        apiFormData.append(key, data[key]);
+      // Validate slider data
+      const { isValid, errors } = validateSliderData(data);
+      if (!isValid) {
+        errors.forEach((error) => toast.error(error));
+        setIsSubmitting(false);
+        return;
       }
-    });
 
-    // API call
-    fetch('/api/sliders', {
-      method: 'POST',
-      body: apiFormData,
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        toast.success("Slider created successfully!");
-        router.push('/admin/sliders');
-      })
-      .catch(error => {
-        console.error('Error creating slider:', error);
-        toast.error("Failed to create slider. Please try again.");
+      // Check if ordering is already in use
+      if (isOrderingInUse(data.ordering, existingSliders)) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare image data for submission
+      const preparedImage = await prepareImageForSubmission(data.image);
+      if (!preparedImage) {
+        toast.error('Please upload an image for the slider');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Format data for API submission
+      const formattedData = formatSliderDataForSubmission({
+        ...data,
+        image: preparedImage,
       });
-    */
+
+      // Submit to API
+      const response = await createSlider(formattedData);
+
+      if (response.status === 'success') {
+        toast.success(response.message || 'Slider created successfully!');
+        router.push('/admin/sliders');
+      } else {
+        toast.error(response.message || 'Failed to create slider');
+      }
+    } catch (error) {
+      console.error('Error creating slider:', error);
+
+      // Handle the ordering error from API
+      if (error.message && error.message.includes('ordering has already been taken')) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+      } else {
+        toast.error(error.message || 'An error occurred while creating the slider');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -232,7 +290,8 @@ const AdminSliderCreate = () => {
                               <Input type="number" min={1} placeholder="1" {...field} />
                             </FormControl>
                             <FormDescription>
-                              Lower numbers appear first in the carousel.
+                              Lower numbers appear first in the carousel. Each slider must have a
+                              unique ordering number.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -311,15 +370,26 @@ const AdminSliderCreate = () => {
                         variant="outline"
                         type="button"
                         onClick={() => {
-                          form.reset();
+                          form.reset({
+                            title: '',
+                            description: '',
+                            ordering: getNextAvailableOrdering(existingSliders),
+                            status: '1',
+                            image: null,
+                          });
                           setImagePreview(null);
                         }}
+                        disabled={isSubmitting}
                       >
                         Reset
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={isSubmitting}
+                      >
                         <Save className="mr-2 h-4 w-4" />
-                        Create Slider
+                        {isSubmitting ? 'Creating...' : 'Create Slider'}
                       </Button>
                     </CardFooter>
                   </Card>
