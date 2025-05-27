@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/events/[eventId]/edit/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -57,6 +59,16 @@ import {
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 
+// Import API services
+import {
+  getEventById,
+  updateEvent,
+  deleteEvent,
+  validateEventData,
+  formatEventDataForSubmission,
+} from '@/api/services/admin/eventService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
 // Define form schema with validation
 const formSchema = z
   .object({
@@ -97,9 +109,11 @@ export default function EditEvent({ params }) {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [originalFormData, setOriginalFormData] = useState(null);
 
   // Initialize form
   const form = useForm({
@@ -126,73 +140,66 @@ export default function EditEvent({ params }) {
     setPageSubtitle('Update event details and settings');
   }, [setPageTitle, setPageSubtitle]);
 
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
   // Fetch event data based on the ID
   useEffect(() => {
     const fetchEvent = async () => {
       setIsLoading(true);
       try {
-        // For testing: Get events from localStorage
-        const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
-        const foundEvent = storedEvents.find((e) => e.id === params.eventId);
+        // Fetch event data from API
+        const eventData = await getEventById(params.eventId);
 
-        if (foundEvent) {
-          setEvent(foundEvent);
+        if (eventData && eventData.status === 'success' && eventData.data) {
+          const fetchedEvent = eventData.data;
+          setEvent(fetchedEvent);
+
+          // Parse date strings to Date objects
+          const startDate = fetchedEvent.start_date
+            ? parseISO(fetchedEvent.start_date)
+            : new Date();
+          const endDate = fetchedEvent.end_date ? parseISO(fetchedEvent.end_date) : new Date();
+
+          // Format form values from API data
+          const formValues = {
+            title: fetchedEvent.title || '',
+            description: fetchedEvent.description || '',
+            start_date: startDate,
+            end_date: endDate,
+            price: Number(fetchedEvent.price) || 0,
+            target_amount: Number(fetchedEvent.target_amount) || 0,
+            is_fixed_donation:
+              fetchedEvent.is_fixed_donation === '1' || fetchedEvent.is_fixed_donation === true,
+            location: fetchedEvent.location || '',
+            status: fetchedEvent.status?.toString() || '1',
+            is_featured: fetchedEvent.is_featured === '1' || fetchedEvent.is_featured === true,
+            featured_image: fetchedEvent.featured_image || null,
+          };
 
           // Set form values
-          form.reset({
-            title: foundEvent.title,
-            description: foundEvent.description,
-            start_date: parseISO(foundEvent.start_date),
-            end_date: parseISO(foundEvent.end_date),
-            price: Number(foundEvent.price),
-            target_amount: Number(foundEvent.target_amount),
-            is_fixed_donation: foundEvent.is_fixed_donation,
-            location: foundEvent.location,
-            status: foundEvent.status,
-            is_featured: foundEvent.is_featured,
-            featured_image: foundEvent.featured_image,
-          });
+          form.reset(formValues);
+
+          // Store original form data for reset functionality
+          setOriginalFormData(formValues);
 
           // Set image preview if available
-          if (foundEvent.featured_image) {
-            setImagePreview(foundEvent.featured_image);
+          if (fetchedEvent.featured_image) {
+            setImagePreview(fetchedEvent.featured_image);
           }
         } else {
-          toast.error('Event not found');
+          toast.error('Event not found or invalid response');
           router.push('/admin/events');
         }
-
-        /* API Implementation (Commented out for future use)
-        const response = await fetch(`/api/events/${params.eventId}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch event');
-        }
-        
-        const eventData = await response.json();
-        setEvent(eventData);
-        
-        form.reset({
-          title: eventData.title,
-          description: eventData.description,
-          start_date: parseISO(eventData.start_date),
-          end_date: parseISO(eventData.end_date),
-          price: Number(eventData.price),
-          target_amount: Number(eventData.target_amount),
-          is_fixed_donation: eventData.is_fixed_donation,
-          location: eventData.location,
-          status: eventData.status,
-          is_featured: eventData.is_featured,
-          featured_image: eventData.featured_image,
-        });
-        
-        if (eventData.featured_image) {
-          setImagePreview(eventData.featured_image);
-        }
-        */
       } catch (error) {
         console.error('Error fetching event:', error);
-        toast.error('Failed to load event data');
+        toast.error(error.message || 'Failed to load event data');
+        router.push('/admin/events');
       } finally {
         setIsLoading(false);
       }
@@ -227,123 +234,61 @@ export default function EditEvent({ params }) {
   }, [hasUnsavedChanges]);
 
   // Handle form submission
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     try {
-      // Get all events
-      const allEvents = JSON.parse(localStorage.getItem('events') || '[]');
+      setIsSubmitting(true);
 
-      // Find the index of the event to update
-      const eventIndex = allEvents.findIndex((e) => e.id === params.eventId);
-
-      if (eventIndex !== -1) {
-        // Update the event data
-        const updatedEvent = {
-          ...allEvents[eventIndex],
-          ...data,
-          start_date: data.start_date.toISOString(),
-          end_date: data.end_date.toISOString(),
-        };
-
-        // Update the array
-        allEvents[eventIndex] = updatedEvent;
-
-        // Save back to localStorage
-        localStorage.setItem('events', JSON.stringify(allEvents));
-
-        // Show success message
-        toast.success('Event updated successfully');
-
-        // Reset unsaved changes flag
-        setHasUnsavedChanges(false);
-
-        // Navigate back to events list
-        router.push('/admin/events');
-      } else {
-        toast.error('Event not found');
+      // Validate event data
+      const { isValid, errors } = validateEventData(data);
+      if (!isValid) {
+        errors.forEach((error) => toast.error(error));
+        setIsSubmitting(false);
+        return;
       }
 
-      /* API Implementation (Commented out for future use)
-      // For actual API implementation, we would use FormData to handle file uploads
-      const apiFormData = new FormData();
-      
-      // Add all form fields to FormData
-      Object.keys(data).forEach(key => {
-        if (key === 'featured_image' && data[key] && data[key] instanceof File) {
-          apiFormData.append(key, data[key]);
-        } else if (key === 'start_date' || key === 'end_date') {
-          apiFormData.append(key, data[key].toISOString());
-        } else {
-          apiFormData.append(key, data[key]);
-        }
-      });
+      // Format data for API submission
+      const formattedData = formatEventDataForSubmission(data);
 
-      // API call with PUT method for update
-      fetch(`/api/events/${params.eventId}`, {
-        method: 'PUT',
-        body: apiFormData,
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          toast.success("Event updated successfully");
-          setHasUnsavedChanges(false);
-          router.push('/admin/events');
-        })
-        .catch(error => {
-          console.error('Error updating event:', error);
-          toast.error("Failed to update event. Please try again.");
-        });
-      */
+      // Debug
+      console.log('Formatted data for submission:', formattedData);
+
+      // Submit to API
+      const response = await updateEvent(params.eventId, formattedData);
+
+      if (response.status === 'success') {
+        toast.success(response.message || 'Event updated successfully!');
+        setHasUnsavedChanges(false);
+        router.push('/admin/events');
+      } else {
+        toast.error(response.message || 'Failed to update event');
+      }
     } catch (error) {
       console.error('Error updating event:', error);
-      toast.error('Failed to update event');
+      toast.error(error.message || 'An error occurred while updating the event');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Handle event deletion
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
-      // Get all events
-      const allEvents = JSON.parse(localStorage.getItem('events') || '[]');
+      setIsSubmitting(true);
 
-      // Filter out the event to delete
-      const updatedEvents = allEvents.filter((e) => e.id !== params.eventId);
+      // Call API to delete event
+      const response = await deleteEvent(params.eventId);
 
-      // Save back to localStorage
-      localStorage.setItem('events', JSON.stringify(updatedEvents));
-
-      // Show success message
-      toast.success('Event deleted successfully');
-
-      // Navigate back to events list
-      router.push('/admin/events');
-
-      /* API Implementation (Commented out for future use)
-      fetch(`/api/events/${params.eventId}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(() => {
-          toast.success("Event deleted successfully");
-          router.push('/admin/events');
-        })
-        .catch(error => {
-          console.error('Error deleting event:', error);
-          toast.error("Failed to delete event. Please try again.");
-        });
-      */
+      if (response.status === 'success') {
+        toast.success(response.message || 'Event deleted successfully!');
+        router.push('/admin/events');
+      } else {
+        toast.error(response.message || 'Failed to delete event');
+      }
     } catch (error) {
       console.error('Error deleting event:', error);
-      toast.error('Failed to delete event');
+      toast.error(error.message || 'An error occurred while deleting the event');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -361,6 +306,16 @@ export default function EditEvent({ params }) {
       reader.readAsDataURL(file);
 
       setHasUnsavedChanges(true);
+    }
+  };
+
+  // Reset form to original values
+  const handleReset = () => {
+    if (originalFormData) {
+      form.reset(originalFormData);
+      setImagePreview(originalFormData.featured_image);
+      setHasUnsavedChanges(false);
+      toast.info('Form reset to original values');
     }
   };
 
@@ -402,6 +357,7 @@ export default function EditEvent({ params }) {
                   <Button
                     variant="outline"
                     className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                    disabled={isSubmitting}
                   >
                     Delete Event
                   </Button>
@@ -429,9 +385,10 @@ export default function EditEvent({ params }) {
               <Button
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isSubmitting}
               >
                 <Save className="mr-2 h-4 w-4" />
-                Save Changes
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </div>
@@ -719,31 +676,15 @@ export default function EditEvent({ params }) {
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={() => {
-                          form.reset({
-                            title: event.title,
-                            description: event.description,
-                            start_date: parseISO(event.start_date),
-                            end_date: parseISO(event.end_date),
-                            price: Number(event.price),
-                            target_amount: Number(event.target_amount),
-                            is_fixed_donation: event.is_fixed_donation,
-                            location: event.location,
-                            status: event.status,
-                            is_featured: event.is_featured,
-                          });
-                          setImagePreview(event.featured_image);
-                          setHasUnsavedChanges(false);
-                          toast.info('Form reset to original values');
-                        }}
-                      >
+                      <Button variant="outline" type="button" onClick={handleReset}>
                         Reset Changes
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                        Save Changes
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
                       </Button>
                     </CardFooter>
                   </Card>
@@ -851,5 +792,3 @@ export default function EditEvent({ params }) {
     </div>
   );
 }
-
-// export default EditEvent;

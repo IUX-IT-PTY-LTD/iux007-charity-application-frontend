@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/events/create/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -14,7 +16,7 @@ import EventPreview from '@/components/admin/events/create/EventPreview';
 import { eventFormSchema, defaultEventValues } from '@/components/admin/events/create/eventSchema';
 
 // Import service
-import {
+import { 
   createEvent,
   validateEventData,
   formatEventDataForSubmission,
