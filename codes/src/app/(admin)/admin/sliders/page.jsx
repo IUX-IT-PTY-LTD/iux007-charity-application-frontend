@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/sliders/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -63,6 +65,10 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 
+// Import API services
+import { getAllSliders, deleteSlider, updateSlider } from '@/api/services/admin/sliderService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
 const AdminSlidersList = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
@@ -73,6 +79,9 @@ const AdminSlidersList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('ordering');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isStatusUpdating, setIsStatusUpdating] = useState(false);
+  const [selectedSliderId, setSelectedSliderId] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,102 +93,33 @@ const AdminSlidersList = () => {
     setPageSubtitle('Manage homepage carousel sliders');
   }, [setPageTitle, setPageSubtitle]);
 
-  // Fetch sliders from localStorage (for testing) or API
+  // Check authentication
   useEffect(() => {
-    const fetchSliders = () => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Fetch sliders from API
+  useEffect(() => {
+    const fetchSliders = async () => {
       setIsLoading(true);
 
       try {
-        // Check localStorage first
-        const storedSliders = localStorage.getItem('sliders');
-        let sliderData = [];
+        const response = await getAllSliders();
 
-        if (storedSliders) {
-          sliderData = JSON.parse(storedSliders);
+        if (response.status === 'success' && response.data) {
+          setSliders(response.data);
+        } else {
+          toast.error('Failed to load sliders');
         }
-
-        // If no stored sliders, use sample data
-        if (!sliderData || sliderData.length === 0) {
-          // Create sample images
-          const sampleImage1 =
-            "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Crect width='1200' height='400' fill='%23007bff' /%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24px' fill='white'%3ESample Slider Image 1%3C/text%3E%3C/svg%3E";
-          const sampleImage2 =
-            "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Crect width='1200' height='400' fill='%23198754' /%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24px' fill='white'%3ESample Slider Image 2%3C/text%3E%3C/svg%3E";
-          const sampleImage3 =
-            "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Crect width='1200' height='400' fill='%23dc3545' /%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24px' fill='white'%3ESample Slider Image 3%3C/text%3E%3C/svg%3E";
-
-          sliderData = [
-            {
-              id: '1',
-              title: 'Welcome to Our Store',
-              description:
-                'Discover amazing products at unbeatable prices. Shop now and enjoy free shipping on all orders.',
-              ordering: 1,
-              status: '1',
-              image: sampleImage1,
-            },
-            {
-              id: '2',
-              title: 'Summer Sale',
-              description: 'Get up to 50% off on all summer essentials. Limited time offer!',
-              ordering: 2,
-              status: '1',
-              image: sampleImage2,
-            },
-            {
-              id: '3',
-              title: 'New Collection',
-              description:
-                'Check out our latest arrivals. Trendy and fashionable items just for you.',
-              ordering: 3,
-              status: '0',
-              image: sampleImage3,
-            },
-          ];
-
-          // Store sample data for testing
-          localStorage.setItem('sliders', JSON.stringify(sliderData));
-        }
-
-        setSliders(sliderData);
       } catch (error) {
         console.error('Error fetching sliders:', error);
-        toast.error('Failed to load sliders');
+        toast.error(error.message || 'Failed to load sliders');
       } finally {
         setIsLoading(false);
       }
-
-      /* API Implementation (Commented out for future use)
-      // Fetch from API
-      fetch('/api/sliders')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch sliders');
-          }
-          return response.json();
-        })
-        .then(data => {
-          setSliders(data);
-          // Optionally cache in localStorage
-          localStorage.setItem("sliders", JSON.stringify(data));
-        })
-        .catch(error => {
-          console.error('Error fetching sliders:', error);
-          toast.error("Failed to load sliders. Please try again.");
-          
-          // Fall back to localStorage or sample data if API fails
-          const storedSliders = JSON.parse(localStorage.getItem("sliders") || "[]");
-          if (storedSliders.length > 0) {
-            setSliders(storedSliders);
-          } else {
-            // Use sample data as last resort
-            setSliders(sampleSliders);
-          }
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-      */
     };
 
     fetchSliders();
@@ -202,8 +142,8 @@ const AdminSlidersList = () => {
 
       const query = searchQuery.toLowerCase();
 
-      if (query === 'active') return slider.status === '1';
-      if (query === 'inactive') return slider.status === '0';
+      if (query === 'active') return slider.status === '1' || slider.status === 1;
+      if (query === 'inactive') return slider.status === '0' || slider.status === 0;
 
       return (
         slider.title.toLowerCase().includes(query) ||
@@ -228,97 +168,80 @@ const AdminSlidersList = () => {
   const currentSliders = filteredAndSortedSliders.slice(indexOfFirstItem, indexOfLastItem);
 
   // Handle slider deletion
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     try {
-      const updatedSliders = sliders.filter((slider) => slider.id !== id);
-      setSliders(updatedSliders);
-      localStorage.setItem('sliders', JSON.stringify(updatedSliders));
+      setIsDeleting(true);
+      setSelectedSliderId(id);
 
-      toast.success('Slider deleted successfully');
+      const response = await deleteSlider(id);
 
-      /* API Implementation (Commented out for future use)
-      fetch(`/api/sliders/${id}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to delete slider');
-          }
-          
-          // Update state after successful deletion
-          const updatedSliders = sliders.filter(slider => slider.id !== id);
-          setSliders(updatedSliders);
-          
-          // Update localStorage for offline capability
-          localStorage.setItem("sliders", JSON.stringify(updatedSliders));
-          
-          toast.success("Slider deleted successfully");
-        })
-        .catch(error => {
-          console.error('Error deleting slider:', error);
-          toast.error("Failed to delete slider. Please try again.");
-        });
-      */
+      if (response.status === 'success') {
+        // Update state after successful deletion
+        const updatedSliders = sliders.filter((slider) => slider.id !== id);
+        setSliders(updatedSliders);
+
+        toast.success(response.message || 'Slider deleted successfully');
+      } else {
+        toast.error(response.message || 'Failed to delete slider');
+      }
     } catch (error) {
       console.error('Error deleting slider:', error);
-      toast.error('Failed to delete slider');
+      toast.error(error.message || 'Failed to delete slider');
+    } finally {
+      setIsDeleting(false);
+      setSelectedSliderId(null);
     }
   };
 
   // Handle status toggle
-  const handleStatusChange = (id, currentStatus) => {
+  const handleStatusChange = async (id, currentStatus) => {
     try {
-      const updatedSliders = sliders.map((slider) => {
-        if (slider.id === id) {
-          return { ...slider, status: currentStatus === '1' ? '0' : '1' };
-        }
-        return slider;
-      });
+      setIsStatusUpdating(true);
+      setSelectedSliderId(id);
 
-      setSliders(updatedSliders);
-      localStorage.setItem('sliders', JSON.stringify(updatedSliders));
+      const sliderToUpdate = sliders.find((slider) => slider.id === id);
 
-      toast.success(`Slider ${currentStatus === '1' ? 'deactivated' : 'activated'} successfully`);
+      // Convert status to number if it's a string
+      const currentStatusNum =
+        typeof currentStatus === 'string' ? parseInt(currentStatus, 10) : currentStatus;
 
-      /* API Implementation (Commented out for future use)
-      const sliderToUpdate = sliders.find(slider => slider.id === id);
-      const updatedStatus = currentStatus === "1" ? "0" : "1";
-      
-      fetch(`/api/sliders/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: updatedStatus }),
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to update slider status');
+      // Toggle status (0 to 1 or 1 to 0)
+      const newStatus = currentStatusNum === 1 ? 0 : 1;
+
+      // Prepare update data
+      const updateData = {
+        ...sliderToUpdate,
+        status: newStatus,
+      };
+
+      const response = await updateSlider(id, updateData);
+
+      if (response.status === 'success') {
+        // Update state after successful update
+        const updatedSliders = sliders.map((slider) => {
+          if (slider.id === id) {
+            return {
+              ...slider,
+              status: newStatus,
+            };
           }
-          
-          // Update state after successful update
-          const updatedSliders = sliders.map(slider => {
-            if (slider.id === id) {
-              return { ...slider, status: updatedStatus };
-            }
-            return slider;
-          });
-          
-          setSliders(updatedSliders);
-          
-          // Update localStorage for offline capability
-          localStorage.setItem("sliders", JSON.stringify(updatedSliders));
-          
-          toast.success(`Slider ${currentStatus === "1" ? "deactivated" : "activated"} successfully`);
-        })
-        .catch(error => {
-          console.error('Error updating slider status:', error);
-          toast.error("Failed to update slider status. Please try again.");
+          return slider;
         });
-      */
+
+        setSliders(updatedSliders);
+
+        toast.success(
+          `Slider ${currentStatusNum === 1 ? 'deactivated' : 'activated'} successfully`
+        );
+      } else {
+        toast.error(response.message || 'Failed to update slider status');
+      }
     } catch (error) {
       console.error('Error updating slider status:', error);
-      toast.error('Failed to update slider status');
+      toast.error(error.message || 'Failed to update slider status');
+    } finally {
+      setIsStatusUpdating(false);
+      setSelectedSliderId(null);
     }
   };
 
@@ -331,6 +254,12 @@ const AdminSlidersList = () => {
     { field: 'status', label: 'Status', sortable: true },
     { field: 'actions', label: 'Actions', sortable: false },
   ];
+
+  // Format status value to make sure it's consistent
+  const getStatusValue = (status) => {
+    if (status === '1' || status === 1) return 1;
+    return 0;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -395,7 +324,7 @@ const AdminSlidersList = () => {
                     >
                       Active
                       <Badge variant="outline" className="ml-2">
-                        {sliders.filter((slider) => slider.status === '1').length}
+                        {sliders.filter((slider) => getStatusValue(slider.status) === 1).length}
                       </Badge>
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -404,7 +333,7 @@ const AdminSlidersList = () => {
                     >
                       Inactive
                       <Badge variant="outline" className="ml-2">
-                        {sliders.filter((slider) => slider.status === '0').length}
+                        {sliders.filter((slider) => getStatusValue(slider.status) === 0).length}
                       </Badge>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -475,20 +404,23 @@ const AdminSlidersList = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Switch
-                              checked={slider.status === '1'}
+                              checked={getStatusValue(slider.status) === 1}
                               onCheckedChange={() => handleStatusChange(slider.id, slider.status)}
                               aria-label={`Toggle status for ${slider.title}`}
                               className="data-[state=checked]:bg-black data-[state=checked]:text-white"
+                              disabled={isStatusUpdating && selectedSliderId === slider.id}
                             />
                             <Badge
-                              variant={slider.status === '1' ? 'success' : 'destructive'}
+                              variant={
+                                getStatusValue(slider.status) === 1 ? 'success' : 'destructive'
+                              }
                               className={
-                                slider.status === '1'
+                                getStatusValue(slider.status) === 1
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
                               }
                             >
-                              {slider.status === '1' ? 'Active' : 'Inactive'}
+                              {getStatusValue(slider.status) === 1 ? 'Active' : 'Inactive'}
                             </Badge>
                           </div>
                         </TableCell>
@@ -509,6 +441,7 @@ const AdminSlidersList = () => {
                                   variant="ghost"
                                   size="icon"
                                   className="text-red-600 hover:text-red-800 hover:bg-red-100"
+                                  disabled={isDeleting && selectedSliderId === slider.id}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                   <span className="sr-only">Delete</span>
@@ -528,7 +461,9 @@ const AdminSlidersList = () => {
                                     onClick={() => handleDelete(slider.id)}
                                     className="bg-red-600 hover:bg-red-700 text-white"
                                   >
-                                    Delete
+                                    {isDeleting && selectedSliderId === slider.id
+                                      ? 'Deleting...'
+                                      : 'Delete'}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>

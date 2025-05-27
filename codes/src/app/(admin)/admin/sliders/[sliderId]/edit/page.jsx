@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/sliders/[sliderId]/edit/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -52,6 +54,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
+// Import API services
+import {
+  getAllSliders,
+  updateSlider,
+  deleteSlider,
+  validateSliderData,
+  formatSliderDataForSubmission,
+  isOrderingInUse,
+  prepareImageForSubmission,
+} from '@/api/services/admin/sliderService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
 // Define form schema with validation
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -73,9 +87,13 @@ export default function EditSlider({ params }) {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const [slider, setSlider] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [originalFormData, setOriginalFormData] = useState(null);
+  const [existingSliders, setExistingSliders] = useState([]);
 
   // Initialize form
   const form = useForm({
@@ -96,64 +114,72 @@ export default function EditSlider({ params }) {
     setPageSubtitle('Update slider content and settings');
   }, [setPageTitle, setPageSubtitle]);
 
-  // Fetch slider data based on the ID
+  // Check authentication
   useEffect(() => {
-    const fetchSlider = async () => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Fetch slider data and all sliders for ordering validation
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        // For testing: Get sliders from localStorage
-        const storedSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
-        const foundSlider = storedSliders.find((s) => s.id === params.sliderId);
+        // Fetch all sliders for ordering validation
+        const slidersResponse = await getAllSliders();
 
-        if (foundSlider) {
-          setSlider(foundSlider);
+        if (slidersResponse.status === 'success' && slidersResponse.data) {
+          const allSliders = slidersResponse.data;
+          setExistingSliders(allSliders);
 
-          // Set form values
-          form.reset({
-            title: foundSlider.title,
-            description: foundSlider.description,
-            ordering: Number(foundSlider.ordering),
-            status: foundSlider.status,
-            image: foundSlider.image,
-          });
+          // Find the slider we want to edit
+          const currentSlider = allSliders.find(
+            (s) => s.id.toString() === params.sliderId.toString()
+          );
 
-          // Set image preview
-          setImagePreview(foundSlider.image);
+          if (currentSlider) {
+            setSlider(currentSlider);
+
+            // Create form values from the slider data
+            const formValues = {
+              title: currentSlider.title || '',
+              description: currentSlider.description || '',
+              ordering: Number(currentSlider.ordering) || 1,
+              status: currentSlider.status?.toString() || '1',
+              image: currentSlider.image || null,
+            };
+
+            // Set form values
+            form.reset(formValues);
+
+            // Store original form data for reset functionality
+            setOriginalFormData(formValues);
+
+            // Set image preview
+            if (currentSlider.image) {
+              setImagePreview(currentSlider.image);
+            }
+          } else {
+            toast.error('Slider not found');
+            router.push('/admin/sliders');
+          }
         } else {
-          toast.error('Slider not found');
+          toast.error('Failed to load sliders data');
           router.push('/admin/sliders');
         }
-
-        /* API Implementation (Commented out for future use)
-        const response = await fetch(`/api/sliders/${params.sliderId}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch slider');
-        }
-        
-        const sliderData = await response.json();
-        setSlider(sliderData);
-        
-        form.reset({
-          title: sliderData.title,
-          description: sliderData.description,
-          ordering: Number(sliderData.ordering),
-          status: sliderData.status,
-          image: sliderData.image,
-        });
-        
-        setImagePreview(sliderData.image);
-        */
       } catch (error) {
-        console.error('Error fetching slider:', error);
-        toast.error('Failed to load slider data');
+        console.error('Error fetching slider data:', error);
+        toast.error(error.message || 'Failed to load slider data');
+        router.push('/admin/sliders');
       } finally {
         setIsLoading(false);
       }
     };
 
     if (params.sliderId) {
-      fetchSlider();
+      fetchData();
     }
   }, [params.sliderId, router, form]);
 
@@ -184,6 +210,20 @@ export default function EditSlider({ params }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type and size
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Please upload a valid image file (JPEG, PNG, GIF, WEBP)');
+        return;
+      }
+
+      // Maximum file size (5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error('Image file size should be less than 5MB');
+        return;
+      }
+
       form.setValue('image', file);
 
       // Create image preview
@@ -198,120 +238,100 @@ export default function EditSlider({ params }) {
   };
 
   // Handle form submission
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     try {
-      // Get all sliders
-      const allSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
+      setIsSubmitting(true);
 
-      // Find the index of the slider to update
-      const sliderIndex = allSliders.findIndex((s) => s.id === params.sliderId);
-
-      if (sliderIndex !== -1) {
-        // Update the slider data
-        const updatedSlider = {
-          ...allSliders[sliderIndex],
-          ...data,
-          image: imagePreview, // Use the preview image for storage
-        };
-
-        // Update the array
-        allSliders[sliderIndex] = updatedSlider;
-
-        // Save back to localStorage
-        localStorage.setItem('sliders', JSON.stringify(allSliders));
-
-        // Show success message
-        toast.success('Slider updated successfully');
-
-        // Reset unsaved changes flag
-        setHasUnsavedChanges(false);
-
-        // Navigate back to sliders list
-        router.push('/admin/sliders');
-      } else {
-        toast.error('Slider not found');
-      }
-
-      /* API Implementation (Commented out for future use)
-      // For actual API implementation, we would use FormData to handle file uploads
-      const apiFormData = new FormData();
-      
-      // Add all form fields to FormData
-      Object.keys(data).forEach(key => {
-        if (key === 'image' && data[key] && data[key] instanceof File) {
-          apiFormData.append(key, data[key]);
-        } else {
-          apiFormData.append(key, data[key]);
-        }
+      // Validate slider data
+      const { isValid, errors } = validateSliderData({
+        ...data,
+        id: params.sliderId, // Include ID for validation
       });
 
-      // API call with PUT method for update
-      fetch(`/api/sliders/${params.sliderId}`, {
-        method: 'PUT',
-        body: apiFormData,
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          toast.success("Slider updated successfully");
-          setHasUnsavedChanges(false);
-          router.push('/admin/sliders');
-        })
-        .catch(error => {
-          console.error('Error updating slider:', error);
-          toast.error("Failed to update slider. Please try again.");
-        });
-      */
+      if (!isValid) {
+        errors.forEach((error) => toast.error(error));
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Check if ordering is already in use by other sliders
+      if (isOrderingInUse(data.ordering, existingSliders, params.sliderId)) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare image data
+      let imageData = data.image;
+
+      // If image is a File object, convert to base64
+      if (data.image instanceof File) {
+        imageData = await prepareImageForSubmission(data.image);
+      } else if (!data.image && imagePreview) {
+        // If no new image but we have the existing preview, use that
+        imageData = imagePreview;
+      }
+
+      // Format data for API submission
+      const formattedData = formatSliderDataForSubmission({
+        ...data,
+        image: imageData,
+      });
+
+      // Submit to API
+      const response = await updateSlider(params.sliderId, formattedData);
+
+      if (response.status === 'success') {
+        toast.success(response.message || 'Slider updated successfully!');
+        setHasUnsavedChanges(false);
+        router.push('/admin/sliders');
+      } else {
+        toast.error(response.message || 'Failed to update slider');
+      }
     } catch (error) {
       console.error('Error updating slider:', error);
-      toast.error('Failed to update slider');
+
+      // Handle the ordering error from API
+      if (error.message && error.message.includes('ordering has already been taken')) {
+        toast.error('This ordering number is already in use. Please choose a different number.');
+      } else {
+        toast.error(error.message || 'An error occurred while updating the slider');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Handle slider deletion
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
-      // Get all sliders
-      const allSliders = JSON.parse(localStorage.getItem('sliders') || '[]');
+      setIsDeleting(true);
 
-      // Filter out the slider to delete
-      const updatedSliders = allSliders.filter((s) => s.id !== params.sliderId);
+      // Call API to delete slider
+      const response = await deleteSlider(params.sliderId);
 
-      // Save back to localStorage
-      localStorage.setItem('sliders', JSON.stringify(updatedSliders));
-
-      // Show success message
-      toast.success('Slider deleted successfully');
-
-      // Navigate back to sliders list
-      router.push('/admin/sliders');
-
-      /* API Implementation (Commented out for future use)
-      fetch(`/api/sliders/${params.sliderId}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(() => {
-          toast.success("Slider deleted successfully");
-          router.push('/admin/sliders');
-        })
-        .catch(error => {
-          console.error('Error deleting slider:', error);
-          toast.error("Failed to delete slider. Please try again.");
-        });
-      */
+      if (response.status === 'success') {
+        toast.success(response.message || 'Slider deleted successfully!');
+        router.push('/admin/sliders');
+      } else {
+        toast.error(response.message || 'Failed to delete slider');
+      }
     } catch (error) {
       console.error('Error deleting slider:', error);
-      toast.error('Failed to delete slider');
+      toast.error(error.message || 'An error occurred while deleting the slider');
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  // Reset form to original values
+  const handleReset = () => {
+    if (originalFormData) {
+      form.reset(originalFormData);
+      setImagePreview(originalFormData.image);
+      setHasUnsavedChanges(false);
+      toast.info('Form reset to original values');
     }
   };
 
@@ -353,8 +373,9 @@ export default function EditSlider({ params }) {
                   <Button
                     variant="outline"
                     className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                    disabled={isDeleting}
                   >
-                    Delete Slider
+                    {isDeleting ? 'Deleting...' : 'Delete Slider'}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -380,9 +401,10 @@ export default function EditSlider({ params }) {
               <Button
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isSubmitting}
               >
                 <Save className="mr-2 h-4 w-4" />
-                Save Changes
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </div>
@@ -444,7 +466,8 @@ export default function EditSlider({ params }) {
                               <Input type="number" min={1} {...field} />
                             </FormControl>
                             <FormDescription>
-                              Lower numbers appear first in the carousel.
+                              Lower numbers appear first in the carousel. Each slider must have a
+                              unique ordering number.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -525,22 +548,17 @@ export default function EditSlider({ params }) {
                       <Button
                         variant="outline"
                         type="button"
-                        onClick={() => {
-                          form.reset({
-                            title: slider.title,
-                            description: slider.description,
-                            ordering: Number(slider.ordering),
-                            status: slider.status,
-                          });
-                          setImagePreview(slider.image);
-                          setHasUnsavedChanges(false);
-                          toast.info('Form reset to original values');
-                        }}
+                        onClick={handleReset}
+                        disabled={isSubmitting}
                       >
                         Reset Changes
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                        Save Changes
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
                       </Button>
                     </CardFooter>
                   </Card>
