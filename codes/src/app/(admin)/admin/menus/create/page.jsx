@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 
 import {
   Card,

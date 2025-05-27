@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { ArrowLeft, Save, Loader2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 

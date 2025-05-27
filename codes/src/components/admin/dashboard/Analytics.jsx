@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Bar, Line, Doughnut } from 'recharts';
 import {
   Activity,

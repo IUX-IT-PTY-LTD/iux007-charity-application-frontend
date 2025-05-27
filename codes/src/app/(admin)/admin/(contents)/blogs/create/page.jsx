@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { CalendarIcon, Save, ArrowLeft, Eye, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 

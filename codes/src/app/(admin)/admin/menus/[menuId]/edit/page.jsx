@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { useAdminContext } from '@/components/admin/admin-context';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
 
 import {
   Card,
