@@ -8,7 +8,7 @@ export const ENDPOINTS = {
   COMMON: {
     MENUS: '/menus',
     SLIDERS: '/sliders',
-    FAQ: '/faq',
+    FAQ: '/faqs',
     CONATCTUS: '/contactus',
     SETTINGS: '/settings',
   },
