@@ -5,8 +5,6 @@
 /baseurl/admin/version/{adminId} - PUT
 /baseurl/admin/version/forgot-password - POST
 
-"?title=Gaza Iftar Meal&featured=1&status=1&per_page=10&current_page=1"
-
 **admin event service:**
 
 /baseurl/admin/version/events/{eventId}/donations/{donationId} - GET -- Not Needed
