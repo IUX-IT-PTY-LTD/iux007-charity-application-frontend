@@ -1,14 +1,15 @@
 **admin auth:**
-/baseurl/admin/version/register - POST
+/baseurl/admin/version/register - POST -- Not Needed
 /baseurl/admin/version/logout - POST
 /baseurl/admin/version/{adminId} - GET
+/baseurl/admin/version/{adminId} - PUT
 /baseurl/admin/version/forgot-password - POST
 
 "?title=Gaza Iftar Meal&featured=1&status=1&per_page=10&current_page=1"
 
 **admin event service:**
 
-/baseurl/admin/version/events/{eventId}/donations/{donationId} - GET
+/baseurl/admin/version/events/{eventId}/donations/{donationId} - GET -- Not Needed
 
 **NOTES:**
 IN THE CREATE EVENT API FOR FEATURED IMAGE DATA, you're asking for "feature_image" as the variable name and then you're returning "featured_image" as variable name when the call succeed.
@@ -35,8 +36,7 @@ I DON"T EVEN KNOW IF THE SLIDER STATUS IS A THING OR NOT.
 THE ENDPOINTS FOR FAQs ARE NOT FOLLOWING RESTFUL CONVENTION. Explanation is provided in the previous service for the same concerns. Please refer to that.
 
 **Contact Us:**
-/baseurl/admin/version/contact-us/create - POST
-/baseurl/admin/version/contact-us/{contactId}/delete - DELETE
+Not Needed. Only update the existing rows.
 
 **USERS:**
 USER DETAILS API IS NOT WORKING
