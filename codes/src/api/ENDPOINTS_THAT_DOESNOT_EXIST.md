@@ -35,7 +35,11 @@ I DON"T EVEN KNOW IF THE SLIDER STATUS IS A THING OR NOT.
 THE ENDPOINTS FOR FAQs ARE NOT FOLLOWING RESTFUL CONVENTION. Explanation is provided in the previous service for the same concerns. Please refer to that.
 
 **Contact Us:**
-I don't understand why there's a need or reason for several contact us list and everything. Shouldn't it be just one contact information that will be available everywhere?
+/baseurl/admin/version/contact-us/create - POST
+/baseurl/admin/version/contact-us/{contactId}/delete - DELETE
+
+**USERS:**
+USER DETAILS API IS NOT WORKING
 
 **IMPORTANT NOTE:**
 PLEASE MAKE SURE TO PROVIDE THE FOLLOWING ENDPOINTS FOR EVERY CATEGORY:
@@ -49,6 +53,10 @@ DELETE - to delete the record
 *IF THE RECORD REQUIRES CERTAIN DATA SPECIFIC UPDATES (e.g. status change), provide the following for that data field:*
 GET - to fetch the record's specific field data by ID
 POST/ PUT - to update that specific field's data by ID
+
+
+**MENU SERVICE:**
+Slug can't be updated in Edit.
 
 
 **USERS/CUSTOMERS ACCOUNT LIST AND ALL RELATED ENDPOINTS ARE MISSING**
