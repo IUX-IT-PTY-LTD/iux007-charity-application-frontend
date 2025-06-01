@@ -379,8 +379,6 @@ const handleIncreaseQuantity = (itemId) => {
                       <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
 
                       <div className="space-y-4">
-                        {/* Calculate total amount and store in variable for reuse */}
-
                         <div className="flex justify-between">
                           <span className="text-gray-600">Subtotal</span>
                           <span className="font-semibold">${totalAmount}</span>
@@ -402,79 +400,11 @@ const handleIncreaseQuantity = (itemId) => {
 
             {/* Step 2: Donor Details */}
             {currentStep === 2 && (
-              <form className="max-w-3xl mx-auto space-y-8">
-                <div className="grid md:grid-cols-3 gap-6">
-                  {[
-                    {
-                      label: 'Full Name',
-                      type: 'text',
-                      placeholder: 'Enter your full name',
-                      value: userInfo?.name || '',
-                      key: 'name',
-                    },
-                    {
-                      label: 'Email',
-                      type: 'email',
-                      placeholder: 'Enter your email',
-                      value: userInfo?.email || '',
-                      key: 'email',
-                    },
-                    {
-                      label: 'Phone',
-                      type: 'tel',
-                      placeholder: 'Enter your phone number',
-                      value: userInfo?.phone || '',
-                      key: 'phone',
-                    },
-                  ].map((field, index) => (
-                    <div key={index} className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        {field.label}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          value={field.value}
-                          onChange={(e) => {
-                            const updatedUserInfo = {
-                              ...userInfo,
-                              [field.key]: e.target.value,
-                            };
-                          }}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 
-                            focus:border-primary focus:ring-2 focus:ring-primary/20 
-                            transition-all duration-200 text-gray-700 
-                            placeholder:text-gray-400 text-base outline-none
-                            hover:border-gray-300"
-                        />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          {field.type === 'email' && (
-                            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="create-account"
-                    className="form-checkbox rounded text-primary focus:ring-primary"
-                  />
-                  <label htmlFor="create-account" className="ml-2 text-gray-700">
-                    Create an account for faster checkout
-                  </label>
-                </div>
-
-                {!isAuthenticated && (
-                  <div className="border-t pt-8">
+              <>
+                {!isAuthenticated ? (
+                  <div className="max-w-3xl mx-auto space-y-8">
                     <div className="text-center space-y-4">
-                      <h3 className="text-xl font-semibold">Already have an account?</h3>
+                      <h3 className="text-xl font-semibold">Please Sign In to Continue</h3>
                       <p className="text-gray-600">Sign in for a faster checkout experience</p>
                       <button 
                         onClick={() => router.push('/login')}
@@ -483,28 +413,58 @@ const handleIncreaseQuantity = (itemId) => {
                         Sign In
                       </button>
                     </div>
+
+                    <div className="flex justify-between pt-8 border-t">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Back to Cart
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-3xl mx-auto space-y-8">
+                    <div className="text-center space-y-4">
+                      <h3 className="text-xl font-semibold">Welcome, {userInfo?.name}</h3>
+                      <p className="text-gray-600">Please review your information below</p>
+                      <div className="bg-gray-50 p-6 rounded-lg">
+                        <div className="grid grid-cols-2 gap-4 text-left">
+                          <div>
+                            <p className="text-sm text-gray-500">Name</p>
+                            <p className="font-medium">{userInfo?.name}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="font-medium">{userInfo?.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-green-600 font-medium">You can proceed to payment</p>
+                    </div>
+
+                    <div className="flex justify-between pt-8 border-t">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Back to Cart
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(3)}
+                        className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                      >
+                        Continue to Payment
+                      </button>
+                    </div>
                   </div>
                 )}
-
-                <div className="flex justify-between pt-8 border-t">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(1)}
-                    className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Back to Cart
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(3)}
-                    className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Continue to Payment
-                  </button>
-                </div>
-              </form>
+              </>
             )}
-
+        
             {/* Step 3: Payment */}
             {currentStep === 3 && (
               <div className="max-w-3xl mx-auto space-y-8">
@@ -544,12 +504,12 @@ const handleIncreaseQuantity = (itemId) => {
                   >
                     Back
                   </button>
-                  <button
+                  {/* <button
                     type="submit"
                     className="px-8 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     Complete Payment
-                  </button>
+                  </button> */}
                 </div>
               </div>
             )}
