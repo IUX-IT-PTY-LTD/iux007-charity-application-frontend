@@ -318,7 +318,7 @@ const UsersPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-7xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -332,7 +332,7 @@ const UsersPage = () => {
               Export Users
             </Button>
           </div>
-        </div>
+        </div> */}
 
         {/* User Statistics */}
         <UserStats
