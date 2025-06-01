@@ -32,6 +32,9 @@ class UserService {
       });
 
       const endpoint = `/${this.baseEndpoint}/users${queryString.toString() ? `?${queryString.toString()}` : ''}`;
+
+      console.log('Fetching users with endpoint:', endpoint); // Debug log
+
       const response = await apiService.get(endpoint);
       return response;
     } catch (error) {

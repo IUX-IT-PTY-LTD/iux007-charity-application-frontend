@@ -110,6 +110,8 @@ const UsersPage = () => {
         }
       }
 
+      console.log('Fetching users with params:', params);
+
       // Fetch users from API
       const response = await userService.getUsers(params);
 
@@ -152,10 +154,6 @@ const UsersPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [currentPage, itemsPerPage]);
-
   // Handle filter changes
   const handleFiltersChange = (filters) => {
     // Update local state
@@ -164,17 +162,31 @@ const UsersPage = () => {
     if (filters.sort !== undefined) setSortBy(filters.sort);
     if (filters.donationStatus !== undefined) setDonationStatus(filters.donationStatus);
 
-    // Reset to first page when filters change
-    setCurrentPage(1);
+    // If a specific page is not provided in filters, reset to first page when filters change
+    if (filters.page === undefined) {
+      setCurrentPage(1);
+    } else {
+      setCurrentPage(filters.page);
+    }
+
+    // If a specific perPage is not provided in filters, use the current itemsPerPage
+    if (filters.perPage !== undefined) {
+      setItemsPerPage(filters.perPage);
+    }
 
     // Fetch data with new filters
     fetchData({
-      page: 1,
+      page: filters.page || 1,
       search: filters.search,
       date: filters.date,
-      perPage: itemsPerPage,
+      perPage: filters.perPage || itemsPerPage,
     });
   };
+
+  // Initial data load
+  useEffect(() => {
+    fetchData();
+  }, []); // Empty dependency array to only run once on mount
 
   // Handle user deletion (commented out for future implementation)
   const handleDeleteUser = (userId) => {
@@ -393,7 +405,10 @@ const UsersPage = () => {
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      onClick={() => {
+                        const newPage = Math.max(1, currentPage - 1);
+                        handleFiltersChange({ page: newPage });
+                      }}
                       disabled={currentPage === 1}
                     />
                   </PaginationItem>
@@ -409,7 +424,9 @@ const UsersPage = () => {
                       return (
                         <PaginationItem key={pageNumber}>
                           <PaginationLink
-                            onClick={() => setCurrentPage(pageNumber)}
+                            onClick={() => {
+                              handleFiltersChange({ page: pageNumber });
+                            }}
                             isActive={pageNumber === currentPage}
                           >
                             {pageNumber}
@@ -422,9 +439,10 @@ const UsersPage = () => {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(pagination.last_page, prev + 1))
-                      }
+                      onClick={() => {
+                        const newPage = Math.min(pagination.last_page, currentPage + 1);
+                        handleFiltersChange({ page: newPage });
+                      }}
                       disabled={currentPage === pagination.last_page}
                     />
                   </PaginationItem>
@@ -436,8 +454,8 @@ const UsersPage = () => {
                 <Select
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => {
-                    setItemsPerPage(Number(value));
-                    setCurrentPage(1); // Reset to first page
+                    const newPerPage = Number(value);
+                    handleFiltersChange({ page: 1, perPage: newPerPage });
                   }}
                 >
                   <SelectTrigger className="w-16 h-8">
