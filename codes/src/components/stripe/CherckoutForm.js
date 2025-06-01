@@ -1,13 +1,14 @@
 // components/CheckoutForm.js
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useState } from 'react';
-import { apiService } from '@/api/services/apiService';
+import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
 import './CheckoutForm.css';
 import { removeUserCart } from '@/store/features/userSlice';
 import { useDispatch } from 'react-redux';
+import { Loader2 } from 'lucide-react';
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -123,6 +124,14 @@ const handleError = (error) => {
 
   return (
     <div className="payment-form-container">
+      {isProcessing && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white p-4 rounded-lg flex items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span>Processing Payment...</span>
+              </div>
+          </div>
+      )}
       <div className="payment-card">
         <div className="card-header">
           <h3>Enter Payment Details</h3>

@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiService } from '@/api/services/apiService';
+import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { ToastContainer, toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';

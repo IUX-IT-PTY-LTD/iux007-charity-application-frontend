@@ -6,29 +6,33 @@ const PrivacyPolicy = () => {
       <div className="privacy-policy bg-gray-50 py-16">
         <div className="container mx-auto max-w-4xl">
           <div className="bg-white rounded-lg shadow-lg px-8 py-10">
-            <h1 className="text-4xl font-bold text-gray-900 text-center mb-8">Privacy Policy for Charity Fund</h1>
+            <h1 className="text-4xl font-bold text-gray-900 text-center mb-8">
+              Privacy Policy for Charity Fund
+            </h1>
             <p className="text-gray-600 text-center mb-8">
               <strong>Effective Date:</strong> 2027-01-01
             </p>
 
             {[
               {
-                title: "1. Introduction",
-                content: `At Charity Fund ("we," "us," or "our"), we are committed to protecting your privacy. This Privacy Policy outlines how we collect, use, disclose, and safeguard your information when you visit our website [insert website URL], make a donation, volunteer, or participate in any of our programs or services.`
+                title: '1. Introduction',
+                content: `At Charity Fund ("we," "us," or "our"), we are committed to protecting your privacy. This Privacy Policy outlines how we collect, use, disclose, and safeguard your information when you visit our website [insert website URL], make a donation, volunteer, or participate in any of our programs or services.`,
               },
               {
-                title: "2. Information We Collect",
-                content: "We may collect the following types of information:",
+                title: '2. Information We Collect',
+                content: 'We may collect the following types of information:',
                 list: [
                   {
-                    title: "Personal Information",
-                    content: "When you register for an event, donate, or volunteer, we may collect personal information, such as your name, email address, phone number, mailing address, and payment information."
+                    title: 'Personal Information',
+                    content:
+                      'When you register for an event, donate, or volunteer, we may collect personal information, such as your name, email address, phone number, mailing address, and payment information.',
                   },
                   {
-                    title: "Non-Personal Information",
-                    content: "We may also collect non-personal information about you automatically when you visit our website, such as your IP address, browser type, operating system, pages visited, and the time and date of your visit."
-                  }
-                ]
+                    title: 'Non-Personal Information',
+                    content:
+                      'We may also collect non-personal information about you automatically when you visit our website, such as your IP address, browser type, operating system, pages visited, and the time and date of your visit.',
+                  },
+                ],
               },
               // ... similar structure for other sections
             ].map((section, index) => (
@@ -60,10 +64,17 @@ const PrivacyPolicy = () => {
                 regarding your personal information, please contact us at:
               </p>
               <div className="text-gray-700">
-                <strong>Charity Fund</strong><br />
-                Dhaka, Bangladesh<br />
-                <a href="mailto:charity.fund@gmail.com" className="text-primary hover:underline">charity.fund@gmail.com</a><br />
-                <a href="tel:+8800000000000" className="text-primary hover:underline">+8800000000000</a>
+                <strong>Charity Fund</strong>
+                <br />
+                Dhaka, Bangladesh
+                <br />
+                <a href="mailto:charity.fund@gmail.com" className="text-primary hover:underline">
+                  charity.fund@gmail.com
+                </a>
+                <br />
+                <a href="tel:+8800000000000" className="text-primary hover:underline">
+                  +8800000000000
+                </a>
               </div>
             </div>
           </div>

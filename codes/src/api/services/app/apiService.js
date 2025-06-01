@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_VERSION } from '../config';
+import { API_BASE_URL, API_VERSION } from '../../config';
 import axios from 'axios';
 
 class ApiService {

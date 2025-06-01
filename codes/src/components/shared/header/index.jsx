@@ -4,7 +4,7 @@ import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { FaShoppingBasket, FaUser } from 'react-icons/fa';
-import { apiService } from '@/api/services/apiService';
+import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout as logoutAction } from '@/store/features/userSlice';

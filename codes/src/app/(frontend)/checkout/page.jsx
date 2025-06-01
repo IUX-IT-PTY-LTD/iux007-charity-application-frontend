@@ -26,82 +26,80 @@ const Checkout = () => {
   /** Stripe Integration */
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-useEffect(() => {
-  // Get cart items from localStorage when component mounts
-  const cart = localStorage.getItem('cartItems');
-  if (cart) {
-    const parsedCart = JSON.parse(cart);
-    setCartItems(parsedCart);
-    
-    // Calculate subtotal from cart items
-    const subtotal = parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    
-    // Set admin contribution amount (5% of subtotal)
-    const adminContrib = subtotal * 0.05;
-    setAdminContributionAmount(adminContrib);
-    
-    // Set total amount (subtotal + admin contribution)
-    setTotalAmount(subtotal + adminContrib);
+  useEffect(() => {
+    // Get cart items from localStorage when component mounts
+    const cart = localStorage.getItem('cartItems');
+    if (cart) {
+      const parsedCart = JSON.parse(cart);
+      setCartItems(parsedCart);
 
-    // Build checkout data structure
-    const checkoutDataObj = {
-      donations: parsedCart.map(item => ({
-        event_id: item.id,
-        quantity: item.quantity,
-        amount: item.price,
-        notes: item.note || ""
-      })),
-      currency_id: 1, // Assuming default currency ID is 1
-      total_price: subtotal,
-      type: "single",
-      admin_contribution: adminContrib,
-      payment_intent_id: "" // This will be set after Stripe creates payment intent
-    };
-    
-    setCheckoutData(checkoutDataObj);
-  }
-}, []);
+      // Calculate subtotal from cart items
+      const subtotal = parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-// Update total amount whenever admin contribution changes
-useEffect(() => {
-  if (cartItems.length > 0) {
-    const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    setTotalAmount(subtotal + adminContributionAmount);
-  }
-}, [adminContributionAmount, cartItems]);
+      // Set admin contribution amount (5% of subtotal)
+      const adminContrib = subtotal * 0.05;
+      setAdminContributionAmount(adminContrib);
+
+      // Set total amount (subtotal + admin contribution)
+      setTotalAmount(subtotal + adminContrib);
+
+      // Build checkout data structure
+      const checkoutDataObj = {
+        donations: parsedCart.map((item) => ({
+          event_id: item.id,
+          quantity: item.quantity,
+          amount: item.price,
+          notes: item.note || '',
+        })),
+        currency_id: 1, // Assuming default currency ID is 1
+        total_price: subtotal,
+        type: 'single',
+        admin_contribution: adminContrib,
+        payment_intent_id: '', // This will be set after Stripe creates payment intent
+      };
+
+      setCheckoutData(checkoutDataObj);
+    }
+  }, []);
+
+  // Update total amount whenever admin contribution changes
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      setTotalAmount(subtotal + adminContributionAmount);
+    }
+  }, [adminContributionAmount, cartItems]);
 
   // Add this function at the component level:
-const handleIncreaseQuantity = (itemId) => {
-  setCartItems((prev) => {
-    const updatedCart = prev.map((i) =>
-      i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
-    );
-    // Update localStorage with new cart data
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    
-    const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const newAdminContribution = newSubtotal * 0.05;
-    
-    // Update admin contribution first
-    setAdminContributionAmount(newAdminContribution);
-    
-    // Update total with new subtotal and new admin contribution
-    setTotalAmount(newSubtotal + newAdminContribution);
-    
-    setCheckoutData({
-      ...checkoutData,
-      total_price: newSubtotal,
-      admin_contribution: newAdminContribution,
-      donations: checkoutData.donations.map(donation => 
-        donation.event_id === itemId 
-          ? { ...donation, quantity: donation.quantity + 1 }
-          : donation
-      )
-    });
+  const handleIncreaseQuantity = (itemId) => {
+    setCartItems((prev) => {
+      const updatedCart = prev.map((i) =>
+        i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
+      );
+      // Update localStorage with new cart data
+      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
 
-    return updatedCart;
-  });
-};
+      const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      const newAdminContribution = newSubtotal * 0.05;
+
+      // Update admin contribution first
+      setAdminContributionAmount(newAdminContribution);
+
+      // Update total with new subtotal and new admin contribution
+      setTotalAmount(newSubtotal + newAdminContribution);
+
+      setCheckoutData({
+        ...checkoutData,
+        total_price: newSubtotal,
+        admin_contribution: newAdminContribution,
+        donations: checkoutData.donations.map((donation) =>
+          donation.event_id === itemId ? { ...donation, quantity: donation.quantity + 1 } : donation
+        ),
+      });
+
+      return updatedCart;
+    });
+  };
 
   const handleDecreaseQuantity = (itemId) => {
     setCartItems((prev) => {
@@ -119,12 +117,10 @@ const handleIncreaseQuantity = (itemId) => {
         ...checkoutData,
         total_price: newSubtotal,
         admin_contribution: newAdminContribution,
-        donations: checkoutData.donations.map(donation => 
-          donation.event_id === itemId 
-            ? { ...donation, quantity: donation.quantity - 1 }
-            : donation
-        )
-      })
+        donations: checkoutData.donations.map((donation) =>
+          donation.event_id === itemId ? { ...donation, quantity: donation.quantity - 1 } : donation
+        ),
+      });
       setAdminContributionAmount(newSubtotal * 0.05);
       return updatedCart;
     });
@@ -134,20 +130,12 @@ const handleIncreaseQuantity = (itemId) => {
     setCartItems((prev) => prev.filter((i) => i.id !== itemId));
     const updatedCart = cartItems.filter((i) => i.id !== itemId);
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    setTotalAmount(
-      updatedCart.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      )
-    );
+    setTotalAmount(updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0));
     setAdminContributionAmount(
-      updatedCart.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      ) * 0.05
+      updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.05
     );
-    dispatch(setUserCart(updatedCart))
-  }
+    dispatch(setUserCart(updatedCart));
+  };
 
   const paymentMethods = [
     {
@@ -229,7 +217,10 @@ const handleIncreaseQuantity = (itemId) => {
                 <div className="divide-y divide-gray-100">
                   {cartItems.length > 0 ? (
                     cartItems.map((item) => (
-                      <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300">
+                      <div
+                        key={item.id}
+                        className="bg-white rounded-xl shadow-md overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300"
+                      >
                         <div className="p-6">
                           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                             {/* Image and Details Section */}
@@ -254,7 +245,9 @@ const handleIncreaseQuantity = (itemId) => {
                                 <div className="flex flex-wrap items-center gap-4">
                                   <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                                     <button
-                                      onClick={() => item.quantity > 1 ? handleDecreaseQuantity(item.id) : null}
+                                      onClick={() =>
+                                        item.quantity > 1 ? handleDecreaseQuantity(item.id) : null
+                                      }
                                       className="px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
                                       disabled={item.quantity <= 1}
                                     >
@@ -299,16 +292,15 @@ const handleIncreaseQuantity = (itemId) => {
                                     onChange={(e) => {
                                       const note = e.target.value;
                                       setCartItems((prev) =>
-                                        prev.map((i) =>
-                                          i.id === item.id
-                                            ? { ...i, note }
-                                            : i
-                                        )
+                                        prev.map((i) => (i.id === item.id ? { ...i, note } : i))
                                       );
-                                      const updatedCart = cartItems.map(i => 
+                                      const updatedCart = cartItems.map((i) =>
                                         i.id === item.id ? { ...i, note } : i
                                       );
-                                      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+                                      localStorage.setItem(
+                                        'cartItems',
+                                        JSON.stringify(updatedCart)
+                                      );
                                     }}
                                     rows={2}
                                   />
@@ -379,8 +371,6 @@ const handleIncreaseQuantity = (itemId) => {
                       <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
 
                       <div className="space-y-4">
-                        {/* Calculate total amount and store in variable for reuse */}
-
                         <div className="flex justify-between">
                           <span className="text-gray-600">Subtotal</span>
                           <span className="font-semibold">${totalAmount}</span>
@@ -402,107 +392,69 @@ const handleIncreaseQuantity = (itemId) => {
 
             {/* Step 2: Donor Details */}
             {currentStep === 2 && (
-              <form className="max-w-3xl mx-auto space-y-8">
-                <div className="grid md:grid-cols-3 gap-6">
-                  {[
-                    {
-                      label: 'Full Name',
-                      type: 'text',
-                      placeholder: 'Enter your full name',
-                      value: userInfo?.name || '',
-                      key: 'name',
-                    },
-                    {
-                      label: 'Email',
-                      type: 'email',
-                      placeholder: 'Enter your email',
-                      value: userInfo?.email || '',
-                      key: 'email',
-                    },
-                    {
-                      label: 'Phone',
-                      type: 'tel',
-                      placeholder: 'Enter your phone number',
-                      value: userInfo?.phone || '',
-                      key: 'phone',
-                    },
-                  ].map((field, index) => (
-                    <div key={index} className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        {field.label}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          value={field.value}
-                          onChange={(e) => {
-                            const updatedUserInfo = {
-                              ...userInfo,
-                              [field.key]: e.target.value,
-                            };
-                          }}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 
-                            focus:border-primary focus:ring-2 focus:ring-primary/20 
-                            transition-all duration-200 text-gray-700 
-                            placeholder:text-gray-400 text-base outline-none
-                            hover:border-gray-300"
-                        />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          {field.type === 'email' && (
-                            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="create-account"
-                    className="form-checkbox rounded text-primary focus:ring-primary"
-                  />
-                  <label htmlFor="create-account" className="ml-2 text-gray-700">
-                    Create an account for faster checkout
-                  </label>
-                </div>
-
-                {!isAuthenticated && (
-                  <div className="border-t pt-8">
+              <>
+                {!isAuthenticated ? (
+                  <div className="max-w-3xl mx-auto space-y-8">
                     <div className="text-center space-y-4">
-                      <h3 className="text-xl font-semibold">Already have an account?</h3>
+                      <h3 className="text-xl font-semibold">Please Sign In to Continue</h3>
                       <p className="text-gray-600">Sign in for a faster checkout experience</p>
-                      <button 
+                      <button
                         onClick={() => router.push('/login')}
                         className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                       >
                         Sign In
                       </button>
                     </div>
+
+                    <div className="flex justify-between pt-8 border-t">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Back to Cart
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-3xl mx-auto space-y-8">
+                    <div className="text-center space-y-4">
+                      <h3 className="text-xl font-semibold">Welcome, {userInfo?.name}</h3>
+                      <p className="text-gray-600">Please review your information below</p>
+                      <div className="bg-gray-50 p-6 rounded-lg">
+                        <div className="grid grid-cols-2 gap-4 text-left">
+                          <div>
+                            <p className="text-sm text-gray-500">Name</p>
+                            <p className="font-medium">{userInfo?.name}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="font-medium">{userInfo?.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-green-600 font-medium">You can proceed to payment</p>
+                    </div>
+
+                    <div className="flex justify-between pt-8 border-t">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Back to Cart
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(3)}
+                        className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                      >
+                        Continue to Payment
+                      </button>
+                    </div>
                   </div>
                 )}
-
-                <div className="flex justify-between pt-8 border-t">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(1)}
-                    className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Back to Cart
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(3)}
-                    className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Continue to Payment
-                  </button>
-                </div>
-              </form>
+              </>
             )}
 
             {/* Step 3: Payment */}
@@ -544,12 +496,12 @@ const handleIncreaseQuantity = (itemId) => {
                   >
                     Back
                   </button>
-                  <button
+                  {/* <button
                     type="submit"
                     className="px-8 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     Complete Payment
-                  </button>
+                  </button> */}
                 </div>
               </div>
             )}

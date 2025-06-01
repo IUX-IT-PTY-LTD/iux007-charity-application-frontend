@@ -7,7 +7,7 @@ import Hero from '@/components/homepage-components/hero';
 import FeaturedEvents from '@/components/homepage-components/featured-events';
 import Operations from '@/components/homepage-components/operations';
 import FAQ from '@/components/shared/faq';
-import { apiService } from '@/api/services/apiService';
+import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 
 const Home = () => {

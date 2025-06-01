@@ -1,8 +1,8 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
-import { apiService } from '@/api/services/apiService';
+import React, { useState, useEffect } from 'react';
+import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
@@ -10,6 +10,7 @@ import { ToastContainer, toast } from 'react-toastify';
 const Register = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [resendTimer, setResendTimer] = useState(90);
   const [formData, setFormData] = useState({
     email: '',
     otp: '',
@@ -17,10 +18,26 @@ const Register = () => {
     password: '',
     phone: '',
     address: '',
-    acceptTerms: false
+    acceptTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let timer;
+    if (step === 2) {
+      timer = setInterval(() => {
+        setResendTimer((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [step]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -33,19 +50,26 @@ const Register = () => {
   const handleEmailVerification = async (e) => {
     e.preventDefault();
     setError(null);
+
+    const loadingToast = toast.loading('Verifying email...');
+
     try {
       const response = await apiService.post(ENDPOINTS.AUTH.EMAIL_VERIFICATION, {
-        email: formData.email
+        email: formData.email,
       });
+
+      toast.dismiss(loadingToast);
 
       if (response && response.status === 'success') {
         toast.success(response.message);
         setStep(2);
+        setResendTimer(90); // Reset timer when moving to step 2
       } else {
         setError(response.errors);
         toast.error('Email verification failed. Please try again.');
       }
     } catch (err) {
+      toast.dismiss(loadingToast);
       console.error('Email verification error:', err);
       toast.error(err.message || 'Email verification failed');
     }
@@ -56,7 +80,7 @@ const Register = () => {
     try {
       const response = await apiService.post(ENDPOINTS.AUTH.CODE_VERIFICATION, {
         email: formData.email,
-        code: formData.otp
+        code: formData.otp,
       });
 
       if (response && response.status === 'success') {
@@ -68,6 +92,20 @@ const Register = () => {
     } catch (err) {
       console.error('OTP verification error:', err);
       toast.error(err.message || 'OTP verification failed');
+    }
+  };
+
+  const handleResendOTP = async () => {
+    try {
+      const response = await apiService.post(ENDPOINTS.AUTH.EMAIL_VERIFICATION, {
+        email: formData.email,
+      });
+      if (response && response.status === 'success') {
+        toast.success('OTP resent successfully');
+        setResendTimer(90);
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to resend OTP');
     }
   };
 
@@ -83,8 +121,9 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        confirm_password: formData.confirmPassword,
         phone: formData.phone,
-        address: formData.address
+        address: formData.address,
       });
 
       if (response && response.status === 'success') {
@@ -152,7 +191,6 @@ const Register = () => {
               <form onSubmit={handleOTPVerification} className="w-full py-6 px-6 sm:px-6">
                 <div className="mb-6">
                   <h3 className="text-gray-800 text-2xl font-bold">Verify Email</h3>
-                  <p className="text-gray-600 text-sm mt-2">Step 2 of 3: Enter OTP</p>
                 </div>
 
                 <div className="space-y-4">
@@ -170,11 +208,11 @@ const Register = () => {
                           onChange={(e) => {
                             const newOtp = formData.otp.split('');
                             newOtp[index] = e.target.value;
-                            setFormData(prev => ({
+                            setFormData((prev) => ({
                               ...prev,
-                              otp: newOtp.join('')
+                              otp: newOtp.join(''),
                             }));
-                            
+
                             if (e.target.value && index < 5) {
                               e.target.nextElementSibling?.focus();
                             }
@@ -188,7 +226,29 @@ const Register = () => {
                         />
                       ))}
                     </div>
-                    <p className="text-gray-500 text-sm">Please enter the 6-digit code sent to your email</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="text-gray-500 text-sm">
+                        Please enter the 6-digit code sent to your email
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">
+                          {resendTimer > 0 &&
+                            `${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleResendOTP}
+                          disabled={resendTimer > 0}
+                          className={`text-sm ${
+                            resendTimer > 0
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-blue-600 hover:underline'
+                          }`}
+                        >
+                          Resend OTP
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -233,6 +293,28 @@ const Register = () => {
                         onChange={handleChange}
                         className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
                         placeholder="Enter password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                      >
+                        {showPassword ? '👁️' : '👁️‍🗨️'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-gray-800 text-sm mb-2 block">Confirm Password</label>
+                    <div className="relative">
+                      <input
+                        name="confirm_password"
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className="text-gray-800 bg-white border border-gray-300 w-full text-sm px-4 py-2.5 rounded-md outline-blue-500"
+                        placeholder="Confirm password"
                       />
                       <button
                         type="button"

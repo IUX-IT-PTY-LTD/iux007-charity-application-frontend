@@ -8,9 +8,10 @@ export const ENDPOINTS = {
   COMMON: {
     MENUS: '/menus',
     SLIDERS: '/sliders',
-    FAQ: '/faq',
-    CONATCTUS: '/contactus',
+    FAQ: '/faqs',
+    CONATCTUS: '/contact-us',
     SETTINGS: '/settings',
+    CUSTOMER_ENQUIRY: '/customer-inquiry',
   },
   // Auth endpoints
   AUTH: {
@@ -19,6 +20,14 @@ export const ENDPOINTS = {
     LOGIN: '/login',
     REGISTER: '/registration',
     LOGOUT: '/logout',
+    CHANGE_PASSWORD: '/change-password',
+  },
+
+  // Forgot password endpoints
+  FORGOT_PASSWORD: {
+    EMAIL_VERIFICATION: '/forgot-password/email-verification',
+    CODE_VERIFICATION: '/forgot-password/code-verification',
+    RESET_PASSWORD: '/forgot-password/reset-password',
   },
 
   // Events endpoints
