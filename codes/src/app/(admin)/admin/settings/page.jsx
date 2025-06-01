@@ -23,10 +23,10 @@ const SettingsPage = () => {
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="flex flex-col">
-        <h1 className="text-3xl font-bold tracking-tight mb-1">Settings</h1>
+        {/* <h1 className="text-3xl font-bold tracking-tight mb-1">Settings</h1>
         <p className="text-muted-foreground mb-6">
           Manage your account preferences and company information
-        </p>
+        </p> */}
 
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="mb-6 grid grid-cols-3 w-full max-w-md">

@@ -58,25 +58,39 @@ const UserDonationRow = ({ donation, eventName }) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  // Format date
-  const formattedDate = donation.date
-    ? format(parseISO(donation.date), "MMM d, yyyy 'at' h:mm a")
-    : 'N/A';
+  // Set default status if not available
+  const status = donation.status || 'completed';
+
+  // Format date - use created_at if date is not available
+  const donationDate = donation.date
+    ? parseISO(donation.date)
+    : donation.created_at
+      ? parseISO(donation.created_at)
+      : new Date();
+  const formattedDate = format(donationDate, "MMM d, yyyy 'at' h:mm a");
 
   // Format amount with dollar sign
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-  }).format(donation.amount);
+  }).format(donation.amount || 0);
 
   // Handle receipt viewing
   const handleViewReceipt = () => {
-    router.push(`/admin/events/${donation.event_id}/donations/${donation.id}/receipt`);
+    // If we have an actual endpoint for receipts
+    if (donation.receipt_url) {
+      window.open(donation.receipt_url, '_blank');
+    } else {
+      // Fallback to event/donation details page
+      router.push(
+        `/admin/events/${donation.event_id || 'unknown'}/donations/${donation.id || 'unknown'}/receipt`
+      );
+    }
   };
 
   // Handle receipt download
   const handleDownloadReceipt = () => {
-    toast.info(`Downloading receipt for donation #${donation.id} as PDF...`);
+    toast.info(`Downloading receipt for donation #${donation.id || 'unknown'} as PDF...`);
 
     // Simulate download delay
     setTimeout(() => {
@@ -86,8 +100,13 @@ const UserDonationRow = ({ donation, eventName }) => {
 
   // Handle copying donation ID to clipboard
   const handleCopyId = () => {
-    navigator.clipboard.writeText(donation.id);
-    toast.success('Donation ID copied to clipboard');
+    if (donation.id) {
+      navigator.clipboard.writeText(donation.id.toString());
+      toast.success('Donation ID copied to clipboard');
+    } else if (donation.transaction_id) {
+      navigator.clipboard.writeText(donation.transaction_id.toString());
+      toast.success('Transaction ID copied to clipboard');
+    }
   };
 
   return (
@@ -106,12 +125,18 @@ const UserDonationRow = ({ donation, eventName }) => {
             <div className="flex items-center gap-3">
               <div>
                 <div className="font-medium">{eventName}</div>
-                <div className="text-sm text-muted-foreground">{donation.id}</div>
+                <div className="text-sm text-muted-foreground">
+                  {donation.id
+                    ? `ID: ${donation.id}`
+                    : donation.transaction_id
+                      ? `Trans: ${donation.transaction_id}`
+                      : 'No ID'}
+                </div>
               </div>
 
-              <Badge className={statusStyles[donation.status]}>
-                <StatusIcon status={donation.status} />
-                <span className="ml-1 capitalize">{donation.status}</span>
+              <Badge className={statusStyles[status]}>
+                <StatusIcon status={status} />
+                <span className="ml-1 capitalize">{status}</span>
               </Badge>
             </div>
           </div>
@@ -137,7 +162,7 @@ const UserDonationRow = ({ donation, eventName }) => {
                   <div>
                     <div className="font-medium">{eventName}</div>
                     <div className="text-sm text-muted-foreground">
-                      Event ID: {donation.event_id}
+                      Event ID: {donation.event_id || 'Unknown'}
                     </div>
                   </div>
                 </div>
@@ -159,10 +184,12 @@ const UserDonationRow = ({ donation, eventName }) => {
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <CreditCard className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <div className="text-sm">{donation.payment_method}</div>
-                </div>
+                {donation.payment_method && (
+                  <div className="flex items-center">
+                    <CreditCard className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <div className="text-sm">{donation.payment_method}</div>
+                  </div>
+                )}
 
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -171,7 +198,13 @@ const UserDonationRow = ({ donation, eventName }) => {
 
                 <div className="flex items-center">
                   <Clipboard className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <div className="text-sm">Transaction ID: {donation.transaction_id || 'N/A'}</div>
+                  <div className="text-sm">
+                    {donation.transaction_id
+                      ? `Transaction ID: ${donation.transaction_id}`
+                      : donation.id
+                        ? `Donation ID: ${donation.id}`
+                        : 'ID: N/A'}
+                  </div>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -197,38 +230,40 @@ const UserDonationRow = ({ donation, eventName }) => {
             </div>
           </div>
 
-          {/* Additional Information */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Additional Information</h3>
+          {/* Additional Information - only display if we have these fields */}
+          {(donation.campaign || donation.notes || donation.tribute_info) && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold">Additional Information</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {donation.campaign && (
-                <div>
-                  <div className="text-sm font-medium">Campaign</div>
-                  <div className="text-sm text-muted-foreground">{donation.campaign}</div>
-                </div>
-              )}
-
-              {donation.notes && (
-                <div className="col-span-2">
-                  <div className="text-sm font-medium">Notes</div>
-                  <div className="text-sm text-muted-foreground">{donation.notes}</div>
-                </div>
-              )}
-
-              {donation.tribute_info && (
-                <div className="col-span-2">
-                  <div className="text-sm font-medium">Tribute Information</div>
-                  <div className="text-sm text-muted-foreground">
-                    In {donation.tribute_info.type} of {donation.tribute_info.name}
-                    {donation.tribute_info.message && (
-                      <div className="mt-1 italic">"{donation.tribute_info.message}"</div>
-                    )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {donation.campaign && (
+                  <div>
+                    <div className="text-sm font-medium">Campaign</div>
+                    <div className="text-sm text-muted-foreground">{donation.campaign}</div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {donation.notes && (
+                  <div className="col-span-2">
+                    <div className="text-sm font-medium">Notes</div>
+                    <div className="text-sm text-muted-foreground">{donation.notes}</div>
+                  </div>
+                )}
+
+                {donation.tribute_info && (
+                  <div className="col-span-2">
+                    <div className="text-sm font-medium">Tribute Information</div>
+                    <div className="text-sm text-muted-foreground">
+                      In {donation.tribute_info.type} of {donation.tribute_info.name}
+                      {donation.tribute_info.message && (
+                        <div className="mt-1 italic">"{donation.tribute_info.message}"</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Actions */}
           <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
