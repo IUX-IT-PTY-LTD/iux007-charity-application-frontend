@@ -69,21 +69,21 @@ export const login = async (email, password) => {
  * @param {Object} userData - User registration data
  * @returns {Promise} - Promise resolving to registration result
  */
-export const register = async (userData) => {
-  try {
-    const data = await apiService.post(`/admin/${version}/register`, userData);
+// export const register = async (userData) => {
+//   try {
+//     const data = await apiService.post(`/admin/${version}/register`, userData);
 
-    // Set token in localStorage if returned with registration
-    if (data.status === 'success' && data.data && data.data.access_token) {
-      setAuthToken(data.data.access_token);
-    }
+//     // Set token in localStorage if returned with registration
+//     if (data.status === 'success' && data.data && data.data.access_token) {
+//       setAuthToken(data.data.access_token);
+//     }
 
-    return data;
-  } catch (error) {
-    console.error('Registration error:', error);
-    throw error;
-  }
-};
+//     return data;
+//   } catch (error) {
+//     console.error('Registration error:', error);
+//     throw error;
+//   }
+// };
 
 /**
  * Send password reset request
