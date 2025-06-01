@@ -20,6 +20,7 @@ export const ENDPOINTS = {
     LOGIN: '/login',
     REGISTER: '/registration',
     LOGOUT: '/logout',
+    CHANGE_PASSWORD: '/change-password',
   },
 
   // Forgot password endpoints

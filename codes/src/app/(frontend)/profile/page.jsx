@@ -11,6 +11,7 @@ import  { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { updateUser } from '@/store/features/userSlice'
 import { toast, ToastContainer } from 'react-toastify';
+import { Loader2 } from 'lucide-react'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('profile')
   const [userInfo, setUserInfo] = useState(useSelector((state) => state.user.user))
   const [donations, setDonations] = useState([])
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchDonations = async () => {
     try {
@@ -35,6 +37,7 @@ export default function ProfilePage() {
   }, []); 
   const handleInfoUpdate = async (e) => {
     e.preventDefault()
+    setIsLoading(true);
     try {
       console.log(userInfo.image);
       const response = await apiService.put(ENDPOINTS.USER.UPDATE_PROFILE, {
@@ -55,6 +58,8 @@ export default function ProfilePage() {
     } catch (err) {
       console.error('Profile Update Error:', err);
       toast.error(err.message || 'Update Profile failed');
+      }finally {
+        setIsLoading(false);
     }
 
     // Handle profile update logic here
@@ -73,6 +78,14 @@ export default function ProfilePage() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row gap-8">
       <ToastContainer />
+      {isLoading && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white p-4 rounded-lg flex items-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span>Update Profile...</span>
+                </div>
+            </div>
+        )}
         {/* Navigation Sidebar */}
         <div className="md:w-64 flex-shrink-0">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">

@@ -3,11 +3,13 @@ import React from 'react';
 import { commonService } from '@/api/services/app/commonService';
 import { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
+import { Loader2 } from 'lucide-react';
 
 
 const ContactUs = () => {
 
   const [contactData, setContactData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const fetchContactData = async () => {
     const response = await commonService.getContactData();
     if (response.status === 'success') {
@@ -15,30 +17,36 @@ const ContactUs = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    console.log(data);
-    const contactData = {
-      name: data.firstName + ' ' + data.lastName,
-      email: data.email,
-      phone: data.phone,
-      message: data.message,
-    };
+    setIsLoading(true);
 
-    console.log(contactData);
-    // Call the API to submit the form data
-    commonService.storeCustomerEnquiry(contactData)
-      .then((response) => {
-        if (response.status === 'success') {
-          toast.success('Enquiry submitted successfully!');
-          e.target.reset();
-        } else {
-          alert('Failed to submit enquiry. Please try again later.');
-        }
-      })
+    try {
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      const contactData = {
+        name: data.firstName + ' ' + data.lastName,
+        email: data.email,
+        phone: data.phone,
+        message: data.message,
+      };
 
+      const response = await commonService.storeCustomerEnquiry(contactData);
+      
+      if (response.status === 'success') {
+        toast.success('Enquiry submitted successfully!');
+        e.target.reset();
+      } else {
+        toast.error('Failed to submit enquiry. Please try again later.');
+      }
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -48,6 +56,14 @@ const ContactUs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-16">
       <ToastContainer />
+      {isLoading && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white p-4 rounded-lg flex items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span>Processing...</span>
+              </div>
+          </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">Get in Touch</h1>

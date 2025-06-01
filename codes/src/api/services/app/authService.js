@@ -45,4 +45,13 @@ export const authService = {
       throw error;
     }
   },
+
+  changePassword: async (current_password, new_password, password_confirmation) => {
+    try {
+      const response = await apiService.patch(ENDPOINTS.AUTH.CHANGE_PASSWORD, {current_password, new_password, password_confirmation });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
