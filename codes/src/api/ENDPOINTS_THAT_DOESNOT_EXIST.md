@@ -1,14 +1,13 @@
 **admin auth:**
-/baseurl/admin/version/register - POST
+/baseurl/admin/version/register - POST -- Not Needed
 /baseurl/admin/version/logout - POST
 /baseurl/admin/version/{adminId} - GET
+/baseurl/admin/version/{adminId} - PUT
 /baseurl/admin/version/forgot-password - POST
 
 **admin event service:**
-/baseurl/admin/version/events/{eventId} - GET
-/baseurl/admin/version/events/{eventId} - DELETE
-/baseurl/admin/version/events/{eventId}/donations - GET
-/baseurl/admin/version/events/{eventId}/donations/{donationId} - GET
+
+/baseurl/admin/version/events/{eventId}/donations/{donationId} - GET -- Not Needed
 
 **NOTES:**
 IN THE CREATE EVENT API FOR FEATURED IMAGE DATA, you're asking for "feature_image" as the variable name and then you're returning "featured_image" as variable name when the call succeed.
@@ -35,7 +34,10 @@ I DON"T EVEN KNOW IF THE SLIDER STATUS IS A THING OR NOT.
 THE ENDPOINTS FOR FAQs ARE NOT FOLLOWING RESTFUL CONVENTION. Explanation is provided in the previous service for the same concerns. Please refer to that.
 
 **Contact Us:**
-I don't understand why there's a need or reason for several contact us list and everything. Shouldn't it be just one contact information that will be available everywhere?
+Not Needed. Only update the existing rows.
+
+**USERS:**
+USER DETAILS API IS NOT WORKING
 
 **IMPORTANT NOTE:**
 PLEASE MAKE SURE TO PROVIDE THE FOLLOWING ENDPOINTS FOR EVERY CATEGORY:
@@ -49,6 +51,10 @@ DELETE - to delete the record
 *IF THE RECORD REQUIRES CERTAIN DATA SPECIFIC UPDATES (e.g. status change), provide the following for that data field:*
 GET - to fetch the record's specific field data by ID
 POST/ PUT - to update that specific field's data by ID
+
+
+**MENU SERVICE:**
+Slug can't be updated in Edit.
 
 
 **USERS/CUSTOMERS ACCOUNT LIST AND ALL RELATED ENDPOINTS ARE MISSING**
