@@ -26,82 +26,80 @@ const Checkout = () => {
   /** Stripe Integration */
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-useEffect(() => {
-  // Get cart items from localStorage when component mounts
-  const cart = localStorage.getItem('cartItems');
-  if (cart) {
-    const parsedCart = JSON.parse(cart);
-    setCartItems(parsedCart);
-    
-    // Calculate subtotal from cart items
-    const subtotal = parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    
-    // Set admin contribution amount (5% of subtotal)
-    const adminContrib = subtotal * 0.05;
-    setAdminContributionAmount(adminContrib);
-    
-    // Set total amount (subtotal + admin contribution)
-    setTotalAmount(subtotal + adminContrib);
+  useEffect(() => {
+    // Get cart items from localStorage when component mounts
+    const cart = localStorage.getItem('cartItems');
+    if (cart) {
+      const parsedCart = JSON.parse(cart);
+      setCartItems(parsedCart);
 
-    // Build checkout data structure
-    const checkoutDataObj = {
-      donations: parsedCart.map(item => ({
-        event_id: item.id,
-        quantity: item.quantity,
-        amount: item.price,
-        notes: item.note || ""
-      })),
-      currency_id: 1, // Assuming default currency ID is 1
-      total_price: subtotal,
-      type: "single",
-      admin_contribution: adminContrib,
-      payment_intent_id: "" // This will be set after Stripe creates payment intent
-    };
-    
-    setCheckoutData(checkoutDataObj);
-  }
-}, []);
+      // Calculate subtotal from cart items
+      const subtotal = parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-// Update total amount whenever admin contribution changes
-useEffect(() => {
-  if (cartItems.length > 0) {
-    const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    setTotalAmount(subtotal + adminContributionAmount);
-  }
-}, [adminContributionAmount, cartItems]);
+      // Set admin contribution amount (5% of subtotal)
+      const adminContrib = subtotal * 0.05;
+      setAdminContributionAmount(adminContrib);
+
+      // Set total amount (subtotal + admin contribution)
+      setTotalAmount(subtotal + adminContrib);
+
+      // Build checkout data structure
+      const checkoutDataObj = {
+        donations: parsedCart.map((item) => ({
+          event_id: item.id,
+          quantity: item.quantity,
+          amount: item.price,
+          notes: item.note || '',
+        })),
+        currency_id: 1, // Assuming default currency ID is 1
+        total_price: subtotal,
+        type: 'single',
+        admin_contribution: adminContrib,
+        payment_intent_id: '', // This will be set after Stripe creates payment intent
+      };
+
+      setCheckoutData(checkoutDataObj);
+    }
+  }, []);
+
+  // Update total amount whenever admin contribution changes
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      setTotalAmount(subtotal + adminContributionAmount);
+    }
+  }, [adminContributionAmount, cartItems]);
 
   // Add this function at the component level:
-const handleIncreaseQuantity = (itemId) => {
-  setCartItems((prev) => {
-    const updatedCart = prev.map((i) =>
-      i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
-    );
-    // Update localStorage with new cart data
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    
-    const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const newAdminContribution = newSubtotal * 0.05;
-    
-    // Update admin contribution first
-    setAdminContributionAmount(newAdminContribution);
-    
-    // Update total with new subtotal and new admin contribution
-    setTotalAmount(newSubtotal + newAdminContribution);
-    
-    setCheckoutData({
-      ...checkoutData,
-      total_price: newSubtotal,
-      admin_contribution: newAdminContribution,
-      donations: checkoutData.donations.map(donation => 
-        donation.event_id === itemId 
-          ? { ...donation, quantity: donation.quantity + 1 }
-          : donation
-      )
-    });
+  const handleIncreaseQuantity = (itemId) => {
+    setCartItems((prev) => {
+      const updatedCart = prev.map((i) =>
+        i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
+      );
+      // Update localStorage with new cart data
+      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
 
-    return updatedCart;
-  });
-};
+      const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      const newAdminContribution = newSubtotal * 0.05;
+
+      // Update admin contribution first
+      setAdminContributionAmount(newAdminContribution);
+
+      // Update total with new subtotal and new admin contribution
+      setTotalAmount(newSubtotal + newAdminContribution);
+
+      setCheckoutData({
+        ...checkoutData,
+        total_price: newSubtotal,
+        admin_contribution: newAdminContribution,
+        donations: checkoutData.donations.map((donation) =>
+          donation.event_id === itemId ? { ...donation, quantity: donation.quantity + 1 } : donation
+        ),
+      });
+
+      return updatedCart;
+    });
+  };
 
   const handleDecreaseQuantity = (itemId) => {
     setCartItems((prev) => {
@@ -119,12 +117,10 @@ const handleIncreaseQuantity = (itemId) => {
         ...checkoutData,
         total_price: newSubtotal,
         admin_contribution: newAdminContribution,
-        donations: checkoutData.donations.map(donation => 
-          donation.event_id === itemId 
-            ? { ...donation, quantity: donation.quantity - 1 }
-            : donation
-        )
-      })
+        donations: checkoutData.donations.map((donation) =>
+          donation.event_id === itemId ? { ...donation, quantity: donation.quantity - 1 } : donation
+        ),
+      });
       setAdminContributionAmount(newSubtotal * 0.05);
       return updatedCart;
     });
@@ -134,20 +130,12 @@ const handleIncreaseQuantity = (itemId) => {
     setCartItems((prev) => prev.filter((i) => i.id !== itemId));
     const updatedCart = cartItems.filter((i) => i.id !== itemId);
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    setTotalAmount(
-      updatedCart.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      )
-    );
+    setTotalAmount(updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0));
     setAdminContributionAmount(
-      updatedCart.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      ) * 0.05
+      updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.05
     );
-    dispatch(setUserCart(updatedCart))
-  }
+    dispatch(setUserCart(updatedCart));
+  };
 
   const paymentMethods = [
     {
@@ -229,7 +217,10 @@ const handleIncreaseQuantity = (itemId) => {
                 <div className="divide-y divide-gray-100">
                   {cartItems.length > 0 ? (
                     cartItems.map((item) => (
-                      <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300">
+                      <div
+                        key={item.id}
+                        className="bg-white rounded-xl shadow-md overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300"
+                      >
                         <div className="p-6">
                           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                             {/* Image and Details Section */}
@@ -254,7 +245,9 @@ const handleIncreaseQuantity = (itemId) => {
                                 <div className="flex flex-wrap items-center gap-4">
                                   <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                                     <button
-                                      onClick={() => item.quantity > 1 ? handleDecreaseQuantity(item.id) : null}
+                                      onClick={() =>
+                                        item.quantity > 1 ? handleDecreaseQuantity(item.id) : null
+                                      }
                                       className="px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
                                       disabled={item.quantity <= 1}
                                     >
@@ -299,16 +292,15 @@ const handleIncreaseQuantity = (itemId) => {
                                     onChange={(e) => {
                                       const note = e.target.value;
                                       setCartItems((prev) =>
-                                        prev.map((i) =>
-                                          i.id === item.id
-                                            ? { ...i, note }
-                                            : i
-                                        )
+                                        prev.map((i) => (i.id === item.id ? { ...i, note } : i))
                                       );
-                                      const updatedCart = cartItems.map(i => 
+                                      const updatedCart = cartItems.map((i) =>
                                         i.id === item.id ? { ...i, note } : i
                                       );
-                                      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+                                      localStorage.setItem(
+                                        'cartItems',
+                                        JSON.stringify(updatedCart)
+                                      );
                                     }}
                                     rows={2}
                                   />
@@ -406,7 +398,7 @@ const handleIncreaseQuantity = (itemId) => {
                     <div className="text-center space-y-4">
                       <h3 className="text-xl font-semibold">Please Sign In to Continue</h3>
                       <p className="text-gray-600">Sign in for a faster checkout experience</p>
-                      <button 
+                      <button
                         onClick={() => router.push('/login')}
                         className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                       >
@@ -464,7 +456,7 @@ const handleIncreaseQuantity = (itemId) => {
                 )}
               </>
             )}
-        
+
             {/* Step 3: Payment */}
             {currentStep === 3 && (
               <div className="max-w-3xl mx-auto space-y-8">

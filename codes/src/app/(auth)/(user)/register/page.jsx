@@ -18,7 +18,7 @@ const Register = () => {
     password: '',
     phone: '',
     address: '',
-    acceptTerms: false
+    acceptTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
@@ -50,12 +50,12 @@ const Register = () => {
   const handleEmailVerification = async (e) => {
     e.preventDefault();
     setError(null);
-    
+
     const loadingToast = toast.loading('Verifying email...');
-    
+
     try {
       const response = await apiService.post(ENDPOINTS.AUTH.EMAIL_VERIFICATION, {
-        email: formData.email
+        email: formData.email,
       });
 
       toast.dismiss(loadingToast);
@@ -80,7 +80,7 @@ const Register = () => {
     try {
       const response = await apiService.post(ENDPOINTS.AUTH.CODE_VERIFICATION, {
         email: formData.email,
-        code: formData.otp
+        code: formData.otp,
       });
 
       if (response && response.status === 'success') {
@@ -98,7 +98,7 @@ const Register = () => {
   const handleResendOTP = async () => {
     try {
       const response = await apiService.post(ENDPOINTS.AUTH.EMAIL_VERIFICATION, {
-        email: formData.email
+        email: formData.email,
       });
       if (response && response.status === 'success') {
         toast.success('OTP resent successfully');
@@ -123,7 +123,7 @@ const Register = () => {
         password: formData.password,
         confirm_password: formData.confirmPassword,
         phone: formData.phone,
-        address: formData.address
+        address: formData.address,
       });
 
       if (response && response.status === 'success') {
@@ -208,11 +208,11 @@ const Register = () => {
                           onChange={(e) => {
                             const newOtp = formData.otp.split('');
                             newOtp[index] = e.target.value;
-                            setFormData(prev => ({
+                            setFormData((prev) => ({
                               ...prev,
-                              otp: newOtp.join('')
+                              otp: newOtp.join(''),
                             }));
-                            
+
                             if (e.target.value && index < 5) {
                               e.target.nextElementSibling?.focus();
                             }
@@ -227,18 +227,21 @@ const Register = () => {
                       ))}
                     </div>
                     <div className="flex justify-between items-center mt-2">
-                      <p className="text-gray-500 text-sm">Please enter the 6-digit code sent to your email</p>
+                      <p className="text-gray-500 text-sm">
+                        Please enter the 6-digit code sent to your email
+                      </p>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-500">
-                          {resendTimer > 0 && `${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')}`}
+                          {resendTimer > 0 &&
+                            `${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')}`}
                         </span>
                         <button
                           type="button"
                           onClick={handleResendOTP}
                           disabled={resendTimer > 0}
                           className={`text-sm ${
-                            resendTimer > 0 
-                              ? 'text-gray-400 cursor-not-allowed' 
+                            resendTimer > 0
+                              ? 'text-gray-400 cursor-not-allowed'
                               : 'text-blue-600 hover:underline'
                           }`}
                         >

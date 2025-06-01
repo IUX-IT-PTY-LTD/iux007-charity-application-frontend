@@ -50,7 +50,7 @@ const EventDetails = ({ params }) => {
         : document.getElementById('donation_amount').value,
       isFixedDonation: event.is_fixed_donation,
     };
-  
+
     // Add donation item to cart state
     // Using React state management or Redux is preferred over sessionStorage
     // This is a temporary solution - TODO: Implement proper state management
@@ -62,7 +62,7 @@ const EventDetails = ({ params }) => {
       dispatch(setUserCart(existingCart));
     }
     router.push('/checkout');
-  }
+  };
 
   useEffect(() => {
     fetchEventDetails();
