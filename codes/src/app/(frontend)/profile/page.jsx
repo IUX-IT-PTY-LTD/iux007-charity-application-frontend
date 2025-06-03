@@ -388,10 +388,12 @@ export default function ProfilePage() {
                           <span
                             className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                               donation.status.toLowerCase() === 'pending'
-                                ? 'bg-red-100 text-red-800'
-                                : donation.status.toLowerCase() === 'processing'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-green-100 text-green-800'
+                                ? 'bg-red-100 text-red-600'
+                                : donation.status.toLowerCase() === 'completed'
+                                  ? 'bg-green-100 text-green-600'
+                                  : donation.status.toLowerCase() === 'failed'
+                                   ? 'bg-yellow-100 text-yellow-600'
+                                  : 'bg-blue-100 text-blue-600'
                             }`}
                           >
                             {donation.status}
