@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import './CheckoutForm.css';
 import { removeUserCart } from '@/store/features/userSlice';
 import { useDispatch } from 'react-redux';
-import { Loader2 } from 'lucide-react';
+import Loader from '../shared/loader';
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -124,14 +124,7 @@ const handleError = (error) => {
 
   return (
     <div className="payment-form-container">
-      {isProcessing && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-white p-4 rounded-lg flex items-center gap-2">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                  <span>Processing Payment...</span>
-              </div>
-          </div>
-      )}
+      {isProcessing && <Loader title="Processing Payment"/>}
       <div className="payment-card">
         <div className="card-header">
           <h3>Enter Payment Details</h3>

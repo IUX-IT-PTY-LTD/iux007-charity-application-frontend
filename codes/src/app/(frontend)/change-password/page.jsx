@@ -6,6 +6,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { authService } from '@/api/services/app/authService';
 import { ToastContainer, toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import Loader from '@/components/shared/loader';
 
 export default function ChangePassword() {
   const router = useRouter();
@@ -54,14 +55,7 @@ export default function ChangePassword() {
   return (
     <div className="container mx-auto py-10">
       <ToastContainer />
-      {isLoading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg flex items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Changing password...</span>
-          </div>
-        </div>
-      )}
+      {isLoading && <Loader title="Changing Password" />}
       <Card className="max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Change Password</CardTitle>

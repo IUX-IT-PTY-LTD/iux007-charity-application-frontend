@@ -8,6 +8,7 @@ import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout as logoutAction } from '@/store/features/userSlice';
+import  Loader  from '@/components/shared/loader';
 
 
 const Header = () => {
@@ -18,6 +19,7 @@ const Header = () => {
   const [menus, setMenus] = useState([]);
   const [settings, setSettings] = useState([]);
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchMenus = async () => {
     try {
@@ -51,10 +53,12 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+      setIsLoading(true);
       await apiService.post(ENDPOINTS.AUTH.LOGOUT);
       localStorage.removeItem('token');
       dispatch(logoutAction());
       toast.success('Logout successful');
+      setIsLoading(false);
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -77,6 +81,7 @@ const Header = () => {
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-[70px] tracking-wide relative z-50">
       <div className="container mx-auto">
+      {isLoading && <Loader title="Logging Out..." />}
         <div className="flex flex-wrap items-center justify-between gap-5 w-full">
           <Link href="./" className="flex justify-start items-center gap-3">
             <Image src="/assets/img/logo.svg" width={100} height={100} alt="logo" className="w-8" />
