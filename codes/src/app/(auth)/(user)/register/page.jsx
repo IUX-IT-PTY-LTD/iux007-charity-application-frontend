@@ -6,6 +6,7 @@ import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
+import Loader from '@/components/shared/loader';
 
 const Register = () => {
   const router = useRouter();
@@ -22,6 +23,7 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -110,6 +112,7 @@ const Register = () => {
   };
 
   const handleRegistration = async (e) => {
+
     e.preventDefault();
     if (!formData.acceptTerms) {
       toast.error('Please accept the Terms and Conditions');
@@ -117,6 +120,7 @@ const Register = () => {
     }
 
     try {
+      setIsLoading(true);
       const response = await apiService.post(ENDPOINTS.AUTH.REGISTER, {
         name: formData.name,
         email: formData.email,
@@ -138,12 +142,15 @@ const Register = () => {
     } catch (err) {
       console.error('Registration error:', err);
       toast.error(err.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="w-full">
       <ToastContainer />
+      {isLoading && <Loader title="Creating Account"/>}
       <div className="flex py-20 flex-col items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
           <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">

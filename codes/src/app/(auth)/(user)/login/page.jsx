@@ -8,9 +8,11 @@ import { ENDPOINTS } from '@/api/config';
 import { ToastContainer, toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/store/features/userSlice';
+import Loader from '@/components/shared/loader';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -28,6 +30,7 @@ const Login = () => {
   };
 
   const handleLogin = async (e) => {
+    setLoading(true);
     e.preventDefault();
     let errorMessage = '';
 
@@ -63,12 +66,15 @@ const Login = () => {
       }
 
       toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="w-full">
       <ToastContainer />
+      {loading && <Loader title="Authnticating..." />}
       <div className="flex py-20 flex-col items-center justify-center px-4">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
           <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">

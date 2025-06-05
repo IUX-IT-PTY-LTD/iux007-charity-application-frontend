@@ -11,7 +11,7 @@ import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { updateUser } from '@/store/features/userSlice';
 import { toast, ToastContainer } from 'react-toastify';
-import { Loader2 } from 'lucide-react';
+import  Loader  from '@/components/shared/loader';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -64,9 +64,13 @@ export default function ProfilePage() {
     // Handle profile update logic here
   };
 
-  const handleDownloadInvoice = (invoiceId) => {
+  const handleDownloadInvoice = (donationId) => {
     // Handle invoice download logic here
-    console.log(`Downloading invoice: ${invoiceId}`);
+    router.push(`/invoice/${donationId}`, {
+      state: {
+        invoiceData: donations.find(donation => donation.uuid === donationId)
+      }
+    });
   };
 
   const calculateTotal = (items) => {
@@ -77,14 +81,7 @@ export default function ProfilePage() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row gap-8">
         <ToastContainer />
-        {isLoading && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded-lg flex items-center gap-2">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Update Profile...</span>
-            </div>
-          </div>
-        )}
+        {isLoading && <Loader title="Updating Profile"/>}
         {/* Navigation Sidebar */}
         <div className="md:w-64 flex-shrink-0">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -333,7 +330,7 @@ export default function ProfilePage() {
                             </p>
                           </div>
                           <button
-                            onClick={() => handleDownloadInvoice(donation.invoice_no)}
+                            onClick={() => handleDownloadInvoice(donation.uuid)}
                             className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
                           >
                             <svg
@@ -349,7 +346,7 @@ export default function ProfilePage() {
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                               />
                             </svg>
-                            <span className="text-sm">Download Invoice</span>
+                            <span className="text-sm">View Invoice</span>
                           </button>
                         </div>
 
