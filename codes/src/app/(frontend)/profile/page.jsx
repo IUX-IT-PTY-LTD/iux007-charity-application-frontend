@@ -11,7 +11,7 @@ import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { updateUser } from '@/store/features/userSlice';
 import { toast, ToastContainer } from 'react-toastify';
-import  Loader  from '@/components/shared/loader';
+import Loader from '@/components/shared/loader';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -68,8 +68,8 @@ export default function ProfilePage() {
     // Handle invoice download logic here
     router.push(`/invoice/${donationId}`, {
       state: {
-        invoiceData: donations.find(donation => donation.uuid === donationId)
-      }
+        invoiceData: donations.find((donation) => donation.uuid === donationId),
+      },
     });
   };
 
@@ -81,7 +81,7 @@ export default function ProfilePage() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row gap-8">
         <ToastContainer />
-        {isLoading && <Loader title="Updating Profile"/>}
+        {isLoading && <Loader title="Updating Profile" />}
         {/* Navigation Sidebar */}
         <div className="md:w-64 flex-shrink-0">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -389,8 +389,8 @@ export default function ProfilePage() {
                                 : donation.status.toLowerCase() === 'completed'
                                   ? 'bg-green-100 text-green-600'
                                   : donation.status.toLowerCase() === 'failed'
-                                   ? 'bg-yellow-100 text-yellow-600'
-                                  : 'bg-blue-100 text-blue-600'
+                                    ? 'bg-yellow-100 text-yellow-600'
+                                    : 'bg-blue-100 text-blue-600'
                             }`}
                           >
                             {donation.status}

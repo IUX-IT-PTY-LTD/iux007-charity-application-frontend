@@ -55,7 +55,7 @@ export default function ChangePassword() {
   return (
     <div className="container mx-auto py-10">
       <ToastContainer />
-      {isLoading && <Loader title="Changing Password"/>}
+      {isLoading && <Loader title="Changing Password" />}
       <Card className="max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">Change Password</CardTitle>
