@@ -193,7 +193,7 @@ const AdminSliderCreate = () => {
       const response = await createSlider(formattedData);
 
       if (response.status === 'success') {
-        toast.success(response.message || 'Slider created successfully!');
+        toast.success('Slider created successfully!');
         router.push('/admin/sliders');
       } else {
         toast.error(response.message || 'Failed to create slider');

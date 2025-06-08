@@ -123,7 +123,7 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
             <span className="sr-only">Edit</span>
           </Button>
 
-          <DeleteEventDialog event={event} onDelete={handleDelete} />
+          {/* <DeleteEventDialog event={event} onDelete={handleDelete} /> */}
         </div>
       </TableCell>
     </TableRow>

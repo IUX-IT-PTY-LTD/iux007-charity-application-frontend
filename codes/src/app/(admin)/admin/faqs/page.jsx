@@ -268,7 +268,7 @@ const AdminFAQsList = () => {
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div>
               <CardTitle>Frequently Asked Questions</CardTitle>
-              <CardDescription>Manage FAQs displayed on your website</CardDescription>
+              {/* <CardDescription>Manage FAQs displayed on your website</CardDescription> */}
             </div>
 
             <Button

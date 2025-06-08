@@ -279,7 +279,7 @@ export default function EditEvent({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              {/* <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -307,7 +307,7 @@ export default function EditEvent({ params }) {
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
-              </AlertDialog>
+              </AlertDialog> */}
 
               <Button
                 onClick={form.handleSubmit(onSubmit)}

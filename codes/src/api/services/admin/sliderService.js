@@ -56,9 +56,28 @@ export const updateSlider = async (sliderId, sliderData) => {
       throw new Error('Authentication required. Please log in.');
     }
 
-    return await apiService.post(`/admin/${version}/sliders/update/${sliderId}`, sliderData);
+    return await apiService.put(`/admin/${version}/sliders/update/${sliderId}`, sliderData);
   } catch (error) {
     console.error('Error updating slider:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update the status of a slider
+ * @param {number|string} sliderId - ID of the slider to update
+ * @param {number} status - New status (0 for inactive, 1 for active)
+ * @returns {Promise} - Promise resolving to the updated slider status
+ */
+export const updateSliderStatus = async (sliderId, status) => {
+  try {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    return await apiService.patch(`/admin/${version}/sliders/${sliderId}/status`, { status });
+  } catch (error) {
+    console.error('Error updating slider status:', error);
     throw error;
   }
 };
