@@ -170,27 +170,6 @@ const UserFilters = ({
       {showFilters && (
         <div className="space-y-4 pt-2">
           {/* Filter options would go here */}
-          {/* Role filter is commented out as per the original code */}
-          {/* <div className="flex flex-wrap gap-2 py-2 items-center">
-            <div className="text-sm text-muted-foreground">Role:</div>
-            <Button
-              variant={roleFilter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setRoleFilter("all")}
-            >
-              All Roles
-            </Button>
-            {roles.map((role) => (
-              <Button
-                key={role}
-                variant={roleFilter === role ? "default" : "outline"}
-                size="sm"
-                onClick={() => setRoleFilter(role)}
-              >
-                {role}
-              </Button>
-            ))}
-          </div> */}
 
           {/* Donation filter option */}
           <div className="flex flex-wrap gap-2 py-2 items-center">

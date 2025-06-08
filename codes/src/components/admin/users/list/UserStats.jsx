@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Users, DollarSign, Clock, TrendingUp } from 'lucide-react';
+import { Users, DollarSign, Clock, TrendingUp, HandCoins } from 'lucide-react';
 
 const StatCard = ({ title, value, icon: Icon, description, trend, trendValue }) => {
   return (
@@ -74,7 +74,7 @@ const UserStats = ({
       <StatCard
         title="Total Donations"
         value={totalDonations}
-        icon={DollarSign}
+        icon={HandCoins}
         description={`Average ${averageDonationsPerUser.toFixed(1)} donations per user`}
         trend={true}
         trendValue={3} // Mock value, would be calculated in a real implementation

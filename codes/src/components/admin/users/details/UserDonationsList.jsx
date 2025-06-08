@@ -1,4 +1,4 @@
-// components/users/UserDonationsList.jsx
+// components/admin/users/details/UserDonationsList.jsx
 'use client';
 
 import React, { useState } from 'react';
@@ -12,12 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -28,51 +23,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-const UserDonationsList = ({ donations = [], events = [] }) => {
+const UserDonationsList = ({ donations = [] }) => {
   // Donations may be null from the API
   const donationsList = donations || [];
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState(null);
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
-
-  // Calculate status counts - adjust based on actual donation data structure
-  const getStatusCounts = () => {
-    const counts = {
-      all: donationsList.length,
-      completed: 0,
-      pending: 0,
-      failed: 0,
-      refunded: 0,
-    };
-
-    // If we have donations with status property, count them
-    donationsList.forEach((donation) => {
-      if (donation.status) {
-        counts[donation.status] = (counts[donation.status] || 0) + 1;
-      } else {
-        // Default to completed if no status is provided
-        counts.completed += 1;
-      }
-    });
-
-    return counts;
-  };
-
-  const statusCounts = getStatusCounts();
 
   // Filter and sort donations
   const filterAndSortDonations = () => {
@@ -85,27 +47,16 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
       const query = searchQuery.toLowerCase();
       filteredDonations = filteredDonations.filter(
         (donation) =>
-          (findEventName(donation.event_id) || '').toLowerCase().includes(query) ||
-          (donation.id && donation.id.toString().toLowerCase().includes(query)) ||
-          (donation.transaction_id &&
-            donation.transaction_id.toString().toLowerCase().includes(query))
+          (donation.event?.title || '').toLowerCase().includes(query) ||
+          (donation.id && donation.id.toString().toLowerCase().includes(query))
       );
-    }
-
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filteredDonations = filteredDonations.filter((donation) => donation.status === statusFilter);
     }
 
     // Apply date filter
     if (dateFilter) {
       filteredDonations = filteredDonations.filter((donation) => {
-        if (!donation.date && !donation.created_at) return false;
-
-        const donationDate = donation.date
-          ? parseISO(donation.date)
-          : parseISO(donation.created_at);
-
+        if (!donation.donated_at) return false;
+        const donationDate = parseISO(donation.donated_at);
         return format(donationDate, 'yyyy-MM-dd') === format(dateFilter, 'yyyy-MM-dd');
       });
     }
@@ -114,50 +65,27 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
     switch (sortBy) {
       case 'newest':
         filteredDonations.sort((a, b) => {
-          const dateA = a.date
-            ? new Date(a.date)
-            : a.created_at
-              ? new Date(a.created_at)
-              : new Date(0);
-          const dateB = b.date
-            ? new Date(b.date)
-            : b.created_at
-              ? new Date(b.created_at)
-              : new Date(0);
+          const dateA = a.donated_at ? new Date(a.donated_at) : new Date(0);
+          const dateB = b.donated_at ? new Date(b.donated_at) : new Date(0);
           return dateB - dateA;
         });
         break;
       case 'oldest':
         filteredDonations.sort((a, b) => {
-          const dateA = a.date
-            ? new Date(a.date)
-            : a.created_at
-              ? new Date(a.created_at)
-              : new Date(0);
-          const dateB = b.date
-            ? new Date(b.date)
-            : b.created_at
-              ? new Date(b.created_at)
-              : new Date(0);
+          const dateA = a.donated_at ? new Date(a.donated_at) : new Date(0);
+          const dateB = b.donated_at ? new Date(b.donated_at) : new Date(0);
           return dateA - dateB;
         });
         break;
       case 'amount-high':
-        filteredDonations.sort((a, b) => (b.amount || 0) - (a.amount || 0));
+        filteredDonations.sort((a, b) => (b.total_price || 0) - (a.total_price || 0));
         break;
       case 'amount-low':
-        filteredDonations.sort((a, b) => (a.amount || 0) - (b.amount || 0));
+        filteredDonations.sort((a, b) => (a.total_price || 0) - (b.total_price || 0));
         break;
     }
 
     return filteredDonations;
-  };
-
-  // Find event name based on event ID
-  const findEventName = (eventId) => {
-    if (!eventId || !events.length) return 'Unknown Event';
-    const event = events.find((e) => e.id === eventId);
-    return event ? event.title : 'Unknown Event';
   };
 
   // Export donations as CSV
@@ -172,6 +100,16 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
 
   // Get filtered donations
   const filteredDonations = filterAndSortDonations();
+
+  // Calculate total donation amount
+  const totalDonationAmount = donationsList.reduce(
+    (sum, donation) => sum + (donation.total_price || 0),
+    0
+  );
+  const formattedTotalAmount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(totalDonationAmount);
 
   // Render empty state
   const renderEmptyState = () => (
@@ -190,7 +128,6 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
           variant="outline"
           onClick={() => {
             setSearchQuery('');
-            setStatusFilter('all');
             setDateFilter(null);
           }}
         >
@@ -204,7 +141,9 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
     <Card className="shadow-sm mt-6">
       <CardHeader>
         <CardTitle>Donation History</CardTitle>
-        <CardDescription>{donationsList.length} total donations</CardDescription>
+        <CardDescription>
+          {donationsList.length} total donations • {formattedTotalAmount}
+        </CardDescription>
 
         <div className="space-y-4 mt-4">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -243,7 +182,7 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
                         size="sm"
                         className="w-full justify-start font-normal p-4"
                       >
-                        {dateFilter ? 'Clear Date Filter' : 'Select Date...'}
+                        {dateFilter ? format(dateFilter, 'PPP') : 'Select Date...'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -279,57 +218,20 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
 
           {showFilters && (
             <div className="flex flex-wrap gap-2 py-2 items-center">
-              <div className="text-sm text-muted-foreground">Status:</div>
-              <Button
-                variant={statusFilter === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('all')}
-              >
-                All
-                <Badge variant="outline" className="ml-2">
-                  {statusCounts.all}
-                </Badge>
-              </Button>
-              <Button
-                variant={statusFilter === 'completed' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('completed')}
-              >
-                Completed
-                <Badge variant="outline" className="ml-2">
-                  {statusCounts.completed}
-                </Badge>
-              </Button>
-              <Button
-                variant={statusFilter === 'pending' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('pending')}
-              >
-                Pending
-                <Badge variant="outline" className="ml-2">
-                  {statusCounts.pending}
-                </Badge>
-              </Button>
-              <Button
-                variant={statusFilter === 'failed' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('failed')}
-              >
-                Failed
-                <Badge variant="outline" className="ml-2">
-                  {statusCounts.failed}
-                </Badge>
-              </Button>
-              <Button
-                variant={statusFilter === 'refunded' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setStatusFilter('refunded')}
-              >
-                Refunded
-                <Badge variant="outline" className="ml-2">
-                  {statusCounts.refunded}
-                </Badge>
-              </Button>
+              <div className="text-sm text-muted-foreground">Events:</div>
+              {/* Create a unique list of event titles for filtering */}
+              {Array.from(new Set(donationsList.map((d) => d.event?.title)))
+                .filter(Boolean)
+                .map((eventTitle) => (
+                  <Button
+                    key={eventTitle}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSearchQuery(eventTitle)}
+                  >
+                    {eventTitle}
+                  </Button>
+                ))}
             </div>
           )}
         </div>
@@ -341,11 +243,7 @@ const UserDonationsList = ({ donations = [], events = [] }) => {
         ) : (
           <div className="space-y-4">
             {filteredDonations.map((donation) => (
-              <UserDonationRow
-                key={donation.id || `donation-${Math.random()}`}
-                donation={donation}
-                eventName={findEventName(donation.event_id)}
-              />
+              <UserDonationRow key={donation.id} donation={donation} />
             ))}
           </div>
         )}

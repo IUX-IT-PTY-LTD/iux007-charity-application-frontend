@@ -1,4 +1,4 @@
-// components/users/UserActionsHeader.jsx
+// components/admin/users/details/UserActionsHeader.jsx
 'use client';
 
 import React from 'react';

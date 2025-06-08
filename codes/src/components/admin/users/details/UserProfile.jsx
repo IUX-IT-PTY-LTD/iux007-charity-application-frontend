@@ -1,24 +1,11 @@
-// components/users/UserProfile.jsx
+// components/admin/users/details/UserProfile.jsx
 'use client';
 
 import React from 'react';
 import { format, parseISO } from 'date-fns';
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  DollarSign,
-  User as UserIcon,
-  Clock,
-  Bell,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
+import { Mail, Calendar, DollarSign, User as UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 
 const UserProfile = ({ user }) => {
   if (!user) return null;
@@ -61,7 +48,7 @@ const UserProfile = ({ user }) => {
               </Avatar>
               <div>
                 <h2 className="text-2xl font-bold">{user.name}</h2>
-                <p className="text-muted-foreground">{user.email}</p>
+                {/* <p className="text-muted-foreground">{user.email}</p> */}
               </div>
             </div>
 
@@ -71,26 +58,10 @@ const UserProfile = ({ user }) => {
                 <span>{user.email}</span>
               </div>
 
-              {/* Only show these fields if they're available in the API response */}
-              {user.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{user.phone}</span>
-                </div>
-              )}
-
-              {user.address && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p>{user.address.street}</p>
-                    <p>
-                      {user.address.city}, {user.address.state} {user.address.zip}
-                    </p>
-                    <p>{user.address.country}</p>
-                  </div>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span>Member since {registeredDate}</span>
+              </div>
             </div>
           </div>
 
@@ -105,18 +76,6 @@ const UserProfile = ({ user }) => {
                 <p className="font-semibold">{registeredDate}</p>
               </div>
 
-              {user.last_active && (
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Last Active</span>
-                  </div>
-                  <p className="font-semibold">
-                    {format(parseISO(user.last_active), "MMMM d, yyyy 'at' h:mm a")}
-                  </p>
-                </div>
-              )}
-
               <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -130,32 +89,9 @@ const UserProfile = ({ user }) => {
                   <UserIcon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Donation Count</span>
                 </div>
-                <p className="font-semibold">{user.total_donors || 0} donations</p>
+                <p className="font-semibold">{user.total_donors} donations</p>
               </div>
             </div>
-
-            {/* Only show newsletter field if it's available in the API response */}
-            {user.newsletter !== undefined && (
-              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Newsletter Subscription</span>
-                </div>
-                <div className="flex items-center">
-                  {user.newsletter ? (
-                    <>
-                      <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                      <span className="font-semibold">Subscribed</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="h-4 w-4 text-red-600 mr-2" />
-                      <span className="font-semibold">Not subscribed</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </CardContent>

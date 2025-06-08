@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/users/[userId]/details/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -18,23 +20,21 @@ const UserDetailsPage = ({ params }) => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
 
-  // State for user and donations
-  const [user, setUser] = useState(null);
-  const [donations, setDonations] = useState([]);
-  const [events, setEvents] = useState([]);
+  // State for user data
+  const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Set page title based on user
   useEffect(() => {
-    if (user) {
-      setPageTitle(`User Details - ${user.name}`);
+    if (userData) {
+      setPageTitle(`User Details - ${userData.name}`);
       setPageSubtitle(`View and manage user information`);
     } else {
       setPageTitle('User Details');
       setPageSubtitle('Loading user data...');
     }
-  }, [user, setPageTitle, setPageSubtitle]);
+  }, [userData, setPageTitle, setPageSubtitle]);
 
   // Load user data
   useEffect(() => {
@@ -51,19 +51,7 @@ const UserDetailsPage = ({ params }) => {
         const response = await userService.getUserDetails(params.userId);
 
         if (response.status === 'success') {
-          setUser(response.data);
-
-          // Handle donation details if present
-          if (response.data.donation_details) {
-            setDonations(response.data.donation_details);
-          } else {
-            // If there are no donation details, set empty array
-            setDonations([]);
-          }
-
-          // For now, events data would need a separate API endpoint
-          // We'll use an empty array for now
-          setEvents([]);
+          setUserData(response.data);
         } else {
           throw new Error(response.message || 'Failed to fetch user details');
         }
@@ -110,7 +98,7 @@ const UserDetailsPage = ({ params }) => {
   }
 
   // Show error state if user not found
-  if (!user) {
+  if (!userData) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -132,11 +120,11 @@ const UserDetailsPage = ({ params }) => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-7xl">
-        <UserActionsHeader userId={user.id} userName={user.name} />
+        <UserActionsHeader userId={userData.id} userName={userData.name} />
 
-        <UserProfile user={user} />
+        <UserProfile user={userData} />
 
-        <UserDonationsList donations={donations} events={events} />
+        <UserDonationsList donations={userData.donation_details} />
       </div>
     </div>
   );
