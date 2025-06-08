@@ -1,5 +1,6 @@
 import { apiService } from './apiService';
 import { API_BASE_URL, API_VERSION } from '@/api/config';
+import { getAuthToken } from './authService';
 
 class UserService {
   constructor() {
@@ -16,6 +17,10 @@ class UserService {
    */
   async getUsers(params = {}) {
     try {
+      if (!getAuthToken()) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
       // Set default values
       const queryParams = {
         current_page: 1,
@@ -49,6 +54,10 @@ class UserService {
    * @returns {Promise<Object>} - User details
    */
   async getUserDetails(userId) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!userId) {
       throw new Error('User ID is required');
     }

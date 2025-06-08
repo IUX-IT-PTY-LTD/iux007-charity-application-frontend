@@ -1,8 +1,3 @@
-/**
- * Service file for handling slider-related API requests
- * Integrated with the application's apiService
- */
-
 import { apiService } from './apiService';
 import { getAuthToken } from './authService';
 

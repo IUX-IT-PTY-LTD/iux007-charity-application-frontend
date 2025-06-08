@@ -1,5 +1,6 @@
 import { apiService } from './apiService';
 import { API_BASE_URL, API_VERSION } from '@/api/config';
+import { getAuthToken } from './authService';
 
 class EventService {
   constructor() {
@@ -18,6 +19,10 @@ class EventService {
    */
   async getEvents(params = {}) {
     try {
+      if (!getAuthToken()) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
       // Ensure pagination parameters are always included with correct naming
       const queryParams = {
         current_page: 1, // Default to page 1
@@ -55,6 +60,10 @@ class EventService {
    * @returns {Promise<Object>} - Event details
    */
   async getEventDetails(eventId) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!eventId) {
       throw new Error('Event ID is required');
     }
@@ -75,6 +84,10 @@ class EventService {
    * @returns {Promise<Object>} - Event details with donations
    */
   async getEventWithDonations(eventId) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!eventId) {
       throw new Error('Event ID is required');
     }
@@ -96,6 +109,10 @@ class EventService {
    */
   async createEvent(eventData) {
     try {
+      if (!getAuthToken()) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
       const endpoint = `/${this.baseEndpoint}/events`;
 
       // Format the data for submission
@@ -116,6 +133,10 @@ class EventService {
    * @returns {Promise<Object>} - Updated event data
    */
   async updateEvent(eventId, eventData) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!eventId) {
       throw new Error('Event ID is required');
     }
@@ -141,6 +162,10 @@ class EventService {
    * @returns {Promise<Object>} - Status update result
    */
   async updateEventStatus(eventId, status) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!eventId) {
       throw new Error('Event ID is required');
     }
@@ -161,6 +186,10 @@ class EventService {
    * @returns {Promise<Object>} - Deletion response
    */
   async deleteEvent(eventId) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+    
     if (!eventId) {
       throw new Error('Event ID is required');
     }

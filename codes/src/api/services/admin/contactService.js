@@ -1,5 +1,6 @@
 import { apiService } from './apiService';
 import { API_VERSION } from '@/api/config';
+import { getAuthToken } from './authService';
 
 class ContactService {
   constructor() {
@@ -12,6 +13,10 @@ class ContactService {
    */
   async getAllContacts() {
     try {
+      if (!getAuthToken()) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
       const endpoint = `/${this.baseEndpoint}/contact-us`;
       const response = await apiService.get(endpoint);
       return response;
@@ -27,6 +32,10 @@ class ContactService {
    * @returns {Promise<Object>} - Contact details
    */
   async getContactDetails(contactId) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!contactId) {
       throw new Error('Contact ID is required');
     }
@@ -52,6 +61,10 @@ class ContactService {
    * @returns {Promise<Object>} - Updated contact information
    */
   async updateContact(contactId, contactData) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!contactId) {
       throw new Error('Contact ID is required');
     }
@@ -77,6 +90,10 @@ class ContactService {
    * @returns {Promise<Object>} - Updated contact
    */
   async toggleContactStatus(contactId, status) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+    
     if (!contactId) {
       throw new Error('Contact ID is required');
     }
@@ -88,20 +105,20 @@ class ContactService {
     try {
       // First, get the current contact details
       const contactResponse = await this.getContactDetails(contactId);
-      
+
       if (contactResponse.status !== 'success' || !contactResponse.data) {
         throw new Error('Failed to fetch contact details for status update');
       }
-      
+
       // Get the current contact data
       const contactData = contactResponse.data;
-      
+
       // Update the status while preserving all other fields
       const updatedContactData = {
         ...contactData,
-        status: status
+        status: status,
       };
-      
+
       // Send the complete data back to the server with the updated status
       return await this.updateContact(contactId, updatedContactData);
     } catch (error) {

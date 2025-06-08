@@ -1,5 +1,6 @@
 import { apiService } from './apiService';
 import { API_BASE_URL, API_VERSION } from '@/api/config';
+import { getAuthToken } from './authService';
 
 class MenuService {
   constructor() {
@@ -12,6 +13,10 @@ class MenuService {
    */
   async getMenus() {
     try {
+      if (!getAuthToken()) {
+        throw new Error('Authentication required. Please log in.');
+      }
+
       const endpoint = `/${this.baseEndpoint}/menus`;
 
       console.log('Fetching menus with endpoint:', endpoint); // Debug log
@@ -30,6 +35,10 @@ class MenuService {
    * @returns {Promise<Object>} - Menu details
    */
   async getMenuDetails(menuId) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!menuId) {
       throw new Error('Menu ID is required');
     }
@@ -54,6 +63,10 @@ class MenuService {
    * @returns {Promise<Object>} - Created menu data
    */
   async createMenu(menuData) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     try {
       const endpoint = `/${this.baseEndpoint}/menus/create`;
 
@@ -84,6 +97,10 @@ class MenuService {
    * @returns {Promise<Object>} - Updated menu data
    */
   async updateMenu(menuId, menuData) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
     if (!menuId) {
       throw new Error('Menu ID is required');
     }
@@ -109,6 +126,10 @@ class MenuService {
    * @returns {Promise<Object>} - Deletion response
    */
   async deleteMenu(menuId) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+    
     if (!menuId) {
       throw new Error('Menu ID is required');
     }
