@@ -68,7 +68,7 @@ const UserStats = ({
         icon={Users}
         description={`${recentlyAddedUsers} new users in the last 30 days`}
         trend={true}
-        trendValue={5} // Mock value, would be calculated in a real implementation
+        trendValue={5} // Mock value, need to be calculated from backend data
       />
 
       <StatCard
@@ -77,7 +77,7 @@ const UserStats = ({
         icon={HandCoins}
         description={`Average ${averageDonationsPerUser.toFixed(1)} donations per user`}
         trend={true}
-        trendValue={3} // Mock value, would be calculated in a real implementation
+        trendValue={3} // Mock value, need to be calculated from backend data
       />
     </div>
   );
