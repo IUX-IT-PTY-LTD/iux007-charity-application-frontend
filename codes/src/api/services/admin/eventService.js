@@ -70,6 +70,26 @@ class EventService {
   }
 
   /**
+   * Get event details with donation data
+   * @param {number|string} eventId - Event ID
+   * @returns {Promise<Object>} - Event details with donations
+   */
+  async getEventWithDonations(eventId) {
+    if (!eventId) {
+      throw new Error('Event ID is required');
+    }
+
+    try {
+      const endpoint = `/${this.baseEndpoint}/events/${eventId}/donation`;
+      const response = await apiService.get(endpoint);
+      return response;
+    } catch (error) {
+      console.error(`Error fetching event donations for ID ${eventId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Create a new event
    * @param {Object} eventData - Event data
    * @returns {Promise<Object>} - Created event data

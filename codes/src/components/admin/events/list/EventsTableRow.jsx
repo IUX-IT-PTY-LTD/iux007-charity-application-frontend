@@ -47,7 +47,7 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
           <div
             className="font-medium truncate cursor-pointer hover:text-blue-600"
             title={event.title}
-            onClick={() => router.push(`/admin/events/${event.id}/donations`)}
+            onClick={() => router.push(`/admin/events/${event.id}/details`)}
           >
             {event.title}
           </div>
