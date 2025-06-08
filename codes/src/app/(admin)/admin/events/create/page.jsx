@@ -16,12 +16,7 @@ import EventPreview from '@/components/admin/events/create/EventPreview';
 import { eventFormSchema, defaultEventValues } from '@/components/admin/events/create/eventSchema';
 
 // Import service
-import { 
-  createEvent,
-  validateEventData,
-  formatEventDataForSubmission,
-} from '@/api/services/admin/eventService';
-import { isAuthenticated } from '@/api/services/admin/authService';
+import { eventService } from '@/api/services/admin/eventService';
 
 const AdminEventCreate = () => {
   const router = useRouter();
@@ -31,16 +26,8 @@ const AdminEventCreate = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   useEffect(() => {
     setPageTitle('Create Event');
-    // setPageSubtitle("Add a new event to your calendar");
+    setPageSubtitle('Add a new event to your calendar');
   }, [setPageTitle, setPageSubtitle]);
-
-  // Check authentication
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      toast.error('Authentication required. Please log in.');
-      router.push('/admin/login');
-    }
-  }, [router]);
 
   // Initialize form with validation
   const form = useForm({
@@ -51,34 +38,40 @@ const AdminEventCreate = () => {
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      console.log('Form data before validation:', data);
+      console.log('Form data for submission:', data);
 
-      // Validate event data
-      const { isValid, errors } = validateEventData(data);
-      if (!isValid) {
-        errors.forEach((error) => toast.error(error));
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Format data for API submission
-      const formattedData = formatEventDataForSubmission(data);
-
-      // Debug
-      console.log('Formatted data for submission:', formattedData);
-
-      // Submit to API
-      const response = await createEvent(formattedData);
+      // Submit to API using the eventService
+      const response = await eventService.createEvent(data);
 
       if (response.status === 'success') {
         toast.success(response.message || 'Event created successfully!');
+
+        // You can store the returned event ID or UUID if needed
+        console.log('Created event details:', response.data);
+
         router.push('/admin/events');
       } else {
         toast.error(response.message || 'Failed to create event');
       }
     } catch (error) {
       console.error('Error creating event:', error);
-      toast.error(error.message || 'An error occurred while creating the event');
+
+      // Check for validation errors in the API response
+      if (error.errors) {
+        // Handle specific field errors
+        Object.entries(error.errors).forEach(([field, messages]) => {
+          if (messages && messages.length > 0) {
+            form.setError(field, {
+              type: 'manual',
+              message: messages[0],
+            });
+          }
+        });
+
+        toast.error('Please correct the errors in the form');
+      } else {
+        toast.error(error.message || 'An error occurred while creating the event');
+      }
     } finally {
       setIsSubmitting(false);
     }

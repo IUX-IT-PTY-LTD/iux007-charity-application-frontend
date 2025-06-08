@@ -50,12 +50,12 @@ const navigationItems = [
   //   href: "/admin/pages",
   //   icon: FileText,
   // },
-  {
-    id: 'blogs',
-    name: 'Blog Posts',
-    href: '/admin/blogs',
-    icon: FileText,
-  },
+  // {
+  //   id: 'blogs',
+  //   name: 'Blog Posts',
+  //   href: '/admin/blogs',
+  //   icon: FileText,
+  // },
   {
     id: 'faqs',
     name: 'FAQs',

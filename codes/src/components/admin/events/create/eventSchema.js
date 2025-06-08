@@ -25,13 +25,16 @@ export const eventFormSchema = z
     target_amount: z.coerce.number().min(0, {
       message: 'Target amount must be a positive number.',
     }),
-    is_fixed_donation: z.boolean().default(false),
-    location: z.string().min(2, {
-      message: 'Location must be at least 2 characters.',
-    }),
-    status: z.string().default('1'),
-    is_featured: z.boolean().default(false),
-    feature_image: z.any().optional(),
+    is_fixed_donation: z.number().default(0),
+    location: z
+      .string()
+      .min(2, {
+        message: 'Location must be at least 2 characters.',
+      })
+      .nullable(),
+    status: z.number().default(1),
+    is_featured: z.number().default(0),
+    featured_image: z.any().optional(),
   })
   .refine((data) => data.end_date >= data.start_date, {
     message: 'End date must be after start date',
@@ -46,27 +49,9 @@ export const defaultEventValues = {
   end_date: new Date(),
   price: 0,
   target_amount: 0,
-  is_fixed_donation: false,
+  is_fixed_donation: 0,
   location: '',
-  status: '1',
-  is_featured: false,
-  feature_image: null,
-};
-
-// Helper to format form data for API submission
-export const formatEventDataForSubmission = (data) => {
-  // Format dates to YYYY-MM-DD strings
-  const formattedData = {
-    ...data,
-    start_date:
-      data.start_date instanceof Date
-        ? data.start_date.toISOString().split('T')[0]
-        : data.start_date,
-    end_date:
-      data.end_date instanceof Date ? data.end_date.toISOString().split('T')[0] : data.end_date,
-    is_fixed_donation: data.is_fixed_donation ? '1' : '0',
-    is_featured: data.is_featured ? '1' : '0',
-  };
-
-  return formattedData;
+  status: 1,
+  is_featured: 0,
+  featured_image: null,
 };

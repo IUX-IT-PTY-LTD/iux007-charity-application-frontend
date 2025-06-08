@@ -11,16 +11,25 @@ import {
 
 const EventsPagination = ({
   currentPage,
-  setCurrentPage,
-  itemsPerPage,
-  setItemsPerPage,
   totalEvents,
   totalPages,
   indexOfFirstItem,
   indexOfLastItem,
+  onPageChange,
+  itemsPerPage,
+  onItemsPerPageChange,
 }) => {
+  // Pagination only display if we have events
+  if (totalEvents === 0) {
+    return (
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center w-full">
+        <div className="text-xs text-gray-500">No events found</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center w-full">
       <div className="text-xs text-gray-500">
         Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalEvents)} of {totalEvents}{' '}
         events
@@ -32,7 +41,7 @@ const EventsPagination = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(1)}
+            onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
           >
             First
@@ -40,7 +49,7 @@ const EventsPagination = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
             disabled={currentPage === 1}
           >
             &lt;
@@ -60,7 +69,7 @@ const EventsPagination = ({
                     key={pageNumber}
                     variant={currentPage === pageNumber ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setCurrentPage(pageNumber)}
+                    onClick={() => onPageChange(pageNumber)}
                     className="w-8 h-8 p-0"
                   >
                     {pageNumber}
@@ -74,7 +83,7 @@ const EventsPagination = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
             &gt;
@@ -82,7 +91,7 @@ const EventsPagination = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(totalPages)}
+            onClick={() => onPageChange(totalPages)}
             disabled={currentPage === totalPages}
           >
             Last
@@ -94,10 +103,7 @@ const EventsPagination = ({
         <span className="text-xs text-gray-500">Items per page:</span>
         <Select
           value={itemsPerPage.toString()}
-          onValueChange={(value) => {
-            setItemsPerPage(Number(value));
-            setCurrentPage(1); // Reset to first page when changing items per page
-          }}
+          onValueChange={(value) => onItemsPerPageChange(Number(value))}
         >
           <SelectTrigger className="w-16 h-8">
             <SelectValue placeholder="10" />
