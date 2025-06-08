@@ -60,7 +60,7 @@ class EventService {
     }
 
     try {
-      const endpoint = `/${this.baseEndpoint}/events/${eventId}`;
+      const endpoint = `/${this.baseEndpoint}/events/view/${eventId}`;
       const response = await apiService.get(endpoint);
       return response;
     } catch (error) {
