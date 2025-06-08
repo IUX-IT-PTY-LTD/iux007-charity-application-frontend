@@ -1,3 +1,4 @@
+// src/app/(admin)/admin/menus/[menuId]/edit/page.jsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,46 +9,18 @@ import { useParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Form } from '@/components/ui/form';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+
+// Import services
+import { menuService } from '@/api/services/admin/menuService';
+
+// Import components
+import EditMenuForm from '@/components/admin/menus/edit/EditMenuForm';
+import EditMenuPreview from '@/components/admin/menus/edit/EditMenuPreview';
+import EditFormActions from '@/components/admin/menus/edit/EditFormActions';
 
 // Define form schema
 const formSchema = z.object({
@@ -60,18 +33,20 @@ const formSchema = z.object({
   ordering: z.coerce.number().int().positive({
     message: 'Ordering must be a positive number.',
   }),
-  status: z.boolean().default(true),
+  status: z.number().int().min(0).max(1).default(1),
 });
 
-const AdminMenuEdit = () => {
+const EditMenuPage = () => {
   const params = useParams();
   const router = useRouter();
   const { menuId } = params;
   const { setPageTitle, setPageSubtitle } = useAdminContext();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [originalSlug, setOriginalSlug] = useState('');
+  const [originalOrdering, setOriginalOrdering] = useState(null);
 
   // Define form with zod validation
   const form = useForm({
@@ -79,104 +54,48 @@ const AdminMenuEdit = () => {
       name: '',
       slug: '',
       ordering: 1,
-      status: true,
+      status: 1,
     },
     resolver: zodResolver(formSchema),
   });
 
   // For form preview - use the values directly from form.watch()
-  const formPreview = form.watch();
+  const formValues = form.watch();
 
   useEffect(() => {
-    setPageTitle('Edit Menu Item');
-    // setPageSubtitle("Manage your website navigation menus");
-  }, [setPageTitle, setPageSubtitle]);
+    setPageTitle(`Edit Menu: ${formValues.name || 'Loading...'}`);
+    setPageSubtitle('Update your website navigation menu');
+  }, [formValues.name, setPageTitle, setPageSubtitle]);
 
   // Fetch menu data
   useEffect(() => {
     const fetchMenuData = async () => {
       setIsLoading(true);
       try {
-        // Get menus from localStorage
-        const menus = JSON.parse(localStorage.getItem('menus') || '[]');
-        const menuData = menus.find((menu) => menu.id === menuId);
+        const response = await menuService.getMenuDetails(menuId);
 
-        if (!menuData) {
-          throw new Error('Menu not found');
+        if (response.status === 'success') {
+          const menuData = response.data;
+
+          // Set original values to track changes
+          setOriginalSlug(menuData.slug);
+          setOriginalOrdering(menuData.ordering);
+
+          // Update form with fetched data
+          form.reset(menuData);
+        } else {
+          throw new Error(response.message || 'Failed to fetch menu details');
         }
-
-        // Convert numeric status to boolean for form
-        const formData = {
-          ...menuData,
-          status: menuData.status === 1,
-        };
-
-        // Set original slug to track changes
-        setOriginalSlug(menuData.slug);
-
-        // Update form with fetched data
-        form.reset(formData);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching menu:', err);
+      } catch (error) {
+        console.error('Error fetching menu:', error);
         setError('Failed to load menu. Please try again later.');
+      } finally {
         setIsLoading(false);
       }
     };
 
     fetchMenuData();
   }, [menuId, form]);
-
-  // Handle form submission
-  const onSubmit = async (data) => {
-    // Convert status boolean to number for API
-    const apiData = {
-      ...data,
-      id: menuId,
-      status: data.status ? 1 : 0,
-    };
-
-    try {
-      // Update in localStorage
-      const menus = JSON.parse(localStorage.getItem('menus') || '[]');
-      const updatedMenus = menus.map((menu) => (menu.id === menuId ? apiData : menu));
-      localStorage.setItem('menus', JSON.stringify(updatedMenus));
-
-      // Show success message
-      toast.success('Menu updated successfully!');
-
-      // Redirect to menus list
-      router.push('/admin/menus');
-    } catch (err) {
-      console.error('Error updating menu:', err);
-      toast.error({
-        title: 'Error',
-        description: 'Failed to update menu',
-      });
-    }
-  };
-
-  // For delete:
-  const handleDelete = async () => {
-    try {
-      // Delete from localStorage
-      const menus = JSON.parse(localStorage.getItem('menus') || '[]');
-      const filteredMenus = menus.filter((menu) => menu.id !== menuId);
-      localStorage.setItem('menus', JSON.stringify(filteredMenus));
-
-      // Show success message
-      toast.success('Menu deleted successfully!');
-
-      // Redirect after deletion
-      router.push('/admin/menus');
-    } catch (err) {
-      console.error('Error deleting menu:', err);
-      toast.error({
-        title: 'Error',
-        description: 'Failed to delete menu',
-      });
-    }
-  };
 
   // Generate a slug from name
   const generateSlug = (name) => {
@@ -189,6 +108,116 @@ const AdminMenuEdit = () => {
       .replace(/-+$/, ''); // Trim - from end of text
 
     form.setValue('slug', slug);
+  };
+
+  // Handle form submission
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+
+    try {
+      const response = await menuService.updateMenu(menuId, data);
+
+      if (response.status === 'success') {
+        toast.success('Menu updated successfully!');
+        router.push('/admin/menus');
+      } else {
+        throw new Error(response.message || 'Failed to update menu');
+      }
+    } catch (error) {
+      console.error('Error updating menu:', error);
+
+      // Extract validation errors from the response
+      const validationErrors =
+        error.errors ||
+        error.response?.data?.errors ||
+        (error.response?.data && error.response.data);
+
+      if (validationErrors) {
+        // Handle slug error
+        if (validationErrors.slug) {
+          const slugError = Array.isArray(validationErrors.slug)
+            ? validationErrors.slug[0]
+            : validationErrors.slug;
+
+          form.setError('slug', {
+            type: 'manual',
+            message: slugError,
+          });
+          toast.error(`Slug error: ${slugError}`, {
+            description: 'Please choose a different slug name.',
+          });
+        }
+
+        // Handle ordering error
+        if (validationErrors.ordering) {
+          const orderingError = Array.isArray(validationErrors.ordering)
+            ? validationErrors.ordering[0]
+            : validationErrors.ordering;
+
+          form.setError('ordering', {
+            type: 'manual',
+            message: orderingError,
+          });
+
+          // Only show ordering toast if there's no slug error (to avoid multiple toasts)
+          if (!validationErrors.slug) {
+            toast.error(`Ordering error: ${orderingError}`, {
+              description: 'Please choose a different ordering value.',
+            });
+          }
+        }
+      } else if (typeof error.message === 'string') {
+        // Check for common error messages in the string
+        if (
+          error.message.includes('slug') &&
+          (error.message.includes('taken') || error.message.includes('unique'))
+        ) {
+          form.setError('slug', {
+            type: 'manual',
+            message: 'This slug is already in use.',
+          });
+          toast.error('This slug is already in use', {
+            description: 'Please choose a different slug name.',
+          });
+        } else if (
+          error.message.includes('ordering') &&
+          (error.message.includes('taken') || error.message.includes('unique'))
+        ) {
+          form.setError('ordering', {
+            type: 'manual',
+            message: 'This ordering position is already taken.',
+          });
+          toast.error('This ordering position is already taken', {
+            description: 'Please choose a different ordering value.',
+          });
+        } else {
+          toast.error('Failed to update menu', {
+            description: error.message,
+          });
+        }
+      } else {
+        toast.error('Failed to update menu. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle menu deletion
+  const handleDelete = async () => {
+    try {
+      const response = await menuService.deleteMenu(menuId);
+
+      if (response.status === 'success') {
+        toast.success('Menu deleted successfully!');
+        router.push('/admin/menus');
+      } else {
+        throw new Error(response.message || 'Failed to delete menu');
+      }
+    } catch (error) {
+      console.error('Error deleting menu:', error);
+      toast.error('Failed to delete menu. Please try again.');
+    }
   };
 
   if (isLoading) {
@@ -225,207 +254,26 @@ const AdminMenuEdit = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-5xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-            Editing: {form.getValues().name}
-          </h2>
-
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push('/admin/menus')}>
-              Cancel
-            </Button>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete Menu</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the menu and all
-                    associated items.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Form Section */}
           <div className="md:col-span-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Menu Information</CardTitle>
-                    <CardDescription>Update this navigation menu for your website.</CardDescription>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Menu Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g. Blog"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                if (originalSlug === form.getValues('slug')) {
-                                  generateSlug(e.target.value);
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>The name displayed in the admin panel.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="slug"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Slug</FormLabel>
-                          <div className="flex items-center space-x-2">
-                            <FormControl>
-                              <Input placeholder="e.g. blog" {...field} />
-                            </FormControl>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => generateSlug(form.getValues('name'))}
-                            >
-                              Generate
-                            </Button>
-                          </div>
-                          <FormDescription>Used in URL and code references.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="ordering"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Order Priority</FormLabel>
-                          <FormControl>
-                            <Input type="number" min={1} placeholder="1" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Lower numbers appear first in navigation.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Separator className="my-2" />
-
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Menu Status</FormLabel>
-                          <Select
-                            onValueChange={(value) => field.onChange(value === '1')}
-                            value={field.value ? '1' : '0'}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="1">Active</SelectItem>
-                              <SelectItem value="0">Inactive</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            When active, this menu will be available for use.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-
-                  <CardFooter className="flex justify-between">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() => router.push('/admin/menus')}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                      Update Menu
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <EditMenuForm
+                  form={form}
+                  generateSlug={generateSlug}
+                  originalSlug={originalSlug}
+                  FormActions={() => (
+                    <EditFormActions isSubmitting={isSubmitting} handleDelete={handleDelete} />
+                  )}
+                />
               </form>
             </Form>
           </div>
 
           {/* Preview Section */}
           <div className="md:col-span-1">
-            <Card className="sticky top-6">
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">{formPreview.name || 'Menu Name'}</h3>
-                    <p className="text-sm text-gray-500">/{formPreview.slug || 'slug'}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={formPreview.status ? 'success' : 'error'}
-                      className={
-                        formPreview.status
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }
-                    >
-                      {formPreview.status ? 'Active' : 'Inactive'}
-                    </Badge>
-                    <span className="text-xs text-gray-500">Order: {formPreview.ordering}</span>
-                  </div>
-
-                  <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                    <div className="text-xs text-gray-500 mb-2">Menu items will appear here</div>
-                    <div className="h-24 border border-dashed rounded-md flex items-center justify-center">
-                      <p className="text-xs text-gray-400">No items yet</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between items-center">
-                <span className="text-xs text-gray-500">ID: {menuId}</span>
-                <span className="text-xs text-gray-500">
-                  Last updated: {new Date().toLocaleDateString()}
-                </span>
-              </CardFooter>
-            </Card>
+            <EditMenuPreview formValues={formValues} menuId={menuId} />
           </div>
         </div>
       </div>
@@ -433,4 +281,4 @@ const AdminMenuEdit = () => {
   );
 };
 
-export default AdminMenuEdit;
+export default EditMenuPage;
