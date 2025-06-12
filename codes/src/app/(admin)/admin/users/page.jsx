@@ -3,8 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
-import { Loader2, FileDown, UserSearch } from 'lucide-react';
-import { format, parseISO, isSameDay } from 'date-fns';
+import { Loader2, FileDown, UserSearch, AlertCircle } from 'lucide-react';
+import { format, parseISO, isSameDay, subDays } from 'date-fns';
+
+// Import user service
+import { userService } from '@/api/services/admin/userService';
 
 // Import custom components
 import UserFilters from '@/components/admin/users/list/UserFilters';
@@ -39,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const UsersPage = () => {
   const router = useRouter();
@@ -53,278 +57,191 @@ const UsersPage = () => {
   // State for users
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [lastUpdateDate, setLastUpdateDate] = useState(new Date().toISOString());
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState(null);
-  const [sortBy, setSortBy] = useState('name-a-z');
+  const [sortBy, setSortBy] = useState('newest');
+  const [donationStatus, setDonationStatus] = useState('all');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    per_page: 10,
+    current_page: 1,
+    last_page: 1,
+    from: 0,
+    to: 0,
+  });
+
+  // Stats state
+  const [recentlyAddedUsers, setRecentlyAddedUsers] = useState(0);
 
   // Load user data
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+  const fetchData = async (filters = {}) => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        // Check if users exist in localStorage
-        const storedUsers = localStorage.getItem('users');
-        let userData = [];
-
-        if (storedUsers) {
-          userData = JSON.parse(storedUsers);
-        } else {
-          // Generate sample users
-          userData = generateSampleUsers();
-          localStorage.setItem('users', JSON.stringify(userData));
-          setLastUpdateDate(new Date().toISOString());
-        }
-
-        setUsers(userData);
-
-        /* API Implementation (Commented out for future use)
-        // Fetch users from API
-        const response = await fetch('/api/users');
-        if (!response.ok) {
-          throw new Error('Failed to fetch users');
-        }
-        const userData = await response.json();
-        setUsers(userData);
-        setLastUpdateDate(new Date().toISOString());
-        */
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to load user data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Helper function to generate sample users for testing
-  function generateSampleUsers() {
-    const sampleUsers = [];
-    const roles = ['Donor', 'Volunteer', 'Staff', 'Admin'];
-    const firstNames = [
-      'John',
-      'Jane',
-      'Michael',
-      'Emma',
-      'David',
-      'Sarah',
-      'Robert',
-      'Emily',
-      'William',
-      'Olivia',
-      'James',
-      'Sophia',
-      'Benjamin',
-      'Isabella',
-      'Daniel',
-      'Mia',
-      'Matthew',
-      'Charlotte',
-      'Joseph',
-      'Amelia',
-    ];
-    const lastNames = [
-      'Smith',
-      'Johnson',
-      'Williams',
-      'Brown',
-      'Jones',
-      'Garcia',
-      'Miller',
-      'Davis',
-      'Rodriguez',
-      'Martinez',
-      'Wilson',
-      'Anderson',
-      'Taylor',
-      'Thomas',
-      'Moore',
-      'Jackson',
-      'Martin',
-      'Lee',
-      'Thompson',
-      'White',
-    ];
-
-    // Generate 50 sample users
-    for (let i = 1; i <= 50; i++) {
-      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-      const fullName = `${firstName} ${lastName}`;
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`;
-
-      // Random registration date in the past 2 years
-      const now = new Date();
-      const twoYearsAgo = new Date(now);
-      twoYearsAgo.setFullYear(now.getFullYear() - 2);
-
-      const registrationDate = new Date(
-        twoYearsAgo.getTime() + Math.random() * (now.getTime() - twoYearsAgo.getTime())
-      );
-
-      //   // Random role with weighted probability
-      //   // 70% Donor, 15% Volunteer, 10% Staff, 5% Admin
-      //   let role;
-      //   const rand = Math.random();
-      //   if (rand < 0.7) {
-      //     role = "Donor";
-      //   } else if (rand < 0.85) {
-      //     role = "Volunteer";
-      //   } else if (rand < 0.95) {
-      //     role = "Staff";
-      //   } else {
-      //     role = "Admin";
-      //   }
-
-      // Random number of donations (0-20)
-      const donationCount = Math.floor(Math.random() * 21);
-
-      // Random last login date (within the last 30 days for most users)
-      const lastActive =
-        Math.random() < 0.7
-          ? new Date(now - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)) // Random day in the last 30 days
-          : new Date(now - Math.floor(Math.random() * 180 * 24 * 60 * 60 * 1000)); // Random day in the last 180 days
-
-      // Create user object
-      const user = {
-        id: `USER-${i.toString().padStart(3, '0')}`,
-        name: fullName,
-        email: email,
-        phone:
-          Math.random() < 0.7
-            ? `(${Math.floor(Math.random() * 900) + 100}) ${
-                Math.floor(Math.random() * 900) + 100
-              }-${Math.floor(Math.random() * 9000) + 1000}`
-            : null,
-        address:
-          Math.random() < 0.5
-            ? {
-                street: `${Math.floor(Math.random() * 9999) + 1} Main St`,
-                city: 'Springfield',
-                state: 'IL',
-                zip: `${Math.floor(Math.random() * 90000) + 10000}`,
-                country: 'USA',
-              }
-            : null,
-        created_at: registrationDate.toISOString(),
-        last_active: lastActive.toISOString(),
-        // role: role,
-        donation_count: donationCount,
-        total_donated:
-          donationCount > 0
-            ? Math.floor(Math.random() * 50 * donationCount) + 20 * donationCount
-            : 0,
-        newsletter: Math.random() < 0.7,
-        avatar: null, // No avatar for sample users
+    try {
+      // Prepare API parameters
+      const params = {
+        current_page: filters.page || currentPage,
+        per_page: filters.perPage || itemsPerPage,
       };
 
-      sampleUsers.push(user);
+      // Add name filter if search query exists
+      if (filters.search !== undefined ? filters.search : searchQuery) {
+        params.name = filters.search !== undefined ? filters.search : searchQuery;
+      }
+
+      // Add date filter if exists
+      if (filters.date !== undefined ? filters.date : dateFilter) {
+        // Format date as required by the API
+        const formattedDate =
+          filters.date || (dateFilter ? format(dateFilter, 'yyyy-MM-dd') : null);
+
+        if (formattedDate) {
+          params.date = formattedDate;
+        }
+      }
+
+      console.log('Fetching users with params:', params);
+
+      // Fetch users from API
+      const response = await userService.getUsers(params);
+
+      if (response.status === 'success') {
+        setUsers(response.data || []);
+        setPagination(
+          response.pagination || {
+            total: 0,
+            per_page: itemsPerPage,
+            current_page: currentPage,
+            last_page: 1,
+            from: 0,
+            to: 0,
+          }
+        );
+        setLastUpdateDate(new Date().toISOString());
+
+        // Calculate recently added users (users added in the last 30 days)
+        const thirtyDaysAgo = subDays(new Date(), 30);
+        const recentUsers = response.data.filter((user) => {
+          const createdAt = parseISO(user.created_at);
+          return createdAt >= thirtyDaysAgo;
+        }).length;
+
+        // For a more accurate count, we should ideally have an API endpoint for this
+        // For now, we'll estimate based on the current page data
+        const estimatedRecentUsers = Math.round(
+          (recentUsers / response.data.length) * response.pagination.total
+        );
+        setRecentlyAddedUsers(estimatedRecentUsers);
+      } else {
+        throw new Error(response.message || 'Failed to fetch users');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError('Failed to load user data. Please try again later.');
+      toast.error('Failed to load user data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle filter changes
+  const handleFiltersChange = (filters) => {
+    // Update local state
+    if (filters.search !== undefined) setSearchQuery(filters.search);
+    if (filters.date !== undefined) setDateFilter(filters.date ? new Date(filters.date) : null);
+    if (filters.sort !== undefined) setSortBy(filters.sort);
+    if (filters.donationStatus !== undefined) setDonationStatus(filters.donationStatus);
+
+    // If a specific page is not provided in filters, reset to first page when filters change
+    if (filters.page === undefined) {
+      setCurrentPage(1);
+    } else {
+      setCurrentPage(filters.page);
     }
 
-    return sampleUsers;
-  }
+    // If a specific perPage is not provided in filters, use the current itemsPerPage
+    if (filters.perPage !== undefined) {
+      setItemsPerPage(filters.perPage);
+    }
 
-  // Handle user deletion
-  const handleDeleteUser = (userId) => {
-    // Update users state
-    setUsers(users.filter((user) => user.id !== userId));
-
-    // Update localStorage
-    localStorage.setItem('users', JSON.stringify(users.filter((user) => user.id !== userId)));
-    setLastUpdateDate(new Date().toISOString());
-
-    /* API Implementation (Commented out for future use)
-    // Delete user from API
-    fetch(`/api/users/${userId}`, {
-      method: 'DELETE'
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to delete user');
-      return response.json();
-    })
-    .then(data => {
-      setUsers(users.filter(user => user.id !== userId));
-      setLastUpdateDate(new Date().toISOString());
-      toast.success('User deleted successfully');
-    })
-    .catch(error => {
-      console.error('Error deleting user:', error);
-      toast.error('Failed to delete user');
+    // Fetch data with new filters
+    fetchData({
+      page: filters.page || 1,
+      search: filters.search,
+      date: filters.date,
+      perPage: filters.perPage || itemsPerPage,
     });
-    */
+  };
+
+  // Initial data load
+  useEffect(() => {
+    fetchData();
+  }, []); // Empty dependency array to only run once on mount
+
+  // Handle user deletion (commented out for future implementation)
+  const handleDeleteUser = (userId) => {
+    toast.info('Delete functionality will be implemented in the future');
   };
 
   // Handle export users
   const handleExportUsers = () => {
     toast.info('Exporting users...');
-    // In production, this would generate a CSV/Excel file
-    // For now, we'll just show a toast message
     setTimeout(() => {
       toast.success('Users exported successfully!');
     }, 1500);
   };
 
-  // Filter and sort users
-  const filterAndSortUsers = () => {
-    let filteredUsers = [...users];
+  // Apply client-side filtering for donation status
+  // (ideally this would be handled by the API)
+  const filterByDonationStatus = (userList) => {
+    if (donationStatus === 'all') return userList;
 
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filteredUsers = filteredUsers.filter(
-        (user) =>
-          user.name.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query) ||
-          (user.phone && user.phone.includes(query))
+    return userList.filter((user) => {
+      const hasDonations = (user.total_donors || 0) > 0;
+      return (
+        (donationStatus === 'donors' && hasDonations) ||
+        (donationStatus === 'non-donors' && !hasDonations)
       );
-    }
+    });
+  };
 
-    // Apply role filter
-    // if (roleFilter !== "all") {
-    //   filteredUsers = filteredUsers.filter((user) => user.role === roleFilter);
-    // }
-
-    // Apply date filter
-    if (dateFilter) {
-      filteredUsers = filteredUsers.filter((user) => {
-        const userDate = parseISO(user.created_at);
-        return isSameDay(userDate, dateFilter);
-      });
-    }
+  // Sort users
+  const sortUsers = (userList) => {
+    let sortedUsers = [...userList];
 
     // Apply sorting
     switch (sortBy) {
       case 'name-a-z':
-        filteredUsers.sort((a, b) => a.name.localeCompare(b.name));
+        sortedUsers.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case 'name-z-a':
-        filteredUsers.sort((a, b) => b.name.localeCompare(a.name));
+        sortedUsers.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case 'newest':
-        filteredUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        sortedUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         break;
       case 'oldest':
-        filteredUsers.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        sortedUsers.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         break;
       case 'donations-high':
-        filteredUsers.sort((a, b) => b.donation_count - a.donation_count);
+        sortedUsers.sort((a, b) => (b.total_donors || 0) - (a.total_donors || 0));
         break;
       case 'donations-low':
-        filteredUsers.sort((a, b) => a.donation_count - b.donation_count);
+        sortedUsers.sort((a, b) => (a.total_donors || 0) - (b.total_donors || 0));
         break;
     }
 
-    return filteredUsers;
+    return sortedUsers;
   };
 
   // Calculate stats for user summary
@@ -332,58 +249,31 @@ const UsersPage = () => {
     if (!users.length) {
       return {
         totalUsers: 0,
-        recentlyActiveUsers: 0,
         totalDonations: 0,
         averageDonationsPerUser: 0,
       };
     }
 
-    // Count users who were active in the last 30 days
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(now.getDate() - 30);
-
-    const recentlyActiveUsers = users.filter(
-      (user) => new Date(user.last_active) >= thirtyDaysAgo
-    ).length;
+    // Count all users from pagination
+    const totalUsers = pagination.total;
 
     // Total donations made by all users
-    const totalDonations = users.reduce((sum, user) => sum + user.donation_count, 0);
+    const totalDonations = users.reduce((sum, user) => sum + (user.total_donors || 0), 0);
 
     // Average donations per user
     const averageDonationsPerUser = users.length ? totalDonations / users.length : 0;
 
     return {
-      totalUsers: users.length,
-      recentlyActiveUsers,
+      totalUsers,
       totalDonations,
       averageDonationsPerUser,
     };
   };
 
-  // Get unique roles for filtering
-  //   const getRoles = () => {
-  //     const roles = new Set();
-  //     users.forEach((user) => {
-  //       if (user.role) {
-  //         roles.add(user.role);
-  //       }
-  //     });
-  //     return Array.from(roles);
-  //   };
-
-  // Apply filters and calculate stats
-  const filteredUsers = filterAndSortUsers();
+  // Apply sorting and filters, then calculate stats
+  const filteredUsers = filterByDonationStatus(users);
+  const sortedUsers = sortUsers(filteredUsers);
   const stats = calculateStats();
-  //   const roles = getRoles();
-
-  // Calculate pagination
-  const totalUsers = filteredUsers.length;
-  const totalPages = Math.ceil(totalUsers / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   // Show loading state
   if (isLoading) {
@@ -405,17 +295,18 @@ const UsersPage = () => {
       </div>
       <h3 className="text-xl font-semibold mb-2">No users found</h3>
       <p className="text-muted-foreground text-center max-w-md mb-6">
-        {users.length === 0
+        {pagination.total === 0
           ? 'There are no registered users yet.'
           : 'No users match your current filters. Try adjusting your search or filter criteria.'}
       </p>
-      {users.length > 0 && (
+      {pagination.total > 0 && (searchQuery || dateFilter || donationStatus !== 'all') && (
         <Button
           variant="outline"
           onClick={() => {
             setSearchQuery('');
-            setRoleFilter('all');
             setDateFilter(null);
+            setDonationStatus('all');
+            fetchData({ search: '', date: null, page: 1 });
           }}
         >
           Clear All Filters
@@ -427,7 +318,7 @@ const UsersPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-7xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -441,16 +332,24 @@ const UsersPage = () => {
               Export Users
             </Button>
           </div>
-        </div>
+        </div> */}
 
         {/* User Statistics */}
         <UserStats
           totalUsers={stats.totalUsers}
-          recentlyActiveUsers={stats.recentlyActiveUsers}
+          recentlyAddedUsers={recentlyAddedUsers}
           totalDonations={stats.totalDonations}
           averageDonationsPerUser={stats.averageDonationsPerUser}
           lastUpdateDate={lastUpdateDate}
         />
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader className="p-4 pb-0">
@@ -458,7 +357,7 @@ const UsersPage = () => {
               {/* <div>
                 <CardTitle>Registered Users</CardTitle>
                 <CardDescription>
-                  Displaying {totalUsers} out of {users.length} total users
+                  Displaying {pagination.total} out of {pagination.total} total users
                 </CardDescription>
               </div> */}
             </div>
@@ -471,50 +370,63 @@ const UsersPage = () => {
               setDateFilter={setDateFilter}
               sortBy={sortBy}
               setSortBy={setSortBy}
-              //   roles={roles}
+              onFiltersChange={handleFiltersChange}
             />
           </CardHeader>
 
           <CardContent className="p-0 pt-4">
-            {totalUsers === 0 ? (
+            {sortedUsers.length === 0 ? (
               renderEmptyState()
             ) : (
               <div className="border rounded-md">
-                {paginatedUsers.map((user) => (
-                  <UserRow key={user.id} user={user} onDelete={handleDeleteUser} />
+                {sortedUsers.map((user) => (
+                  <UserRow
+                    key={user.id}
+                    user={{
+                      ...user,
+                      // Map API fields to match the component props
+                      donation_count: user.total_donors || 0,
+                      total_donated: user.total_donation_amount || 0,
+                    }}
+                    onDelete={handleDeleteUser}
+                  />
                 ))}
               </div>
             )}
           </CardContent>
 
-          {totalUsers > 0 && (
+          {sortedUsers.length > 0 && (
             <CardFooter className="flex flex-col sm:flex-row justify-between items-center p-4 gap-4">
               <div className="text-sm text-muted-foreground">
-                Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-                {Math.min(currentPage * itemsPerPage, totalUsers)} of {totalUsers} users
+                Showing {pagination.from} to {pagination.to} of {pagination.total} users
               </div>
 
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      onClick={() => {
+                        const newPage = Math.max(1, currentPage - 1);
+                        handleFiltersChange({ page: newPage });
+                      }}
                       disabled={currentPage === 1}
                     />
                   </PaginationItem>
 
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
                     // Show 5 pages around current page
                     const startPage = Math.max(1, currentPage - 2);
-                    const endPage = Math.min(totalPages, startPage + 4);
+                    const endPage = Math.min(pagination.last_page, startPage + 4);
                     const adjustedStartPage = Math.max(1, endPage - 4);
                     const pageNumber = adjustedStartPage + i;
 
-                    if (pageNumber <= totalPages) {
+                    if (pageNumber <= pagination.last_page) {
                       return (
                         <PaginationItem key={pageNumber}>
                           <PaginationLink
-                            onClick={() => setCurrentPage(pageNumber)}
+                            onClick={() => {
+                              handleFiltersChange({ page: pageNumber });
+                            }}
                             isActive={pageNumber === currentPage}
                           >
                             {pageNumber}
@@ -527,8 +439,11 @@ const UsersPage = () => {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => {
+                        const newPage = Math.min(pagination.last_page, currentPage + 1);
+                        handleFiltersChange({ page: newPage });
+                      }}
+                      disabled={currentPage === pagination.last_page}
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -539,8 +454,8 @@ const UsersPage = () => {
                 <Select
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => {
-                    setItemsPerPage(Number(value));
-                    setCurrentPage(1); // Reset to first page
+                    const newPerPage = Number(value);
+                    handleFiltersChange({ page: 1, perPage: newPerPage });
                   }}
                 >
                   <SelectTrigger className="w-16 h-8">

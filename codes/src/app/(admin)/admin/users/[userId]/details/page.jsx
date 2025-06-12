@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/users/[userId]/details/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -5,6 +7,9 @@ import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Import user service
+import { userService } from '@/api/services/admin/userService';
 
 // Import custom components
 import UserProfile from '@/components/admin/users/details/UserProfile';
@@ -15,99 +20,52 @@ const UserDetailsPage = ({ params }) => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
 
-  // State for user and donations
-  const [user, setUser] = useState(null);
-  const [donations, setDonations] = useState([]);
-  const [events, setEvents] = useState([]);
+  // State for user data
+  const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Set page title based on user
   useEffect(() => {
-    if (user) {
-      setPageTitle(`User Details - ${user.name}`);
+    if (userData) {
+      setPageTitle(`User Details - ${userData.name}`);
       setPageSubtitle(`View and manage user information`);
     } else {
       setPageTitle('User Details');
       setPageSubtitle('Loading user data...');
     }
-  }, [user, setPageTitle, setPageSubtitle]);
+  }, [userData, setPageTitle, setPageSubtitle]);
 
-  // Load user and donations data
+  // Load user data
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      setError(null);
 
       try {
         if (!params?.userId) {
-          toast.error('Missing user ID');
-          router.push('/admin/users');
-          return;
+          throw new Error('Missing user ID');
         }
 
-        // Fetch user data from localStorage
-        const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-        const foundUser = storedUsers.find((u) => u.id === params.userId);
+        // Fetch user data from API
+        const response = await userService.getUserDetails(params.userId);
 
-        if (!foundUser) {
-          toast.error('User not found');
-          router.push('/admin/users');
-          return;
+        if (response.status === 'success') {
+          setUserData(response.data);
+        } else {
+          throw new Error(response.message || 'Failed to fetch user details');
         }
-
-        setUser(foundUser);
-
-        // Fetch events data
-        const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
-        setEvents(storedEvents);
-
-        // Fetch all donations from all events
-        let allDonations = [];
-        storedEvents.forEach((event) => {
-          const eventDonations = JSON.parse(localStorage.getItem(`donations_${event.id}`) || '[]');
-          allDonations = [...allDonations, ...eventDonations];
-        });
-
-        // Filter donations for this user
-        // Match by email since we don't have a proper user_id in the donation data
-        const userDonations = allDonations.filter((donation) => donation.email === foundUser.email);
-
-        setDonations(userDonations);
-
-        /* API Implementation (Commented out for future use)
-        // Fetch user data
-        const userResponse = await fetch(`/api/users/${params.userId}`);
-        if (!userResponse.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-        const userData = await userResponse.json();
-        setUser(userData);
-        
-        // Fetch events data
-        const eventsResponse = await fetch('/api/events');
-        if (!eventsResponse.ok) {
-          throw new Error('Failed to fetch events data');
-        }
-        const eventsData = await eventsResponse.json();
-        setEvents(eventsData);
-        
-        // Fetch donations for this user
-        const donationsResponse = await fetch(`/api/users/${params.userId}/donations`);
-        if (!donationsResponse.ok) {
-          throw new Error('Failed to fetch donations data');
-        }
-        const donationsData = await donationsResponse.json();
-        setDonations(donationsData);
-        */
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to load user and donation data');
+        console.error('Error fetching user data:', error);
+        setError(error.message || 'Failed to load user data');
+        toast.error('Failed to load user data');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [params.userId, router]);
+  }, [params.userId]);
 
   // Show loading state
   if (isLoading) {
@@ -121,8 +79,26 @@ const UserDetailsPage = ({ params }) => {
     );
   }
 
+  // Show error state if there was an error
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Error Loading User</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <button
+            onClick={() => router.push('/admin/users')}
+            className="text-primary hover:underline"
+          >
+            Return to users list
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Show error state if user not found
-  if (!user) {
+  if (!userData) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -144,11 +120,11 @@ const UserDetailsPage = ({ params }) => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-7xl">
-        <UserActionsHeader userId={user.id} userName={user.name} />
+        <UserActionsHeader userId={userData.id} userName={userData.name} />
 
-        <UserProfile user={user} />
+        <UserProfile user={userData} />
 
-        <UserDonationsList donations={donations} events={events} />
+        <UserDonationsList donations={userData.donation_details} />
       </div>
     </div>
   );

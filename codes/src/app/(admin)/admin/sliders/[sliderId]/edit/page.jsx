@@ -1,5 +1,3 @@
-// src/app/(admin)/admin/sliders/[sliderId]/edit/page.jsx
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,50 +6,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
-import { Save, ArrowLeft, ImageIcon } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
-// Import shadcn components
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+// Import components
+import SliderForm from '@/components/admin/sliders/edit/SliderForm';
+import SliderPreview from '@/components/admin/sliders/edit/SliderPreview';
+import SliderDeleteDialog from '@/components/admin/sliders/edit/SliderDeleteDialog';
+import SliderHeader from '@/components/admin/sliders/edit/SliderHeader';
+
+// Import UI components
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Label } from '@/components/ui/label';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 // Import API services
@@ -94,6 +58,7 @@ export default function EditSlider({ params }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [originalFormData, setOriginalFormData] = useState(null);
   const [existingSliders, setExistingSliders] = useState([]);
+  const [imageChanged, setImageChanged] = useState(false);
 
   // Initialize form
   const form = useForm({
@@ -207,8 +172,7 @@ export default function EditSlider({ params }) {
   }, [hasUnsavedChanges]);
 
   // Handle image change
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (file) => {
     if (file) {
       // Validate file type and size
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
@@ -233,6 +197,7 @@ export default function EditSlider({ params }) {
       };
       reader.readAsDataURL(file);
 
+      setImageChanged(true);
       setHasUnsavedChanges(true);
     }
   };
@@ -261,28 +226,26 @@ export default function EditSlider({ params }) {
         return;
       }
 
-      // Prepare image data
-      let imageData = data.image;
+      // Create a new object from data to modify before submission
+      const submissionData = { ...data };
 
-      // If image is a File object, convert to base64
-      if (data.image instanceof File) {
-        imageData = await prepareImageForSubmission(data.image);
-      } else if (!data.image && imagePreview) {
-        // If no new image but we have the existing preview, use that
-        imageData = imagePreview;
+      // Handle the image based on whether it was changed
+      if (!imageChanged && typeof data.image === 'string' && data.image.startsWith('http')) {
+        // If image wasn't changed and it's a URL, don't send it in the request
+        delete submissionData.image;
+      } else if (data.image instanceof File) {
+        // If image is a File object, convert to base64
+        submissionData.image = await prepareImageForSubmission(data.image);
       }
 
       // Format data for API submission
-      const formattedData = formatSliderDataForSubmission({
-        ...data,
-        image: imageData,
-      });
+      const formattedData = formatSliderDataForSubmission(submissionData);
 
       // Submit to API
       const response = await updateSlider(params.sliderId, formattedData);
 
       if (response.status === 'success') {
-        toast.success(response.message || 'Slider updated successfully!');
+        toast.success('Slider updated successfully!');
         setHasUnsavedChanges(false);
         router.push('/admin/sliders');
       } else {
@@ -311,7 +274,7 @@ export default function EditSlider({ params }) {
       const response = await deleteSlider(params.sliderId);
 
       if (response.status === 'success') {
-        toast.success(response.message || 'Slider deleted successfully!');
+        toast.success('Slider deleted successfully!');
         router.push('/admin/sliders');
       } else {
         toast.error(response.message || 'Failed to delete slider');
@@ -330,6 +293,7 @@ export default function EditSlider({ params }) {
     if (originalFormData) {
       form.reset(originalFormData);
       setImagePreview(originalFormData.image);
+      setImageChanged(false);
       setHasUnsavedChanges(false);
       toast.info('Form reset to original values');
     }
@@ -368,42 +332,19 @@ export default function EditSlider({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete Slider'}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete the "{slider?.title}" slider. This action cannot
-                      be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <SliderDeleteDialog
+                isOpen={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                onDelete={handleDelete}
+                isDeleting={isDeleting}
+                sliderTitle={slider?.title}
+              />
 
               <Button
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={isSubmitting}
               >
-                <Save className="mr-2 h-4 w-4" />
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
@@ -412,218 +353,25 @@ export default function EditSlider({ params }) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Form Section */}
             <div className="md:col-span-2">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Edit Slider: {slider?.title}</CardTitle>
-                      <CardDescription>
-                        Update the content and settings for this slider
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Slider Title</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              The main title displayed on the slider.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Textarea className="min-h-24" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              Additional text to display on the slider.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="ordering"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Order Priority</FormLabel>
-                            <FormControl>
-                              <Input type="number" min={1} {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              Lower numbers appear first in the carousel. Each slider must have a
-                              unique ordering number.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <Separator className="my-2" />
-
-                      <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              value={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a status" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="1">Active</SelectItem>
-                                <SelectItem value="0">Inactive</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              Only active sliders are displayed on the website.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div>
-                        <FormLabel>Slider Image</FormLabel>
-                        <div className="mt-2">
-                          <Label htmlFor="image" className="cursor-pointer">
-                            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center">
-                              {imagePreview ? (
-                                <div className="w-full">
-                                  <img
-                                    src={imagePreview}
-                                    alt="Preview"
-                                    className="max-h-64 object-contain rounded-md mx-auto"
-                                  />
-                                  <p className="text-sm text-center mt-2 text-muted-foreground">
-                                    Click to change image
-                                  </p>
-                                </div>
-                              ) : (
-                                <>
-                                  <ImageIcon className="h-10 w-10 text-gray-400" />
-                                  <p className="mt-2 text-sm text-muted-foreground">
-                                    Click to upload an image (PNG, JPG)
-                                  </p>
-                                  <p className="mt-1 text-xs text-muted-foreground">
-                                    Recommended size: 1920x600px
-                                  </p>
-                                </>
-                              )}
-                            </div>
-                          </Label>
-                          <Input
-                            id="image"
-                            type="file"
-                            onChange={handleImageChange}
-                            className="hidden"
-                            accept="image/*"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={handleReset}
-                        disabled={isSubmitting}
-                      >
-                        Reset Changes
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? 'Saving...' : 'Save Changes'}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </form>
-              </Form>
+              <SliderForm
+                form={form}
+                onSubmit={onSubmit}
+                isSubmitting={isSubmitting}
+                onReset={handleReset}
+                onImageChange={handleImageChange}
+                imagePreview={imagePreview}
+                slider={slider}
+              />
             </div>
 
             {/* Preview Section */}
             <div className="md:col-span-1">
-              <Card className="sticky top-6">
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Preview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="overflow-hidden rounded-md border">
-                      {imagePreview ? (
-                        <img
-                          src={imagePreview}
-                          alt="Slider Preview"
-                          className="w-full h-32 object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-32 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            No image selected
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {form.watch('title') || 'Slider Title'}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge
-                          variant={form.watch('status') === '1' ? 'default' : 'secondary'}
-                          className={
-                            form.watch('status') === '1'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                          }
-                        >
-                          {form.watch('status') === '1' ? 'Active' : 'Inactive'}
-                        </Badge>
-                        <span className="text-xs text-gray-500">
-                          Order: {form.watch('ordering')}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                      <p className="text-xs text-gray-500 mb-2">Description Preview:</p>
-                      <p className="text-sm line-clamp-5">
-                        {form.watch('description') || 'No description...'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between text-xs text-gray-500">
-                  <span>ID: {params.sliderId}</span>
-                  <span>{hasUnsavedChanges ? 'Unsaved changes' : 'No changes'}</span>
-                </CardFooter>
-              </Card>
+              <SliderPreview
+                form={form}
+                imagePreview={imagePreview}
+                sliderId={params.sliderId}
+                hasUnsavedChanges={hasUnsavedChanges}
+              />
             </div>
           </div>
         </div>

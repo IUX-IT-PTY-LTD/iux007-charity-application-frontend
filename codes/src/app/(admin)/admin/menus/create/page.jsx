@@ -1,44 +1,24 @@
+// src/app/(admin)/admin/menus/create/page.jsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
+import { Form } from '@/components/ui/form';
 import { toast } from 'sonner';
+
+// Import services
+import { menuService } from '@/api/services/admin/menuService';
+
+// Import components
+import MenuForm from '@/components/admin/menus/create/MenuForm';
+import MenuPreview from '@/components/admin/menus/create/MenuPreview';
+import FormActions from '@/components/admin/menus/create/FormActions';
 
 // Define form schema
 const formSchema = z.object({
@@ -51,56 +31,32 @@ const formSchema = z.object({
   ordering: z.coerce.number().int().positive({
     message: 'Ordering must be a positive number.',
   }),
-  status: z.boolean().default(true),
+  status: z.number().int().min(0).max(1).default(1),
 });
 
-const AdminMenus = () => {
+const CreateMenuPage = () => {
+  const router = useRouter();
+  const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setPageTitle('Create New Menu Item');
+    setPageSubtitle('Add a new navigation menu to your website');
+  }, [setPageTitle, setPageSubtitle]);
+
   // Define form with zod validation
   const form = useForm({
     defaultValues: {
       name: '',
       slug: '',
       ordering: 1,
-      status: true,
+      status: 1,
     },
     resolver: zodResolver(formSchema),
   });
 
-  const router = useRouter();
-
-  const { setPageTitle, setPageSubtitle } = useAdminContext();
-
-  useEffect(() => {
-    setPageTitle('Create New Menu Item');
-    // setPageSubtitle("Manage your website navigation menus");
-  }, [setPageTitle, setPageSubtitle]);
-
   // For form preview - use the values directly from form.watch()
-  // instead of creating a separate state that causes infinite loops
-  const formPreview = form.watch();
-
-  // Handle form submission
-  const onSubmit = (data) => {
-    // Convert status boolean to number for API
-    const apiData = {
-      ...data,
-      status: data.status ? 1 : 0,
-      id: Date.now().toString(), // Generate a unique ID using timestamp
-    };
-
-    console.log('Submitted data:', apiData);
-
-    // Store in localStorage
-    const existingMenus = JSON.parse(localStorage.getItem('menus') || '[]');
-    existingMenus.push(apiData);
-    localStorage.setItem('menus', JSON.stringify(existingMenus));
-
-    // Show success message
-    toast.success('Menu created successfully!');
-
-    // Redirect to menu list
-    router.push('/admin/menus');
-  };
+  const formValues = form.watch();
 
   // Generate a slug from name
   const generateSlug = (name) => {
@@ -115,6 +71,101 @@ const AdminMenus = () => {
     form.setValue('slug', slug);
   };
 
+  // Handle form submission
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+
+    try {
+      const response = await menuService.createMenu(data);
+
+      if (response.status === 'success') {
+        toast.success('Menu created successfully!');
+        router.push('/admin/menus');
+      } else {
+        throw new Error(response.message || 'Failed to create menu');
+      }
+    } catch (error) {
+      console.error('Error creating menu:', error);
+
+      // Extract validation errors from the response
+      // This handles different error response formats
+      const validationErrors =
+        error.errors ||
+        error.response?.data?.errors ||
+        (error.response?.data && error.response.data);
+
+      if (validationErrors) {
+        // Handle slug error
+        if (validationErrors.slug) {
+          const slugError = Array.isArray(validationErrors.slug)
+            ? validationErrors.slug[0]
+            : validationErrors.slug;
+
+          form.setError('slug', {
+            type: 'manual',
+            message: slugError,
+          });
+          toast.error(`Slug error: ${slugError}`, {
+            description: 'Please choose a different slug name.',
+          });
+        }
+
+        // Handle ordering error
+        if (validationErrors.ordering) {
+          const orderingError = Array.isArray(validationErrors.ordering)
+            ? validationErrors.ordering[0]
+            : validationErrors.ordering;
+
+          form.setError('ordering', {
+            type: 'manual',
+            message: orderingError,
+          });
+
+          // Only show ordering toast if there's no slug error (to avoid multiple toasts)
+          if (!validationErrors.slug) {
+            toast.error(`Ordering error: ${orderingError}`, {
+              description: 'Please choose a different ordering value.',
+            });
+          }
+        }
+      } else if (typeof error.message === 'string') {
+        // Check for common error messages in the string
+        if (
+          error.message.includes('slug') &&
+          (error.message.includes('taken') || error.message.includes('unique'))
+        ) {
+          form.setError('slug', {
+            type: 'manual',
+            message: 'This slug is already in use.',
+          });
+          toast.error('This slug is already in use', {
+            description: 'Please choose a different slug name.',
+          });
+        } else if (
+          error.message.includes('ordering') &&
+          (error.message.includes('taken') || error.message.includes('unique'))
+        ) {
+          form.setError('ordering', {
+            type: 'manual',
+            message: 'This ordering position is already taken.',
+          });
+          toast.error('This ordering position is already taken', {
+            description: 'Please choose a different ordering value.',
+          });
+        } else {
+          toast.error('Failed to create menu', {
+            description: error.message,
+          });
+        }
+      } else {
+        // Fallback to generic error
+        toast.error('Failed to create menu. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-5xl">
@@ -123,164 +174,18 @@ const AdminMenus = () => {
           <div className="md:col-span-2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Menu Information</CardTitle>
-                    <CardDescription>
-                      Create a new navigation menu for your website.
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Menu Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g. Blog"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                if (!form.getValues('slug')) {
-                                  generateSlug(e.target.value);
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormDescription>The name displayed in the admin panel.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="slug"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Slug</FormLabel>
-                          <div className="flex items-center space-x-2">
-                            <FormControl>
-                              <Input placeholder="e.g. blog" {...field} />
-                            </FormControl>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => generateSlug(form.getValues('name'))}
-                            >
-                              Generate
-                            </Button>
-                          </div>
-                          <FormDescription>Used in URL and code references.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="ordering"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Order Priority</FormLabel>
-                          <FormControl>
-                            <Input type="number" min={1} placeholder="1" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Lower numbers appear first in navigation.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Separator className="my-2" />
-
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Menu Status</FormLabel>
-                          <Select
-                            onValueChange={(value) => field.onChange(value === '1')}
-                            defaultValue={field.value ? '1' : '0'}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="1">Active</SelectItem>
-                              <SelectItem value="0">Inactive</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            When active, this menu will be available for use.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-
-                  <CardFooter className="flex justify-between">
-                    <Button variant="outline" type="button" onClick={() => form.reset()}>
-                      Reset
-                    </Button>
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                      Save Menu
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <MenuForm
+                  form={form}
+                  generateSlug={generateSlug}
+                  FormActions={() => <FormActions form={form} isSubmitting={isSubmitting} />}
+                />
               </form>
             </Form>
           </div>
 
           {/* Preview Section */}
           <div className="md:col-span-1">
-            <Card className="sticky top-6">
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">{formPreview.name || 'Menu Name'}</h3>
-                    <p className="text-sm text-gray-500">/{formPreview.slug || 'slug'}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={formPreview.status ? 'success' : 'error'}
-                      className={
-                        formPreview.status
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }
-                    >
-                      {formPreview.status ? 'Active' : 'Inactive'}
-                    </Badge>
-                    <span className="text-xs text-gray-500">Order: {formPreview.ordering}</span>
-                  </div>
-
-                  <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                    <div className="text-xs text-gray-500 mb-2">Menu items will appear here</div>
-                    <div className="h-24 border border-dashed rounded-md flex items-center justify-center">
-                      <p className="text-xs text-gray-400">No items yet</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="text-xs text-gray-500">
-                Changes will not be saved until form is submitted
-              </CardFooter>
-            </Card>
+            <MenuPreview formValues={formValues} />
           </div>
         </div>
       </div>
@@ -288,4 +193,4 @@ const AdminMenus = () => {
   );
 };
 
-export default AdminMenus;
+export default CreateMenuPage;

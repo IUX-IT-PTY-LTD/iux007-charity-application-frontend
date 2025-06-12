@@ -2,21 +2,28 @@
 'use client';
 
 import React from 'react';
-import { Users, DollarSign, Clock } from 'lucide-react';
+import { Users, DollarSign, Clock, TrendingUp, HandCoins } from 'lucide-react';
 
-const StatCard = ({ title, value, icon: Icon, description }) => {
+const StatCard = ({ title, value, icon: Icon, description, trend, trendValue }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-3xl font-bold mt-1">{value}</p>
+
+          {trend && trendValue > 0 && (
+            <div className="flex items-center mt-1.5 text-emerald-600">
+              <TrendingUp className="h-3.5 w-3.5 mr-1" />
+              <span className="text-xs font-medium">+{trendValue}% from last month</span>
+            </div>
+          )}
         </div>
-        <div className="rounded-full bg-primary/10 p-2">
-          <Icon className="h-5 w-5 text-primary" />
+        <div className="rounded-full bg-primary/10 p-3">
+          <Icon className="h-6 w-6 text-primary" />
         </div>
       </div>
-      {description && <p className="text-xs text-muted-foreground mt-2">{description}</p>}
+      {description && <p className="text-xs text-muted-foreground mt-3">{description}</p>}
     </div>
   );
 };
@@ -25,7 +32,7 @@ const UserStats = ({
   totalUsers,
   totalDonations,
   averageDonationsPerUser,
-  recentlyActiveUsers,
+  recentlyAddedUsers,
   lastUpdateDate,
 }) => {
   // Format currency
@@ -59,22 +66,19 @@ const UserStats = ({
         title="Registered Users"
         value={totalUsers}
         icon={Users}
-        description={`${recentlyActiveUsers} users active in the last 30 days`}
+        description={`${recentlyAddedUsers} new users in the last 30 days`}
+        trend={true}
+        trendValue={5} // Mock value, need to be calculated from backend data
       />
 
       <StatCard
         title="Total Donations"
         value={totalDonations}
-        icon={DollarSign}
-        description={`Avg ${averageDonationsPerUser.toFixed(1)} per user`}
+        icon={HandCoins}
+        description={`Average ${averageDonationsPerUser.toFixed(1)} donations per user`}
+        trend={true}
+        trendValue={3} // Mock value, need to be calculated from backend data
       />
-
-      {/* <StatCard
-        title="Last Database Update"
-        value={formatUpdateDate(lastUpdateDate)}
-        icon={Clock}
-        description="Data shown reflects most recent information"
-      /> */}
     </div>
   );
 };

@@ -25,12 +25,7 @@ export default function AdminLayout({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   // Auth-exempt routes that don't require authentication
-  const authExemptRoutes = [
-    '/admin/login',
-    '/admin/register',
-    '/admin/forgot-password',
-    '/admin/reset-password',
-  ];
+  const authExemptRoutes = ['/admin/login'];
   const isAuthRoute = authExemptRoutes.some((route) => pathname.startsWith(route));
 
   useEffect(() => {

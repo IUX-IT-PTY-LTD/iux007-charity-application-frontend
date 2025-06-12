@@ -43,7 +43,7 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
       reader.onloadend = () => {
         const base64String = reader.result;
         setImagePreview(base64String);
-        form.setValue('feature_image', base64String);
+        form.setValue('featured_image', base64String);
       };
       reader.readAsDataURL(file);
     }
@@ -51,11 +51,11 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
 
   // If we already have an image (for edit mode)
   React.useEffect(() => {
-    const featureImage = form.getValues('feature_image');
+    const featuredImage = form.getValues('featured_image');
 
     // Set image preview if available
-    if (featureImage && typeof featureImage === 'string' && !imagePreview) {
-      setImagePreview(featureImage);
+    if (featuredImage && typeof featuredImage === 'string' && !imagePreview) {
+      setImagePreview(featuredImage);
     }
   }, [form, imagePreview]);
 
@@ -208,7 +208,11 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input placeholder="123 Main St, City, State" {...field} />
+                    <Input
+                      placeholder="123 Main St, City, State"
+                      {...field}
+                      value={field.value || ''}
+                    />
                   </FormControl>
                   <FormDescription>Physical address or virtual meeting link</FormDescription>
                   <FormMessage />
@@ -225,7 +229,10 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={(value) => field.onChange(parseInt(value, 10))}
+                      value={field.value.toString()}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a status" />
@@ -249,7 +256,10 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        <Checkbox
+                          checked={field.value === 1}
+                          onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                        />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Fixed Donation</FormLabel>
@@ -265,7 +275,10 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        <Checkbox
+                          checked={field.value === 1}
+                          onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                        />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Featured Event</FormLabel>
@@ -281,7 +294,7 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
               <FormLabel>Featured Image</FormLabel>
               <div className="mt-2 space-y-4">
                 <div>
-                  <Label htmlFor="feature_image" className="cursor-pointer">
+                  <Label htmlFor="featured_image" className="cursor-pointer">
                     <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center">
                       {imagePreview ? (
                         <div className="w-full">
@@ -305,7 +318,7 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                     </div>
                   </Label>
                   <Input
-                    id="feature_image"
+                    id="featured_image"
                     type="file"
                     onChange={handleImageChange}
                     className="hidden"

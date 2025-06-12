@@ -149,7 +149,7 @@ const AdminCreateFAQ = () => {
       const response = await createFaq(formattedData);
 
       if (response.status === 'success') {
-        toast.success(response.message || 'FAQ created successfully!');
+        toast.success('FAQ created successfully!');
         router.push('/admin/faqs');
       } else {
         toast.error(response.message || 'Failed to create FAQ');

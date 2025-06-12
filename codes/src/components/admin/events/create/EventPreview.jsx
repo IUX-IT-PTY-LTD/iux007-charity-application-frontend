@@ -15,9 +15,9 @@ const EventPreview = ({ form }) => {
       <CardContent>
         <div className="space-y-4">
           <div>
-            {formValues.feature_image && typeof formValues.feature_image === 'string' ? (
+            {formValues.featured_image && typeof formValues.featured_image === 'string' ? (
               <img
-                src={formValues.feature_image}
+                src={formValues.featured_image}
                 alt="Event"
                 className="w-full h-32 object-cover rounded-md"
               />
@@ -32,16 +32,16 @@ const EventPreview = ({ form }) => {
             <h3 className="text-lg font-semibold">{formValues.title || 'Event Title'}</h3>
             <div className="flex items-center gap-2 mt-1">
               <Badge
-                variant={formValues.status === '1' ? 'default' : 'secondary'}
+                variant={formValues.status === 1 ? 'default' : 'secondary'}
                 className={
-                  formValues.status === '1'
+                  formValues.status === 1
                     ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                     : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                 }
               >
-                {formValues.status === '1' ? 'Active' : 'Inactive'}
+                {formValues.status === 1 ? 'Active' : 'Inactive'}
               </Badge>
-              {formValues.is_featured && (
+              {formValues.is_featured === 1 && (
                 <Badge
                   variant="outline"
                   className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300"
@@ -71,7 +71,7 @@ const EventPreview = ({ form }) => {
               <span className="text-muted-foreground">Price:</span>
               <span className="col-span-2">
                 ${formValues.price}
-                {formValues.is_fixed_donation && ' (Fixed)'}
+                {formValues.is_fixed_donation === 1 && ' (Fixed)'}
               </span>
             </div>
 

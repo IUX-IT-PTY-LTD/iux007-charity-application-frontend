@@ -74,7 +74,7 @@ export const updateFaq = async (faqId, faqData) => {
       throw new Error('Authentication required. Please log in.');
     }
 
-    return await apiService.post(`/admin/${version}/faqs/edit/${faqId}`, faqData);
+    return await apiService.put(`/admin/${version}/faqs/update/${faqId}`, faqData);
   } catch (error) {
     console.error('Error updating FAQ:', error);
     throw error;

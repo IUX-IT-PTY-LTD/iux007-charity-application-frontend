@@ -46,11 +46,7 @@ import {
   RecentDonations,
 } from '@/components/admin/dashboard/Components';
 
-// Import Notifications Component
 import { NotificationsButton } from '@/components/admin/dashboard/Notifications';
-
-// Import Analytics Component directly - comment this out initially to test if other parts work
-// The error suggests this import might be problematic
 import { DashboardAnalytics } from '@/components/admin/dashboard/Analytics';
 
 const AdminDashboard = () => {
@@ -206,7 +202,7 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4">
       <div className="container mx-auto max-w-7xl">
         {/* Top Header with Search and Notifications */}
-        <div className="flex items-center justify-between mb-6">
+        {/* <div className="flex items-center justify-between mb-6">
           <div className="relative max-w-md w-full lg:max-w-sm hidden md:block">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
@@ -222,14 +218,14 @@ const AdminDashboard = () => {
               notifications={notifications}
               onMarkAllAsRead={handleMarkAllAsRead}
             />
-            {/* <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon">
               <PieChart className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon">
               <ExternalLink className="h-5 w-5" />
-            </Button> */}
+            </Button>
           </div>
-        </div>
+        </div> */}
 
         {/* Stat Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -134,11 +134,11 @@ const LoginCard = () => {
           </button>
         </form>
 
-        <div className="divider">
+        {/* <div className="divider">
           <span>OR</span>
-        </div>
+        </div> */}
 
-        <div className="social-logins">
+        {/* <div className="social-logins">
           <button className="social-button google-button">
             <svg className="google-icon" viewBox="0 0 24 24" width="18" height="18">
               <path
@@ -148,16 +148,16 @@ const LoginCard = () => {
             </svg>
             Continue with Google
           </button>
-        </div>
+        </div> */}
 
-        <div className="create-account">
+        {/* <div className="create-account">
           <p>
             Don't have an account?{' '}
             <Link href="/admin/register" className="create-link">
               Create Account
             </Link>
           </p>
-        </div>
+        </div> */}
 
         {error && <div className="error-message">{error}</div>}
       </div>

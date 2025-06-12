@@ -10,6 +10,7 @@ const version = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
 // Auth token key in localStorage - using what apiService expects
 const AUTH_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
 
 /**
  * Get auth token from localStorage
@@ -18,6 +19,15 @@ const AUTH_TOKEN_KEY = 'accessToken';
 export const getAuthToken = () => {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem(AUTH_TOKEN_KEY);
+};
+
+/**
+ * Get refresh token from localStorage
+ * @returns {string|null} - Refresh token or null if not found
+ */
+export const getRefreshToken = () => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
 };
 
 /**
@@ -30,11 +40,28 @@ export const setAuthToken = (token) => {
 };
 
 /**
+ * Set refresh token in localStorage
+ * @param {string} token - Refresh token to set
+ */
+export const setRefreshToken = (token) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(REFRESH_TOKEN_KEY, token);
+};
+
+/**
  * Remove auth token from localStorage
  */
 export const removeAuthToken = () => {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(AUTH_TOKEN_KEY);
+};
+
+/**
+ * Remove refresh token from localStorage
+ */
+export const removeRefreshToken = () => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 };
 
 /**
@@ -52,69 +79,18 @@ export const login = async (email, password) => {
       password,
     });
 
-    // Set token in localStorage if login successful
+    // Set tokens in localStorage if login successful
     if (data.status === 'success' && data.data && data.data.access_token) {
       setAuthToken(data.data.access_token);
+
+      if (data.data.refresh_token) {
+        setRefreshToken(data.data.refresh_token);
+      }
     }
 
     return data;
   } catch (error) {
     console.error('Login error:', error);
-    throw error;
-  }
-};
-
-/**
- * Register a new user
- * @param {Object} userData - User registration data
- * @returns {Promise} - Promise resolving to registration result
- */
-export const register = async (userData) => {
-  try {
-    const data = await apiService.post(`/admin/${version}/register`, userData);
-
-    // Set token in localStorage if returned with registration
-    if (data.status === 'success' && data.data && data.data.access_token) {
-      setAuthToken(data.data.access_token);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Registration error:', error);
-    throw error;
-  }
-};
-
-/**
- * Send password reset request
- * @param {string} email - User email for password reset
- * @returns {Promise} - Promise resolving to password reset request result
- */
-export const forgotPassword = async (email) => {
-  try {
-    return await apiService.post(`/admin/${version}/forgot-password`, { email });
-  } catch (error) {
-    console.error('Forgot password error:', error);
-    throw error;
-  }
-};
-
-/**
- * Reset password with token
- * @param {string} token - Reset token from email
- * @param {string} password - New password
- * @param {string} passwordConfirmation - Password confirmation
- * @returns {Promise} - Promise resolving to password reset result
- */
-export const resetPassword = async (token, password, passwordConfirmation) => {
-  try {
-    return await apiService.post(`/admin/${version}/reset-password`, {
-      token,
-      password,
-      password_confirmation: passwordConfirmation,
-    });
-  } catch (error) {
-    console.error('Reset password error:', error);
     throw error;
   }
 };
@@ -132,14 +108,16 @@ export const logout = async () => {
 
     const data = await apiService.post(`/admin/${version}/logout`, {});
 
-    // Remove token on successful logout
+    // Remove tokens on successful logout
     removeAuthToken();
+    removeRefreshToken();
 
     return data;
   } catch (error) {
     console.error('Logout error:', error);
-    // Remove token even if logout API fails
+    // Remove tokens even if logout API fails
     removeAuthToken();
+    removeRefreshToken();
     throw error;
   }
 };
@@ -163,9 +141,28 @@ export const getCurrentUser = async () => {
       throw new Error('Not authenticated');
     }
 
-    return await apiService.get(`/admin/${version}/me`);
+    return await apiService.get(`/admin/${version}/profile/1`);
   } catch (error) {
     console.error('Get current user error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update user profile
+ * @param {Object} profileData - Profile data to update
+ * @returns {Promise} - Promise resolving to updated profile data
+ */
+export const updateProfile = async (profileData) => {
+  try {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    return await apiService.put(`/admin/${version}/profile/1`, profileData);
+  } catch (error) {
+    console.error('Update profile error:', error);
     throw error;
   }
 };

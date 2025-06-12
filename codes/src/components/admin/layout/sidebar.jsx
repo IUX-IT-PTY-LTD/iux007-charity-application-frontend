@@ -17,6 +17,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
+import { logout } from '@/api/services/admin/authService';
 
 // Menu data structure for easy modification
 const navigationItems = [
@@ -50,12 +52,12 @@ const navigationItems = [
   //   href: "/admin/pages",
   //   icon: FileText,
   // },
-  {
-    id: 'blogs',
-    name: 'Blog Posts',
-    href: '/admin/blogs',
-    icon: FileText,
-  },
+  // {
+  //   id: 'blogs',
+  //   name: 'Blog Posts',
+  //   href: '/admin/blogs',
+  //   icon: FileText,
+  // },
   {
     id: 'faqs',
     name: 'FAQs',
@@ -80,6 +82,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  const { adminProfile, isLoadingProfile } = useAdminContext();
 
   // Check if a path is active
   const isActive = (href) => {
@@ -94,50 +97,33 @@ export function AdminSidebar() {
     try {
       setIsLoggingOut(true);
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-      const version = process.env.NEXT_PUBLIC_API_VERSION;
-
-      // Get the admin token from cookies
-      const cookies = document.cookie.split(';');
-      const adminTokenCookie = cookies.find((cookie) => cookie.trim().startsWith('admin_token='));
-      const adminToken = adminTokenCookie ? adminTokenCookie.split('=')[1] : null;
-
-      if (!adminToken) {
-        // If no token exists, just redirect to login
-        router.push('/admin/login');
-        return;
-      }
-
-      // Call logout API
-      const response = await fetch(`${baseUrl}/admin/${version}/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: adminToken, // The token is already in Bearer format
-        },
-      });
-
-      const data = await response.json();
-
-      // Clear the admin token cookie regardless of API response
-      document.cookie = 'admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      // Use the authService logout function
+      const response = await logout();
 
       // Show success message
-      toast.success('Logged out successfully');
+      toast.success(response.message || 'Logged out successfully');
 
       // Redirect to login page
       router.push('/admin/login');
     } catch (error) {
       console.error('Logout error:', error);
-
-      // Even if API call fails, clear cookie and redirect
-      document.cookie = 'admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      router.push('/admin/login');
-
       toast.error('An error occurred during logout');
+
+      // Redirect to login page even if logout fails
+      router.push('/admin/login');
     } finally {
       setIsLoggingOut(false);
     }
+  };
+
+  // Get admin initials for avatar fallback
+  const getInitials = () => {
+    if (!adminProfile || !adminProfile.name) return 'SA';
+
+    const nameParts = adminProfile.name.split(' ');
+    if (nameParts.length === 1) return nameParts[0].substring(0, 2).toUpperCase();
+
+    return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
   };
 
   return (
@@ -148,12 +134,16 @@ export function AdminSidebar() {
           <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
             <AvatarImage src="/assets/img/avatar.jpg" alt="Admin" />
             <AvatarFallback className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-              SA
+              {isLoadingProfile ? 'SA' : getInitials()}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col text-sm">
-            <span className="font-medium text-gray-900 dark:text-white">Super Admin</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Administrator</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              {isLoadingProfile ? 'Loading...' : adminProfile?.name || 'Super Admin'}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {isLoadingProfile ? '' : adminProfile?.email || 'Administrator'}
+            </span>
           </div>
         </div>
       </div>

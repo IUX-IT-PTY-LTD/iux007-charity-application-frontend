@@ -227,7 +227,7 @@ export default function EditFAQ({ params }) {
       const response = await updateFaq(params.faqId, formattedData);
 
       if (response.status === 'success') {
-        toast.success(response.message || 'FAQ updated successfully!');
+        toast.success('FAQ updated successfully!');
         setHasUnsavedChanges(false);
         router.push('/admin/faqs');
       } else {
@@ -256,7 +256,7 @@ export default function EditFAQ({ params }) {
       const response = await deleteFaq(params.faqId);
 
       if (response.status === 'success') {
-        toast.success(response.message || 'FAQ deleted successfully!');
+        toast.success('FAQ deleted successfully!');
         router.push('/admin/faqs');
       } else {
         toast.error(response.message || 'Failed to delete FAQ');

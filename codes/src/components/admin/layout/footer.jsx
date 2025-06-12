@@ -18,7 +18,19 @@ const AdminFooter = () => {
 
           {/* Center item - Version and Status */}
           <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
-            <span>Version 0.1.0</span>
+            <span>
+            Developed by{' '}
+            <a
+              href="https://iuxit.com.au/"
+              className="hover:text-gray-600 dark:hover:text-gray-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              IUX IT Pty Ltd
+            </a>
+          </span>
+          <span>|</span>
+            <span>v0.1.0</span>
             <span
               className="inline-block h-2 w-2 rounded-full bg-green-500"
               title="System online"
@@ -52,7 +64,7 @@ const AdminFooter = () => {
         </div>
 
         {/* Optional secondary footer with credit */}
-        <div className="mt-2 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500">
+        {/* <div className="mt-2 flex items-center justify-center text-xs text-gray-400 dark:text-gray-500">
           <span>
             Developed by{' '}
             <a
@@ -64,7 +76,7 @@ const AdminFooter = () => {
               IUX IT Pty Ltd
             </a>
           </span>
-        </div>
+        </div> */}
       </div>
     </footer>
   );

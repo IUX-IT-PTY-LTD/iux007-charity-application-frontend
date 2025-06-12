@@ -1,4 +1,4 @@
-// components/users/UserActionsHeader.jsx
+// components/admin/users/details/UserActionsHeader.jsx
 'use client';
 
 import React from 'react';
@@ -25,51 +25,6 @@ const UserActionsHeader = ({ userId, userName }) => {
     router.push('/admin/users');
   };
 
-  // Handle navigation to edit user page
-  const handleEdit = () => {
-    router.push(`/admin/users/${userId}/edit`);
-  };
-
-  // Handle user deletion
-  const handleDelete = () => {
-    // Close the dialog
-    setShowDeleteDialog(false);
-
-    // Get current users from localStorage
-    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = storedUsers.filter((user) => user.id !== userId);
-
-    // Update localStorage
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-
-    // Show success message
-    toast.success(`User ${userName} has been deleted`);
-
-    // Navigate back to users list
-    setTimeout(() => {
-      router.push('/admin/users');
-    }, 500);
-
-    /* API Implementation (Commented out for future use)
-    // Delete user from API
-    fetch(`/api/users/${userId}`, {
-      method: 'DELETE'
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to delete user');
-      return response.json();
-    })
-    .then(data => {
-      toast.success(`User ${userName} has been deleted`);
-      router.push("/admin/users");
-    })
-    .catch(error => {
-      console.error('Error deleting user:', error);
-      toast.error('Failed to delete user');
-    });
-    */
-  };
-
   // Handle export user data
   const handleExport = () => {
     toast.info(`Exporting user data for ${userName}...`);
@@ -93,6 +48,8 @@ const UserActionsHeader = ({ userId, userName }) => {
           Export Data
         </Button>
 
+        {/* Edit and Delete buttons are commented out as requested */}
+        {/* 
         <Button variant="outline" onClick={handleEdit}>
           <Edit className="mr-2 h-4 w-4" />
           Edit
@@ -102,9 +59,11 @@ const UserActionsHeader = ({ userId, userName }) => {
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </Button>
+        */}
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog - Commented out as requested */}
+      {/* 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -123,6 +82,7 @@ const UserActionsHeader = ({ userId, userName }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      */}
     </div>
   );
 };
