@@ -13,6 +13,7 @@ import {
   LogOut,
   Settings,
   User,
+  Building,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -75,6 +76,12 @@ const navigationItems = [
     name: 'Settings',
     href: '/admin/settings',
     icon: Settings,
+  },
+  {
+    id: 'organization',
+    name: 'Organization',
+    href: '/admin/org',
+    icon: Building,
   },
 ];
 
