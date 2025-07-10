@@ -99,18 +99,6 @@ const FAQ = () => {
             </div>
           ))}
         </div>
-        <div className="grid-item flex items-center justify-center">
-          <div className="relative w-full h-full max-w-2xl overflow-hidden rounded-xl shadow-xl">
-            <Image
-              src={'/assets/img/donation-faq.jpg'}
-              width={800}
-              height={600}
-              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
-              alt="Donate Hero"
-              unoptimized
-            />
-          </div>
-        </div>
       </div>
     </div>
   );
