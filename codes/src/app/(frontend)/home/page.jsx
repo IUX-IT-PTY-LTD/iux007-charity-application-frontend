@@ -51,7 +51,7 @@ const Home = () => {
     <div>
       <Hero data={heroData} />
       <FeaturedEvents data={featuredEventsData} />
-      <Operations />
+      {/* <Operations /> */}
       <Events data={eventsData} />
       <FAQ />
     </div>

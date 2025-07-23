@@ -54,25 +54,36 @@ const Events = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {paginatedDonations.map((event) => (
-                  <div
-                    key={event.uuid}
-                    className="transform hover:scale-105 transition-transform duration-300"
-                  >
-                    <EventCard
-                      eventId={event.uuid}
-                      title={event.title}
-                      description={event.description}
-                      img={event.featured_image}
-                      time={event.end_date}
-                      venue={event.location}
-                      targetAmount={event.target_amount}
-                      showDetails={true}
-                    />
-                  </div>
-                ))}
-              </div>
+              {paginatedDonations.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {paginatedDonations.map((event) => (
+                    <div
+                      key={event.uuid}
+                      className="transform hover:scale-105 transition-transform duration-300"
+                    >
+                      <EventCard
+                        eventId={event.uuid}
+                        title={event.title}
+                        description={event.description}
+                        img={event.featured_image}
+                        time={event.end_date}
+                        venue={event.location}
+                        targetAmount={event.target_amount}
+                        showDetails={true}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col justify-center items-center min-h-[400px] bg-gray-50 rounded-lg shadow-sm p-8">
+                  <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                    No Active Campaigns
+                  </h3>
+                  <p className="text-gray-500 text-center max-w-md">
+                    There are currently no ongoing donation campaigns. Please check back later or contact us to learn about upcoming opportunities.
+                  </p>
+                </div>
+              )}
 
               <div className="flex justify-center items-center space-x-2 mt-12">
                 {Array.from({ length: totalPage }, (_, index) => (

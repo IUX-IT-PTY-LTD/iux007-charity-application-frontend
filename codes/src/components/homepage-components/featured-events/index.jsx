@@ -11,10 +11,11 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 const FeaturedEvents = ({ data }) => {
+  let fallbackImage = 'https://iux007-charity-application.s3.ap-southeast-2.amazonaws.com/staging/assets/fallback_images/slider_fallback_image.jpg'
   return (
     <div className="container mx-auto px-4 py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4 text-center">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-10 text-center">
           Featured Events
         </h2>
         <Swiper
@@ -36,27 +37,51 @@ const FeaturedEvents = ({ data }) => {
           }}
           className="z-50 relative"
         >
-          {data.map((event) => (
-            <SwiperSlide key={event.id}>
-              <div className="transform transition duration-300 hover:scale-105">
-                <FeaturedEventsCard
-                  eventId={event.uuid}
-                  title={event.title}
-                  description={event.description}
-                  img={event.featured_image}
-                  time={new Date(event.start_date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                  venue={event.location}
-                  fixedDonation={event.is_fixed_donation}
-                  donationAmount={event.price}
-                  showDetails={false}
-                />
-              </div>
-            </SwiperSlide>
-          ))}
+          {data && data.length > 0 ? (
+            data.map((event) => (
+              <SwiperSlide key={event.id}>
+                <div className="transform transition duration-300 hover:scale-105">
+                  <FeaturedEventsCard
+                    eventId={event.uuid}
+                    title={event.title}
+                    description={event.description}
+                    img={event.featured_image}
+                    time={new Date(event.start_date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                    venue={event.location}
+                    fixedDonation={event.is_fixed_donation}
+                    donationAmount={event.price}
+                    showDetails={false}
+                  />
+                </div>
+              </SwiperSlide>
+            ))
+          ) : (
+            [1, 2, 3, 4].map((index) => (
+              <SwiperSlide key={`demo-${index}`}>
+                <div className="transform transition duration-300 hover:scale-105">
+                  <FeaturedEventsCard
+                    eventId="demo-event"
+                    title="Demo Event"
+                    description="This is a sample event description. Join us for an amazing experience!"
+                    img={fallbackImage}
+                    time={new Date().toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                    venue="Sample Location"
+                    fixedDonation={true}
+                    donationAmount={50}
+                    showDetails={false}
+                  />
+                </div>
+              </SwiperSlide>
+            ))
+          )}
         </Swiper>
       </div>
     </div>
