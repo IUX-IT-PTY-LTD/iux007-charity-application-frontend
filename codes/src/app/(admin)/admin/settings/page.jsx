@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 
 import ProfileInformationSection from '@/components/admin/settings/ProfileInformationSection';
 import ContactInformationSection from '@/components/admin/settings/ContactInformationSection';
+import FooterLinkManagementSection from '@/components/admin/settings/FooterLinkManagementSection';
 
 const SettingsPage = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
@@ -29,7 +30,7 @@ const SettingsPage = () => {
         </p> */}
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="mb-6 grid grid-cols-3 w-full max-w-md">
+          <TabsList className="mb-6 grid grid-cols-2 w-full max-w-7xl ">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -38,10 +39,10 @@ const SettingsPage = () => {
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Company</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
+            {/* <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">Notifications</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           {/* Profile Tab */}
@@ -54,11 +55,11 @@ const SettingsPage = () => {
                 </p>
                 <Separator className="my-4" />
               </div>
-              
+
               <div className="md:col-span-3 lg:col-span-2">
                 <ProfileInformationSection />
               </div>
-              
+
               <div className="md:col-span-3 lg:col-span-1">
                 <Card>
                   <CardHeader>
@@ -86,45 +87,29 @@ const SettingsPage = () => {
 
           {/* Company Tab */}
           <TabsContent value="company" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-3">
+            <div className="space-y-6">
+              <div>
                 <h2 className="text-xl font-semibold mb-1">Company Settings</h2>
                 <p className="text-muted-foreground mb-4">
                   Manage your company information and public contact details
                 </p>
                 <Separator className="my-4" />
               </div>
-              
-              <div className="md:col-span-3 lg:col-span-2">
-                <ContactInformationSection />
-              </div>
-              
-              <div className="md:col-span-3 lg:col-span-1">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Preview</CardTitle>
-                    <CardDescription>How information appears on your website</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-md">
-                      <div className="text-sm text-muted-foreground">
-                        <p className="mb-4">
-                          Your active contact details will be displayed on your public website.
-                        </p>
-                        <Button variant="outline" size="sm" className="w-full">
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          View Website
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="w-full">
+                  <ContactInformationSection />
+                </div>
+
+                <div className="w-full">
+                  <FooterLinkManagementSection />
+                </div>
               </div>
             </div>
           </TabsContent>
 
           {/* Notifications Tab - Placeholder for future implementation */}
-          <TabsContent value="notifications" className="space-y-6">
+          {/* <TabsContent value="notifications" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-3">
                 <h2 className="text-xl font-semibold mb-1">Notification Settings</h2>
@@ -153,7 +138,7 @@ const SettingsPage = () => {
                 </Card>
               </div>
             </div>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>
