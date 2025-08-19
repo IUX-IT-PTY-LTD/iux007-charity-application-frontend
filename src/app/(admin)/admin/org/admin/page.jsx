@@ -9,12 +9,12 @@ import { getAllAdmins } from '@/api/services/admin/adminService';
 
 // Import components
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import AdminsHeader from '@/components/admin/org/AdminsHeader';
-import AdminsSearchBar from '@/components/admin/org/AdminsSearchBar';
-import AdminsTable from '@/components/admin/org/AdminsTable';
-import AdminsPagination from '@/components/admin/org/AdminsPagination';
-import CreateAdminModal from '@/components/admin/org/CreateAdminModal';
-import EditAdminModal from '@/components/admin/org/EditAdminModal';
+import AdminsHeader from '@/components/admin/org/admin/AdminsHeader';
+import AdminsSearchBar from '@/components/admin/org/admin/AdminsSearchBar';
+import AdminsTable from '@/components/admin/org/admin/AdminsTable';
+import AdminsPagination from '@/components/admin/org/admin/AdminsPagination';
+import CreateAdminModal from '@/components/admin/org/admin/CreateAdminModal';
+import EditAdminModal from '@/components/admin/org/admin/EditAdminModal';
 
 const AdminsPage = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
