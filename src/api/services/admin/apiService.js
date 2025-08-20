@@ -177,7 +177,7 @@ class ApiService {
   getAuthHeader() {
     // Use try-catch to handle cases where localStorage is not available (SSR)
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('adminAccessToken');
       return token ? { Authorization: `${token}` } : {};
     } catch (error) {
       console.warn('Could not access localStorage');
