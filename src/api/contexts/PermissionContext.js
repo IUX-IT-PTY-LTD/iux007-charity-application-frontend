@@ -4,8 +4,8 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCurrentUserPermissions, clearPermissionsCache } from '../utils/permissionWrapper';
-import { getUserId } from '../api/services/admin/authService';
+import { getCurrentUserPermissions, clearPermissionsCache } from '@/api/utils/permissionWrapper';
+import { getUserId } from '@/api/services/admin/authService';
 
 // Create the context
 const PermissionContext = createContext();

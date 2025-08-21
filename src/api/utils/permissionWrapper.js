@@ -3,9 +3,9 @@
  * Wraps service operations with permission checking
  */
 
-import { getAdminById } from '../api/services/admin/adminService.js';
-import { getRolePermissions } from '../api/services/admin/permissionService.js';
-import { getUserId } from '../api/services/admin/authService.js';
+import { getAdminById } from '@/api/services/admin/adminService.js';
+import { getRolePermissions } from '@/api/services/admin/permissionService.js';
+import { getUserId } from '@/api/services/admin/authService.js';
 
 // Cache for user permissions to avoid repeated API calls
 let userPermissionsCache = null;

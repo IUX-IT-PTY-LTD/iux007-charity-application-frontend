@@ -3,13 +3,13 @@
  * Provides utilities to wrap service operations with permission checking
  */
 
-import { hasPermission, hasModuleAccess } from '../utils/permissionWrapper';
+import { hasPermission, hasModuleAccess } from '@/api/utils/permissionWrapper';
 import {
   PermissionDeniedError,
   ModuleAccessError,
   AuthenticationError,
   handlePermissionError,
-} from '../utils/permissionErrors';
+} from '@/api/utils/permissionErrors';
 
 // ==================== PERMISSION WRAPPER FUNCTIONS ====================
 
