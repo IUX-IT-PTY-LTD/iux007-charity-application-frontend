@@ -1,4 +1,5 @@
-// components/admin/admins/list/TableCells.jsx
+// components/admin/org/admin/AdminsPagination.jsx
+
 import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

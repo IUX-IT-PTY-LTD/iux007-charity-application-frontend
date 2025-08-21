@@ -1,4 +1,5 @@
-// components/admin/admins/list/AdminsHeader.jsx
+// components/admin/org/admin/AdminsHeader.jsx
+
 import React from 'react';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';

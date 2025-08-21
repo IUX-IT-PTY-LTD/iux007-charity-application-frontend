@@ -1,4 +1,5 @@
-// components/admin/admins/list/AdminsPagination.jsx
+// components/admin/org/admin/AdminsPagination.jsx
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import {

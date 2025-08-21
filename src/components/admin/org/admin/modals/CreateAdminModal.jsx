@@ -1,4 +1,5 @@
-// components/admin/admins/modals/CreateAdminModal.jsx
+// components/admin/org/admin/modals/CreateAdminModal.jsx
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { createAdmin } from '@/api/services/admin/adminService';

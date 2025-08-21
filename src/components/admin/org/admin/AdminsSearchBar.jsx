@@ -1,4 +1,4 @@
-// components/admin/admins/list/AdminsSearchBar.jsx
+// components/admin/org/admin/AdminsSearchBar.jsx
 import React from 'react';
 import { Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';

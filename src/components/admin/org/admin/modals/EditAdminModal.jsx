@@ -1,4 +1,5 @@
-// components/admin/admins/modals/EditAdminModal.jsx
+// components/admin/org/admin/modals/EditAdminModal.jsx
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { updateAdmin } from '@/api/services/admin/adminService';

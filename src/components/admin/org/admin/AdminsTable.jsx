@@ -1,4 +1,5 @@
-// components/admin/admins/list/AdminsTable.jsx
+// components/admin/org/admin/AdminsTable.jsx
+
 import React from 'react';
 import { ArrowUpDown } from 'lucide-react';
 import {
