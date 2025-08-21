@@ -149,13 +149,13 @@ const getNavigationItems = (permissions) => {
   }
 
   // Permission Management
-  if (permissions.permissions.hasAccess) {
-    orgSubmenuItems.push({
-      id: 'org-permissions',
-      name: 'Permission Management',
-      href: '/admin/org/permissions',
-    });
-  }
+  // if (permissions.permissions.hasAccess) {
+  //   orgSubmenuItems.push({
+  //     id: 'org-permissions',
+  //     name: 'Permission Management',
+  //     href: '/admin/org/permissions',
+  //   });
+  // }
 
   // Only show Organization menu if user has access to any org feature
   if (orgSubmenuItems.length > 0) {
