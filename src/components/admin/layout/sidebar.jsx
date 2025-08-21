@@ -153,7 +153,7 @@ const getNavigationItems = (permissions) => {
   //   orgSubmenuItems.push({
   //     id: 'org-permissions',
   //     name: 'Permission Management',
-  //     href: '/admin/org/permissions',
+  //     href: '/admin/pms',
   //   });
   // }
 
