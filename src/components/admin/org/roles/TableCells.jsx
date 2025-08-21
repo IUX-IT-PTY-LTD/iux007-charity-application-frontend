@@ -150,7 +150,7 @@ export const ActionsCell = ({ role, onEdit, onDelete, onViewPermissions }) => {
         </Tooltip>
       </TooltipProvider>
 
-      <AlertDialog>
+      {/* <AlertDialog>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -188,7 +188,7 @@ export const ActionsCell = ({ role, onEdit, onDelete, onViewPermissions }) => {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
     </div>
   );
 };

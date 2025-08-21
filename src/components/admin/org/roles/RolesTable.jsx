@@ -79,7 +79,7 @@ const RolesTable = ({
                   <ActionsCell
                     role={role}
                     onEdit={() => handleEditClick(role)}
-                    onDelete={handleDeleteRole}
+                    // onDelete={handleDeleteRole}
                     onViewPermissions={handleViewPermissions}
                   />
                 </TableCell>
