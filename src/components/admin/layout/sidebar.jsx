@@ -149,13 +149,13 @@ const getNavigationItems = (permissions) => {
   }
 
   // Permission Management
-  // if (permissions.permissions.hasAccess) {
-  //   orgSubmenuItems.push({
-  //     id: 'org-permissions',
-  //     name: 'Permission Management',
-  //     href: '/admin/pms',
-  //   });
-  // }
+  if (permissions.permissions.hasAccess) {
+    orgSubmenuItems.push({
+      id: 'org-permissions',
+      name: 'Permission Management',
+      href: '/admin/pms',
+    });
+  }
 
   // Only show Organization menu if user has access to any org feature
   if (orgSubmenuItems.length > 0) {
@@ -228,23 +228,41 @@ function AdminSidebarContent() {
       return []; // Return empty array while loading
     }
     return getNavigationItems(modulePermissions);
-  }, [modulePermissions, isInitialized]);
+  }, [
+    modulePermissions.isLoading,
+    isInitialized,
+    modulePermissions.users.hasAccess,
+    modulePermissions.menus.hasAccess,
+    modulePermissions.events.hasAccess,
+    modulePermissions.faqs.hasAccess,
+    modulePermissions.sliders.hasAccess,
+    modulePermissions.contacts.hasAccess,
+    modulePermissions.admins.hasAccess,
+    modulePermissions.roles.hasAccess,
+    modulePermissions.permissions.hasAccess,
+  ]);
 
   // Check if a path is active
-  const isActive = (href) => {
-    if (href === '/admin/dashboard') {
-      return pathname === href;
-    }
-    return pathname.startsWith(href);
-  };
+  const isActive = React.useCallback(
+    (href) => {
+      if (href === '/admin/dashboard') {
+        return pathname === href;
+      }
+      return pathname.startsWith(href);
+    },
+    [pathname]
+  );
 
   // Check if any submenu item is active
-  const isSubmenuActive = (submenu) => {
-    return submenu.some((item) => isActive(item.href));
-  };
+  const isSubmenuActive = React.useCallback(
+    (submenu) => {
+      return submenu.some((item) => isActive(item.href));
+    },
+    [isActive]
+  );
 
   // Toggle submenu expansion
-  const toggleSubmenu = (itemId) => {
+  const toggleSubmenu = React.useCallback((itemId) => {
     setExpandedMenus((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(itemId)) {
@@ -254,16 +272,18 @@ function AdminSidebarContent() {
       }
       return newSet;
     });
-  };
+  }, []);
 
-  // Auto-expand menus that have active items
+  // Auto-expand menus that have active items - only run when pathname changes or navigationItems structure changes
   React.useEffect(() => {
+    if (navigationItems.length === 0) return; // Don't run if no items yet
+
     navigationItems.forEach((item) => {
       if (item.submenu && isSubmenuActive(item.submenu)) {
         setExpandedMenus((prev) => new Set(prev).add(item.id));
       }
     });
-  }, [pathname, navigationItems]);
+  }, [pathname]); // Remove navigationItems dependency
 
   // Handle logout
   const handleLogout = async () => {
