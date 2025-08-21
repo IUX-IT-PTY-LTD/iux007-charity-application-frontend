@@ -11,6 +11,7 @@ const AdminContext = createContext({
   setPageSubtitle: () => {},
   adminProfile: null,
   refreshProfile: () => {},
+  clearProfile: () => {},
   isLoadingProfile: false,
 });
 
@@ -27,12 +28,23 @@ export const AdminProvider = ({ children }) => {
   const fetchAdminProfile = async () => {
     try {
       setIsLoadingProfile(true);
+      // Check if token exists before making API call
+      const token = localStorage.getItem('adminAccessToken');
+      if (!token) {
+        setAdminProfile(null);
+        setIsLoadingProfile(false);
+        return;
+      }
+      
       const response = await getCurrentUser();
       if (response.status === 'success' && response.data) {
         setAdminProfile(response.data);
+      } else {
+        setAdminProfile(null);
       }
     } catch (error) {
       console.error('Error fetching admin profile:', error);
+      setAdminProfile(null);
     } finally {
       setIsLoadingProfile(false);
     }
@@ -47,6 +59,11 @@ export const AdminProvider = ({ children }) => {
     fetchAdminProfile();
   };
 
+  const clearProfile = () => {
+    setAdminProfile(null);
+    setIsLoadingProfile(false);
+  };
+
   const value = {
     pageTitle,
     setPageTitle,
@@ -54,6 +71,7 @@ export const AdminProvider = ({ children }) => {
     setPageSubtitle,
     adminProfile,
     refreshProfile,
+    clearProfile,
     isLoadingProfile,
   };
 

@@ -97,7 +97,7 @@ export function AdminSidebar() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [expandedMenus, setExpandedMenus] = React.useState(new Set());
-  const { adminProfile, isLoadingProfile } = useAdminContext();
+  const { adminProfile, isLoadingProfile, clearProfile } = useAdminContext();
 
   // Check if a path is active
   const isActive = (href) => {
@@ -138,6 +138,9 @@ export function AdminSidebar() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
+
+      // Clear the admin profile from context immediately
+      clearProfile();
 
       // Use the authService logout function
       const response = await logout();
