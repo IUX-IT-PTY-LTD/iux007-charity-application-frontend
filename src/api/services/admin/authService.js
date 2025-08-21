@@ -9,8 +9,9 @@ import { apiService } from './apiService';
 const version = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
 // Auth token key in localStorage - using what apiService expects
-const AUTH_TOKEN_KEY = 'accessToken';
+const AUTH_TOKEN_KEY = 'adminAccessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
+const USER_ID_KEY = 'adminUserId';
 
 /**
  * Get auth token from localStorage
@@ -65,6 +66,32 @@ export const removeRefreshToken = () => {
 };
 
 /**
+ * Set user ID in localStorage
+ * @param {string} userId - User ID to set
+ */
+export const setUserId = (userId) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(USER_ID_KEY, userId);
+};
+
+/**
+ * Get user ID from localStorage
+ * @returns {string|null} - User ID or null if not found
+ */
+export const getUserId = () => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(USER_ID_KEY);
+};
+
+/**
+ * Remove user ID from localStorage
+ */
+export const removeUserId = () => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(USER_ID_KEY);
+};
+
+/**
  * Login user with email and password
  * @param {string} email - User email
  * @param {string} password - User password
@@ -85,6 +112,11 @@ export const login = async (email, password) => {
 
       if (data.data.refresh_token) {
         setRefreshToken(data.data.refresh_token);
+      }
+
+      // Store user ID if available in response
+      if (data.data.id) {
+        setUserId(data.data.id);
       }
     }
 
@@ -108,16 +140,18 @@ export const logout = async () => {
 
     const data = await apiService.post(`/admin/${version}/logout`, {});
 
-    // Remove tokens on successful logout
+    // Remove tokens and user ID on successful logout
     removeAuthToken();
     removeRefreshToken();
+    removeUserId();
 
     return data;
   } catch (error) {
     console.error('Logout error:', error);
-    // Remove tokens even if logout API fails
+    // Remove tokens and user ID even if logout API fails
     removeAuthToken();
     removeRefreshToken();
+    removeUserId();
     throw error;
   }
 };
@@ -141,7 +175,11 @@ export const getCurrentUser = async () => {
       throw new Error('Not authenticated');
     }
 
-    return await apiService.get(`/admin/${version}/profile/1`);
+    // Try to get user ID from localStorage first
+    const userId = getUserId();
+    if (userId) {
+      return await apiService.get(`/admin/${version}/profile/${userId}`);
+    }
   } catch (error) {
     console.error('Get current user error:', error);
     throw error;
@@ -160,7 +198,14 @@ export const updateProfile = async (profileData) => {
       throw new Error('Not authenticated');
     }
 
-    return await apiService.put(`/admin/${version}/profile/1`, profileData);
+    // Try to get user ID from localStorage first
+    const userId = getUserId();
+    if (userId) {
+      return await apiService.put(`/admin/${version}/profile/${userId}`, profileData);
+    }
+
+    // Fallback to generic profile endpoint if no user ID stored
+    return await apiService.put(`/admin/${version}/profile/me`, profileData);
   } catch (error) {
     console.error('Update profile error:', error);
     throw error;
