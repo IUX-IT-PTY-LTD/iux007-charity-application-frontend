@@ -3,8 +3,8 @@
  * Compares existing permissions with required permissions
  */
 
-import { getAllPermissions } from '../api/services/admin/permissionService.js';
-import { getAllRequiredPermissions } from '../config/permissions.js';
+import { getAllPermissions } from '@/api/services/admin/permissionService.js';
+import { getAllRequiredPermissions } from '@/api/config/permissions.js';
 
 /**
  * Audit current permissions against required permissions

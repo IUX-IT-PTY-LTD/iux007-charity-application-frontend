@@ -3,8 +3,8 @@
  * Creates all required permissions for the application
  */
 
-import { MODULE_PERMISSIONS } from '../config/permissions.js';
-import { createModulePermissions } from '../api/services/admin/permissionService.js';
+import { MODULE_PERMISSIONS } from '@/api/config/permissions.js';
+import { createModulePermissions } from '@/api/services/admin/permissionService.js';
 
 /**
  * Generate all permissions for all modules
