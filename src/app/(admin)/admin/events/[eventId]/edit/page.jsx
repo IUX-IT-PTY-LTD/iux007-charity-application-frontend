@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Lock } from 'lucide-react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -25,12 +25,26 @@ import EditEventForm from '@/components/admin/events/edit/EditEventForm';
 import EditEventPreview from '@/components/admin/events/edit/EditEventPreview';
 import { eventFormSchema } from '@/components/admin/events/create/eventSchema';
 
-// Import service
-import { eventService } from '@/api/services/admin/eventService';
+// Import protected services
+import {
+  getEventDetails,
+  updateEvent,
+  deleteEvent,
+  validateEventData,
+  formatEventDataForSubmission,
+} from '@/api/services/admin/protected/eventService';
+import { isAuthenticated } from '@/api/services/admin/authService';
 
-export default function EditEvent({ params }) {
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useEventPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
+// Main Event Edit Page Component
+function EditEventContent({ params }) {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const eventPermissions = useEventPermissions();
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +58,30 @@ export default function EditEvent({ params }) {
     setPageTitle('Edit Event');
     setPageSubtitle('Update event details and settings');
   }, [setPageTitle, setPageSubtitle]);
+
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Check if user has event access
+  useEffect(() => {
+    if (!eventPermissions.isLoading && !eventPermissions.hasAccess) {
+      toast.error("You don't have access to the Events module.");
+      router.push('/admin/dashboard');
+    }
+  }, [eventPermissions.isLoading, eventPermissions.hasAccess, router]);
+
+  // Check if user has view permission (needed to load event data)
+  useEffect(() => {
+    if (!eventPermissions.isLoading && eventPermissions.hasAccess && !eventPermissions.canView) {
+      toast.error("You don't have permission to view events.");
+      router.push('/admin/events');
+    }
+  }, [eventPermissions.isLoading, eventPermissions.hasAccess, eventPermissions.canView, router]);
 
   // Initialize form
   const form = useForm({
@@ -67,10 +105,15 @@ export default function EditEvent({ params }) {
   // Fetch event data based on the ID
   useEffect(() => {
     const fetchEvent = async () => {
+      if (!eventPermissions.canView) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
-        // Fetch event data from API
-        const response = await eventService.getEventDetails(params.eventId);
+        // Fetch event data from protected API
+        const response = await getEventDetails(params.eventId);
 
         if (response && response.status === 'success' && response.data) {
           const fetchedEvent = response.data;
@@ -112,17 +155,22 @@ export default function EditEvent({ params }) {
         }
       } catch (error) {
         console.error('Error fetching event:', error);
-        toast.error(error.message || 'Failed to load event data');
+
+        if (isPermissionError(error)) {
+          toast.error(getPermissionErrorMessage(error));
+        } else {
+          toast.error(error.message || 'Failed to load event data');
+        }
         router.push('/admin/events');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (params.eventId) {
+    if (params.eventId && !eventPermissions.isLoading) {
       fetchEvent();
     }
-  }, [params.eventId, router, form]);
+  }, [params.eventId, router, form, eventPermissions.isLoading, eventPermissions.canView]);
 
   // Track form changes
   useEffect(() => {
@@ -147,13 +195,18 @@ export default function EditEvent({ params }) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
-  // Handle form submission
+  // Handle form submission with permission checking
   const onSubmit = async (data) => {
+    if (!eventPermissions.canEdit) {
+      toast.error("You don't have permission to edit events");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
       // Validate event data
-      const { isValid, errors } = eventService.validateEventData(data);
+      const { isValid, errors } = validateEventData(data);
       if (!isValid) {
         errors.forEach((error) => toast.error(error));
         setIsSubmitting(false);
@@ -174,10 +227,10 @@ export default function EditEvent({ params }) {
       }
 
       // Format data for API submission
-      const formattedData = eventService.formatEventDataForSubmission(submissionData);
+      const formattedData = formatEventDataForSubmission(submissionData);
 
-      // Submit to API
-      const response = await eventService.updateEvent(params.eventId, formattedData);
+      // Submit to protected API
+      const response = await updateEvent(params.eventId, formattedData);
 
       if (response.status === 'success') {
         toast.success(response.message || 'Event updated successfully!');
@@ -189,33 +242,42 @@ export default function EditEvent({ params }) {
     } catch (error) {
       console.error('Error updating event:', error);
 
-      // Check for validation errors in the API response
-      if (error.errors) {
-        // Handle specific field errors
-        Object.entries(error.errors).forEach(([field, messages]) => {
-          if (messages && messages.length > 0) {
-            form.setError(field, {
-              type: 'manual',
-              message: messages[0],
-            });
-          }
-        });
-        toast.error('Please correct the errors in the form');
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
       } else {
-        toast.error(error.message || 'An error occurred while updating the event');
+        // Check for validation errors in the API response
+        if (error.errors) {
+          // Handle specific field errors
+          Object.entries(error.errors).forEach(([field, messages]) => {
+            if (messages && messages.length > 0) {
+              form.setError(field, {
+                type: 'manual',
+                message: messages[0],
+              });
+            }
+          });
+          toast.error('Please correct the errors in the form');
+        } else {
+          toast.error(error.message || 'An error occurred while updating the event');
+        }
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle event deletion
+  // Handle event deletion with permission checking
   const handleDelete = async () => {
+    if (!eventPermissions.canDelete) {
+      toast.error("You don't have permission to delete events");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
-      // Call API to delete event
-      const response = await eventService.deleteEvent(params.eventId);
+      // Call protected API to delete event
+      const response = await deleteEvent(params.eventId);
 
       if (response.status === 'success') {
         toast.success(response.message || 'Event deleted successfully!');
@@ -225,7 +287,12 @@ export default function EditEvent({ params }) {
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      toast.error(error.message || 'An error occurred while deleting the event');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(error.message || 'An error occurred while deleting the event');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -233,6 +300,11 @@ export default function EditEvent({ params }) {
 
   // Reset form to original values
   const handleReset = () => {
+    if (!eventPermissions.canEdit) {
+      toast.error("You don't have permission to edit events");
+      return;
+    }
+
     if (originalFormData) {
       form.reset(originalFormData);
       setImageChanged(false);
@@ -246,11 +318,46 @@ export default function EditEvent({ params }) {
     setImageChanged(hasChanged);
   };
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state while permissions are loading
+  if (eventPermissions.isLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">
+            {eventPermissions.isLoading ? 'Loading permissions...' : 'Loading event data...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if user has no event permissions
+  if (!eventPermissions.hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">
+            You don't have permission to access the Events module.
+          </p>
+          <Button onClick={() => router.push('/admin/dashboard')}>Go to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show view permission denied
+  if (!eventPermissions.canView) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">View Permission Required</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to view event details.</p>
+          <Button onClick={() => router.push('/admin/events')}>Back to Events</Button>
+        </div>
       </div>
     );
   }
@@ -258,13 +365,29 @@ export default function EditEvent({ params }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-5xl">
+        {/* Permission Status Banner */}
+        {/* <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="font-medium text-blue-900 mb-2">Your Event Edit Permissions:</h4>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Badge variant={eventPermissions.canView ? 'default' : 'secondary'}>
+              View: {eventPermissions.canView ? '✓' : '✗'}
+            </Badge>
+            <Badge variant={eventPermissions.canEdit ? 'default' : 'secondary'}>
+              Edit: {eventPermissions.canEdit ? '✓' : '✗'}
+            </Badge>
+            <Badge variant={eventPermissions.canDelete ? 'default' : 'secondary'}>
+              Delete: {eventPermissions.canDelete ? '✓' : '✗'}
+            </Badge>
+          </div>
+        </div> */}
+
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                if (hasUnsavedChanges) {
+                if (hasUnsavedChanges && eventPermissions.canEdit) {
                   if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
                     router.push('/admin/events');
                   }
@@ -279,13 +402,14 @@ export default function EditEvent({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
-              {/* <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="outline"
                     className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !eventPermissions.canDelete}
                   >
+                    {!eventPermissions.canDelete && <Lock className="mr-2 h-4 w-4" />}
                     Delete Event
                   </Button>
                 </AlertDialogTrigger>
@@ -307,13 +431,14 @@ export default function EditEvent({ params }) {
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
-              </AlertDialog> */}
+              </AlertDialog>
 
               <Button
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !eventPermissions.canEdit}
               >
+                {!eventPermissions.canEdit && <Lock className="mr-2 h-4 w-4" />}
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
@@ -328,6 +453,7 @@ export default function EditEvent({ params }) {
                 isSubmitting={isSubmitting}
                 onReset={handleReset}
                 onImageChange={handleImageChange}
+                eventPermissions={eventPermissions}
               />
             </div>
 
@@ -343,5 +469,14 @@ export default function EditEvent({ params }) {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrapper component that provides permission context
+export default function EditEvent({ params }) {
+  return (
+    <PermissionProvider>
+      <EditEventContent params={params} />
+    </PermissionProvider>
   );
 }
