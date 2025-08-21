@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
+import { Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Import UI components
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 // Import custom components
 import EventsHeader from '@/components/admin/events/list/EventsHeader';
@@ -14,12 +16,24 @@ import EventsFilters from '@/components/admin/events/list/EventsFilters';
 import EventsTable from '@/components/admin/events/list/EventsTable';
 import EventsPagination from '@/components/admin/events/list/EventsPagination';
 
-// Import services
-import { eventService } from '@/api/services/admin/eventService';
+// Import protected services
+import {
+  getEvents,
+  updateEventStatus,
+  deleteEvent,
+} from '@/api/services/admin/protected/eventService';
+import { isAuthenticated } from '@/api/services/admin/authService';
 
-const AdminEvents = () => {
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useEventPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
+// Main Events Page Component
+const AdminEventsContent = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const eventPermissions = useEventPermissions();
 
   // State management
   const [events, setEvents] = useState([]);
@@ -48,8 +62,30 @@ const AdminEvents = () => {
     setPageSubtitle('Manage your fundraising and charity events');
   }, [setPageTitle, setPageSubtitle]);
 
-  // Fetch events from API
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Check if user has any event access
+  useEffect(() => {
+    if (!eventPermissions.isLoading && !eventPermissions.hasAccess) {
+      toast.error("You don't have access to the Events module.");
+      router.push('/admin/dashboard');
+    }
+  }, [eventPermissions.isLoading, eventPermissions.hasAccess, router]);
+
+  // Fetch events from API with permission handling
   const fetchEvents = async (page = 1, perPage = 10, searchQuery = '', filterStatus = 'all') => {
+    // Don't fetch if user doesn't have view permission
+    if (!eventPermissions.isLoading && !eventPermissions.canView) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -74,8 +110,8 @@ const AdminEvents = () => {
         params.is_featured = 1;
       }
 
-      // Call API
-      const response = await eventService.getEvents(params);
+      // Call protected API
+      const response = await getEvents(params);
 
       // Process response
       if (response.status === 'success') {
@@ -90,8 +126,14 @@ const AdminEvents = () => {
       }
     } catch (error) {
       console.error('Error fetching events:', error);
-      setError(error.message || 'Failed to load events');
-      toast.error(error.message || 'Failed to load events');
+
+      if (isPermissionError(error)) {
+        setError(getPermissionErrorMessage(error));
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        setError(error.message || 'Failed to load events');
+        toast.error(error.message || 'Failed to load events');
+      }
 
       // Fallback to empty state
       setEvents([]);
@@ -102,23 +144,28 @@ const AdminEvents = () => {
 
   // Initial fetch and when pagination, search, or filter changes
   useEffect(() => {
-    // Make sure we're passing the actual state values
-    fetchEvents(currentPage, itemsPerPage, searchQuery, filterStatus);
-    // We need to include all dependencies that should trigger a refetch
-  }, [currentPage, itemsPerPage, searchQuery, filterStatus]);
+    // Only fetch when permissions are loaded
+    if (!eventPermissions.isLoading) {
+      fetchEvents(currentPage, itemsPerPage, searchQuery, filterStatus);
+    }
+  }, [
+    currentPage,
+    itemsPerPage,
+    searchQuery,
+    filterStatus,
+    eventPermissions.isLoading,
+    eventPermissions.canView,
+  ]);
 
   // Handle page change
   const handlePageChange = (newPage) => {
-    // Update current page state
     setCurrentPage(newPage);
-    // No need to call fetchEvents here as the useEffect will handle it
   };
 
   // Handle items per page change
   const handleItemsPerPageChange = (newPerPage) => {
     setItemsPerPage(newPerPage);
     setCurrentPage(1); // Reset to first page when changing items per page
-    // No need to call fetchEvents here as the useEffect will handle it
   };
 
   // Handle sorting
@@ -131,13 +178,18 @@ const AdminEvents = () => {
     }
   };
 
-  // Handle status toggle
+  // Handle status toggle with permission checking
   const handleStatusChange = async (id, currentStatus) => {
+    if (!eventPermissions.canEdit) {
+      toast.error("You don't have permission to edit events");
+      return;
+    }
+
     try {
       // API expects 0 or 1
       const newStatus = currentStatus === 1 ? 0 : 1;
 
-      const response = await eventService.updateEventStatus(id, newStatus);
+      const response = await updateEventStatus(id, newStatus);
 
       if (response.status === 'success') {
         // Update local state to avoid refetching
@@ -152,14 +204,24 @@ const AdminEvents = () => {
       }
     } catch (error) {
       console.error('Error updating event status:', error);
-      toast.error(error.message || 'Failed to update event status');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(error.message || 'Failed to update event status');
+      }
     }
   };
 
-  // Handle event deletion
+  // Handle event deletion with permission checking
   const handleDelete = async (id) => {
+    if (!eventPermissions.canDelete) {
+      toast.error("You don't have permission to delete events");
+      return;
+    }
+
     try {
-      const response = await eventService.deleteEvent(id);
+      const response = await deleteEvent(id);
 
       if (response.status === 'success') {
         toast.success('Event deleted successfully');
@@ -171,7 +233,12 @@ const AdminEvents = () => {
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      toast.error(error.message || 'Failed to delete event');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(error.message || 'Failed to delete event');
+      }
     }
   };
 
@@ -201,9 +268,59 @@ const AdminEvents = () => {
     { field: 'actions', label: 'Actions', sortable: false },
   ];
 
+  // Show loading state while permissions are loading
+  if (eventPermissions.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if user has no event permissions
+  if (!eventPermissions.hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">
+            You don't have permission to access the Events module.
+          </p>
+          <Button onClick={() => router.push('/admin/dashboard')}>Go to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-7xl">
+        {/* Permission Status Banner */}
+        {/* <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="font-medium text-blue-900 mb-2">Your Event Management Permissions:</h4>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Badge variant={eventPermissions.canCreate ? 'default' : 'secondary'}>
+              Create: {eventPermissions.canCreate ? '✓' : '✗'}
+            </Badge>
+            <Badge variant={eventPermissions.canView ? 'default' : 'secondary'}>
+              View: {eventPermissions.canView ? '✓' : '✗'}
+            </Badge>
+            <Badge variant={eventPermissions.canEdit ? 'default' : 'secondary'}>
+              Edit: {eventPermissions.canEdit ? '✓' : '✗'}
+            </Badge>
+            <Badge variant={eventPermissions.canDelete ? 'default' : 'secondary'}>
+              Delete: {eventPermissions.canDelete ? '✓' : '✗'}
+            </Badge>
+          </div>
+          {!eventPermissions.canView && (
+            <p className="text-sm text-orange-600 mt-2">You have limited access to this module.</p>
+          )}
+        </div> */}
+
         <Card>
           {/* Header */}
           <EventsHeader />
@@ -232,25 +349,37 @@ const AdminEvents = () => {
               handleStatusChange={handleStatusChange}
               handleDelete={handleDelete}
               indexOfFirstItem={pagination.from - 1}
+              eventPermissions={eventPermissions}
             />
           </CardContent>
 
           <CardFooter>
-            {/* Pagination */}
-            <EventsPagination
-              currentPage={pagination.current_page}
-              totalEvents={pagination.total}
-              totalPages={pagination.last_page}
-              indexOfFirstItem={pagination.from - 1}
-              indexOfLastItem={pagination.to}
-              onPageChange={handlePageChange}
-              itemsPerPage={pagination.per_page}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Pagination - only show if user can view and has data */}
+            {eventPermissions.canView && events.length > 0 && (
+              <EventsPagination
+                currentPage={pagination.current_page}
+                totalEvents={pagination.total}
+                totalPages={pagination.last_page}
+                indexOfFirstItem={pagination.from - 1}
+                indexOfLastItem={pagination.to}
+                onPageChange={handlePageChange}
+                itemsPerPage={pagination.per_page}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            )}
           </CardFooter>
         </Card>
       </div>
     </div>
+  );
+};
+
+// Wrapper component that provides permission context
+const AdminEvents = () => {
+  return (
+    <PermissionProvider>
+      <AdminEventsContent />
+    </PermissionProvider>
   );
 };
 

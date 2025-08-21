@@ -1,6 +1,7 @@
 'use client';
 
-import { Table, TableBody } from '@/components/ui/table';
+import { Lock } from 'lucide-react';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import EventsTableHeader from './EventsTableHeader';
 import EventsTableRow from './EventsTableRow';
 import LoadingRow from './LoadingRow';
@@ -16,6 +17,7 @@ const EventsTable = ({
   handleStatusChange,
   handleDelete,
   indexOfFirstItem,
+  eventPermissions,
 }) => {
   return (
     <div className="rounded-md border">
@@ -29,6 +31,15 @@ const EventsTable = ({
         <TableBody>
           {isLoading ? (
             <LoadingRow colSpan={columns.length} />
+          ) : !eventPermissions.canView ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <Lock className="h-8 w-8 text-gray-400" />
+                  <p>You don't have permission to view events</p>
+                </div>
+              </TableCell>
+            </TableRow>
           ) : events.length === 0 ? (
             <EmptyRow colSpan={columns.length} />
           ) : (
@@ -40,6 +51,7 @@ const EventsTable = ({
                 rowNumber={indexOfFirstItem + index + 1}
                 handleStatusChange={handleStatusChange}
                 handleDelete={handleDelete}
+                eventPermissions={eventPermissions}
               />
             ))
           )}

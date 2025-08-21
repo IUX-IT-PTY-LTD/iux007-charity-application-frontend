@@ -12,7 +12,7 @@ import { getUserId } from '@/api/services/admin/authService.js';
 // Cache for user permissions to avoid repeated API calls
 let userPermissionsCache = null;
 let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 60 * 1000; // 1 minute
 
 /**
  * Get current user's permissions
