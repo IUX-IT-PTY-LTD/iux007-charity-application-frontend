@@ -1,3 +1,5 @@
+// src/api/services/admin/authService.js
+
 /**
  * Service file for handling admin authentication API requests
  * Integrated with the application's apiService

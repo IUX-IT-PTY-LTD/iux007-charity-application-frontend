@@ -1,3 +1,5 @@
+// src/api/scripts/permission-audit.js
+
 /**
  * Simple Permission Audit Tool
  * Compares existing permissions with required permissions

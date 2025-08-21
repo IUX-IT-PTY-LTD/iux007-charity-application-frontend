@@ -1,3 +1,5 @@
+// src/api/services/admin/faqService.js
+
 /**
  * Service file for handling FAQ-related API requests
  * Integrated with the application's apiService

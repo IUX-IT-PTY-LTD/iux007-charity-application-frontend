@@ -1,3 +1,5 @@
+// src/api/services/admin/adminService.js
+
 /**
  * Service file for handling admin management API requests
  * Integrated with the application's apiService

@@ -1,3 +1,5 @@
+// src/api/hooks/usePermission.js
+
 /**
  * Permission Hooks
  * React hooks for permission checking in components

@@ -1,3 +1,5 @@
+// src/api/config/permissions.js
+
 /**
  * Simple Permission Configuration
  * Defines modules and their required permissions

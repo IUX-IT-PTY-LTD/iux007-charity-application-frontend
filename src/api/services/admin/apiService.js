@@ -1,3 +1,5 @@
+// src/api/services/admin/apiService.js
+
 import { API_BASE_URL, API_VERSION } from '@/api/config';
 import axios from 'axios';
 

@@ -1,3 +1,5 @@
+// src/api/services/admin/sliderService.js
+
 import { apiService } from './apiService';
 import { getAuthToken } from './authService';
 

@@ -1,3 +1,5 @@
+// src/api/config/index.js
+
 // API Base URL
 export const API_BASE_URL = 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
 export const API_VERSION = 'v1';

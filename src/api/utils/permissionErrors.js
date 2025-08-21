@@ -1,3 +1,5 @@
+// src/api/utils/permissionErrors.js
+
 /**
  * Custom Permission Error Classes
  * Standardized error handling for permission-related failures

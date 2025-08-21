@@ -1,3 +1,5 @@
+// src/api/scripts/permission-generator.js
+
 /**
  * Simple Permission Generator Script
  * Creates all required permissions for the application

@@ -1,3 +1,5 @@
+// src/api/services/admin/protected/faqService.js
+
 /**
  * Protected FAQ Service
  * FAQ service with automatic permission checking

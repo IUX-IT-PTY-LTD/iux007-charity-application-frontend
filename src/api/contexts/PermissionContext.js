@@ -1,3 +1,5 @@
+// src/api/contexts/PermissionContext.js
+
 /**
  * Permission Context Provider
  * Global state management for user permissions

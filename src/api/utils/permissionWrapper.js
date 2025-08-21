@@ -1,3 +1,5 @@
+// src/api/utils/permissionWrapper.js
+
 /**
  * Simple Permission Wrapper
  * Wraps service operations with permission checking

@@ -1,3 +1,5 @@
+// src/api/middleware/permissionMiddleware.js
+
 /**
  * Permission Middleware
  * Provides utilities to wrap service operations with permission checking

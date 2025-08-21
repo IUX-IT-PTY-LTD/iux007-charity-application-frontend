@@ -1,3 +1,5 @@
+// src/api/services/admin/permissionService.js
+
 /**
  * Simple Permission Service
  * Basic CRUD operations for permissions

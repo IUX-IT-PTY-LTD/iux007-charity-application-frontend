@@ -1,3 +1,5 @@
+// src/api/hooks/useModulePermissions.js
+
 /**
  * Module-Specific Permission Hooks
  * Convenience hooks for each module's permissions
