@@ -44,7 +44,7 @@ const Footer = () => {
     <footer className="bg-black px-8 py-12">
       <div className="container mx-auto">
         <div className="flex justify-between items-center">
-          <Link href="/" className="flex items-center">
+          <Link href={settingsData.find((item) => item.key === 'acnc_link')?.value || '#'} className="flex items-center" target="_blank" rel="noopener noreferrer">
             <Image
               unoptimized
               loading="lazy"

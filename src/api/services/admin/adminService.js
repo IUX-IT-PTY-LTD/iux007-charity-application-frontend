@@ -133,3 +133,60 @@ export const deleteAdmin = async (id) => {
     throw error;
   }
 };
+
+/**
+ * Get dashboard statistics
+ * @returns {Promise} - Promise resolving to dashboard statistics data
+ */
+export const getStatistics = async () => {
+  try {
+    // Check authentication
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    return await apiService.get(`/admin/${version}/statistics`);
+  } catch (error) {
+    console.error('Get statistics error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get events statistics
+ * @returns {Promise} - Promise resolving to events statistics data
+ */
+export const getEventsStatistics = async () => {
+  try {
+    // Check authentication
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    return await apiService.get(`/admin/${version}/events/statistics`);
+  } catch (error) {
+    console.error('Get events statistics error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get monthly donations statistics
+ * @returns {Promise} - Promise resolving to monthly donations statistics data
+ */
+export const getMonthlyDonationsStatistics = async () => {
+  try {
+    // Check authentication
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    return await apiService.get(`/admin/${version}/statistics/monthly-donations`);
+  } catch (error) {
+    console.error('Get monthly donations statistics error:', error);
+    throw error;
+  }
+};
