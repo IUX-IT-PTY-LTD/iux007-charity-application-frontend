@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Download, Search, Calendar, Filter, ChevronDown, FileText } from 'lucide-react';
+import { Download, Search, Calendar, Filter, ChevronDown, FileText, Lock, Eye } from 'lucide-react';
 
 import UserDonationRow from '@/components/admin/users/details/UserDonationRow';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,47 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
+// Import permission hooks
+import { useUserPermissions } from '@/api/hooks/useModulePermissions';
+
+// Permission-aware export button
+const PermissionAwareExportButton = ({ onExport }) => {
+  const userPermissions = useUserPermissions();
+
+  const handleExport = () => {
+    if (!userPermissions.canView) {
+      toast.error("You don't have permission to export donation data");
+      return;
+    }
+    onExport();
+  };
+
+  if (!userPermissions.canView) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        disabled
+        className="opacity-50 cursor-not-allowed"
+        title="You don't have permission to export donation data"
+      >
+        <Lock className="mr-2 h-4 w-4" />
+        Export
+      </Button>
+    );
+  }
+
+  return (
+    <Button variant="outline" size="sm" onClick={handleExport}>
+      <Download className="mr-2 h-4 w-4" />
+      Export
+    </Button>
+  );
+};
+
 const UserDonationsList = ({ donations = [] }) => {
+  const userPermissions = useUserPermissions();
+
   // Donations may be null from the API
   const donationsList = donations || [];
 
@@ -36,9 +76,9 @@ const UserDonationsList = ({ donations = [] }) => {
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filter and sort donations
+  // Filter and sort donations - only if user has permission
   const filterAndSortDonations = () => {
-    if (!donationsList.length) return [];
+    if (!userPermissions.canView || !donationsList.length) return [];
 
     let filteredDonations = [...donationsList];
 
@@ -88,8 +128,13 @@ const UserDonationsList = ({ donations = [] }) => {
     return filteredDonations;
   };
 
-  // Export donations as CSV
+  // Export donations as CSV - with permission check
   const handleExportDonations = () => {
+    if (!userPermissions.canView) {
+      toast.error("You don't have permission to export donation data");
+      return;
+    }
+
     toast.info('Exporting donation history...');
 
     // Simulate export delay
@@ -101,15 +146,31 @@ const UserDonationsList = ({ donations = [] }) => {
   // Get filtered donations
   const filteredDonations = filterAndSortDonations();
 
-  // Calculate total donation amount
-  const totalDonationAmount = donationsList.reduce(
-    (sum, donation) => sum + (donation.total_price || 0),
-    0
+  // Calculate total donation amount - only if user has permission
+  const totalDonationAmount = userPermissions.canView
+    ? donationsList.reduce((sum, donation) => sum + (donation.total_price || 0), 0)
+    : 0;
+
+  const formattedTotalAmount = userPermissions.canView
+    ? new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(totalDonationAmount)
+    : '$••••';
+
+  // Render access denied state
+  const renderAccessDeniedState = () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="bg-gray-100 dark:bg-gray-800 rounded-full p-6 mb-4">
+        <Lock className="h-12 w-12 text-gray-400" />
+      </div>
+      <h3 className="text-xl font-semibold mb-2">Access Restricted</h3>
+      <p className="text-muted-foreground text-center max-w-md mb-6">
+        You don't have permission to view donation details. Contact your administrator to request
+        access.
+      </p>
+    </div>
   );
-  const formattedTotalAmount = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(totalDonationAmount);
 
   // Render empty state
   const renderEmptyState = () => (
@@ -140,110 +201,121 @@ const UserDonationsList = ({ donations = [] }) => {
   return (
     <Card className="shadow-sm mt-6">
       <CardHeader>
-        <CardTitle>Donation History</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          Donation History
+          {!userPermissions.canView && <Eye className="h-5 w-5 text-blue-500" />}
+        </CardTitle>
         <CardDescription>
-          {donationsList.length} total donations • {formattedTotalAmount}
+          {userPermissions.canView
+            ? `${donationsList.length} total donations • ${formattedTotalAmount}`
+            : 'Donation details require view permissions'}
         </CardDescription>
 
-        <div className="space-y-4 mt-4">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-            <div className="relative w-full md:max-w-xs">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                type="search"
-                placeholder="Search donations..."
-                className="pl-8 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
-                <Filter className="mr-2 h-4 w-4" />
-                Filters
-                <ChevronDown
-                  className={`ml-2 h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`}
+        {/* Only show filters if user has view permission */}
+        {userPermissions.canView && (
+          <div className="space-y-4 mt-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+              <div className="relative w-full md:max-w-xs">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                <Input
+                  type="search"
+                  placeholder="Search donations..."
+                  className="pl-8 w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-              </Button>
+              </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Date
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-auto p-0">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start font-normal p-4"
-                      >
-                        {dateFilter ? format(dateFilter, 'PPP') : 'Select Date...'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={dateFilter}
-                        onSelect={setDateFilter}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filters
+                  <ChevronDown
+                    className={`ml-2 h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`}
+                  />
+                </Button>
 
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="amount-high">Amount (High to Low)</SelectItem>
-                  <SelectItem value="amount-low">Amount (Low to High)</SelectItem>
-                </SelectContent>
-              </Select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Date
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-auto p-0">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start font-normal p-4"
+                        >
+                          {dateFilter ? format(dateFilter, 'PPP') : 'Select Date...'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={dateFilter}
+                          onSelect={setDateFilter}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-              <Button variant="outline" size="sm" onClick={handleExportDonations}>
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="amount-high">Amount (High to Low)</SelectItem>
+                    <SelectItem value="amount-low">Amount (Low to High)</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <PermissionAwareExportButton onExport={handleExportDonations} />
+              </div>
             </div>
+
+            {showFilters && (
+              <div className="flex flex-wrap gap-2 py-2 items-center">
+                <div className="text-sm text-muted-foreground">Events:</div>
+                {/* Create a unique list of event titles for filtering */}
+                {Array.from(new Set(donationsList.map((d) => d.event?.title)))
+                  .filter(Boolean)
+                  .map((eventTitle) => (
+                    <Button
+                      key={eventTitle}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSearchQuery(eventTitle)}
+                    >
+                      {eventTitle}
+                    </Button>
+                  ))}
+              </div>
+            )}
           </div>
-
-          {showFilters && (
-            <div className="flex flex-wrap gap-2 py-2 items-center">
-              <div className="text-sm text-muted-foreground">Events:</div>
-              {/* Create a unique list of event titles for filtering */}
-              {Array.from(new Set(donationsList.map((d) => d.event?.title)))
-                .filter(Boolean)
-                .map((eventTitle) => (
-                  <Button
-                    key={eventTitle}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSearchQuery(eventTitle)}
-                  >
-                    {eventTitle}
-                  </Button>
-                ))}
-            </div>
-          )}
-        </div>
+        )}
       </CardHeader>
 
       <CardContent>
-        {filteredDonations.length === 0 ? (
+        {!userPermissions.canView ? (
+          renderAccessDeniedState()
+        ) : filteredDonations.length === 0 ? (
           renderEmptyState()
         ) : (
           <div className="space-y-4">
             {filteredDonations.map((donation) => (
-              <UserDonationRow key={donation.id} donation={donation} />
+              <UserDonationRow
+                key={donation.id}
+                donation={donation}
+                userPermissions={userPermissions}
+              />
             ))}
           </div>
         )}

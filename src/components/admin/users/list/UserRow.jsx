@@ -15,6 +15,8 @@ import {
   DollarSign,
   ChevronRight,
   Clock,
+  Lock,
+  Eye,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -38,8 +40,42 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
+// Import permission hooks
+import { useUserPermissions } from '@/api/hooks/useModulePermissions';
+
+// Permission-aware view button component
+const PermissionAwareViewButton = ({ user, onViewUser }) => {
+  const userPermissions = useUserPermissions();
+
+  if (!userPermissions.canView) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        disabled
+        title="You don't have permission to view user details"
+        className="opacity-0 group-hover:opacity-50 transition-opacity cursor-not-allowed"
+      >
+        <Lock className="h-5 w-5 text-muted-foreground" />
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="opacity-0 group-hover:opacity-100 transition-opacity"
+      onClick={onViewUser}
+    >
+      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+    </Button>
+  );
+};
+
 const UserRow = ({ user, onDelete }) => {
   const router = useRouter();
+  const userPermissions = useUserPermissions();
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
 
   // Format date
@@ -74,21 +110,39 @@ const UserRow = ({ user, onDelete }) => {
       .slice(0, 2);
   };
 
-  // View user details
+  // View user details - with permission check
   const handleViewUser = () => {
+    if (!userPermissions.canView) {
+      toast.error("You don't have permission to view user details");
+      return;
+    }
     router.push(`/admin/users/${user.id}/details`);
+  };
+
+  // Handle row click - with permission check
+  const handleRowClick = () => {
+    if (userPermissions.canView) {
+      handleViewUser();
+    }
   };
 
   // Edit user - Kept for future implementation
   // const handleEditUser = () => {
+  //   if (!userPermissions.canEdit) {
+  //     toast.error("You don't have permission to edit users");
+  //     return;
+  //   }
   //   // router.push(`/admin/users/${user.id}/edit`);
   //   toast.info('Edit functionality will be implemented in the future');
   // };
 
   // Delete user - Kept for future implementation
   // const handleDeleteUser = () => {
+  //   if (!userPermissions.canDelete) {
+  //     toast.error("You don't have permission to delete users");
+  //     return;
+  //   }
   //   setShowDeleteDialog(false);
-
   //   // Call the delete function passed from parent
   //   onDelete(user.id);
   // };
@@ -129,9 +183,10 @@ const UserRow = ({ user, onDelete }) => {
   return (
     <>
       <div
-        className="relative group transition-all duration-200 ease-in-out border-b hover:bg-gray-50/70 dark:hover:bg-gray-800/70"
-        onClick={handleViewUser}
-        style={{ cursor: 'pointer' }}
+        className={`relative group transition-all duration-200 ease-in-out border-b hover:bg-gray-50/70 dark:hover:bg-gray-800/70 ${
+          userPermissions.canView ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'
+        }`}
+        onClick={handleRowClick}
       >
         {/* Main content */}
         <div className="flex items-center p-4 md:p-5">
@@ -150,16 +205,29 @@ const UserRow = ({ user, onDelete }) => {
                   <span className="relative rounded-full h-4 w-4 bg-green-500"></span>
                 </span>
               )}
+              {/* Permission indicator overlay */}
+              {!userPermissions.canView && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 rounded-full">
+                  <Lock className="h-4 w-4 text-gray-400" />
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <h3 className="font-semibold text-base">{user.name}</h3>
+                <h3
+                  className={`font-semibold text-base flex items-center gap-2 ${
+                    !userPermissions.canView ? 'text-gray-400' : ''
+                  }`}
+                >
+                  {user.name}
+                  {!userPermissions.canView && <Lock className="h-4 w-4" />}
+                </h3>
                 {getDonationBadge()}
               </div>
               <div className="text-sm text-muted-foreground flex items-center">
                 <Mail className="h-3.5 w-3.5 mr-1 inline" />
-                {user.email}
+                {userPermissions.canView ? user.email : '••••••@••••.com'}
               </div>
               <div className="hidden md:flex text-xs text-muted-foreground items-center mt-1">
                 <Calendar className="h-3 w-3 mr-1 inline" />
@@ -181,44 +249,63 @@ const UserRow = ({ user, onDelete }) => {
           <div className="flex-shrink-0 flex flex-col md:flex-row items-end md:items-center space-y-2 md:space-y-0 md:space-x-6">
             {/* Donation stats */}
             <div className="flex flex-col items-end md:items-center">
-              <div className="text-sm font-medium">{user.total_donors || 0} donations</div>
+              <div className="text-sm font-medium">
+                {userPermissions.canView ? `${user.total_donors || 0} donations` : '•• donations'}
+              </div>
               <div className="text-xs text-muted-foreground">
-                {formatDonationAmount(user.total_donation_amount || 0)}
+                {userPermissions.canView
+                  ? formatDonationAmount(user.total_donation_amount || 0)
+                  : '$••••'}
               </div>
             </div>
 
             {/* View details indicator */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </Button>
+            <PermissionAwareViewButton user={user} onViewUser={handleViewUser} />
 
-            {/* Dropdown menu - commented out as per requirement */}
+            {/* Dropdown menu - commented out as per requirement, but would need permission checks */}
             {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-5 w-5" />
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  disabled={!userPermissions.canView}
+                >
+                  {userPermissions.canView ? (
+                    <MoreHorizontal className="h-5 w-5" />
+                  ) : (
+                    <Lock className="h-5 w-5" />
+                  )}
                   <span className="sr-only">Open menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleViewUser}>
-                  <User className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={handleViewUser} disabled={!userPermissions.canView}>
+                  {userPermissions.canView ? (
+                    <User className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Lock className="mr-2 h-4 w-4" />
+                  )}
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleEditUser}>
-                  <Edit className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={handleEditUser} disabled={!userPermissions.canEdit}>
+                  {userPermissions.canEdit ? (
+                    <Edit className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Lock className="mr-2 h-4 w-4" />
+                  )}
                   Edit User
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600 dark:text-red-400"
                   onClick={() => setShowDeleteDialog(true)}
+                  disabled={!userPermissions.canDelete}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  {userPermissions.canDelete ? (
+                    <Trash2 className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Lock className="mr-2 h-4 w-4" />
+                  )}
                   Delete User
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -231,9 +318,14 @@ const UserRow = ({ user, onDelete }) => {
           <Clock className="h-3 w-3 mr-1" />
           Joined {registeredDate}
         </div>
+
+        {/* Permission overlay for entire row when no access */}
+        {!userPermissions.canView && (
+          <div className="absolute inset-0 bg-white/10 dark:bg-gray-900/10 pointer-events-none" />
+        )}
       </div>
 
-      {/* Delete Confirmation Dialog - commented out as per requirement */}
+      {/* Delete Confirmation Dialog - commented out as per requirement, but would include permission checks */}
       {/* <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -246,8 +338,12 @@ const UserRow = ({ user, onDelete }) => {
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteUser}>
-              Delete User
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteUser}
+              disabled={!userPermissions.canDelete}
+            >
+              {userPermissions.canDelete ? 'Delete User' : 'No Permission'}
             </Button>
           </DialogFooter>
         </DialogContent>
