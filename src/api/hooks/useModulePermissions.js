@@ -1,67 +1,59 @@
 // src/api/hooks/useModulePermissions.js
 
 /**
- * Module-Specific Permission Hooks
- * Convenience hooks for each module's permissions
+ * Fixed Module-Specific Permission Hooks
+ * Added missing modules and updated combined hooks
  */
 
 import { useModuleAccess } from './usePermission';
 
-// ==================== ADMIN MODULE HOOKS ====================
+// ==================== EXISTING MODULE HOOKS ====================
 
 export const useAdminPermissions = () => {
   return useModuleAccess('admin');
 };
 
-// ==================== ROLE MODULE HOOKS ====================
-
 export const useRolePermissions = () => {
   return useModuleAccess('role');
 };
-
-// ==================== EVENT MODULE HOOKS ====================
 
 export const useEventPermissions = () => {
   return useModuleAccess('event');
 };
 
-// ==================== FAQ MODULE HOOKS ====================
-
 export const useFaqPermissions = () => {
   return useModuleAccess('faq');
 };
-
-// ==================== SLIDER MODULE HOOKS ====================
 
 export const useSliderPermissions = () => {
   return useModuleAccess('slider');
 };
 
-// ==================== MENU MODULE HOOKS ====================
-
 export const useMenuPermissions = () => {
   return useModuleAccess('menu');
 };
-
-// ==================== CONTACT MODULE HOOKS ====================
 
 export const useContactPermissions = () => {
   return useModuleAccess('contact');
 };
 
-// ==================== USER MODULE HOOKS ====================
-
 export const useUserPermissions = () => {
   return useModuleAccess('user');
 };
-
-// ==================== PERMISSION MODULE HOOKS ====================
 
 export const usePermissionManagement = () => {
   return useModuleAccess('permission');
 };
 
-// ==================== COMBINED HOOKS FOR COMMON USE CASES ====================
+export const useProfilePermissions = () => {
+  return useModuleAccess('profile');
+};
+
+export const useSettingsPermissions = () => {
+  return useModuleAccess('settings');
+};
+
+// ==================== COMBINED HOOKS ====================
 
 /**
  * Hook for content management permissions (events, faqs, sliders, menus)
@@ -89,12 +81,15 @@ export const useUserManagementPermissions = () => {
   const adminPerms = useAdminPermissions();
   const rolePerms = useRolePermissions();
   const userPerms = useUserPermissions();
+  const profilePerms = useProfilePermissions();
 
   return {
     admins: adminPerms,
     roles: rolePerms,
     users: userPerms,
-    hasAnyUserManagementAccess: adminPerms.hasAccess || rolePerms.hasAccess || userPerms.hasAccess,
+    profiles: profilePerms,
+    hasAnyUserManagementAccess:
+      adminPerms.hasAccess || rolePerms.hasAccess || userPerms.hasAccess || profilePerms.hasAccess,
   };
 };
 
@@ -104,10 +99,13 @@ export const useUserManagementPermissions = () => {
 export const useSystemPermissions = () => {
   const permissionPerms = usePermissionManagement();
   const contactPerms = useContactPermissions();
+  const settingsPerms = useSettingsPermissions();
 
   return {
     permissions: permissionPerms,
     contacts: contactPerms,
-    hasAnySystemAccess: permissionPerms.hasAccess || contactPerms.hasAccess,
+    settings: settingsPerms,
+    hasAnySystemAccess:
+      permissionPerms.hasAccess || contactPerms.hasAccess || settingsPerms.hasAccess,
   };
 };

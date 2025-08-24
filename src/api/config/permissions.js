@@ -1,26 +1,29 @@
 // src/api/config/permissions.js
 
 /**
- * Simple Permission Configuration
+ * Fixed Permission Configuration
  * Defines modules and their required permissions
  */
 
 // ==================== MODULE CONFIGURATIONS ====================
 
-/**
- * Define modules and their required permissions
- * Each module specifies the actions it needs
- */
 export const MODULE_PERMISSIONS = {
+  // Core admin modules
   admin: ['create', 'view', 'edit', 'delete'],
   role: ['create', 'view', 'edit', 'delete'],
   permission: ['create', 'view', 'edit', 'delete'],
+
+  // Content management modules
   event: ['create', 'view', 'edit', 'delete'],
   faq: ['create', 'view', 'edit', 'delete'],
   slider: ['create', 'view', 'edit', 'delete'],
   menu: ['create', 'view', 'edit', 'delete'],
-  contact: ['view', 'edit'],
+  contact: ['create', 'view', 'edit', 'delete'],
+
+  // User management
   user: ['view', 'details'],
+  profile: ['view', 'edit'],
+  settings: ['create', 'view', 'edit', 'delete'],
 };
 
 /**
