@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Contact,
   Shield,
+  UserCircle, // Added for Profile
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -33,7 +34,7 @@ import {
   useEventPermissions,
   useFaqPermissions,
   useSliderPermissions,
-  useContactPermissions,
+  useProfilePermissions, // ADDED: Profile permissions
   useAdminPermissions,
   useRolePermissions,
   usePermissionManagement,
@@ -50,7 +51,20 @@ const getNavigationItems = (permissions) => {
     href: '/admin/dashboard',
     icon: LayoutDashboard,
     visible: true,
+    order: 1,
   });
+
+  // Profile - ADDED: Replace Contact with Profile
+  if (permissions.profiles.hasAccess) {
+    items.push({
+      id: 'profile',
+      name: 'Profile',
+      href: '/admin/profile',
+      icon: UserCircle,
+      visible: true,
+      order: 2,
+    });
+  }
 
   // Users module
   if (permissions.users.hasAccess) {
@@ -60,17 +74,7 @@ const getNavigationItems = (permissions) => {
       href: '/admin/users',
       icon: User,
       visible: true,
-    });
-  }
-
-  // Menus module
-  if (permissions.menus.hasAccess) {
-    items.push({
-      id: 'menus',
-      name: 'Menus',
-      href: '/admin/menus',
-      icon: MenuIcon,
-      visible: true,
+      order: 3,
     });
   }
 
@@ -82,6 +86,19 @@ const getNavigationItems = (permissions) => {
       href: '/admin/events',
       icon: Calendar,
       visible: true,
+      order: 4,
+    });
+  }
+
+  // Menus module
+  if (permissions.menus.hasAccess) {
+    items.push({
+      id: 'menus',
+      name: 'Menus',
+      href: '/admin/menus',
+      icon: MenuIcon,
+      visible: true,
+      order: 5,
     });
   }
 
@@ -93,6 +110,7 @@ const getNavigationItems = (permissions) => {
       href: '/admin/faqs',
       icon: HelpCircle,
       visible: true,
+      order: 6,
     });
   }
 
@@ -104,17 +122,7 @@ const getNavigationItems = (permissions) => {
       href: '/admin/sliders',
       icon: Images,
       visible: true,
-    });
-  }
-
-  // Contact module
-  if (permissions.contacts.hasAccess) {
-    items.push({
-      id: 'contact',
-      name: 'Contact',
-      href: '/admin/contact',
-      icon: Contact,
-      visible: true,
+      order: 7,
     });
   }
 
@@ -125,6 +133,7 @@ const getNavigationItems = (permissions) => {
     href: '/admin/settings',
     icon: Settings,
     visible: true,
+    order: 8,
   });
 
   // Organization submenu - only show if user has access to any org-related permissions
@@ -136,6 +145,7 @@ const getNavigationItems = (permissions) => {
       id: 'org-admins',
       name: 'Admin Management',
       href: '/admin/org/admin',
+      order: 1,
     });
   }
 
@@ -145,6 +155,7 @@ const getNavigationItems = (permissions) => {
       id: 'org-roles',
       name: 'Role Management',
       href: '/admin/org/roles',
+      order: 2,
     });
   }
 
@@ -154,8 +165,12 @@ const getNavigationItems = (permissions) => {
       id: 'org-permissions',
       name: 'Permission Management',
       href: '/admin/pms',
+      order: 3,
     });
   }
+
+  // Sort submenu items by order
+  orgSubmenuItems.sort((a, b) => a.order - b.order);
 
   // Only show Organization menu if user has access to any org feature
   if (orgSubmenuItems.length > 0) {
@@ -165,20 +180,22 @@ const getNavigationItems = (permissions) => {
       icon: Building,
       submenu: orgSubmenuItems,
       visible: true,
+      order: 9,
     });
   }
 
-  return items.filter((item) => item.visible);
+  // Sort items by order and filter visible ones
+  return items.filter((item) => item.visible).sort((a, b) => a.order - b.order);
 };
 
-// Component to get all permissions
+// Component to get all permissions - UPDATED: Added profile permissions
 const useAllModulePermissions = () => {
   const users = useUserPermissions();
   const menus = useMenuPermissions();
   const events = useEventPermissions();
   const faqs = useFaqPermissions();
   const sliders = useSliderPermissions();
-  const contacts = useContactPermissions();
+  const profiles = useProfilePermissions(); // ADDED: Profile permissions
   const admins = useAdminPermissions();
   const roles = useRolePermissions();
   const permissions = usePermissionManagement();
@@ -189,7 +206,7 @@ const useAllModulePermissions = () => {
     events.isLoading ||
     faqs.isLoading ||
     sliders.isLoading ||
-    contacts.isLoading ||
+    profiles.isLoading || // ADDED: Profile loading state
     admins.isLoading ||
     roles.isLoading ||
     permissions.isLoading;
@@ -200,7 +217,7 @@ const useAllModulePermissions = () => {
     events,
     faqs,
     sliders,
-    contacts,
+    profiles, // ADDED: Profile permissions
     admins,
     roles,
     permissions,
@@ -222,7 +239,7 @@ function AdminSidebarContent() {
   // Get permission context for overall loading state
   const { isLoading: permissionContextLoading, isInitialized } = usePermissionContext();
 
-  // Generate navigation items based on permissions
+  // Generate navigation items based on permissions - UPDATED: Added profiles dependency
   const navigationItems = React.useMemo(() => {
     if (modulePermissions.isLoading || !isInitialized) {
       return []; // Return empty array while loading
@@ -236,7 +253,7 @@ function AdminSidebarContent() {
     modulePermissions.events.hasAccess,
     modulePermissions.faqs.hasAccess,
     modulePermissions.sliders.hasAccess,
-    modulePermissions.contacts.hasAccess,
+    modulePermissions.profiles.hasAccess, // ADDED: Profile permissions dependency
     modulePermissions.admins.hasAccess,
     modulePermissions.roles.hasAccess,
     modulePermissions.permissions.hasAccess,
