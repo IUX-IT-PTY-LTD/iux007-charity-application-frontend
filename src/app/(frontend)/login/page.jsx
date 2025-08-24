@@ -1,8 +1,8 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,6 +14,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -43,7 +44,10 @@ const Login = () => {
       if (response.data && response.status === 'success') {
         dispatch(setUser(response.data));
         toast.success('Login successful');
-        router.replace('/');
+        
+        // Check for redirect parameter and redirect there, otherwise go to home
+        const redirectUrl = searchParams.get('redirect');
+        router.replace(redirectUrl || '/');
       } else {
         errorMessage = response.data?.error?.description || 'User name or password wrong';
         toast.error(errorMessage);
@@ -82,8 +86,6 @@ const Login = () => {
               <div className="mb-8">
                 <h3 className="text-gray-800 text-3xl font-extrabold">Sign in</h3>
                 <p className="text-gray-500 text-sm mt-4 leading-relaxed">
-                  Sign in to your account and explore a world of possibilities. Your journey begins
-                  here.
                 </p>
               </div>
 
