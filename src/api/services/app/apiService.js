@@ -89,6 +89,7 @@ class ApiService {
 
   // Get auth header
   getAuthHeader() {
+    if (typeof window === 'undefined') return {};
     const token = localStorage.getItem('accessToken');
     return token ? { Authorization: `${token}` } : {};
   }

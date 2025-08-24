@@ -69,6 +69,9 @@ const Events = () => {
                         time={event.end_date}
                         venue={event.location}
                         targetAmount={event.target_amount}
+                        raised={event.total_donation || 0}
+                        totalDonors={event.total_donor || 0}
+                        remainingPercentage={event.remaining_percentage || 0}
                         showDetails={true}
                       />
                     </div>

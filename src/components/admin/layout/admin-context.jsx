@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCurrentUser } from '@/api/services/admin/authService';
+import { getCurrentUser, getAuthToken } from '@/api/services/admin/authService';
 
 // Create context
 const AdminContext = createContext({
@@ -29,7 +29,7 @@ export const AdminProvider = ({ children }) => {
     try {
       setIsLoadingProfile(true);
       // Check if token exists before making API call
-      const token = localStorage.getItem('adminAccessToken');
+      const token = getAuthToken();
       if (!token) {
         setAdminProfile(null);
         setIsLoadingProfile(false);

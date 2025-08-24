@@ -48,7 +48,7 @@ const EventDetails = ({ params }) => {
       price: event.is_fixed_donation
         ? event.price
         : document.getElementById('donation_amount').value,
-      isFixedDonation: event.is_fixed_donation,
+      isFixedDonation: event.is_fixed_donation
     };
 
     // Add donation item to cart state
@@ -67,6 +67,21 @@ const EventDetails = ({ params }) => {
   useEffect(() => {
     fetchEventDetails();
   }, []); // Added dependency array to prevent infinite loop
+
+  // Calculate dynamic progress percentage
+  const progressPercentage = event.remaining_percentage 
+    ? (100 - event.remaining_percentage).toFixed(2)
+    : event.target_amount > 0 
+      ? Math.min((event.total_donation / event.target_amount) * 100, 100).toFixed(2)
+      : 0;
+
+  // Determine progress bar color based on progress percentage
+  const getProgressBarColor = () => {
+    if (parseFloat(progressPercentage) > 70) {
+      return 'bg-green-500';
+    }
+    return 'bg-primary';
+  };
 
   if (loading) {
     return (
@@ -152,8 +167,8 @@ const EventDetails = ({ params }) => {
                   <div className="bg-gray-100 rounded-lg p-4">
                     <div className="flex flex-col gap-1 mb-4">
                       <div className="flex items-baseline">
-                        <span className="text-1xl font-bold text-primary">${25000 || 0}</span>
-                        <span className="text-gray-500 ml-2">USD Raised of </span>
+                        <span className="text-1xl font-bold text-primary">${event.total_donation || 0}</span>
+                        <span className="text-gray-500 ml-2">Raised of </span>
                         <span className="text-1xl font-bold text-primary">
                           {' '}
                           ${event.target_amount || 0}
@@ -163,16 +178,16 @@ const EventDetails = ({ params }) => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div
-                        className="bg-primary h-2.5 rounded-full"
+                        className={`${getProgressBarColor()} h-2.5 rounded-full transition-colors duration-300`}
                         style={{
-                          width: `${Math.min((25000 / event.target_amount) * 100 || 0, 100)}%`,
+                          width: `${progressPercentage}%`,
                         }}
                       ></div>
                     </div>
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-sm text-gray-500">{100 || 0} Donors</span>
+                      <span className="text-sm text-gray-500">{event.total_donor || 0} Donors</span>
                       <span className="text-sm text-gray-500">
-                        {Math.min((25000 / event.target_amount) * 100 || 0, 100).toFixed(1)}%
+                        {progressPercentage}%
                         Complete
                       </span>
                     </div>

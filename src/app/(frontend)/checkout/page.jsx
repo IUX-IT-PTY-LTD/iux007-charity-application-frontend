@@ -24,7 +24,8 @@ const Checkout = () => {
   console.log(userInfo);
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   /** Stripe Integration */
-  const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
   useEffect(() => {
     // Get cart items from localStorage when component mounts
@@ -461,9 +462,29 @@ const Checkout = () => {
             {currentStep === 3 && (
               <div className="max-w-3xl mx-auto space-y-8">
                 <div className="grid">
-                  <Elements stripe={stripePromise}>
-                    <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
-                  </Elements>
+                  {!stripePublishableKey ? (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                      <h3 className="text-lg font-semibold text-red-800 mb-2">Payment Configuration Error</h3>
+                      <p className="text-red-600 mb-4">
+                        Stripe payment is not properly configured. Please contact support.
+                      </p>
+                      <button
+                        onClick={() => setCurrentStep(2)}
+                        className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        Go Back
+                      </button>
+                    </div>
+                  ) : stripePromise ? (
+                    <Elements stripe={stripePromise}>
+                      <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
+                    </Elements>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Payment System...</h3>
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  )}
                   {/* {paymentMethods.map((method) => (
                     <div
                       key={method.id}

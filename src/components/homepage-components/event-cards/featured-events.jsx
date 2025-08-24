@@ -1,12 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import { FaClock, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaClock, FaMapMarkerAlt, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 import { useState, useEffect } from'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { setUserCart } from '@/store/features/userSlice';
-import { toast, ToastContainer } from 'react-toastify';
 
 const FeaturedEventsCard = ({
   eventId,
@@ -23,6 +22,8 @@ const FeaturedEventsCard = ({
   const dispatch = useDispatch(); // Assuming you have a dispatch function from your Redux store
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [customAmount, setCustomAmount] = useState('');
+  const [showError, setShowError] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   useEffect(() => {
     if (selectedAmount) {
       setCustomAmount(selectedAmount);
@@ -34,16 +35,12 @@ const FeaturedEventsCard = ({
     const amount = fixedDonation ? donationAmount : (selectedAmount || customAmount);
     
     if (!amount || amount <= 0) {
-      toast.error('Please enter a valid donation amount', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      setShowError(true);
+      setShowPopup(true);
       return;
     }
+    
+    setShowError(false);
 
     const donationItem = {
       id: eventId,
@@ -66,9 +63,45 @@ const FeaturedEventsCard = ({
     router.push('/checkout');
   }
 
+  const CustomPopup = () => {
+    if (!showPopup) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-2xl transform transition-all text-center">
+          <div className="flex items-center justify-center mb-4">
+            <FaExclamationTriangle className="text-orange-500 text-xl mr-2" />
+            <h3 className="text-base font-semibold text-gray-800">Amount Required</h3>
+            <button 
+              onClick={() => {
+                setShowPopup(false);
+                setShowError(false);
+              }}
+              className="ml-auto text-gray-400 hover:text-gray-600"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          <p className="text-sm text-gray-600 mb-6">
+            Please select or enter a valid donation amount to proceed with your donation.
+          </p>
+          <button
+            onClick={() => {
+              setShowPopup(false);
+              setShowError(false);
+            }}
+            className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors text-sm"
+          >
+            OK, I'll select an amount
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
+    <>
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mx-auto max-w-sm">
-      <ToastContainer />
       <div className="relative">
         <Link href={`/events/${eventId}`}>
           <Image
@@ -101,19 +134,27 @@ const FeaturedEventsCard = ({
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">{description}</p>
         <div className="space-y-4">
           {fixedDonation ? (
-            <div className="text-center text-2xl font-bold text-primary mb-4">
-              ${donationAmount}
+           <div className="text-center h-[84px] flex flex-col items-center justify-center">
+              <div className="text-sm text-gray-600 mb-1">Fixed Donation</div>
+              <div className="text-2xl font-bold text-primary">
+                ${donationAmount}
+              </div>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-1">
+              <div className={`grid grid-cols-3 gap-1 ${showError ? 'animate-pulse' : ''}`}>
                 {['50', '100', '200'].map((amount) => (
                   <button
                     key={amount}
-                    onClick={() => setSelectedAmount(amount)}
+                    onClick={() => {
+                      setSelectedAmount(amount);
+                      setShowError(false);
+                    }}
                     className={`${
                       selectedAmount === amount
                         ? 'bg-primary text-white'
+                        : showError 
+                        ? 'bg-red-100 text-red-600 border border-red-300 hover:bg-red-200' 
                         : 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
                     } px-3 py-1.5 rounded-lg text-sm transition-colors duration-200`}
                   >
@@ -130,8 +171,13 @@ const FeaturedEventsCard = ({
                   onChange={(e) => {
                     setCustomAmount(e.target.value);
                     setSelectedAmount(null);
+                    setShowError(false);
                   }}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  className={`w-full px-3 py-2 text-sm border rounded-lg outline-none transition-all ${
+                    showError 
+                      ? 'border-red-300 bg-red-50 focus:ring-2 focus:ring-red-200 focus:border-red-400' 
+                      : 'border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary'
+                  }`}
                 />
               </div>
             </>
@@ -152,6 +198,8 @@ const FeaturedEventsCard = ({
         </div>
       </div>
     </div>
+    <CustomPopup />
+    </>
   );
 };
 
