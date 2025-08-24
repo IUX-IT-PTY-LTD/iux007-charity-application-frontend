@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Award, PlusCircle, Loader2, Trash2, Edit, ExternalLink, Upload } from 'lucide-react';
+import { Award, Loader2, Edit, ExternalLink, Upload } from 'lucide-react';
 import EditableField from '@/components/admin/shared/EditableField';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,160 +15,192 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-const AccreditationsSection = ({ accreditations, setAccreditations }) => {
+// Import the protected settings service
+import {
+  updateAccreditationSetting,
+  safeUpdateSetting,
+} from '@/api/services/admin/protected/settingsService';
+
+const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh }) => {
   // Dialog states
-  const [addAccreditationOpen, setAddAccreditationOpen] = useState(false);
   const [editAccreditationOpen, setEditAccreditationOpen] = useState(false);
 
   // Edit states
   const [editingAccreditation, setEditingAccreditation] = useState(null);
 
-  // Form states
-  const [accreditationForm, setAccreditationForm] = useState({
-    title: '',
-    logo: null,
-    link: '',
-  });
-
-  // Error states
-  const [accreditationErrors, setAccreditationErrors] = useState({});
+  // Loading state
   const [loading, setLoading] = useState(false);
 
-  // Validation functions
-  const validateAccreditationForm = () => {
-    const errors = {};
-
-    if (!accreditationForm.title.trim()) {
-      errors.title = 'Accreditation title is required';
-    }
-
-    if (!accreditationForm.logo && !editingAccreditation) {
-      errors.logo = 'Logo file is required';
-    }
-
-    if (!accreditationForm.link.trim()) {
-      errors.link = 'Accreditation link is required';
-    } else if (!isValidUrl(accreditationForm.link)) {
-      errors.link = 'Please enter a valid URL';
-    }
-
-    setAccreditationErrors(errors);
-    return Object.keys(errors).length === 0;
+  const handleEditAccreditation = (accreditation) => {
+    setEditingAccreditation(accreditation);
+    setEditAccreditationOpen(true);
   };
 
-  const isValidUrl = (string) => {
+  const handleUpdateAccreditation = async (field, newValue) => {
+    if (!editingAccreditation) return;
+
     try {
-      new URL(string);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  };
+      setLoading(true);
 
-  // File upload handler
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
-        return;
+      // Determine which setting to update based on the field
+      let settingId, settingKey, settingData;
+
+      if (field === 'title') {
+        // For title changes, we don't actually update anything since ACNC title is fixed
+        toast.info('ACNC accreditation title cannot be changed');
+        return true;
+      } else if (field === 'link') {
+        settingId = editingAccreditation.linkId;
+        settingKey = 'acnc_link';
+      } else if (field === 'logo') {
+        settingId = editingAccreditation.logoId;
+        settingKey = 'acnc_logo';
+      } else {
+        throw new Error('Unknown field');
       }
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
-        return;
-      }
+      // Get current setting data and update it
+      const currentValue = field === 'link' ? editingAccreditation.link : editingAccreditation.logo;
 
-      setAccreditationForm((prev) => ({ ...prev, logo: file }));
-    }
-  };
-
-  // Accreditation handlers
-  const handleAddAccreditation = async () => {
-    if (!validateAccreditationForm()) return;
-
-    setLoading(true);
-    try {
-      // Simulate file upload and API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const newAccreditation = {
-        id: Date.now(),
-        title: accreditationForm.title,
-        logo: `/uploads/${accreditationForm.logo.name}`, // Simulated upload path
-        link: accreditationForm.link,
-        status: 1,
+      settingData = {
+        key: settingKey,
+        value: newValue,
+        type: 'text', // Based on API, type is usually 'text'
+        status: 1, // Keep active status
       };
 
-      setAccreditations((prev) => [...prev, newAccreditation]);
-      setAccreditationForm({ title: '', logo: null, link: '' });
-      setAccreditationErrors({});
-      setAddAccreditationOpen(false);
-      toast.success('Accreditation added successfully');
-    } catch (error) {
-      toast.error('Failed to add accreditation');
+      const response = await safeUpdateSetting(settingId, settingData);
+
+      if (response.status === 'success') {
+        // Update the editing state
+        setEditingAccreditation((prev) => ({
+          ...prev,
+          [field]: newValue,
+        }));
+
+        // Update the main accreditations state
+        setAccreditations((prev) =>
+          prev.map((acc) =>
+            acc.id === editingAccreditation.id ? { ...acc, [field]: newValue } : acc
+          )
+        );
+
+        // Refresh parent data to get latest from server
+        if (onRefresh) {
+          await onRefresh();
+        }
+
+        toast.success(`ACNC ${field} updated successfully`);
+        return true;
+      } else {
+        throw new Error(response.message || 'Failed to update accreditation');
+      }
+    } catch (err) {
+      console.error(`Error updating accreditation ${field}:`, err);
+      toast.error(`Failed to update ACNC ${field}: ${err.message}`);
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditAccreditation = (accreditation) => {
-    setEditingAccreditation(accreditation);
-    setAccreditationForm({
-      title: accreditation.title,
-      logo: null, // File will be optional for editing
-      link: accreditation.link,
-    });
-    setAccreditationErrors({});
-    setEditAccreditationOpen(true);
-  };
-
-  const handleUpdateAccreditation = async (field, newValue) => {
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      setEditingAccreditation((prev) => ({ ...prev, [field]: newValue }));
-
-      // Update in main list
-      setAccreditations((prev) =>
-        prev.map((acc) =>
-          acc.id === editingAccreditation.id ? { ...acc, [field]: newValue } : acc
-        )
-      );
-
-      toast.success(`Accreditation ${field} updated successfully`);
-      return true;
-    } catch (err) {
-      toast.error(`Failed to update accreditation ${field}`);
-      throw err;
-    }
-  };
-
-  const handleDeleteAccreditation = async (accreditationId) => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setAccreditations((prev) => prev.filter((acc) => acc.id !== accreditationId));
-      toast.success('Accreditation deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete accreditation');
-    }
-  };
-
   const handleToggleAccreditationStatus = async (accreditationId, newStatus) => {
+    const accreditation = accreditations.find((acc) => acc.id === accreditationId);
+    if (!accreditation) return;
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      setLoading(true);
+
+      // Update both logo and link status since they work together
+      const logoData = {
+        key: 'acnc_logo',
+        value: accreditation.logo,
+        type: 'text',
+        status: newStatus,
+      };
+
+      const linkData = {
+        key: 'acnc_link',
+        value: accreditation.link,
+        type: 'text',
+        status: newStatus,
+      };
+
+      // Update both settings
+      await Promise.all([
+        safeUpdateSetting(accreditation.logoId, logoData),
+        safeUpdateSetting(accreditation.linkId, linkData),
+      ]);
+
+      // Update local state
       setAccreditations((prev) =>
         prev.map((acc) => (acc.id === accreditationId ? { ...acc, status: newStatus } : acc))
       );
-      toast.success(`Accreditation ${newStatus === 1 ? 'enabled' : 'disabled'} on website`);
+
+      // Refresh parent data
+      if (onRefresh) {
+        await onRefresh();
+      }
+
+      toast.success(`ACNC accreditation ${newStatus === 1 ? 'enabled' : 'disabled'} on website`);
     } catch (error) {
-      toast.error('Failed to update accreditation status');
+      console.error('Error updating accreditation status:', error);
+      toast.error(`Failed to update accreditation status: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !editingAccreditation) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Convert file to base64
+      const base64String = await convertFileToBase64(file);
+
+      // Update the accreditation with base64 string
+      await handleUpdateAccreditation('logo', base64String);
+      toast.success('Logo updated successfully');
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast.error('Failed to update logo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to convert file to base64
+  const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // FileReader result includes data URL prefix (data:image/jpeg;base64,...)
+        // We send the full data URL to the API
+        resolve(reader.result);
+      };
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        reject(new Error('Failed to read file'));
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   return (
@@ -178,91 +210,6 @@ const AccreditationsSection = ({ accreditations, setAccreditations }) => {
           <Award className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-medium">Accreditations</h3>
         </div>
-        <Dialog open={addAccreditationOpen} onOpenChange={setAddAccreditationOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Add Accreditation
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Accreditation</DialogTitle>
-              <DialogDescription>
-                Add a new accreditation to display in the footer
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="acc-title">Accreditation Title *</Label>
-                <Input
-                  id="acc-title"
-                  value={accreditationForm.title}
-                  onChange={(e) =>
-                    setAccreditationForm({ ...accreditationForm, title: e.target.value })
-                  }
-                  placeholder="e.g., ISO 9001:2015 Certified"
-                  className={accreditationErrors.title ? 'border-red-500' : ''}
-                />
-                {accreditationErrors.title && (
-                  <p className="text-sm text-red-500 mt-1">{accreditationErrors.title}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="acc-logo">Logo File *</Label>
-                <div className="mt-2">
-                  <Input
-                    id="acc-logo"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className={accreditationErrors.logo ? 'border-red-500' : ''}
-                  />
-                  {accreditationForm.logo && (
-                    <p className="text-sm text-green-600 mt-1">
-                      Selected: {accreditationForm.logo.name}
-                    </p>
-                  )}
-                </div>
-                {accreditationErrors.logo && (
-                  <p className="text-sm text-red-500 mt-1">{accreditationErrors.logo}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="acc-link">Accreditation Link *</Label>
-                <Input
-                  id="acc-link"
-                  value={accreditationForm.link}
-                  onChange={(e) =>
-                    setAccreditationForm({ ...accreditationForm, link: e.target.value })
-                  }
-                  placeholder="https://example.com/certificate"
-                  className={accreditationErrors.link ? 'border-red-500' : ''}
-                />
-                {accreditationErrors.link && (
-                  <p className="text-sm text-red-500 mt-1">{accreditationErrors.link}</p>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setAddAccreditationOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddAccreditation}
-                  disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Accreditation
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Accreditations List */}
@@ -287,16 +234,9 @@ const AccreditationsSection = ({ accreditations, setAccreditations }) => {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleEditAccreditation(accreditation)}
+                  disabled={loading}
                 >
                   <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteAccreditation(accreditation.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -306,13 +246,20 @@ const AccreditationsSection = ({ accreditations, setAccreditations }) => {
                 <Label htmlFor={`acc-toggle-${accreditation.id}`} className="text-sm font-medium">
                   Show {accreditation.title} on website
                 </Label>
-                <Switch
-                  id={`acc-toggle-${accreditation.id}`}
-                  checked={accreditation.status === 1}
-                  onCheckedChange={(checked) =>
-                    handleToggleAccreditationStatus(accreditation.id, checked ? 1 : 0)
-                  }
-                />
+                <div className="flex items-center gap-2">
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Switch
+                      id={`acc-toggle-${accreditation.id}`}
+                      checked={accreditation.status === 1}
+                      onCheckedChange={(checked) =>
+                        handleToggleAccreditationStatus(accreditation.id, checked ? 1 : 0)
+                      }
+                      disabled={loading}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -321,38 +268,37 @@ const AccreditationsSection = ({ accreditations, setAccreditations }) => {
         {accreditations.length === 0 && (
           <div className="text-center py-8">
             <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No accreditations added yet</p>
+            <p className="text-muted-foreground">No accreditations found</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              ACNC accreditation settings are managed through the general settings
+            </p>
           </div>
         )}
       </div>
 
       {/* Edit Accreditation Dialog */}
       <Dialog open={editAccreditationOpen} onOpenChange={setEditAccreditationOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Edit Accreditation</DialogTitle>
-            <DialogDescription>
-              Update the accreditation information using the fields below
-            </DialogDescription>
+            <DialogTitle>Edit ACNC Accreditation</DialogTitle>
+            <DialogDescription>Update the ACNC accreditation information</DialogDescription>
           </DialogHeader>
           {editingAccreditation && (
             <div className="space-y-4">
-              <EditableField
-                label="Accreditation Title"
-                value={editingAccreditation.title}
-                icon={Award}
-                onSave={(newValue) => handleUpdateAccreditation('title', newValue)}
-                type="text"
-                placeholder="Enter accreditation title..."
-                required={true}
-              />
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  This is your ACNC (Australian Charities and Not-for-profits Commission)
+                  accreditation. You can update the logo and link URL.
+                </AlertDescription>
+              </Alert>
 
               {/* Logo Upload Section */}
               <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm">
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-center gap-2">
                     <Upload className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Update Logo</Label>
+                    <Label className="text-sm font-medium">Update ACNC Logo</Label>
                   </div>
 
                   <div className="space-y-2">
@@ -363,35 +309,9 @@ const AccreditationsSection = ({ accreditations, setAccreditations }) => {
                     <Input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          // Validate file
-                          if (!file.type.startsWith('image/')) {
-                            toast.error('Please select an image file');
-                            return;
-                          }
-                          if (file.size > 5 * 1024 * 1024) {
-                            toast.error('File size must be less than 5MB');
-                            return;
-                          }
-
-                          // Simulate upload and update
-                          setLoading(true);
-                          setTimeout(async () => {
-                            try {
-                              const newLogoPath = `/uploads/${file.name}`;
-                              await handleUpdateAccreditation('logo', newLogoPath);
-                              toast.success('Logo updated successfully');
-                            } catch (error) {
-                              toast.error('Failed to update logo');
-                            } finally {
-                              setLoading(false);
-                            }
-                          }, 1000);
-                        }
-                      }}
+                      onChange={handleFileUpload}
                       className="cursor-pointer"
+                      disabled={loading}
                     />
 
                     <p className="text-xs text-muted-foreground">
@@ -402,16 +322,20 @@ const AccreditationsSection = ({ accreditations, setAccreditations }) => {
               </div>
 
               <EditableField
-                label="Certificate Link"
+                label="ACNC Certificate Link"
                 value={editingAccreditation.link}
                 onSave={(newValue) => handleUpdateAccreditation('link', newValue)}
                 type="text"
-                placeholder="Enter certificate link..."
+                placeholder="Enter ACNC certificate link..."
                 required={true}
               />
 
               <div className="flex justify-end pt-4">
-                <Button variant="outline" onClick={() => setEditAccreditationOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditAccreditationOpen(false)}
+                  disabled={loading}
+                >
                   Done
                 </Button>
               </div>

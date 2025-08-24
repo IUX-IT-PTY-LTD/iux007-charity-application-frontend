@@ -2,12 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Printer, Loader2, RefreshCcw, AlertCircle } from 'lucide-react';
-import { contactService } from '@/api/services/admin/contactService';
 import EditableField from '@/components/admin/shared/EditableField';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+
+// Import the protected settings service
+import {
+  getAllContacts,
+  updateContact,
+  prepareContactDataForForm,
+  safeUpdateContact,
+} from '@/api/services/admin/protected/settingsService';
 
 const ContactInformationSection = () => {
   const [contacts, setContacts] = useState([]);
@@ -18,7 +25,7 @@ const ContactInformationSection = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await contactService.getAllContacts();
+      const response = await getAllContacts();
       if (response.status === 'success') {
         setContacts(response.data || []);
       } else {
@@ -26,7 +33,14 @@ const ContactInformationSection = () => {
       }
     } catch (err) {
       console.error('Error fetching contacts:', err);
-      setError('Failed to load contact information. Please try again.');
+
+      // Handle permission errors gracefully
+      if (err.message?.includes('permission')) {
+        setError('You do not have permission to view contact information.');
+      } else {
+        setError('Failed to load contact information. Please try again.');
+      }
+
       toast.error('Could not load contact information');
     } finally {
       setLoading(false);
@@ -44,13 +58,16 @@ const ContactInformationSection = () => {
         throw new Error('Contact not found');
       }
 
-      // Create updated contact data
+      // Prepare the updated contact data with all required fields
       const updatedContactData = {
-        ...contactToUpdate,
+        name: contactToUpdate.name,
         value: newValue,
+        icon: contactToUpdate.icon || '', // Ensure icon is included (can be empty string)
+        status: contactToUpdate.status,
       };
 
-      const response = await contactService.updateContact(contactId, updatedContactData);
+      // Use the safe update function which handles permissions gracefully
+      const response = await safeUpdateContact(contactId, updatedContactData);
 
       if (response.status === 'success') {
         // Update the local state
@@ -66,7 +83,7 @@ const ContactInformationSection = () => {
       }
     } catch (err) {
       console.error(`Error updating contact ${contactId}:`, err);
-      toast.error(`Failed to update ${getContactName(contactId)}`);
+      toast.error(`Failed to update ${getContactName(contactId)}: ${err.message}`);
       throw err;
     }
   };
@@ -78,7 +95,16 @@ const ContactInformationSection = () => {
         throw new Error('Contact not found');
       }
 
-      const response = await contactService.toggleContactStatus(contactId, newStatus);
+      // Prepare the updated contact data with all required fields
+      const updatedContactData = {
+        name: contactToUpdate.name,
+        value: contactToUpdate.value,
+        icon: contactToUpdate.icon || '', // Ensure icon is included (can be empty string)
+        status: newStatus,
+      };
+
+      // Use the safe update function which handles permissions gracefully
+      const response = await safeUpdateContact(contactId, updatedContactData);
 
       if (response.status === 'success') {
         // Update the local state
@@ -94,7 +120,7 @@ const ContactInformationSection = () => {
       }
     } catch (err) {
       console.error(`Error updating contact status ${contactId}:`, err);
-      toast.error(`Failed to update ${getContactName(contactId)} status`);
+      toast.error(`Failed to update ${getContactName(contactId)} status: ${err.message}`);
       throw err;
     }
   };
@@ -110,7 +136,7 @@ const ContactInformationSection = () => {
     } else if (name.includes('fax')) {
       return Printer;
     }
-    return null;
+    return Phone; // Default icon
   };
 
   const getContactName = (contactId) => {
@@ -164,27 +190,34 @@ const ContactInformationSection = () => {
         <CardDescription>Manage company contact details displayed on the website</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {contacts.map((contact) => (
-          <div key={contact.id} className="mb-4">
-            <EditableField
-              label={contact.name}
-              value={contact.value}
-              icon={getContactIcon(contact.name)}
-              onSave={(newValue) => handleUpdateContact(contact.id, newValue)}
-              type="text"
-              placeholder={`Enter ${contact.name.toLowerCase()}...`}
-              required={true}
-            />
-            <div className="mt-2">
-              <EditableField
-                label={`Show ${contact.name} on website`}
-                value={contact.status}
-                type="toggle"
-                onSave={(newStatus) => handleToggleStatus(contact.id, newStatus)}
-              />
-            </div>
+        {contacts.length === 0 ? (
+          <div className="text-center py-8">
+            <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No contact information found</p>
           </div>
-        ))}
+        ) : (
+          contacts.map((contact) => (
+            <div key={contact.id} className="mb-4">
+              <EditableField
+                label={contact.name}
+                value={contact.value}
+                icon={getContactIcon(contact.name)}
+                onSave={(newValue) => handleUpdateContact(contact.id, newValue)}
+                type="text"
+                placeholder={`Enter ${contact.name.toLowerCase()}...`}
+                required={true}
+              />
+              <div className="mt-2">
+                <EditableField
+                  label={`Show ${contact.name} on website`}
+                  value={contact.status}
+                  type="toggle"
+                  onSave={(newStatus) => handleToggleStatus(contact.id, newStatus)}
+                />
+              </div>
+            </div>
+          ))
+        )}
       </CardContent>
     </Card>
   );

@@ -9,48 +9,17 @@ import { toast } from 'sonner';
 import AccreditationsSection from './footerMangement/AccreditationsSection';
 import SocialLinksSection from './footerMangement/SocialLinksSection';
 
-// Demo data - keep separate from design code
-const demoAccreditations = [
-  {
-    id: 1,
-    title: 'ISO 9001:2015 Certified',
-    logo: '/uploads/iso-logo.png',
-    link: 'https://example.com/iso-certificate',
-    status: 1
-  },
-  {
-    id: 2,
-    title: 'Better Business Bureau',
-    logo: '/uploads/bbb-logo.png',
-    link: 'https://example.com/bbb-profile',
-    status: 0
-  }
-];
-
-const demoSocialLinks = [
-  {
-    id: 1,
-    platform: 'Facebook',
-    url: 'https://facebook.com/company',
-    status: 1
-  },
-  {
-    id: 2,
-    platform: 'Twitter',
-    url: 'https://twitter.com/company',
-    status: 1
-  },
-  {
-    id: 3,
-    platform: 'LinkedIn',
-    url: 'https://linkedin.com/company/company',
-    status: 0
-  }
-];
+// Import the protected settings service
+import {
+  getAllSettings,
+  getSocialMediaSettings,
+  getAccreditationSettings,
+} from '@/api/services/admin/protected/settingsService';
 
 const FooterLinkManagementSection = () => {
-  const [accreditations, setAccreditations] = useState([]);
+  const [allSettings, setAllSettings] = useState([]);
   const [socialLinks, setSocialLinks] = useState([]);
+  const [accreditations, setAccreditations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -58,13 +27,52 @@ const FooterLinkManagementSection = () => {
     setLoading(true);
     setError(null);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setAccreditations(demoAccreditations);
-      setSocialLinks(demoSocialLinks);
+      const response = await getAllSettings();
+      if (response.status === 'success') {
+        const settings = response.data || [];
+        setAllSettings(settings);
+
+        // Extract social media settings
+        const socialMediaSettings = getSocialMediaSettings(settings);
+        const formattedSocialLinks = socialMediaSettings.map((setting) => ({
+          id: setting.id,
+          platform: formatPlatformName(setting.key),
+          url: setting.value,
+          status: setting.status,
+          key: setting.key, // Keep the original key for updates
+        }));
+        setSocialLinks(formattedSocialLinks);
+
+        // Extract accreditation settings (ACNC)
+        const accreditationSettings = getAccreditationSettings(settings);
+        const formattedAccreditations = [];
+
+        // Create accreditation object if both logo and link exist
+        if (accreditationSettings.logo && accreditationSettings.link) {
+          formattedAccreditations.push({
+            id: 'acnc', // Use a consistent ID for ACNC
+            title: 'ACNC Registration',
+            logo: accreditationSettings.logo.value,
+            link: accreditationSettings.link.value,
+            status: accreditationSettings.logo.status && accreditationSettings.link.status ? 1 : 0,
+            logoId: accreditationSettings.logo.id,
+            linkId: accreditationSettings.link.id,
+          });
+        }
+        setAccreditations(formattedAccreditations);
+      } else {
+        throw new Error(response.message || 'Failed to fetch footer link information');
+      }
     } catch (err) {
       console.error('Error fetching footer data:', err);
-      setError('Failed to load footer link information. Please try again.');
+
+      // Handle permission errors gracefully
+      if (err.message?.includes('permission')) {
+        setError('You do not have permission to view footer settings.');
+      } else {
+        setError('Failed to load footer link information. Please try again.');
+      }
+
       toast.error('Could not load footer link information');
     } finally {
       setLoading(false);
@@ -75,12 +83,32 @@ const FooterLinkManagementSection = () => {
     fetchData();
   }, []);
 
+  // Helper function to format platform names
+  const formatPlatformName = (key) => {
+    const platformMap = {
+      facebook_link: 'Facebook',
+      instagram: 'Instagram',
+      twitter: 'Twitter',
+      linkedin: 'LinkedIn',
+      youtube: 'YouTube',
+      tiktok: 'TikTok',
+    };
+    return platformMap[key.toLowerCase()] || key.charAt(0).toUpperCase() + key.slice(1);
+  };
+
+  // Function to refresh data after updates
+  const refreshData = async () => {
+    await fetchData();
+  };
+
   if (loading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Footer Link Management</CardTitle>
-          <CardDescription>Manage accreditations and social media links displayed in the website footer</CardDescription>
+          <CardDescription>
+            Manage accreditations and social media links displayed in the website footer
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
           <div className="flex flex-col items-center">
@@ -97,7 +125,9 @@ const FooterLinkManagementSection = () => {
       <Card>
         <CardHeader>
           <CardTitle>Footer Link Management</CardTitle>
-          <CardDescription>Manage accreditations and social media links displayed in the website footer</CardDescription>
+          <CardDescription>
+            Manage accreditations and social media links displayed in the website footer
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert variant="destructive" className="mb-4">
@@ -118,19 +148,23 @@ const FooterLinkManagementSection = () => {
     <Card>
       <CardHeader>
         <CardTitle>Footer Link Management</CardTitle>
-        <CardDescription>Manage accreditations and social media links displayed in the website footer</CardDescription>
+        <CardDescription>
+          Manage accreditations and social media links displayed in the website footer
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Accreditations Section */}
-        <AccreditationsSection 
-          accreditations={accreditations} 
-          setAccreditations={setAccreditations} 
+        <AccreditationsSection
+          accreditations={accreditations}
+          setAccreditations={setAccreditations}
+          onRefresh={refreshData}
         />
-        
+
         {/* Social Media Links Section */}
-        <SocialLinksSection 
-          socialLinks={socialLinks} 
-          setSocialLinks={setSocialLinks} 
+        <SocialLinksSection
+          socialLinks={socialLinks}
+          setSocialLinks={setSocialLinks}
+          onRefresh={refreshData}
         />
       </CardContent>
     </Card>
