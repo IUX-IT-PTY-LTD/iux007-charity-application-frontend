@@ -1,3 +1,5 @@
+// src/components/admin/settings/footerMangement/SocialLinksSection.jsx
+
 'use client';
 
 import { useState } from 'react';
@@ -13,6 +15,7 @@ import {
   Instagram,
   Linkedin,
   Youtube,
+  Lock,
 } from 'lucide-react';
 import EditableField from '@/components/admin/shared/EditableField';
 import { Button } from '@/components/ui/button';
@@ -45,6 +48,9 @@ import {
   validateSettingData,
 } from '@/api/services/admin/protected/settingsService';
 
+// Import permission utilities
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
 // Social media platforms with their icons and API keys
 const socialPlatforms = [
   { value: 'facebook_link', label: 'Facebook', icon: Facebook, color: 'text-blue-600' },
@@ -55,7 +61,7 @@ const socialPlatforms = [
   { value: 'tiktok', label: 'TikTok', icon: Share2, color: 'text-black' },
 ];
 
-const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
+const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh, adminPermissions }) => {
   // Dialog states
   const [addSocialOpen, setAddSocialOpen] = useState(false);
   const [editSocialOpen, setEditSocialOpen] = useState(false);
@@ -116,8 +122,15 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
     }
   };
 
+  const isReadOnly = !adminPermissions?.canEdit;
+
   // Social media handlers
   const handleAddSocialLink = async () => {
+    if (!adminPermissions.canCreate) {
+      toast.error("You don't have permission to create social media links");
+      return;
+    }
+
     if (!validateSocialForm()) return;
 
     if (socialLinks.length >= 4) {
@@ -162,13 +175,23 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
       }
     } catch (error) {
       console.error('Error adding social link:', error);
-      toast.error(`Failed to add social media link: ${error.message}`);
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(`Failed to add social media link: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleEditSocialLink = (socialLink) => {
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit social media links");
+      return;
+    }
+
     setEditingSocialLink(socialLink);
     setSocialForm({
       platform: socialLink.key,
@@ -179,6 +202,11 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
   };
 
   const handleUpdateSocialLink = async (field, newValue) => {
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit social media links");
+      throw new Error('Edit permission required');
+    }
+
     if (!editingSocialLink) return;
 
     try {
@@ -214,7 +242,12 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
       }
     } catch (err) {
       console.error(`Error updating social link:`, err);
-      toast.error(`Failed to update social link: ${err.message}`);
+
+      if (isPermissionError(err)) {
+        toast.error(getPermissionErrorMessage(err));
+      } else {
+        toast.error(`Failed to update social link: ${err.message}`);
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -222,6 +255,11 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
   };
 
   const handleDeleteSocialLink = async (socialLinkId) => {
+    if (!adminPermissions.canDelete) {
+      toast.error("You don't have permission to delete social media links");
+      return;
+    }
+
     // Note: The API doesn't seem to have a delete endpoint for settings
     // You may need to implement this or use status=0 to "delete"
     try {
@@ -251,13 +289,23 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
       }
     } catch (error) {
       console.error('Error removing social link:', error);
-      toast.error(`Failed to remove social media link: ${error.message}`);
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(`Failed to remove social media link: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleToggleSocialStatus = async (socialLinkId, newStatus) => {
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit social media links");
+      return;
+    }
+
     const socialLink = socialLinks.find((link) => link.id === socialLinkId);
     if (!socialLink) return;
 
@@ -287,7 +335,12 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
       }
     } catch (error) {
       console.error('Error updating social link status:', error);
-      toast.error(`Failed to update social link status: ${error.message}`);
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(`Failed to update social link status: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -298,94 +351,111 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Share2 className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">Social Media Links</h3>
+          <h3 className="text-lg font-medium">
+            Social Media Links
+            {isReadOnly && <span className="text-orange-600 ml-2 text-sm">(Read-only)</span>}
+          </h3>
         </div>
-        <Dialog open={addSocialOpen} onOpenChange={setAddSocialOpen}>
-          <DialogTrigger asChild>
-            <Button
-              size="sm"
-              disabled={socialLinks.length >= 4 || loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400"
-            >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Add Social Link
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Social Media Link</DialogTitle>
-              <DialogDescription>
-                Add a social media link to display in the footer (Max: 6 links)
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="social-platform">Platform *</Label>
-                <Select
-                  value={socialForm.platform}
-                  onValueChange={(value) => setSocialForm({ ...socialForm, platform: value })}
-                >
-                  <SelectTrigger className={socialErrors.platform ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Select a platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {socialPlatforms
-                      .filter(
-                        (platform) => !socialLinks.some((link) => link.key === platform.value)
-                      )
-                      .map((platform) => {
-                        const IconComponent = platform.icon;
-                        return (
-                          <SelectItem key={platform.value} value={platform.value}>
-                            <div className="flex items-center gap-2">
-                              <IconComponent className={`h-4 w-4 ${platform.color}`} />
-                              <span>{platform.label}</span>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                  </SelectContent>
-                </Select>
-                {socialErrors.platform && (
-                  <p className="text-sm text-red-500 mt-1">{socialErrors.platform}</p>
-                )}
-              </div>
 
-              <div>
-                <Label htmlFor="social-url">URL *</Label>
-                <Input
-                  id="social-url"
-                  value={socialForm.url}
-                  onChange={(e) => setSocialForm({ ...socialForm, url: e.target.value })}
-                  placeholder="https://facebook.com/yourcompany"
-                  className={socialErrors.url ? 'border-red-500' : ''}
-                />
-                {socialErrors.url && (
-                  <p className="text-sm text-red-500 mt-1">{socialErrors.url}</p>
-                )}
-              </div>
+        {/* Add Social Link Button */}
+        {isReadOnly ? (
+          <Button
+            size="sm"
+            disabled
+            className="opacity-50 cursor-not-allowed"
+            title="You don't have permission to create social media links"
+          >
+            <Lock className="h-4 w-4 mr-2" />
+            Add Social Link
+          </Button>
+        ) : (
+          <Dialog open={addSocialOpen} onOpenChange={setAddSocialOpen}>
+            <DialogTrigger asChild>
+              <Button
+                size="sm"
+                disabled={socialLinks.length >= 4 || loading || !adminPermissions.canCreate}
+                className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400"
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Social Link
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add Social Media Link</DialogTitle>
+                <DialogDescription>
+                  Add a social media link to display in the footer (Max: 6 links)
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="social-platform">Platform *</Label>
+                  <Select
+                    value={socialForm.platform}
+                    onValueChange={(value) => setSocialForm({ ...socialForm, platform: value })}
+                  >
+                    <SelectTrigger className={socialErrors.platform ? 'border-red-500' : ''}>
+                      <SelectValue placeholder="Select a platform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {socialPlatforms
+                        .filter(
+                          (platform) => !socialLinks.some((link) => link.key === platform.value)
+                        )
+                        .map((platform) => {
+                          const IconComponent = platform.icon;
+                          return (
+                            <SelectItem key={platform.value} value={platform.value}>
+                              <div className="flex items-center gap-2">
+                                <IconComponent className={`h-4 w-4 ${platform.color}`} />
+                                <span>{platform.label}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                    </SelectContent>
+                  </Select>
+                  {socialErrors.platform && (
+                    <p className="text-sm text-red-500 mt-1">{socialErrors.platform}</p>
+                  )}
+                </div>
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setAddSocialOpen(false)}
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddSocialLink}
-                  disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Social Link
-                </Button>
+                <div>
+                  <Label htmlFor="social-url">URL *</Label>
+                  <Input
+                    id="social-url"
+                    value={socialForm.url}
+                    onChange={(e) => setSocialForm({ ...socialForm, url: e.target.value })}
+                    placeholder="https://facebook.com/yourcompany"
+                    className={socialErrors.url ? 'border-red-500' : ''}
+                  />
+                  {socialErrors.url && (
+                    <p className="text-sm text-red-500 mt-1">{socialErrors.url}</p>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAddSocialOpen(false)}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleAddSocialLink}
+                    disabled={loading}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Social Link
+                  </Button>
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       {/* Social Links List */}
@@ -408,23 +478,48 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditSocialLink(socialLink)}
-                    disabled={loading}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteSocialLink(socialLink.id)}
-                    className="text-red-500 hover:text-red-700"
-                    disabled={loading}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {isReadOnly ? (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled
+                        title="You don't have permission to edit social links"
+                        className="opacity-50 cursor-not-allowed"
+                      >
+                        <Lock className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled
+                        title="You don't have permission to delete social links"
+                        className="opacity-50 cursor-not-allowed text-red-500"
+                      >
+                        <Lock className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditSocialLink(socialLink)}
+                        disabled={loading}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteSocialLink(socialLink.id)}
+                        className="text-red-500 hover:text-red-700"
+                        disabled={loading}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -434,6 +529,7 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
                     Show {socialLink.platform} on website
                   </Label>
                   <div className="flex items-center gap-2">
+                    {isReadOnly && <Lock className="h-4 w-4 text-gray-400" />}
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
@@ -443,7 +539,7 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
                         onCheckedChange={(checked) =>
                           handleToggleSocialStatus(socialLink.id, checked ? 1 : 0)
                         }
-                        disabled={loading}
+                        disabled={loading || isReadOnly}
                       />
                     )}
                   </div>
@@ -468,6 +564,11 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
             Currently showing {socialLinks.filter((link) => link.status === 1).length} active social
             links out of {socialLinks.length} total. You can add up to {4 - socialLinks.length} more
             links.
+            {isReadOnly && (
+              <span className="text-orange-600 ml-1">
+                Changes are restricted due to read-only access.
+              </span>
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -477,7 +578,10 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Social Media Link</DialogTitle>
-            <DialogDescription>Update the social media link URL</DialogDescription>
+            <DialogDescription>
+              Update the social media link URL
+              {isReadOnly && <span className="text-orange-600 ml-1">(Read-only mode)</span>}
+            </DialogDescription>
           </DialogHeader>
           {editingSocialLink && (
             <div className="space-y-4">
@@ -489,6 +593,7 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
                 type="text"
                 placeholder="Enter platform URL..."
                 required={true}
+                disabled={isReadOnly}
               />
 
               <div className="flex justify-end pt-4">
@@ -497,7 +602,7 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks, onRefresh }) => {
                   onClick={() => setEditSocialOpen(false)}
                   disabled={loading}
                 >
-                  Done
+                  {isReadOnly ? 'Close' : 'Done'}
                 </Button>
               </div>
             </div>

@@ -1,7 +1,9 @@
+// src/components/admin/settings/footerMangement/AccreditationsSection.jsx
+
 'use client';
 
 import { useState } from 'react';
-import { Award, Loader2, Edit, ExternalLink, Upload } from 'lucide-react';
+import { Award, Loader2, Edit, ExternalLink, Upload, Lock } from 'lucide-react';
 import EditableField from '@/components/admin/shared/EditableField';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,7 +27,15 @@ import {
   safeUpdateSetting,
 } from '@/api/services/admin/protected/settingsService';
 
-const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh }) => {
+// Import permission utilities
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
+const AccreditationsSection = ({
+  accreditations,
+  setAccreditations,
+  onRefresh,
+  adminPermissions,
+}) => {
   // Dialog states
   const [editAccreditationOpen, setEditAccreditationOpen] = useState(false);
 
@@ -36,11 +46,21 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
   const [loading, setLoading] = useState(false);
 
   const handleEditAccreditation = (accreditation) => {
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit accreditations");
+      return;
+    }
+
     setEditingAccreditation(accreditation);
     setEditAccreditationOpen(true);
   };
 
   const handleUpdateAccreditation = async (field, newValue) => {
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit accreditations");
+      throw new Error('Edit permission required');
+    }
+
     if (!editingAccreditation) return;
 
     try {
@@ -101,7 +121,12 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
       }
     } catch (err) {
       console.error(`Error updating accreditation ${field}:`, err);
-      toast.error(`Failed to update ACNC ${field}: ${err.message}`);
+
+      if (isPermissionError(err)) {
+        toast.error(getPermissionErrorMessage(err));
+      } else {
+        toast.error(`Failed to update ACNC ${field}: ${err.message}`);
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -109,6 +134,11 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
   };
 
   const handleToggleAccreditationStatus = async (accreditationId, newStatus) => {
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit accreditations");
+      return;
+    }
+
     const accreditation = accreditations.find((acc) => acc.id === accreditationId);
     if (!accreditation) return;
 
@@ -149,13 +179,23 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
       toast.success(`ACNC accreditation ${newStatus === 1 ? 'enabled' : 'disabled'} on website`);
     } catch (error) {
       console.error('Error updating accreditation status:', error);
-      toast.error(`Failed to update accreditation status: ${error.message}`);
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(`Failed to update accreditation status: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleFileUpload = async (event) => {
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit accreditations");
+      return;
+    }
+
     const file = event.target.files[0];
     if (!file || !editingAccreditation) return;
 
@@ -180,7 +220,12 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
       toast.success('Logo updated successfully');
     } catch (error) {
       console.error('Error uploading logo:', error);
-      toast.error('Failed to update logo');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error('Failed to update logo');
+      }
     } finally {
       setLoading(false);
     }
@@ -203,12 +248,17 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
     });
   };
 
+  const isReadOnly = !adminPermissions?.canEdit;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Award className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">Accreditations</h3>
+          <h3 className="text-lg font-medium">
+            Accreditations
+            {isReadOnly && <span className="text-orange-600 ml-2 text-sm">(Read-only)</span>}
+          </h3>
         </div>
       </div>
 
@@ -230,14 +280,26 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEditAccreditation(accreditation)}
-                  disabled={loading}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
+                {isReadOnly ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled
+                    title="You don't have permission to edit accreditations"
+                    className="opacity-50 cursor-not-allowed"
+                  >
+                    <Lock className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditAccreditation(accreditation)}
+                    disabled={loading}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -247,6 +309,7 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                   Show {accreditation.title} on website
                 </Label>
                 <div className="flex items-center gap-2">
+                  {isReadOnly && <Lock className="h-4 w-4 text-gray-400" />}
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -256,7 +319,7 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                       onCheckedChange={(checked) =>
                         handleToggleAccreditationStatus(accreditation.id, checked ? 1 : 0)
                       }
-                      disabled={loading}
+                      disabled={loading || isReadOnly}
                     />
                   )}
                 </div>
@@ -281,7 +344,10 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Edit ACNC Accreditation</DialogTitle>
-            <DialogDescription>Update the ACNC accreditation information</DialogDescription>
+            <DialogDescription>
+              Update the ACNC accreditation information
+              {isReadOnly && <span className="text-orange-600 ml-1">(Read-only mode)</span>}
+            </DialogDescription>
           </DialogHeader>
           {editingAccreditation && (
             <div className="space-y-4">
@@ -290,6 +356,11 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                 <AlertDescription>
                   This is your ACNC (Australian Charities and Not-for-profits Commission)
                   accreditation. You can update the logo and link URL.
+                  {isReadOnly && (
+                    <span className="text-orange-600 ml-1">
+                      You currently have read-only access.
+                    </span>
+                  )}
                 </AlertDescription>
               </Alert>
 
@@ -298,7 +369,10 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-center gap-2">
                     <Upload className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Update ACNC Logo</Label>
+                    <Label className="text-sm font-medium">
+                      Update ACNC Logo
+                      {isReadOnly && <span className="text-orange-600 ml-1">(Read-only)</span>}
+                    </Label>
                   </div>
 
                   <div className="space-y-2">
@@ -310,12 +384,14 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                       type="file"
                       accept="image/*"
                       onChange={handleFileUpload}
-                      className="cursor-pointer"
-                      disabled={loading}
+                      className={isReadOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+                      disabled={loading || isReadOnly}
                     />
 
                     <p className="text-xs text-muted-foreground">
-                      Supported formats: PNG, JPG, GIF (Max: 5MB)
+                      {isReadOnly
+                        ? 'File upload disabled (read-only access)'
+                        : 'Supported formats: PNG, JPG, GIF (Max: 5MB)'}
                     </p>
                   </div>
                 </div>
@@ -328,6 +404,7 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                 type="text"
                 placeholder="Enter ACNC certificate link..."
                 required={true}
+                disabled={isReadOnly}
               />
 
               <div className="flex justify-end pt-4">
@@ -336,7 +413,7 @@ const AccreditationsSection = ({ accreditations, setAccreditations, onRefresh })
                   onClick={() => setEditAccreditationOpen(false)}
                   disabled={loading}
                 >
-                  Done
+                  {isReadOnly ? 'Close' : 'Done'}
                 </Button>
               </div>
             </div>

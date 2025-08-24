@@ -1,7 +1,9 @@
+// src/components/admin/settings/FooterLinkManagementSection.jsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, RefreshCcw, AlertCircle } from 'lucide-react';
+import { Loader2, RefreshCcw, AlertCircle, Lock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -16,7 +18,13 @@ import {
   getAccreditationSettings,
 } from '@/api/services/admin/protected/settingsService';
 
+// Import permission hooks
+import { useAdminPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
 const FooterLinkManagementSection = () => {
+  const adminPermissions = useAdminPermissions();
+
   const [allSettings, setAllSettings] = useState([]);
   const [socialLinks, setSocialLinks] = useState([]);
   const [accreditations, setAccreditations] = useState([]);
@@ -24,6 +32,12 @@ const FooterLinkManagementSection = () => {
   const [error, setError] = useState(null);
 
   const fetchData = async () => {
+    // Only fetch if user has admin view permission
+    if (!adminPermissions.isLoading && !adminPermissions.canView) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -66,22 +80,26 @@ const FooterLinkManagementSection = () => {
     } catch (err) {
       console.error('Error fetching footer data:', err);
 
-      // Handle permission errors gracefully
-      if (err.message?.includes('permission')) {
+      if (isPermissionError(err)) {
+        setError(getPermissionErrorMessage(err));
+        toast.error(getPermissionErrorMessage(err));
+      } else if (err.message?.includes('permission')) {
         setError('You do not have permission to view footer settings.');
+        toast.error('You do not have permission to view footer settings.');
       } else {
         setError('Failed to load footer link information. Please try again.');
+        toast.error('Could not load footer link information');
       }
-
-      toast.error('Could not load footer link information');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!adminPermissions.isLoading) {
+      fetchData();
+    }
+  }, [adminPermissions.isLoading, adminPermissions.canView]);
 
   // Helper function to format platform names
   const formatPlatformName = (key) => {
@@ -101,7 +119,8 @@ const FooterLinkManagementSection = () => {
     await fetchData();
   };
 
-  if (loading) {
+  // Show loading state while permissions are loading
+  if (adminPermissions.isLoading || loading) {
     return (
       <Card>
         <CardHeader>
@@ -120,6 +139,51 @@ const FooterLinkManagementSection = () => {
     );
   }
 
+  // Show access denied if user has no admin permissions
+  if (!adminPermissions.hasAccess) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Footer Link Management</CardTitle>
+          <CardDescription>
+            Manage accreditations and social media links displayed in the website footer
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <Lock className="h-4 w-4" />
+            <AlertTitle>Access Denied</AlertTitle>
+            <AlertDescription>
+              You don't have access to footer settings management. Please contact an administrator.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show view permission denied if user can't view
+  if (!adminPermissions.canView) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Footer Link Management</CardTitle>
+          <CardDescription>
+            Manage accreditations and social media links displayed in the website footer
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <Lock className="h-4 w-4" />
+            <AlertTitle>View Permission Required</AlertTitle>
+            <AlertDescription>You don't have permission to view footer settings.</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Handle error state
   if (error) {
     return (
       <Card>
@@ -135,10 +199,12 @@ const FooterLinkManagementSection = () => {
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-          <Button onClick={fetchData} className="mt-2">
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            Try Again
-          </Button>
+          {adminPermissions.canView && (
+            <Button onClick={fetchData} className="mt-2">
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
@@ -147,17 +213,38 @@ const FooterLinkManagementSection = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Footer Link Management</CardTitle>
+        <CardTitle>
+          Footer Link Management
+          {!adminPermissions.canEdit && (
+            <span className="text-orange-600 ml-2 text-sm">(Read-only)</span>
+          )}
+        </CardTitle>
         <CardDescription>
           Manage accreditations and social media links displayed in the website footer
+          {!adminPermissions.canEdit && (
+            <span className="text-orange-600 ml-1">- View-only access</span>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Show permission warning for read-only access */}
+        {!adminPermissions.canEdit && (
+          <Alert>
+            <Lock className="h-4 w-4" />
+            <AlertTitle>Read-Only Access</AlertTitle>
+            <AlertDescription>
+              You can view footer settings but cannot make changes. Contact an administrator to
+              modify footer links.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Accreditations Section */}
         <AccreditationsSection
           accreditations={accreditations}
           setAccreditations={setAccreditations}
           onRefresh={refreshData}
+          adminPermissions={adminPermissions}
         />
 
         {/* Social Media Links Section */}
@@ -165,6 +252,7 @@ const FooterLinkManagementSection = () => {
           socialLinks={socialLinks}
           setSocialLinks={setSocialLinks}
           onRefresh={refreshData}
+          adminPermissions={adminPermissions}
         />
       </CardContent>
     </Card>

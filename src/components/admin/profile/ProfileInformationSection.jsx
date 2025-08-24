@@ -1,7 +1,9 @@
+// src/components/admin/profile/ProfileInformationSection.jsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, Shield, Loader2, RefreshCcw, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, Shield, Loader2, RefreshCcw, AlertCircle, Lock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -16,7 +18,13 @@ import {
   hasProfileChanges,
 } from '@/api/services/admin/protected/profileService';
 
+// Import permission hooks
+import { useAdminPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
 const ProfileInformationSection = () => {
+  const adminPermissions = useAdminPermissions();
+
   const [profileData, setProfileData] = useState(null);
   const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,20 +45,43 @@ const ProfileInformationSection = () => {
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
-      setError(err.message || 'Failed to load profile information. Please try again.');
-      toast.error('Could not load profile information');
+
+      if (isPermissionError(err)) {
+        setError(getPermissionErrorMessage(err));
+        toast.error(getPermissionErrorMessage(err));
+      } else {
+        setError(err.message || 'Failed to load profile information. Please try again.');
+        toast.error('Could not load profile information');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Load profile on component mount
+  // Load profile on component mount (only if user has view permission)
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (!adminPermissions.isLoading) {
+      if (adminPermissions.hasAccess && adminPermissions.canView) {
+        fetchProfile();
+      } else {
+        setLoading(false);
+        if (!adminPermissions.hasAccess) {
+          setError("You don't have access to profile information.");
+        } else if (!adminPermissions.canView) {
+          setError("You don't have permission to view profile information.");
+        }
+      }
+    }
+  }, [adminPermissions.isLoading, adminPermissions.hasAccess, adminPermissions.canView]);
 
   // Handle updating profile fields
   const handleUpdateProfileField = async (field, value) => {
+    // Check edit permissions before allowing updates
+    if (!adminPermissions.canEdit) {
+      toast.error("You don't have permission to edit profile information");
+      throw new Error('Edit permission required');
+    }
+
     try {
       if (!profileData) {
         throw new Error('Profile data not loaded');
@@ -93,7 +124,9 @@ const ProfileInformationSection = () => {
       console.error(`Error updating profile field ${field}:`, err);
 
       // Handle specific error cases
-      if (err.message?.includes('permission')) {
+      if (isPermissionError(err)) {
+        toast.error(getPermissionErrorMessage(err));
+      } else if (err.message?.includes('permission')) {
         toast.error(`You don't have permission to update ${getFieldDisplayName(field)}`);
       } else if (err.message?.includes('Validation failed')) {
         toast.error(err.message.replace('Validation failed: ', ''));
@@ -116,8 +149,8 @@ const ProfileInformationSection = () => {
     return fieldNames[field] || field;
   };
 
-  // Handle loading state
-  if (loading) {
+  // Show loading state while permissions are loading
+  if (adminPermissions.isLoading || loading) {
     return (
       <Card>
         <CardHeader>
@@ -129,6 +162,48 @@ const ProfileInformationSection = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
             <p className="text-muted-foreground">Loading profile information...</p>
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show access denied if user has no admin permissions
+  if (!adminPermissions.hasAccess) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Information</CardTitle>
+          <CardDescription>Manage your personal account details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <Lock className="h-4 w-4" />
+            <AlertTitle>Access Denied</AlertTitle>
+            <AlertDescription>
+              You don't have access to profile management. Please contact an administrator.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show view permission denied if user can't view
+  if (!adminPermissions.canView) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Information</CardTitle>
+          <CardDescription>Manage your personal account details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <Lock className="h-4 w-4" />
+            <AlertTitle>View Permission Required</AlertTitle>
+            <AlertDescription>
+              You don't have permission to view profile information.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     );
@@ -148,10 +223,12 @@ const ProfileInformationSection = () => {
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-          <Button onClick={fetchProfile} className="mt-2">
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            Try Again
-          </Button>
+          {adminPermissions.canView && (
+            <Button onClick={fetchProfile} className="mt-2">
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
@@ -178,8 +255,18 @@ const ProfileInformationSection = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile Information</CardTitle>
-        <CardDescription>Manage your personal account details</CardDescription>
+        <CardTitle>
+          Profile Information
+          {!adminPermissions.canEdit && (
+            <span className="text-orange-600 ml-2 text-sm">(Read-only)</span>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Manage your personal account details
+          {!adminPermissions.canEdit && (
+            <span className="text-orange-600 ml-1">- View-only access</span>
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <EditableField
@@ -189,6 +276,7 @@ const ProfileInformationSection = () => {
           onSave={(value) => handleUpdateProfileField('name', value)}
           placeholder="Enter your full name..."
           required={true}
+          disabled={!adminPermissions.canEdit}
         />
 
         <EditableField
@@ -199,9 +287,10 @@ const ProfileInformationSection = () => {
           type="email"
           placeholder="Enter your email address..."
           required={true}
+          disabled={!adminPermissions.canEdit}
         />
 
-        {/* Role field - read-only display */}
+        {/* Role field - always read-only */}
         <EditableField
           label="Role"
           value={profileData.role?.name || 'Unknown Role'}
@@ -210,7 +299,7 @@ const ProfileInformationSection = () => {
           onSave={() => {}}
         />
 
-        {/* Status field - read-only display */}
+        {/* Status field - always read-only */}
         <EditableField
           label="Account Status"
           value={profileData.status === 1 ? 'Active' : 'Inactive'}
@@ -219,21 +308,16 @@ const ProfileInformationSection = () => {
           onSave={() => {}}
         />
 
-        {/* Display additional profile info */}
-        {/* {profileData.id && (
-          <div className="mt-6 pt-4 border-t">
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>
-                <strong>User ID:</strong> {profileData.id}
-              </p>
-              {profileData.role && (
-                <p>
-                  <strong>Role ID:</strong> {profileData.role.id}
-                </p>
-              )}
-            </div>
-          </div>
-        )} */}
+        {/* Show permission info */}
+        {!adminPermissions.canEdit && (
+          <Alert className="mt-4">
+            <Lock className="h-4 w-4" />
+            <AlertDescription>
+              You have read-only access to profile information. Contact an administrator to make
+              changes.
+            </AlertDescription>
+          </Alert>
+        )}
       </CardContent>
     </Card>
   );
