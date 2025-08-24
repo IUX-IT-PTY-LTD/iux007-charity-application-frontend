@@ -1,5 +1,3 @@
-// src/app/(admin)/admin/sliders/create/page.jsx
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
-import { Save, ArrowLeft, ImageIcon } from 'lucide-react';
+import { Save, ArrowLeft, ImageIcon, Lock } from 'lucide-react';
 
 // Import shadcn components
 import {
@@ -43,7 +41,7 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-// Import API services
+// Import PROTECTED API services
 import {
   createSlider,
   getAllSliders,
@@ -52,8 +50,13 @@ import {
   isOrderingInUse,
   getNextAvailableOrdering,
   prepareImageForSubmission,
-} from '@/api/services/admin/sliderService';
+} from '@/api/services/admin/protected/sliderService';
 import { isAuthenticated } from '@/api/services/admin/authService';
+
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useSliderPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
 
 // Define form schema with validation
 const formSchema = z.object({
@@ -70,9 +73,12 @@ const formSchema = z.object({
   image: z.any().optional(),
 });
 
-const AdminSliderCreate = () => {
+// Main Create Component
+const AdminSliderCreateContent = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const sliderPermissions = useSliderPermissions();
+
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingSliders, setExistingSliders] = useState([]);
@@ -103,25 +109,51 @@ const AdminSliderCreate = () => {
     }
   }, [router]);
 
+  // Check permissions
+  useEffect(() => {
+    if (!sliderPermissions.isLoading) {
+      if (!sliderPermissions.hasAccess) {
+        toast.error("You don't have access to the Sliders module.");
+        router.push('/admin/dashboard');
+      } else if (!sliderPermissions.canCreate) {
+        toast.error("You don't have permission to create sliders.");
+        router.push('/admin/sliders');
+      }
+    }
+  }, [
+    sliderPermissions.isLoading,
+    sliderPermissions.hasAccess,
+    sliderPermissions.canCreate,
+    router,
+  ]);
+
   // Fetch existing sliders to get next available ordering
   useEffect(() => {
     const fetchSliders = async () => {
-      try {
-        const response = await getAllSliders();
-        if (response.status === 'success' && response.data) {
-          setExistingSliders(response.data);
+      // Only fetch if user has view permission
+      if (!sliderPermissions.isLoading && sliderPermissions.canView) {
+        try {
+          const response = await getAllSliders();
+          if (response.status === 'success' && response.data) {
+            setExistingSliders(response.data);
 
-          // Set next available ordering number
-          const nextOrdering = getNextAvailableOrdering(response.data);
-          form.setValue('ordering', nextOrdering);
+            // Set next available ordering number
+            const nextOrdering = getNextAvailableOrdering(response.data);
+            form.setValue('ordering', nextOrdering);
+          }
+        } catch (error) {
+          console.error('Error fetching sliders:', error);
+          if (isPermissionError(error)) {
+            toast.error(getPermissionErrorMessage(error));
+          }
         }
-      } catch (error) {
-        console.error('Error fetching sliders:', error);
       }
     };
 
-    fetchSliders();
-  }, [form]);
+    if (!sliderPermissions.isLoading) {
+      fetchSliders();
+    }
+  }, [form, sliderPermissions.isLoading, sliderPermissions.canView]);
 
   // For form preview
   const formPreview = form.watch();
@@ -157,6 +189,11 @@ const AdminSliderCreate = () => {
 
   // Handle form submission
   const onSubmit = async (data) => {
+    if (!sliderPermissions.canCreate) {
+      toast.error("You don't have permission to create sliders");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -189,20 +226,21 @@ const AdminSliderCreate = () => {
         image: preparedImage,
       });
 
-      // Submit to API
+      // Submit to protected API
       const response = await createSlider(formattedData);
 
       if (response.status === 'success') {
         toast.success('Slider created successfully!');
         router.push('/admin/sliders');
       } else {
-        toast.error(response.message || 'Failed to create slider');
+        throw new Error(response.message || 'Failed to create slider');
       }
     } catch (error) {
       console.error('Error creating slider:', error);
 
-      // Handle the ordering error from API
-      if (error.message && error.message.includes('ordering has already been taken')) {
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else if (error.message && error.message.includes('ordering has already been taken')) {
         toast.error('This ordering number is already in use. Please choose a different number.');
       } else {
         toast.error(error.message || 'An error occurred while creating the slider');
@@ -211,6 +249,48 @@ const AdminSliderCreate = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading state while permissions are loading
+  if (sliderPermissions.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if user has no slider access
+  if (!sliderPermissions.hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">
+            You don't have permission to access the Sliders module.
+          </p>
+          <Button onClick={() => router.push('/admin/dashboard')}>Go to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show create permission denied if user can't create
+  if (!sliderPermissions.canCreate) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Permission Required</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to create new sliders.</p>
+          <Button onClick={() => router.push('/admin/sliders')}>Back to Sliders</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -459,6 +539,15 @@ const AdminSliderCreate = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Wrapper component that provides permission context
+const AdminSliderCreate = () => {
+  return (
+    <PermissionProvider>
+      <AdminSliderCreateContent />
+    </PermissionProvider>
   );
 };
 
