@@ -56,4 +56,9 @@ export const ENDPOINTS = {
     UPDATE_PROFILE: '/profile',
     DONATION_HISTORY: '/donations',
   },
+
+  //FundRaising Request
+  FUND_RAISING: {
+    REQUEST: '/fund-raising/requests'
+  }
 };

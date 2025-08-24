@@ -45,6 +45,33 @@ class ApiService {
     }
   }
 
+  // POST request for FormData (file uploads)
+  async postForm(endpoint, formData, options = {}) {
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          ...this.getAuthHeader(),
+          ...options.headers,
+        },
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw { response: { data: result } };
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('API POST Form Error:', error);
+      throw error;
+    }
+  }
+
   // Generic PUT request
   async put(endpoint, data, options = {}) {
     try {

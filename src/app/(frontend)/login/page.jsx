@@ -79,13 +79,14 @@ const Login = () => {
     <div className="w-full">
       <ToastContainer />
       {loading && <Loader title="Authnticating..." />}
-      <div className="flex py-20 flex-col items-center justify-center px-4">
-        <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
-          <div className="rounded-lg p-10 w-full shadow-xl bg-light max-md:mx-auto">
+      <div className="flex py-6 md:py-20 flex-col items-center justify-center px-4 min-h-screen md:min-h-0">
+        <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full max-md:max-w-md max-md:grid-cols-1">
+          <div className="rounded-lg p-4 md:p-10 w-full shadow-xl bg-light max-md:mx-auto max-w-md md:max-w-none">
             <form onSubmit={handleLogin} className="space-y-4">
-              <div className="mb-8">
-                <h3 className="text-gray-800 text-3xl font-extrabold">Sign in</h3>
-                <p className="text-gray-500 text-sm mt-4 leading-relaxed">
+              <div className="mb-4 md:mb-8">
+                <h3 className="text-gray-800 text-2xl md:text-3xl font-extrabold">Sign in</h3>
+                <p className="text-gray-500 text-sm mt-2 md:mt-4 leading-relaxed">
+                  Welcome back! Please sign in to your account.
                 </p>
               </div>
 
@@ -167,7 +168,7 @@ const Login = () => {
                 </div>
               </div>
 
-              <div className="!mt-8">
+              <div className="!mt-6 md:!mt-8">
                 <button
                   type="submit"
                   className="w-full shadow-xl py-3 px-4 text-sm tracking-wide rounded-lg text-white bg-primary hover:bg-blue-700 focus:outline-none"
@@ -176,7 +177,7 @@ const Login = () => {
                 </button>
               </div>
 
-              <p className="text-sm !mt-8 text-center text-gray-800">
+              <p className="text-sm !mt-6 md:!mt-8 text-center text-gray-800">
                 Don&apos;t have an account{' '}
                 <Link
                   href="./register"
@@ -187,12 +188,12 @@ const Login = () => {
               </p>
             </form>
           </div>
-          <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
+          <div className="lg:h-[400px] md:h-[300px] hidden md:block">
             <Image
               width={500}
               height={500}
               src="/assets/img/login.svg"
-              className="w-full h-full max-md:w-4/5 mx-auto block object-contain"
+              className="w-full h-full mx-auto block object-contain"
               alt="Login"
             />
           </div>
