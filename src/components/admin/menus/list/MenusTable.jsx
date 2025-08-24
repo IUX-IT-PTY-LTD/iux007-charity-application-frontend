@@ -1,6 +1,7 @@
-// components/admin/menus/list/MenusTable.jsx
+'use client';
+
 import React from 'react';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, Lock } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -19,8 +20,9 @@ const MenusTable = ({
   handleSort,
   handleStatusChange,
   handleDelete,
+  menuPermissions,
 }) => {
-  // Column definitions for sortable headers (without the ID column)
+  // Column definitions for sortable headers
   const columns = [
     { field: 'name', label: 'Name', sortable: true },
     { field: 'slug', label: 'Slug', sortable: true },
@@ -42,7 +44,11 @@ const MenusTable = ({
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>{column.label}</span>
-                  {column.sortable && <ArrowUpDown className="h-3 w-3" />}
+                  {column.sortable && (
+                    <ArrowUpDown
+                      className={`h-3 w-3 ${sortField === column.field ? 'text-blue-600' : ''}`}
+                    />
+                  )}
                 </div>
               </TableHead>
             ))}
@@ -52,13 +58,30 @@ const MenusTable = ({
           {isLoading ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                Loading menus...
+                <div className="flex flex-col items-center justify-center">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent dark:border-gray-100 dark:border-t-transparent"></div>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading menus...</p>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : !menuPermissions.canView ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <Lock className="h-8 w-8 text-gray-400" />
+                  <p>You don't have permission to view menus</p>
+                </div>
               </TableCell>
             </TableRow>
           ) : menus.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No menus found.
+                <div className="flex flex-col items-center justify-center">
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">No menus found.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    Try adjusting your search or filter criteria.
+                  </p>
+                </div>
               </TableCell>
             </TableRow>
           ) : (
@@ -70,15 +93,17 @@ const MenusTable = ({
                 <TableCell className="text-center">{menu.slug}</TableCell>
                 <TableCell className="text-center">{menu.ordering}</TableCell>
                 <TableCell className="text-center">
-                  <StatusCell 
+                  <StatusCell
                     menu={menu}
                     onStatusChange={handleStatusChange}
+                    menuPermissions={menuPermissions}
                   />
                 </TableCell>
                 <TableCell className="text-center">
-                  <ActionsCell 
+                  <ActionsCell
                     menu={menu}
                     onDelete={handleDelete}
+                    menuPermissions={menuPermissions}
                   />
                 </TableCell>
               </TableRow>

@@ -1,4 +1,3 @@
-// src/app/(admin)/admin/menus/[menuId]/edit/page.jsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -6,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Lock } from 'lucide-react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { toast } from 'sonner';
 
-// Import services
-import { menuService } from '@/api/services/admin/menuService';
+// Import protected services
+import { getMenuDetails, updateMenu, deleteMenu } from '@/api/services/admin/protected/menuService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
 
 // Import components
 import EditMenuForm from '@/components/admin/menus/edit/EditMenuForm';
@@ -36,11 +41,13 @@ const formSchema = z.object({
   status: z.number().int().min(0).max(1).default(1),
 });
 
-const EditMenuPage = () => {
+// Main Edit Menu Page Component
+const EditMenuPageContent = () => {
   const params = useParams();
   const router = useRouter();
   const { menuId } = params;
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const menuPermissions = useMenuPermissions();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,12 +74,35 @@ const EditMenuPage = () => {
     setPageSubtitle('Update your website navigation menu');
   }, [formValues.name, setPageTitle, setPageSubtitle]);
 
-  // Fetch menu data
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Check if user has edit permission (view is also needed to see the data)
+  useEffect(() => {
+    if (!menuPermissions.isLoading && !menuPermissions.canView) {
+      toast.error("You don't have permission to view menus.");
+      router.push('/admin/menus');
+    }
+  }, [menuPermissions.isLoading, menuPermissions.canView, router]);
+
+  // Fetch menu data with permission handling
   useEffect(() => {
     const fetchMenuData = async () => {
+      // Don't fetch if permissions are still loading or user doesn't have view permission
+      if (menuPermissions.isLoading || !menuPermissions.canView) {
+        return;
+      }
+
       setIsLoading(true);
+      setError(null);
+
       try {
-        const response = await menuService.getMenuDetails(menuId);
+        const response = await getMenuDetails(menuId);
 
         if (response.status === 'success') {
           const menuData = response.data;
@@ -88,17 +118,29 @@ const EditMenuPage = () => {
         }
       } catch (error) {
         console.error('Error fetching menu:', error);
-        setError('Failed to load menu. Please try again later.');
+
+        if (isPermissionError(error)) {
+          setError(getPermissionErrorMessage(error));
+          toast.error(getPermissionErrorMessage(error));
+        } else {
+          setError('Failed to load menu. Please try again later.');
+          toast.error('Failed to load menu data');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMenuData();
-  }, [menuId, form]);
+  }, [menuId, form, menuPermissions.isLoading, menuPermissions.canView]);
 
   // Generate a slug from name
   const generateSlug = (name) => {
+    if (!menuPermissions.canEdit) {
+      toast.error("You don't have permission to edit menus");
+      return;
+    }
+
     const slug = name
       .toLowerCase()
       .replace(/\s+/g, '-') // Replace spaces with -
@@ -110,12 +152,17 @@ const EditMenuPage = () => {
     form.setValue('slug', slug);
   };
 
-  // Handle form submission
+  // Handle form submission with permission checking
   const onSubmit = async (data) => {
+    if (!menuPermissions.canEdit) {
+      toast.error("You don't have permission to edit menus");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await menuService.updateMenu(menuId, data);
+      const response = await updateMenu(menuId, data);
 
       if (response.status === 'success') {
         toast.success('Menu updated successfully!');
@@ -125,6 +172,12 @@ const EditMenuPage = () => {
       }
     } catch (error) {
       console.error('Error updating menu:', error);
+
+      // Handle permission errors
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+        return;
+      }
 
       // Extract validation errors from the response
       const validationErrors =
@@ -203,10 +256,15 @@ const EditMenuPage = () => {
     }
   };
 
-  // Handle menu deletion
+  // Handle menu deletion with permission checking
   const handleDelete = async () => {
+    if (!menuPermissions.canDelete) {
+      toast.error("You don't have permission to delete menus");
+      return;
+    }
+
     try {
-      const response = await menuService.deleteMenu(menuId);
+      const response = await deleteMenu(menuId);
 
       if (response.status === 'success') {
         toast.success('Menu deleted successfully!');
@@ -216,34 +274,68 @@ const EditMenuPage = () => {
       }
     } catch (error) {
       console.error('Error deleting menu:', error);
-      toast.error('Failed to delete menu. Please try again.');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error('Failed to delete menu. Please try again.');
+      }
     }
   };
 
-  if (isLoading) {
+  // Show loading state while permissions are loading
+  if (menuPermissions.isLoading || (isLoading && !error)) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Loading menu data...</p>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">
+          {menuPermissions.isLoading ? 'Loading permissions...' : 'Loading menu data...'}
+        </p>
       </div>
     );
   }
 
+  // Show access denied if user doesn't have view permission
+  if (!menuPermissions.canView) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to view or edit menus.</p>
+          <div className="space-x-2">
+            <Button onClick={() => router.push('/admin/menus')}>Back to Menus</Button>
+            <Button variant="outline" onClick={() => router.push('/admin/dashboard')}>
+              Go to Dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container px-4 py-6 mx-auto max-w-5xl">
           <Card className="bg-red-50 border-red-200">
             <CardHeader>
-              <CardTitle className="text-red-800">Error</CardTitle>
+              <CardTitle className="text-red-800 flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Error
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-red-600">{error}</p>
             </CardContent>
             <CardFooter>
-              <Button onClick={() => router.push('/admin/menus')} variant="outline">
-                Back to Menus
-              </Button>
+              <div className="space-x-2">
+                <Button onClick={() => window.location.reload()} variant="outline">
+                  Try Again
+                </Button>
+                <Button onClick={() => router.push('/admin/menus')}>Back to Menus</Button>
+              </div>
             </CardFooter>
           </Card>
         </div>
@@ -254,6 +346,29 @@ const EditMenuPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-5xl">
+        {/* Permission Status Banner */}
+        {(!menuPermissions.canEdit || !menuPermissions.canDelete) && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Lock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium text-yellow-900">Limited Access</h4>
+                <p className="text-sm text-yellow-800 mt-1">
+                  {!menuPermissions.canEdit &&
+                    !menuPermissions.canDelete &&
+                    'You have view-only access. You cannot edit or delete this menu.'}
+                  {menuPermissions.canEdit &&
+                    !menuPermissions.canDelete &&
+                    'You can edit this menu but cannot delete it.'}
+                  {!menuPermissions.canEdit &&
+                    menuPermissions.canDelete &&
+                    'You can delete this menu but cannot edit it.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Form Section */}
           <div className="md:col-span-2">
@@ -263,8 +378,13 @@ const EditMenuPage = () => {
                   form={form}
                   generateSlug={generateSlug}
                   originalSlug={originalSlug}
+                  menuPermissions={menuPermissions}
                   FormActions={() => (
-                    <EditFormActions isSubmitting={isSubmitting} handleDelete={handleDelete} />
+                    <EditFormActions
+                      isSubmitting={isSubmitting}
+                      handleDelete={handleDelete}
+                      menuPermissions={menuPermissions}
+                    />
                   )}
                 />
               </form>
@@ -273,11 +393,24 @@ const EditMenuPage = () => {
 
           {/* Preview Section */}
           <div className="md:col-span-1">
-            <EditMenuPreview formValues={formValues} menuId={menuId} />
+            <EditMenuPreview
+              formValues={formValues}
+              menuId={menuId}
+              menuPermissions={menuPermissions}
+            />
           </div>
         </div>
       </div>
     </div>
+  );
+};
+
+// Wrapper component that provides permission context
+const EditMenuPage = () => {
+  return (
+    <PermissionProvider>
+      <EditMenuPageContent />
+    </PermissionProvider>
   );
 };
 

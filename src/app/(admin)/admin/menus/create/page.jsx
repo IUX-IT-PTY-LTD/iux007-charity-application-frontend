@@ -1,4 +1,3 @@
-// src/app/(admin)/admin/menus/create/page.jsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,13 +6,21 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
+import { Lock } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-// Import services
-import { menuService } from '@/api/services/admin/menuService';
+// Import protected services
+import { createMenu } from '@/api/services/admin/protected/menuService';
+import { isAuthenticated } from '@/api/services/admin/authService';
+
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
 
 // Import components
 import MenuForm from '@/components/admin/menus/create/MenuForm';
@@ -34,15 +41,34 @@ const formSchema = z.object({
   status: z.number().int().min(0).max(1).default(1),
 });
 
-const CreateMenuPage = () => {
+// Main Create Menu Page Component
+const CreateMenuPageContent = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const menuPermissions = useMenuPermissions();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Set page title
   useEffect(() => {
     setPageTitle('Create New Menu Item');
     setPageSubtitle('Add a new navigation menu to your website');
   }, [setPageTitle, setPageSubtitle]);
+
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Check if user has create permission
+  useEffect(() => {
+    if (!menuPermissions.isLoading && !menuPermissions.canCreate) {
+      toast.error("You don't have permission to create menus.");
+      router.push('/admin/menus');
+    }
+  }, [menuPermissions.isLoading, menuPermissions.canCreate, router]);
 
   // Define form with zod validation
   const form = useForm({
@@ -71,12 +97,17 @@ const CreateMenuPage = () => {
     form.setValue('slug', slug);
   };
 
-  // Handle form submission
+  // Handle form submission with permission checking
   const onSubmit = async (data) => {
+    if (!menuPermissions.canCreate) {
+      toast.error("You don't have permission to create menus");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await menuService.createMenu(data);
+      const response = await createMenu(data);
 
       if (response.status === 'success') {
         toast.success('Menu created successfully!');
@@ -87,8 +118,13 @@ const CreateMenuPage = () => {
     } catch (error) {
       console.error('Error creating menu:', error);
 
+      // Handle permission errors
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+        return;
+      }
+
       // Extract validation errors from the response
-      // This handles different error response formats
       const validationErrors =
         error.errors ||
         error.response?.data?.errors ||
@@ -166,6 +202,37 @@ const CreateMenuPage = () => {
     }
   };
 
+  // Show loading state while permissions are loading
+  if (menuPermissions.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if user doesn't have create permission
+  if (!menuPermissions.canCreate) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to create menus.</p>
+          <div className="space-x-2">
+            <Button onClick={() => router.push('/admin/menus')}>Back to Menus</Button>
+            <Button variant="outline" onClick={() => router.push('/admin/dashboard')}>
+              Go to Dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-5xl">
@@ -177,7 +244,13 @@ const CreateMenuPage = () => {
                 <MenuForm
                   form={form}
                   generateSlug={generateSlug}
-                  FormActions={() => <FormActions form={form} isSubmitting={isSubmitting} />}
+                  FormActions={() => (
+                    <FormActions
+                      form={form}
+                      isSubmitting={isSubmitting}
+                      menuPermissions={menuPermissions}
+                    />
+                  )}
                 />
               </form>
             </Form>
@@ -190,6 +263,15 @@ const CreateMenuPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Wrapper component that provides permission context
+const CreateMenuPage = () => {
+  return (
+    <PermissionProvider>
+      <CreateMenuPageContent />
+    </PermissionProvider>
   );
 };
 
