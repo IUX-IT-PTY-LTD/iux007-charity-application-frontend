@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Printer, Loader2, RefreshCcw, AlertCircle } from 'lucide-react';
 import { contactService } from '@/api/services/admin/contactService';
-import EditableField from './EditableField';
+import EditableField from '@/components/admin/shared/EditableField';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

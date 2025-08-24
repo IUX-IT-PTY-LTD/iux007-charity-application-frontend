@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Award, PlusCircle, Loader2, Trash2, Edit, ExternalLink, Upload } from 'lucide-react';
-import EditableField from '../EditableField';
+import EditableField from '@/components/admin/shared/EditableField';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

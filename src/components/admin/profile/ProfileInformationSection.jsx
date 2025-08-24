@@ -1,8 +1,8 @@
 'use client';
 
-import { User, Mail, Phone, Shield, Key } from 'lucide-react';
+import { User, Mail, Phone, Shield } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import EditableField from './EditableField';
+import EditableField from '@/components/admin/shared/EditableField';
 import { toast } from 'sonner';
 
 const ProfileInformationSection = () => {
@@ -22,7 +22,7 @@ const ProfileInformationSection = () => {
     <Card>
       <CardHeader>
         <CardTitle>Profile Information</CardTitle>
-        <CardDescription>Manage your admin account details</CardDescription>
+        <CardDescription>Manage your personal account details</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <EditableField
@@ -58,15 +58,6 @@ const ProfileInformationSection = () => {
           icon={Shield}
           disabled={true}
           onSave={() => {}}
-        />
-
-        <EditableField
-          label="Change Password"
-          value=""
-          icon={Key}
-          type="password"
-          onSave={(value) => handleUpdateProfileField('Password', value)}
-          placeholder="Enter new password..."
         />
       </CardContent>
     </Card>

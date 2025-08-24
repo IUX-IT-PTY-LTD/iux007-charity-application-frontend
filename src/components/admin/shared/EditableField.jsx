@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
  * @param {string|number} props.value - Current field value
  * @param {string} props.icon - Optional icon component
  * @param {function} props.onSave - Function to call when saving changes
- * @param {string} props.type - Input type: 'text', 'textarea', 'toggle'
+ * @param {string} props.type - Input type: 'text', 'textarea', 'toggle', 'email', 'password'
  * @param {boolean} props.disabled - Whether the field is disabled
  * @param {string} props.placeholder - Placeholder text for input
  * @param {boolean} props.required - Whether the field is required
@@ -51,6 +51,21 @@ const EditableField = ({
     // Validate for required fields
     if (required && !inputValue) {
       setError('This field is required');
+      return;
+    }
+
+    // Email validation
+    if (type === 'email' && inputValue) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(inputValue)) {
+        setError('Please enter a valid email address');
+        return;
+      }
+    }
+
+    // Password validation
+    if (type === 'password' && inputValue && inputValue.length < 8) {
+      setError('Password must be at least 8 characters long');
       return;
     }
 
@@ -136,7 +151,7 @@ const EditableField = ({
               />
             ) : (
               <Input
-                type={type}
+                type={type === 'password' ? 'password' : type === 'email' ? 'email' : 'text'}
                 value={inputValue || ''}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={placeholder}
@@ -163,7 +178,7 @@ const EditableField = ({
         ) : (
           <div className="text-base py-1.5">
             {value ? (
-              <span>{value}</span>
+              <span>{type === 'password' ? '••••••••' : value}</span>
             ) : (
               <span className="text-muted-foreground italic">Not set</span>
             )}

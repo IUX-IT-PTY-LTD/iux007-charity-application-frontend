@@ -14,7 +14,7 @@ import {
   Linkedin,
   Youtube,
 } from 'lucide-react';
-import EditableField from '../EditableField';
+import EditableField from '@/components/admin/shared/EditableField';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
