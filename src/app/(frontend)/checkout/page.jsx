@@ -161,12 +161,12 @@ const Checkout = () => {
   //   payment methods
   const [paymentMethod, setPaymentMethod] = React.useState(paymentMethods[0]);
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <div className="min-h-screen bg-gray-50 py-6 md:py-16 px-4 md:px-0">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white shadow-lg rounded-xl overflow-hidden">
-          <div className="p-8">
+          <div className="p-4 md:p-8">
             {/* Progress Steps */}
-            <div className="relative flex justify-between items-center mb-12">
+            <div className="relative flex justify-between items-center mb-8 md:mb-12">
               <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 bg-gray-200">
                 <div
                   className={`h-full bg-primary transition-all ${
@@ -183,7 +183,7 @@ const Checkout = () => {
               ].map((step, index) => (
                 <div key={index} className="relative z-10 text-center">
                   <div
-                    className={`w-16 h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all ${
+                    className={`w-12 h-12 md:w-16 md:h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all ${
                       currentStep > index
                         ? 'bg-primary border-primary text-white'
                         : currentStep === index
@@ -191,10 +191,10 @@ const Checkout = () => {
                           : 'bg-white border-gray-300 text-gray-400'
                     }`}
                   >
-                    <div className="text-2xl">{step.icon}</div>
+                    <div className="text-lg md:text-2xl">{step.icon}</div>
                   </div>
                   <div
-                    className={`mt-3 font-medium ${
+                    className={`mt-2 md:mt-3 font-medium text-xs md:text-base ${
                       currentStep >= index + 1 ? 'text-primary' : 'text-gray-400'
                     }`}
                   >
@@ -207,10 +207,10 @@ const Checkout = () => {
             {/* Step 1: Cart */}
             {currentStep === 1 && (
               <div className="space-y-8">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-center md:justify-between items-center">
                   <Link
                     href="/events"
-                    className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                    className="inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm md:text-base"
                   >
                     <span className="mr-2">Add More Items</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,13 +229,13 @@ const Checkout = () => {
                     cartItems.map((item) => (
                       <div
                         key={item.id}
-                        className="bg-white rounded-xl shadow-md overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300"
+                        className="bg-white rounded-xl shadow-md overflow-hidden mb-4 md:mb-6 hover:shadow-lg transition-shadow duration-300"
                       >
-                        <div className="p-6">
+                        <div className="p-4 md:p-6">
                           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                             {/* Image and Details Section */}
-                            <div className="flex flex-col md:flex-row gap-6">
-                              <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
+                            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                              <div className="w-full md:w-48 h-32 md:h-48 rounded-lg overflow-hidden flex-shrink-0">
                                 <Image
                                   src={item.image}
                                   alt={item.title}
@@ -246,29 +246,29 @@ const Checkout = () => {
                                 />
                               </div>
 
-                              <div className="flex-grow space-y-4">
-                                <h3 className="text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+                              <div className="flex-grow space-y-3 md:space-y-4">
+                                <h3 className="text-lg md:text-xl font-bold text-gray-900 hover:text-primary transition-colors">
                                   {item.title}
                                 </h3>
 
                                 {/* Quantity Controls */}
-                                <div className="flex flex-wrap items-center gap-4">
+                                <div className="flex flex-wrap items-center gap-3 md:gap-4">
                                   <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                                     <button
                                       onClick={() =>
                                         item.quantity > 1 ? handleDecreaseQuantity(item.id) : null
                                       }
-                                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                      className="px-3 md:px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
                                       disabled={item.quantity <= 1}
                                     >
                                       -
                                     </button>
-                                    <span className="px-6 py-2 font-medium border-x border-gray-200 bg-white">
+                                    <span className="px-4 md:px-6 py-2 font-medium border-x border-gray-200 bg-white text-sm md:text-base">
                                       {item.quantity}
                                     </span>
                                     <button
                                       onClick={() => handleIncreaseQuantity(item.id)}
-                                      className="px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                      className="px-3 md:px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
                                     >
                                       +
                                     </button>
@@ -277,7 +277,7 @@ const Checkout = () => {
                                   <input
                                     type="number"
                                     placeholder="Amount"
-                                    className="w-32 px-4 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
+                                    className="w-24 md:w-32 px-3 md:px-4 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
                                     disabled={item.isFixedDonation}
                                     value={item.price}
                                     onChange={(e) => {
@@ -297,7 +297,7 @@ const Checkout = () => {
                                 <div className="relative">
                                   <textarea
                                     placeholder="Add a note for this item..."
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all resize-none"
+                                    className="w-full px-3 md:px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all resize-none"
                                     value={item.note || ''}
                                     onChange={(e) => {
                                       const note = e.target.value;
@@ -388,7 +388,7 @@ const Checkout = () => {
 
                         <button
                           onClick={() => setCurrentStep(2)}
-                          className="w-full px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                          className="w-full px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                           disabled={cartItems.length === 0}
                         >
                           Proceed to Donor Details
@@ -410,7 +410,7 @@ const Checkout = () => {
                       <p className="text-gray-600">Sign in for a faster checkout experience</p>
                       <button
                         onClick={() => router.push('/login?redirect=' + encodeURIComponent('/checkout?step=2'))}
-                        className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                       >
                         Sign In
                       </button>
@@ -420,7 +420,7 @@ const Checkout = () => {
                       <button
                         type="button"
                         onClick={() => setCurrentStep(1)}
-                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                       >
                         Back to Cart
                       </button>
@@ -450,7 +450,7 @@ const Checkout = () => {
                       <button
                         type="button"
                         onClick={() => setCurrentStep(1)}
-                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                       >
                         Back to Cart
                       </button>
@@ -461,7 +461,7 @@ const Checkout = () => {
                           setShowPaymentForm(false);
                           setUserAgreed(false);
                         }}
-                        className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                       >
                         Continue to Payment
                       </button>
@@ -557,7 +557,7 @@ const Checkout = () => {
                       <button
                         type="button"
                         onClick={() => setCurrentStep(2)}
-                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                       >
                         Back to Donor Details
                       </button>
@@ -565,7 +565,7 @@ const Checkout = () => {
                         type="button"
                         onClick={() => setShowPaymentForm(true)}
                         disabled={!userAgreed}
-                        className={`px-8 py-3 rounded-lg transition-colors ${
+                        className={`px-6 md:px-8 py-2 md:py-3 text-sm md:text-base rounded-lg transition-colors ${
                           userAgreed
                             ? 'text-white bg-primary hover:bg-primary/90'
                             : 'text-gray-400 bg-gray-200 cursor-not-allowed'
@@ -592,7 +592,7 @@ const Checkout = () => {
                           </p>
                           <button
                             onClick={() => setShowPaymentForm(false)}
-                            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            className="px-4 md:px-6 py-2 text-sm md:text-base bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                           >
                             Go Back
                           </button>
@@ -613,7 +613,7 @@ const Checkout = () => {
                       <button
                         type="button"
                         onClick={() => setShowPaymentForm(false)}
-                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                       >
                         Back to Review
                       </button>

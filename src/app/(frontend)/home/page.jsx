@@ -5,7 +5,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import Events from '@/components/all-events';
 import Hero from '@/components/homepage-components/hero';
 import FeaturedEvents from '@/components/homepage-components/featured-events';
-import Operations from '@/components/homepage-components/operations';
+import FundRaising from '@/components/homepage-components/operations';
 import FAQ from '@/components/shared/faq';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
@@ -51,8 +51,8 @@ const Home = () => {
     <div>
       <Hero data={heroData} />
       <FeaturedEvents data={featuredEventsData} />
-      {/* <Operations /> */}
       <Events data={eventsData} />
+      <FundRaising />
       <FAQ />
     </div>
   );

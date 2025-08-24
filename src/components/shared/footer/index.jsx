@@ -41,30 +41,32 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-black px-8 py-12">
+    <footer className="bg-black px-4 md:px-8 py-8 md:py-12">
       <div className="container mx-auto">
-        <div className="flex justify-between items-center">
-          <Link href={settingsData.find((item) => item.key === 'acnc_link')?.value || '#'} className="flex items-center" target="_blank" rel="noopener noreferrer">
-            <Image
-              unoptimized
-              loading="lazy"
-              width={100}
-              height={100}
-              src={
-                settingsData.find((item) => item.key === 'acnc_logo')?.value ||
-                '/assets/img/logo.svg'
-              }
-              alt="ACNC Logo"
-              className="mr-4"
-            />
-          </Link>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-8 md:gap-4">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
+            <Link href={settingsData.find((item) => item.key === 'acnc_link')?.value || '#'} className="flex items-center justify-center md:justify-start" target="_blank" rel="noopener noreferrer">
+              <Image
+                unoptimized
+                loading="lazy"
+                width={120}
+                height={120}
+                src={
+                  settingsData.find((item) => item.key === 'acnc_logo')?.value ||
+                  '/assets/img/logo.svg'
+                }
+                alt="ACNC Logo"
+                className="w-24 h-24 md:w-20 md:h-20"
+              />
+            </Link>
+          </div>
 
           {/* Address and Contact Info */}
-          <div className="text-gray-400">
-            <h3 className="text-white font-semibold mb-2">Contact Us</h3>
-            <div>
+          <div className="text-gray-400 text-center md:text-left">
+            <h3 className="text-white font-semibold mb-3 md:mb-2 text-lg md:text-base">Contact Us</h3>
+            <div className="space-y-1">
               {contactData.map((contact, index) => (
-                <p key={index} className="mb-2">
+                <p key={index} className="text-sm md:text-base">
                   <span className="font-semibold">{contact.name}:</span> {contact.value}
                 </p>
               ))}
@@ -72,9 +74,9 @@ const Footer = () => {
           </div>
 
           {/* Social Media Links */}
-          <div className="text-gray-400">
-            <h3 className="text-white font-semibold mb-2">Follow Us</h3>
-            <div className="flex gap-4 mb-4">
+          <div className="text-gray-400 text-center md:text-left">
+            <h3 className="text-white font-semibold mb-3 md:mb-2 text-lg md:text-base">Follow Us</h3>
+            <div className="flex justify-center md:justify-start gap-4 mb-4">
               {['facebook', 'twitter', 'linkedin', 'instagram'].map((social) => (
                 <Link
                   key={social}
@@ -84,7 +86,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                 >
                   <span className="sr-only">{social}</span>
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-7 h-7 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
                     {social === 'facebook' && (
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                     )}
@@ -101,16 +103,16 @@ const Footer = () => {
                 </Link>
               ))}
             </div>
-            <div className="flex gap-8">
+            <div className="flex flex-col md:flex-row justify-center md:justify-start gap-2 md:gap-8">
               <Link
                 href="/privacy-policy"
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white transition-colors text-sm md:text-base"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/terms-of-service"
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white transition-colors text-sm md:text-base"
               >
                 Terms of Service
               </Link>
@@ -118,7 +120,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <hr className="border-gray-800 my-8" />
+        <hr className="border-gray-800 my-6 md:my-8" />
 
         <div className="text-center text-sm text-gray-400">
           <p>© {new Date().getFullYear()} CharityFund. All rights reserved.</p>
