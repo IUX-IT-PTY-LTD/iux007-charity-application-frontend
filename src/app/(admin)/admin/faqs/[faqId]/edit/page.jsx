@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -81,7 +81,8 @@ const formSchema = z.object({
 });
 
 // Component for the edit page
-export default function EditFAQ({ params }) {
+export default function EditFAQ(props) {
+  const params = use(props.params);
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const [faq, setFaq] = useState(null);

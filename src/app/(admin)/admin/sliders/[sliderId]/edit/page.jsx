@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -481,7 +481,8 @@ const EditSliderContent = ({ params }) => {
 };
 
 // Wrapper component that provides permission context
-const EditSlider = ({ params }) => {
+const EditSlider = props => {
+  const params = use(props.params);
   return (
     <PermissionProvider>
       <EditSliderContent params={params} />

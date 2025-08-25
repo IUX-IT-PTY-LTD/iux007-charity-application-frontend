@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Loader2, Lock, ArrowLeft } from 'lucide-react';
@@ -256,7 +256,8 @@ const UserDetailsPageContent = ({ params }) => {
 };
 
 // Wrapper component that provides permission context
-const UserDetailsPage = ({ params }) => {
+const UserDetailsPage = props => {
+  const params = use(props.params);
   return (
     <PermissionProvider>
       <UserDetailsPageContent params={params} />

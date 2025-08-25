@@ -1,13 +1,14 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import DonationCart from '@/components/donation-cart';
 
-const EventDetails = ({ params }) => {
+const EventDetails = props => {
+  const params = use(props.params);
   const { id: uuid } = params;
   console.log(uuid);
 

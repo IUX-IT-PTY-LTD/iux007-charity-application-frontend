@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Loader2 } from 'lucide-react';
@@ -14,7 +14,8 @@ import AdminActions from '@/components/admin/blog/preview/AdminActions';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 
-const BlogPostPreview = ({ params }) => {
+const BlogPostPreview = props => {
+  const params = use(props.params);
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const [post, setPost] = useState(null);

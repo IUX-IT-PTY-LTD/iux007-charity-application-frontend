@@ -66,8 +66,8 @@ const RolesHeader = ({ onCreateClick }) => {
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
           <Shield className="h-4 w-4" />
           <span>
-            {currentRoleLevel === ROLE_LEVELS.SUPER_ADMIN && 'Full Control'}
-            {currentRoleLevel === ROLE_LEVELS.ADMIN && 'Limited Control'}
+            {currentRoleLevel === ROLE_LEVELS.SUPER_ADMIN && 'Complete Full Control'}
+            {currentRoleLevel === ROLE_LEVELS.ADMIN && 'Full Control'}
             {currentRoleLevel === ROLE_LEVELS.OTHER && 'View Only'}
           </span>
         </div>
