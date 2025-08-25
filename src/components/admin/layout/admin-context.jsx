@@ -26,8 +26,8 @@ export const AdminProvider = ({ children }) => {
     try {
       setAdminState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      // Check token first (like in the first version)
-      setIsLoadingProfile(true);
+      // Check token first
+      // setIsLoadingProfile(true);
       // Check if token exists before making API call
       const token = getAuthToken();
       if (!token) {
