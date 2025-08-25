@@ -29,6 +29,7 @@ import ViewPermissionsModal from '@/components/admin/org/roles/modals/ViewPermis
 
 const RolesPage = () => {
   const { adminProfile, isLoading: contextLoading, isInitialized } = useAdminContext();
+  const { setPageTitle, setPageSubtitle } = useAdminContext();
 
   const [pageState, setPageState] = useState({
     roles: [],
@@ -50,6 +51,11 @@ const RolesPage = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  useEffect(() => {
+      setPageTitle('Role Management');
+      setPageSubtitle('Manage user roles and permissions');
+    }, [setPageTitle, setPageSubtitle]);
 
   // Initialize page when context is ready
   useEffect(() => {
