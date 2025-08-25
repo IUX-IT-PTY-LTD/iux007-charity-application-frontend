@@ -10,12 +10,15 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '@/components/stripe/CherckoutForm';
 import { setUserCart } from '@/store/features/userSlice';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const Checkout = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [userAgreed, setUserAgreed] = useState(false);
   const [adminContributionAmount, setAdminContributionAmount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
@@ -24,9 +27,16 @@ const Checkout = () => {
   console.log(userInfo);
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   /** Stripe Integration */
-  const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
   useEffect(() => {
+    // Check for step parameter from URL (when redirecting back from login)
+    const stepParam = searchParams.get('step');
+    if (stepParam) {
+      setCurrentStep(parseInt(stepParam));
+    }
+
     // Get cart items from localStorage when component mounts
     const cart = localStorage.getItem('cartItems');
     if (cart) {
@@ -60,7 +70,7 @@ const Checkout = () => {
 
       setCheckoutData(checkoutDataObj);
     }
-  }, []);
+  }, [searchParams]);
 
   // Update total amount whenever admin contribution changes
   useEffect(() => {
@@ -399,7 +409,7 @@ const Checkout = () => {
                       <h3 className="text-xl font-semibold">Please Sign In to Continue</h3>
                       <p className="text-gray-600">Sign in for a faster checkout experience</p>
                       <button
-                        onClick={() => router.push('/login')}
+                        onClick={() => router.push('/login?redirect=' + encodeURIComponent('/checkout?step=2'))}
                         className="px-6 py-3 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
                       >
                         Sign In
@@ -446,7 +456,11 @@ const Checkout = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setCurrentStep(3)}
+                        onClick={() => {
+                          setCurrentStep(3);
+                          setShowPaymentForm(false);
+                          setUserAgreed(false);
+                        }}
                         className="px-6 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                       >
                         Continue to Payment
@@ -459,50 +473,153 @@ const Checkout = () => {
 
             {/* Step 3: Payment */}
             {currentStep === 3 && (
-              <div className="max-w-3xl mx-auto space-y-8">
-                <div className="grid">
-                  <Elements stripe={stripePromise}>
-                    <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
-                  </Elements>
-                  {/* {paymentMethods.map((method) => (
-                    <div
-                      key={method.id}
-                      onClick={() => setPaymentMethod(method)}
-                      className={`
-                        p-6 border rounded-xl cursor-pointer transition-all
-                        ${
-                          paymentMethod.id === method.id
-                            ? 'border-primary ring-2 ring-primary/20'
-                            : 'hover:border-gray-300'
-                        }
-                      `}
-                    >
-                      <Image
-                        src={method.img}
-                        alt="Payment Method"
-                        width={100}
-                        height={50}
-                        className="w-full h-auto object-contain"
-                      />
+              <div className="max-w-4xl mx-auto space-y-8">
+                {!showPaymentForm ? (
+                  /* Confirmation Preview */
+                  <>
+                    <div className="text-center mb-8">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Review Your Donation</h3>
+                      <p className="text-gray-600">Please review your donation details before proceeding to payment</p>
                     </div>
-                  ))} */}
-                </div>
 
-                <div className="flex justify-between pt-8 border-t">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(2)}
-                    className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Back
-                  </button>
-                  {/* <button
-                    type="submit"
-                    className="px-8 py-3 text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Complete Payment
-                  </button> */}
-                </div>
+                    {/* Order Summary */}
+                    <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
+                      <h4 className="text-xl font-semibold text-gray-900 border-b pb-4">Donation Summary</h4>
+                      
+                      {/* Cart Items Breakdown */}
+                      <div className="space-y-4">
+                        {cartItems.map((item) => (
+                          <div key={item.id} className="flex justify-between items-center py-4 border-b border-gray-100">
+                            <div className="flex items-center space-x-4">
+                              <Image
+                                src={item.image}
+                                alt={item.title}
+                                width={80}
+                                height={80}
+                                className="w-20 h-20 rounded-lg object-cover"
+                                loader={({ src }) => src}
+                              />
+                              <div>
+                                <h5 className="font-semibold text-gray-900">{item.title}</h5>
+                                <p className="text-gray-600">Quantity: {item.quantity}</p>
+                                <p className="text-gray-600">Amount per item: ${Number(item.price || 0).toFixed(2)}</p>
+                                {item.note && (
+                                  <p className="text-sm text-gray-500 mt-1">Note: {item.note}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-semibold text-primary">
+                                ${(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Totals Breakdown */}
+                      <div className="bg-gray-50 rounded-lg p-6 space-y-3">
+                        <div className="flex justify-between text-gray-700">
+                          <span>Subtotal (Donations):</span>
+                          <span>${(Number(totalAmount || 0) - Number(adminContributionAmount || 0)).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-700">
+                          <span>Admin Contribution:</span>
+                          <span>${Number(adminContributionAmount || 0).toFixed(2)}</span>
+                        </div>
+                        <hr className="border-gray-300" />
+                        <div className="flex justify-between text-xl font-bold text-gray-900">
+                          <span>Total Amount:</span>
+                          <span className="text-primary">${Number(totalAmount || 0).toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      {/* Terms and Agreement */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <div className="flex items-start space-x-3">
+                          <input
+                            type="checkbox"
+                            id="agreement"
+                            checked={userAgreed}
+                            onChange={(e) => setUserAgreed(e.target.checked)}
+                            className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                          />
+                          <label htmlFor="agreement" className="text-sm text-gray-700 leading-relaxed">
+                            I agree to the terms and conditions and confirm that all donation details are correct. 
+                            I understand that this donation is final and will be processed immediately upon payment confirmation.
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-between pt-8 border-t">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(2)}
+                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Back to Donor Details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowPaymentForm(true)}
+                        disabled={!userAgreed}
+                        className={`px-8 py-3 rounded-lg transition-colors ${
+                          userAgreed
+                            ? 'text-white bg-primary hover:bg-primary/90'
+                            : 'text-gray-400 bg-gray-200 cursor-not-allowed'
+                        }`}
+                      >
+                        Proceed to Payment
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  /* Payment Form */
+                  <>
+                    <div className="text-center mb-8">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Complete Payment</h3>
+                      <p className="text-gray-600">Total: ${Number(totalAmount || 0).toFixed(2)}</p>
+                    </div>
+
+                    <div className="grid">
+                      {!stripePublishableKey ? (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                          <h3 className="text-lg font-semibold text-red-800 mb-2">Payment Configuration Error</h3>
+                          <p className="text-red-600 mb-4">
+                            Stripe payment is not properly configured. Please contact support.
+                          </p>
+                          <button
+                            onClick={() => setShowPaymentForm(false)}
+                            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            Go Back
+                          </button>
+                        </div>
+                      ) : stripePromise ? (
+                        <Elements stripe={stripePromise}>
+                          <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
+                        </Elements>
+                      ) : (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                          <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Payment System...</h3>
+                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between pt-8 border-t">
+                      <button
+                        type="button"
+                        onClick={() => setShowPaymentForm(false)}
+                        className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Back to Review
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

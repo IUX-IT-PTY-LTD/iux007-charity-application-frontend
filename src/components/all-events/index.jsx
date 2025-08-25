@@ -27,8 +27,10 @@ const Events = ({ data }) => {
                   time={event.end_date}
                   venue={event.location}
                   targetAmount={event.target_amount}
+                  raised={event.total_donation}
+                  totalDonors={event.total_donor}
+                  remainingPercentage={event.remaining_percentage}
                   showDetails={true}
-                  // raised={event.raised}
                 />
               ))
             ) : (
@@ -71,6 +73,7 @@ const Events = ({ data }) => {
                   time={demoEvent.end_date}
                   venue={demoEvent.location}
                   targetAmount={demoEvent.target_amount}
+                  // raised={demoEvent.total_donation}
                   showDetails={true}
                 />
               ))

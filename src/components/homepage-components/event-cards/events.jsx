@@ -12,9 +12,22 @@ const EventCard = ({
   venue,
   targetAmount,
   raised,
+  remainingPercentage,
+  totalDonors,
   showDetails,
   buttonText,
 }) => {
+  // Calculate progress percentage
+  // const progressPercentage = targetAmount > 0 ? Math.min((raised / targetAmount) * 100, 100) : 0;
+  const progressPercentage = 100 - remainingPercentage;
+  
+  // Determine progress bar color based on progress percentage
+  const getProgressBarColor = () => {
+    if (progressPercentage > 50) {
+      return 'bg-green-500';
+    }
+    return 'bg-primary';
+  };
   return (
     <div className="bg-white rounded-2xl p-5 cursor-pointer hover:-translate-y-2 transition-all relative h-full flex flex-col">
       <div className="overflow-hidden mx-auto md:mb-2 mb-4 h-[200px]">
@@ -52,19 +65,19 @@ const EventCard = ({
           <div className="mb-4">
             <div className="bg-gray-50 rounded p-3">
               <div className="flex items-baseline text-sm mb-2">
-                <span className="font-bold text-primary">${25000 || 0}</span>
+                <span className="font-bold text-primary">${raised || 0}</span>
                 <span className="text-gray-500 ml-1">raised of </span>
                 <span className="font-bold text-primary ml-1">${targetAmount || 0}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
                 <div
-                  className="bg-primary h-1.5 rounded-full"
-                  style={{ width: `${Math.min((25000 / targetAmount) * 100, 100)}%` }}
+                  className={`${getProgressBarColor()} h-1.5 rounded-full transition-colors duration-300`}
+                  style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
               <div className="flex justify-between text-xs text-gray-500">
-                <span>{100 || 0} Donors</span>
-                <span>{Math.min((25000 / targetAmount) * 100, 100).toFixed(1)}%</span>
+                <span>{totalDonors || 0} Donors</span>
+                <span>{progressPercentage.toFixed(1)}%</span>
               </div>
             </div>
           </div>

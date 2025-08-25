@@ -64,13 +64,8 @@ export default function ProfilePage() {
     // Handle profile update logic here
   };
 
-  const handleDownloadInvoice = (donationId) => {
-    // Handle invoice download logic here
-    router.push(`/invoice/${donationId}`, {
-      state: {
-        invoiceData: donations.find((donation) => donation.uuid === donationId),
-      },
-    });
+  const handleViewInvoice = (donationId) => {
+    router.push(`/invoice/${donationId}`);
   };
 
   const calculateTotal = (items) => {
@@ -330,7 +325,7 @@ export default function ProfilePage() {
                             </p>
                           </div>
                           <button
-                            onClick={() => handleDownloadInvoice(donation.uuid)}
+                            onClick={() => handleViewInvoice(donation.uuid)}
                             className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
                           >
                             <svg

@@ -339,12 +339,6 @@ export const deleteAdmin = async (id) => {
  */
 export const getAdminsByRole = async (roleId) => {
   try {
-    // Check authentication
-    const token = getAuthToken();
-    if (!token) {
-      throw new Error('Not authenticated');
-    }
-
     console.log('Fetching admins by role ID:', roleId);
 
     // Get all admins and filter by role_id
@@ -359,10 +353,62 @@ export const getAdminsByRole = async (roleId) => {
         message: `Found ${filteredAdmins.length} admins with role ID ${roleId}`,
       };
     }
-
     return allAdminsResponse;
-  } catch (error) {
+  }catch (error) {
     console.error(`Get admins by role ${roleId} error:`, error);
+  } 
+}
+ /* Get dashboard statistics
+ * @returns {Promise} - Promise resolving to dashboard statistics data
+ */
+export const getStatistics = async () => {
+  try {
+    // Check authentication
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    return await apiService.get(`/admin/${version}/statistics`);
+
+  } catch (error) {
+    console.error('Get statistics error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get events statistics
+ * @returns {Promise} - Promise resolving to events statistics data
+ */
+export const getEventsStatistics = async () => {
+  try {
+    // Check authentication
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    return await apiService.get(`/admin/${version}/events/statistics`);
+  } catch (error) {
+    console.error('Get events statistics error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get monthly donations statistics
+ * @returns {Promise} - Promise resolving to monthly donations statistics data
+ */
+export const getMonthlyDonationsStatistics = async () => {
+  try {
+    // Check authentication
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    return await apiService.get(`/admin/${version}/statistics/monthly-donations`);
+  } catch (error) {
+    console.error('Get monthly donations statistics error:', error);
     throw error;
   }
 };

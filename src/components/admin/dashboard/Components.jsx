@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Area, Bar, Line } from 'recharts';
+import React, { useState } from 'react';
+import { Area, Bar, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import {
   Card,
   CardContent,
@@ -268,6 +268,10 @@ const DonorActivity = ({ data }) => {
 
 // Component for campaign performance
 const CampaignPerformance = ({ campaigns }) => {
+  const [showAll, setShowAll] = useState(false);
+  const displayedCampaigns = showAll ? campaigns : campaigns.slice(0, 5);
+  const hasMoreCampaigns = campaigns.length > 5;
+
   return (
     <Card className="col-span-2">
       <CardHeader>
@@ -276,8 +280,12 @@ const CampaignPerformance = ({ campaigns }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {campaigns.map((campaign) => {
-            const percentage = Math.round((campaign.raised / campaign.target) * 100);
+          {displayedCampaigns.map((campaign) => {
+            // Use the real completion percentage from API if available, otherwise calculate
+            const percentage = campaign.percentage !== undefined 
+              ? Math.round(campaign.percentage) 
+              : Math.round((campaign.raised / campaign.target) * 100);
+            
             return (
               <div key={campaign.id} className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -288,19 +296,21 @@ const CampaignPerformance = ({ campaigns }) => {
                 </div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${
+                    className={`h-full transition-all duration-300 ${
                       percentage < 30
                         ? 'bg-red-500'
                         : percentage < 70
                           ? 'bg-yellow-500'
                           : 'bg-green-500'
                     }`}
-                    style={{ width: `${percentage}%` }}
+                    style={{ width: `${Math.min(percentage, 100)}%` }}
                   />
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span>{percentage}% Complete</span>
-                  <span className="text-muted-foreground">{campaign.days_left} days left</span>
+                  <span className="text-muted-foreground">
+                    {campaign.days_left > 0 ? `${campaign.days_left} days left` : 'Ended'}
+                  </span>
                 </div>
               </div>
             );
@@ -308,10 +318,22 @@ const CampaignPerformance = ({ campaigns }) => {
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full" size="sm">
-          View All Campaigns
-          <ChevronRight className="ml-auto h-4 w-4" />
-        </Button>
+        {hasMoreCampaigns ? (
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            size="sm"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? 'Show Less' : `Show More (${campaigns.length - 5} more)`}
+            <ChevronRight className={`ml-auto h-4 w-4 transition-transform ${showAll ? 'rotate-90' : ''}`} />
+          </Button>
+        ) : (
+          <Button variant="outline" className="w-full" size="sm">
+            View All Campaigns
+            <ChevronRight className="ml-auto h-4 w-4" />
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

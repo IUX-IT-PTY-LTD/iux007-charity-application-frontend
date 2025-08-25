@@ -18,7 +18,9 @@ import {
   Search,
   Filter,
   Bell,
+  TrendingUp,
 } from 'lucide-react';
+import { LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Line } from 'recharts';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -48,6 +50,7 @@ import {
 
 import { NotificationsButton } from '@/components/admin/dashboard/Notifications';
 import { DashboardAnalytics } from '@/components/admin/dashboard/Analytics';
+import { getStatistics, getEventsStatistics, getMonthlyDonationsStatistics } from '@/api/services/admin/adminService';
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -56,6 +59,8 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentDonations, setRecentDonations] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
+  const [eventsData, setEventsData] = useState([]);
+  const [monthlyDonationsData, setMonthlyDonationsData] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -70,14 +75,63 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // Generate stats
-        const mockStats = {
-          totalDonations: 2834,
-          totalRaised: 367921,
-          activeEvents: 8,
-          totalDonors: 1532,
-        };
-        setStats(mockStats);
+        // Fetch real statistics from API
+        const statisticsResponse = await getStatistics();
+        if (statisticsResponse.status === 'success') {
+          const statsData = statisticsResponse.data;
+          const mappedStats = {
+            totalDonations: statsData.total_donations,
+            totalRaised: statsData.total_amount_raised,
+            activeEvents: statsData.active_events,
+            totalDonors: statsData.total_donors,
+            totalEvents: statsData.total_events,
+            featuredEvents: statsData.featured_events,
+          };
+          setStats(mappedStats);
+        } else {
+          // Fallback to mock stats if API fails
+          const mockStats = {
+            totalDonations: 0,
+            totalRaised: 0,
+            activeEvents: 0,
+            totalDonors: 0,
+          };
+          setStats(mockStats);
+        }
+
+        // Fetch real events statistics
+        try {
+          const eventsResponse = await getEventsStatistics();
+          if (eventsResponse.status === 'success') {
+            setEventsData(eventsResponse.data);
+            
+            // Transform events data for campaign performance component
+            const transformedCampaigns = eventsResponse.data.map((event) => ({
+              id: event.id,
+              name: event.title,
+              raised: event.total_raised,
+              target: event.target_amount,
+              percentage: event.completion_percentage,
+              days_left: Math.ceil((new Date(event.end_date) - new Date()) / (1000 * 60 * 60 * 24)),
+            }));
+            setCampaigns(transformedCampaigns);
+          } else {
+            // Keep existing mock campaigns if API fails
+          }
+        } catch (error) {
+          console.error('Error fetching events statistics:', error);
+          // Keep existing mock campaigns
+        }
+
+        // Fetch monthly donations statistics
+        try {
+          const monthlyResponse = await getMonthlyDonationsStatistics();
+          if (monthlyResponse.status === 'success') {
+            setMonthlyDonationsData(monthlyResponse.data.monthly_data);
+          }
+        } catch (error) {
+          console.error('Error fetching monthly donations statistics:', error);
+        }
 
         // Generate recent donations
         const recentDonationsMock = [];
@@ -133,7 +187,7 @@ const AdminDashboard = () => {
             days_left: 28,
           },
         ];
-        setCampaigns(campaignsMock);
+        // setCampaigns(campaignsMock);
 
         // Generate notifications
         const notificationsMock = [
@@ -175,6 +229,14 @@ const AdminDashboard = () => {
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        // Fallback to mock stats if API call fails
+        const mockStats = {
+          totalDonations: 2834,
+          totalRaised: 367921,
+          activeEvents: 8,
+          totalDonors: 1532,
+        };
+        setStats(mockStats);
         setIsLoading(false);
       }
     };
@@ -228,7 +290,7 @@ const AdminDashboard = () => {
         </div> */}
 
         {/* Stat Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <StatCard
             title="Total Donations"
             value={stats.totalDonations.toLocaleString()}
@@ -261,6 +323,26 @@ const AdminDashboard = () => {
             trend="up"
             trendValue="4.3%"
           />
+          {stats.totalEvents && (
+            <StatCard
+              title="Total Events"
+              value={stats.totalEvents}
+              description="All events created"
+              icon={Calendar}
+              trend="up"
+              trendValue="2.1%"
+            />
+          )}
+          {stats.featuredEvents && (
+            <StatCard
+              title="Featured Events"
+              value={stats.featuredEvents}
+              description="Events in spotlight"
+              icon={Calendar}
+              trend="up"
+              trendValue="5.7%"
+            />
+          )}
         </div>
 
         {/* Main Dashboard Content */}
@@ -297,32 +379,124 @@ const AdminDashboard = () => {
               </div>
             </TabsContent>
 
-            {/* Analytics Tab - Comment out for now due to the error */}
+            {/* Analytics Tab */}
             <TabsContent value="analytics">
-              <Card className="p-6">
-                <CardHeader>
-                  <CardTitle>Analytics Dashboard</CardTitle>
-                  <CardDescription>
-                    Detailed analytics and metrics for your charity organization.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-10">
-                    <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Analytics Module</h3>
-                    <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                      The analytics module is currently being updated. Please check back later.
-                    </p>
-                    {/* <Button
-                      variant="outline"
-                      onClick={() => router.push("/admin/analytics")}
-                    >
-                      Go to Analytics Page
-                    </Button> */}
+              <div className="grid gap-6">
+                {/* Monthly Donations Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Monthly Donations Trend
+                    </CardTitle>
+                    <CardDescription>
+                      Monthly donation amounts and transaction counts for {monthlyDonationsData.length > 0 ? monthlyDonationsData[0]?.year : '2025'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {monthlyDonationsData.length > 0 ? (
+                      <div className="h-[400px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={monthlyDonationsData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                            <XAxis 
+                              dataKey="month_name" 
+                              fontSize={12}
+                              tick={{ fill: '#6b7280' }}
+                              axisLine={false}
+                              tickLine={false}
+                            />
+                            <YAxis 
+                              fontSize={12}
+                              tick={{ fill: '#6b7280' }}
+                              axisLine={false}
+                              tickLine={false}
+                              tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+                            />
+                            <Tooltip 
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-white p-4 border rounded-lg shadow-lg">
+                                      <p className="font-semibold text-gray-900">{label} {data.year}</p>
+                                      <p className="text-blue-600 font-medium">
+                                        Total Amount: ${data.total_amount.toLocaleString()}
+                                      </p>
+                                      <p className="text-gray-600 text-sm">
+                                        Transactions: {data.total_transactions}
+                                      </p>
+                                      <p className="text-gray-600 text-sm">
+                                        Unique Donors: {data.unique_donors}
+                                      </p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="total_amount" 
+                              stroke="#2563eb" 
+                              strokeWidth={3}
+                              dot={{ fill: '#2563eb', strokeWidth: 2, r: 5 }}
+                              activeDot={{ r: 7, stroke: '#2563eb', strokeWidth: 2, fill: '#fff' }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="text-center py-20">
+                        <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">Loading Monthly Data</h3>
+                        <p className="text-muted-foreground">
+                          Monthly donation statistics are being loaded...
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Summary Statistics */}
+                {monthlyDonationsData.length > 0 && (
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Year Total</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">${monthlyDonationsData.reduce((sum, month) => sum + month.total_amount, 0).toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">Total donations this year</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Peak Month</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">
+                          {monthlyDonationsData.reduce((peak, month) => 
+                            month.total_amount > peak.total_amount ? month : peak, 
+                            { total_amount: 0, month_name: 'None' }
+                          ).month_name}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Highest donation month</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Monthly Average</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">
+                          ${(monthlyDonationsData.reduce((sum, month) => sum + month.total_amount, 0) / 12).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Average per month</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
-              {/* <DashboardAnalytics /> */}
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="reports">
