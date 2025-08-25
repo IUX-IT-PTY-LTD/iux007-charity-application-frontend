@@ -203,6 +203,17 @@ const getNavigationItems = (permissions) => {
     });
   }
 
+  // if (permissions.events.hasAccess) {
+    items.push({
+      id: 'submitted',
+      name: 'Submitted Requests',
+      href: '/admin/requests/submitted',
+      icon: Calendar,
+      visible: true,
+      order: 8,
+    });
+  // }
+
   // Sort items by order and filter visible ones
   return items.filter((item) => item.visible).sort((a, b) => a.order - b.order);
 };
