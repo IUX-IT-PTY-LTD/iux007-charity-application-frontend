@@ -5,19 +5,42 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Shield, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
+import {
+  filterPermissionsByUserRole,
+  getCurrentUserRole,
+  canSeePermissionModule,
+  getPermissionDenialMessage,
+} from '@/api/utils/roleHierarchy';
 
 const PermissionSelector = ({
   permissions = [],
   selectedPermissions = [],
   onSelectionChange,
   disabled = false,
+  targetRole = null, // The role being edited (for self-permission protection)
 }) => {
+  const { adminProfile } = useAdminContext();
+  const currentUserRole = getCurrentUserRole(adminProfile);
+
+  // Filter permissions based on user role
+  const filteredPermissions = useMemo(() => {
+    return filterPermissionsByUserRole(permissions, currentUserRole);
+  }, [permissions, currentUserRole]);
+
+  // Check if user is editing their own role
+  const isEditingOwnRole = useMemo(() => {
+    if (!targetRole || !adminProfile?.role) return false;
+    return targetRole.id === adminProfile.role.id;
+  }, [targetRole, adminProfile]);
+
   // Group permissions by module/category
   const groupedPermissions = useMemo(() => {
     const groups = {};
 
-    permissions.forEach((permission) => {
+    filteredPermissions.forEach((permission) => {
       // Extract module name from permission name (e.g., "user_view" -> "user")
       const parts = permission.name.split('_');
       const module = parts[0] || 'general';
@@ -29,7 +52,7 @@ const PermissionSelector = ({
     });
 
     return groups;
-  }, [permissions]);
+  }, [filteredPermissions]);
 
   // Track expanded state for each group
   const [expandedGroups, setExpandedGroups] = React.useState(
@@ -51,6 +74,8 @@ const PermissionSelector = ({
 
   // Handle individual permission toggle
   const handlePermissionToggle = (permissionId, checked) => {
+    if (disabled) return;
+
     let newSelection;
     if (checked) {
       newSelection = [...selectedPermissions, permissionId];
@@ -62,6 +87,8 @@ const PermissionSelector = ({
 
   // Handle group selection (select all/none in group)
   const handleGroupToggle = (groupPermissions, checked) => {
+    if (disabled) return;
+
     const groupPermissionIds = groupPermissions.map((p) => p.id);
     let newSelection;
 
@@ -79,11 +106,13 @@ const PermissionSelector = ({
 
   // Handle select all/none
   const handleSelectAll = () => {
-    const allPermissionIds = permissions.map((p) => p.id);
+    if (disabled) return;
+    const allPermissionIds = filteredPermissions.map((p) => p.id);
     onSelectionChange(allPermissionIds);
   };
 
   const handleSelectNone = () => {
+    if (disabled) return;
     onSelectionChange([]);
   };
 
@@ -105,15 +134,60 @@ const PermissionSelector = ({
     return permissionName.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  if (permissions.length === 0) {
-    return <div className="text-center py-8 text-gray-500">No permissions available</div>;
+  // Show warning if editing own role
+  const showOwnRoleWarning = isEditingOwnRole && !canSeePermissionModule(currentUserRole);
+
+  if (filteredPermissions.length === 0) {
+    return (
+      <div className="space-y-4">
+        <Label className="text-base font-medium">Permissions</Label>
+        <div className="text-center py-8 text-gray-500">
+          <Shield className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <p>No permissions available for your access level</p>
+          {!canSeePermissionModule(currentUserRole) && (
+            <p className="text-xs text-gray-400 mt-2">
+              Contact Super Admin to manage advanced permissions
+            </p>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
+      {/* Self-editing warning */}
+      {showOwnRoleWarning && (
+        <Alert className="border-amber-200 bg-amber-50">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-800">
+            <strong>Notice:</strong> You are editing your own role. Some advanced permissions may
+            not be visible. Contact a Super Admin if you need to modify permission-related access.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Permission module restriction notice */}
+      {!canSeePermissionModule(currentUserRole) && (
+        <Alert className="border-blue-200 bg-blue-50">
+          <Shield className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            <strong>Access Level:</strong> Permission management module is restricted to Super Admin
+            users. You can assign other available permissions to roles.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header with select all/none */}
       <div className="flex items-center justify-between">
-        <Label className="text-base font-medium">Permissions</Label>
+        <Label className="text-base font-medium">
+          Permissions
+          {filteredPermissions.length !== permissions.length && (
+            <Badge variant="outline" className="ml-2 text-xs">
+              Filtered: {filteredPermissions.length} of {permissions.length}
+            </Badge>
+          )}
+        </Label>
         <div className="flex gap-2">
           <Button
             type="button"
@@ -139,8 +213,13 @@ const PermissionSelector = ({
       {/* Selection summary */}
       <div className="flex items-center gap-2">
         <Badge variant="outline">
-          {selectedPermissions.length} of {permissions.length} selected
+          {selectedPermissions.length} of {filteredPermissions.length} selected
         </Badge>
+        {filteredPermissions.length !== permissions.length && (
+          <Badge variant="secondary" className="text-xs">
+            {permissions.length - filteredPermissions.length} permissions hidden by access level
+          </Badge>
+        )}
       </div>
 
       {/* Permission groups */}
@@ -220,6 +299,17 @@ const PermissionSelector = ({
             </Collapsible>
           );
         })}
+      </div>
+
+      {/* Footer info */}
+      <div className="text-xs text-gray-500 space-y-1">
+        <p>• Permissions control access to different modules and features</p>
+        <p>• Select only the permissions needed for this role's responsibilities</p>
+        {!canSeePermissionModule(currentUserRole) && (
+          <p className="text-amber-600">
+            • Advanced permission management requires Super Admin access
+          </p>
+        )}
       </div>
     </div>
   );
