@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -92,7 +92,8 @@ const formSchema = z.object({
   estimated_read_time: z.string().optional(),
 });
 
-export default function EditBlogPost({ params }) {
+export default function EditBlogPost(props) {
+  const params = use(props.params);
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const editorRef = useRef(null);

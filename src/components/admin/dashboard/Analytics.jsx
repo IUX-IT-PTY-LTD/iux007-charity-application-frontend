@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
-import { Bar, Line, Doughnut } from 'recharts';
+import { Bar, Line } from 'recharts';
+import { Doughnut } from 'react-chartjs-2';
 import {
   Activity,
   ArrowRight,

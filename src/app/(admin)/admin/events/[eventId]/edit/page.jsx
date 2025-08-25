@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -473,7 +473,8 @@ function EditEventContent({ params }) {
 }
 
 // Wrapper component that provides permission context
-export default function EditEvent({ params }) {
+export default function EditEvent(props) {
+  const params = use(props.params);
   return (
     <PermissionProvider>
       <EditEventContent params={params} />

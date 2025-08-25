@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Edit, Download, Lock } from 'lucide-react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
@@ -354,7 +354,8 @@ function EventDetailsContent({ params }) {
 }
 
 // Wrapper component that provides permission context
-export default function EventDetails({ params }) {
+export default function EventDetails(props) {
+  const params = use(props.params);
   return (
     <PermissionProvider>
       <EventDetailsContent params={params} />
