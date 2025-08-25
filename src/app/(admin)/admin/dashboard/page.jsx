@@ -50,7 +50,11 @@ import {
 
 import { NotificationsButton } from '@/components/admin/dashboard/Notifications';
 import { DashboardAnalytics } from '@/components/admin/dashboard/Analytics';
-import { getStatistics, getEventsStatistics, getMonthlyDonationsStatistics } from '@/api/services/admin/adminService';
+import {
+  getStatistics,
+  getEventsStatistics,
+  getMonthlyDonationsStatistics,
+} from '@/api/services/admin/adminService';
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -104,7 +108,7 @@ const AdminDashboard = () => {
           const eventsResponse = await getEventsStatistics();
           if (eventsResponse.status === 'success') {
             setEventsData(eventsResponse.data);
-            
+
             // Transform events data for campaign performance component
             const transformedCampaigns = eventsResponse.data.map((event) => ({
               id: event.id,
@@ -352,17 +356,15 @@ const AdminDashboard = () => {
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="reports">Reports</TabsTrigger>
-                <TabsTrigger value="activities">Activities</TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
-                </Button>
-                <Button size="sm">
-                  <PieChart className="mr-2 h-4 w-4" />
-                  Generate Report
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push('/admin/events/create')}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Create Event
                 </Button>
               </div>
             </div>
@@ -390,35 +392,41 @@ const AdminDashboard = () => {
                       Monthly Donations Trend
                     </CardTitle>
                     <CardDescription>
-                      Monthly donation amounts and transaction counts for {monthlyDonationsData.length > 0 ? monthlyDonationsData[0]?.year : '2025'}
+                      Monthly donation amounts and transaction counts for{' '}
+                      {monthlyDonationsData.length > 0 ? monthlyDonationsData[0]?.year : '2025'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {monthlyDonationsData.length > 0 ? (
                       <div className="h-[400px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={monthlyDonationsData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                            <XAxis 
-                              dataKey="month_name" 
+                          <LineChart
+                            data={monthlyDonationsData}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                          >
+                            <XAxis
+                              dataKey="month_name"
                               fontSize={12}
                               tick={{ fill: '#6b7280' }}
                               axisLine={false}
                               tickLine={false}
                             />
-                            <YAxis 
+                            <YAxis
                               fontSize={12}
                               tick={{ fill: '#6b7280' }}
                               axisLine={false}
                               tickLine={false}
-                              tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+                              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                             />
-                            <Tooltip 
+                            <Tooltip
                               content={({ active, payload, label }) => {
                                 if (active && payload && payload.length) {
                                   const data = payload[0].payload;
                                   return (
                                     <div className="bg-white p-4 border rounded-lg shadow-lg">
-                                      <p className="font-semibold text-gray-900">{label} {data.year}</p>
+                                      <p className="font-semibold text-gray-900">
+                                        {label} {data.year}
+                                      </p>
                                       <p className="text-blue-600 font-medium">
                                         Total Amount: ${data.total_amount.toLocaleString()}
                                       </p>
@@ -434,10 +442,10 @@ const AdminDashboard = () => {
                                 return null;
                               }}
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="total_amount" 
-                              stroke="#2563eb" 
+                            <Line
+                              type="monotone"
+                              dataKey="total_amount"
+                              stroke="#2563eb"
                               strokeWidth={3}
                               dot={{ fill: '#2563eb', strokeWidth: 2, r: 5 }}
                               activeDot={{ r: 7, stroke: '#2563eb', strokeWidth: 2, fill: '#fff' }}
@@ -465,7 +473,12 @@ const AdminDashboard = () => {
                         <CardTitle className="text-sm font-medium">Year Total</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">${monthlyDonationsData.reduce((sum, month) => sum + month.total_amount, 0).toLocaleString()}</div>
+                        <div className="text-2xl font-bold">
+                          $
+                          {monthlyDonationsData
+                            .reduce((sum, month) => sum + month.total_amount, 0)
+                            .toLocaleString()}
+                        </div>
                         <p className="text-xs text-muted-foreground">Total donations this year</p>
                       </CardContent>
                     </Card>
@@ -475,10 +488,13 @@ const AdminDashboard = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold">
-                          {monthlyDonationsData.reduce((peak, month) => 
-                            month.total_amount > peak.total_amount ? month : peak, 
-                            { total_amount: 0, month_name: 'None' }
-                          ).month_name}
+                          {
+                            monthlyDonationsData.reduce(
+                              (peak, month) =>
+                                month.total_amount > peak.total_amount ? month : peak,
+                              { total_amount: 0, month_name: 'None' }
+                            ).month_name
+                          }
                         </div>
                         <p className="text-xs text-muted-foreground">Highest donation month</p>
                       </CardContent>
@@ -489,7 +505,13 @@ const AdminDashboard = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold">
-                          ${(monthlyDonationsData.reduce((sum, month) => sum + month.total_amount, 0) / 12).toLocaleString(undefined, {maximumFractionDigits: 0})}
+                          $
+                          {(
+                            monthlyDonationsData.reduce(
+                              (sum, month) => sum + month.total_amount,
+                              0
+                            ) / 12
+                          ).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </div>
                         <p className="text-xs text-muted-foreground">Average per month</p>
                       </CardContent>
@@ -498,236 +520,7 @@ const AdminDashboard = () => {
                 )}
               </div>
             </TabsContent>
-
-            <TabsContent value="reports">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Generated Reports</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b pb-4">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-muted-foreground mr-3" />
-                        <div>
-                          <p className="text-sm font-medium">Annual Donation Report 2024</p>
-                          <p className="text-xs text-muted-foreground">Generated on May 5, 2024</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Printer className="h-4 w-4 mr-1" />
-                          Print
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between border-b pb-4">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-muted-foreground mr-3" />
-                        <div>
-                          <p className="text-sm font-medium">Quarterly Event Performance</p>
-                          <p className="text-xs text-muted-foreground">
-                            Generated on April 12, 2024
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Printer className="h-4 w-4 mr-1" />
-                          Print
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between border-b pb-4">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-muted-foreground mr-3" />
-                        <div>
-                          <p className="text-sm font-medium">Donor Engagement Analysis</p>
-                          <p className="text-xs text-muted-foreground">
-                            Generated on March 28, 2024
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Printer className="h-4 w-4 mr-1" />
-                          Print
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="pt-4">
-                      <Button variant="outline" className="w-full">
-                        Generate New Report
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="activities">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent System Activities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center border-b pb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          <div className="h-2 w-2 rounded-full bg-blue-500 mr-2"></div>
-                          <p className="text-sm font-medium">Admin User</p>
-                          <p className="text-xs text-muted-foreground ml-2">admin@charity.org</p>
-                        </div>
-                        <p className="text-sm">Created a new campaign: "Summer Food Drive"</p>
-                      </div>
-                      <div className="text-xs text-muted-foreground">Today, 10:42 AM</div>
-                    </div>
-
-                    <div className="flex items-center border-b pb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-                          <p className="text-sm font-medium">System</p>
-                        </div>
-                        <p className="text-sm">Automatically updated donor metrics for April</p>
-                      </div>
-                      <div className="text-xs text-muted-foreground">Yesterday, 11:30 PM</div>
-                    </div>
-
-                    <div className="flex items-center border-b pb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          <div className="h-2 w-2 rounded-full bg-blue-500 mr-2"></div>
-                          <p className="text-sm font-medium">Content Editor</p>
-                          <p className="text-xs text-muted-foreground ml-2">editor@charity.org</p>
-                        </div>
-                        <p className="text-sm">Published 3 new blog articles</p>
-                      </div>
-                      <div className="text-xs text-muted-foreground">Yesterday, 3:15 PM</div>
-                    </div>
-
-                    <div className="flex items-center border-b pb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          <div className="h-2 w-2 rounded-full bg-yellow-500 mr-2"></div>
-                          <p className="text-sm font-medium">System Alert</p>
-                        </div>
-                        <p className="text-sm">Storage quota reaching 80% capacity</p>
-                      </div>
-                      <div className="text-xs text-muted-foreground">May 12, 2024, 9:22 AM</div>
-                    </div>
-
-                    <div className="flex items-center">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          <div className="h-2 w-2 rounded-full bg-red-500 mr-2"></div>
-                          <p className="text-sm font-medium">Security Alert</p>
-                        </div>
-                        <p className="text-sm">Failed login attempts detected</p>
-                      </div>
-                      <div className="text-xs text-muted-foreground">May 10, 2024, 11:47 PM</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
-        </div>
-
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-3">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button
-                  variant="outline"
-                  className="h-auto flex flex-col items-center justify-center py-4"
-                  onClick={() => router.push('/admin/events/create')}
-                >
-                  <Calendar className="h-8 w-8 mb-2" />
-                  <span>Create Event</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex flex-col items-center justify-center py-4"
-                  onClick={() => router.push('/admin/blogs/create')}
-                >
-                  <FileText className="h-8 w-8 mb-2" />
-                  <span>Write Blog</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex flex-col items-center justify-center py-4"
-                  onClick={() => router.push('/admin/users')}
-                >
-                  <Users className="h-8 w-8 mb-2" />
-                  <span>View Users</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-auto flex flex-col items-center justify-center py-4"
-                  onClick={() => {}}
-                >
-                  <BarChart3 className="h-8 w-8 mb-2" />
-                  <span>Analytics</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* <Card>
-            <CardHeader>
-              <CardTitle>System Health</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm">Storage</p>
-                    <p className="text-sm font-medium">65%</p>
-                  </div>
-                  <Progress value={65} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm">Performance</p>
-                    <p className="text-sm font-medium">92%</p>
-                  </div>
-                  <Progress value={92} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm">Uptime</p>
-                    <p className="text-sm font-medium">99.9%</p>
-                  </div>
-                  <Progress value={99.9} className="h-2" />
-                </div>
-                <div className="pt-2">
-                  <Button variant="outline" size="sm" className="w-full">
-                    View System Status
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card> */}
         </div>
       </div>
     </div>

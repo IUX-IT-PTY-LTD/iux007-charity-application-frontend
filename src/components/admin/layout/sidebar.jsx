@@ -18,7 +18,8 @@ import {
   ChevronRight,
   Contact,
   Shield,
-  UserCircle, // Added for Profile
+  UserCircle,
+  Globe, // Added for Website section
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -34,7 +35,7 @@ import {
   useEventPermissions,
   useFaqPermissions,
   useSliderPermissions,
-  useProfilePermissions, // ADDED: Profile permissions
+  useProfilePermissions,
   useAdminPermissions,
   useRolePermissions,
   usePermissionManagement,
@@ -54,18 +55,6 @@ const getNavigationItems = (permissions) => {
     order: 1,
   });
 
-  // Profile - ADDED: Replace Contact with Profile
-  if (permissions.profiles.hasAccess) {
-    items.push({
-      id: 'profile',
-      name: 'Profile',
-      href: '/admin/profile',
-      icon: UserCircle,
-      visible: true,
-      order: 2,
-    });
-  }
-
   // Users module
   if (permissions.users.hasAccess) {
     items.push({
@@ -74,7 +63,7 @@ const getNavigationItems = (permissions) => {
       href: '/admin/users',
       icon: User,
       visible: true,
-      order: 3,
+      order: 2,
     });
   }
 
@@ -86,43 +75,58 @@ const getNavigationItems = (permissions) => {
       href: '/admin/events',
       icon: Calendar,
       visible: true,
-      order: 4,
+      order: 3,
     });
   }
 
-  // Menus module
+  // Website submenu - only show if user has access to any website-related permissions
+  const websiteSubmenuItems = [];
+
+  // Menus
   if (permissions.menus.hasAccess) {
-    items.push({
-      id: 'menus',
+    websiteSubmenuItems.push({
+      id: 'website-menus',
       name: 'Menus',
       href: '/admin/menus',
       icon: MenuIcon,
-      visible: true,
-      order: 5,
+      order: 1,
     });
   }
 
-  // FAQs module
+  // FAQs
   if (permissions.faqs.hasAccess) {
-    items.push({
-      id: 'faqs',
+    websiteSubmenuItems.push({
+      id: 'website-faqs',
       name: 'FAQs',
       href: '/admin/faqs',
       icon: HelpCircle,
-      visible: true,
-      order: 6,
+      order: 2,
     });
   }
 
-  // Sliders module
+  // Sliders
   if (permissions.sliders.hasAccess) {
-    items.push({
-      id: 'sliders',
+    websiteSubmenuItems.push({
+      id: 'website-sliders',
       name: 'Sliders',
       href: '/admin/sliders',
       icon: Images,
+      order: 3,
+    });
+  }
+
+  // Sort website submenu items by order
+  websiteSubmenuItems.sort((a, b) => a.order - b.order);
+
+  // Only show Website menu if user has access to any website feature
+  if (websiteSubmenuItems.length > 0) {
+    items.push({
+      id: 'website',
+      name: 'Website',
+      icon: Globe,
+      submenu: websiteSubmenuItems,
       visible: true,
-      order: 7,
+      order: 4,
     });
   }
 
@@ -133,8 +137,20 @@ const getNavigationItems = (permissions) => {
     href: '/admin/settings',
     icon: Settings,
     visible: true,
-    order: 8,
+    order: 5,
   });
+
+  // Profile - always visible (application level)
+  if (permissions.profiles.hasAccess) {
+    items.push({
+      id: 'profile',
+      name: 'My Profile',
+      href: '/admin/profile',
+      icon: UserCircle,
+      visible: true,
+      order: 6,
+    });
+  }
 
   // Organization submenu - only show if user has access to any org-related permissions
   const orgSubmenuItems = [];
@@ -145,6 +161,7 @@ const getNavigationItems = (permissions) => {
       id: 'org-admins',
       name: 'Admin Management',
       href: '/admin/org/admin',
+      icon: UserCircle,
       order: 1,
     });
   }
@@ -155,6 +172,7 @@ const getNavigationItems = (permissions) => {
       id: 'org-roles',
       name: 'Role Management',
       href: '/admin/org/roles',
+      icon: Shield,
       order: 2,
     });
   }
@@ -165,6 +183,7 @@ const getNavigationItems = (permissions) => {
       id: 'org-permissions',
       name: 'Permission Management',
       href: '/admin/pms',
+      icon: Settings,
       order: 3,
     });
   }
@@ -180,7 +199,7 @@ const getNavigationItems = (permissions) => {
       icon: Building,
       submenu: orgSubmenuItems,
       visible: true,
-      order: 9,
+      order: 7,
     });
   }
 
@@ -188,14 +207,14 @@ const getNavigationItems = (permissions) => {
   return items.filter((item) => item.visible).sort((a, b) => a.order - b.order);
 };
 
-// Component to get all permissions - UPDATED: Added profile permissions
+// Component to get all permissions
 const useAllModulePermissions = () => {
   const users = useUserPermissions();
   const menus = useMenuPermissions();
   const events = useEventPermissions();
   const faqs = useFaqPermissions();
   const sliders = useSliderPermissions();
-  const profiles = useProfilePermissions(); // ADDED: Profile permissions
+  const profiles = useProfilePermissions();
   const admins = useAdminPermissions();
   const roles = useRolePermissions();
   const permissions = usePermissionManagement();
@@ -206,7 +225,7 @@ const useAllModulePermissions = () => {
     events.isLoading ||
     faqs.isLoading ||
     sliders.isLoading ||
-    profiles.isLoading || // ADDED: Profile loading state
+    profiles.isLoading ||
     admins.isLoading ||
     roles.isLoading ||
     permissions.isLoading;
@@ -217,7 +236,7 @@ const useAllModulePermissions = () => {
     events,
     faqs,
     sliders,
-    profiles, // ADDED: Profile permissions
+    profiles,
     admins,
     roles,
     permissions,
@@ -239,7 +258,7 @@ function AdminSidebarContent() {
   // Get permission context for overall loading state
   const { isLoading: permissionContextLoading, isInitialized } = usePermissionContext();
 
-  // Generate navigation items based on permissions - UPDATED: Added profiles dependency
+  // Generate navigation items based on permissions
   const navigationItems = React.useMemo(() => {
     if (modulePermissions.isLoading || !isInitialized) {
       return []; // Return empty array while loading
@@ -253,7 +272,7 @@ function AdminSidebarContent() {
     modulePermissions.events.hasAccess,
     modulePermissions.faqs.hasAccess,
     modulePermissions.sliders.hasAccess,
-    modulePermissions.profiles.hasAccess, // ADDED: Profile permissions dependency
+    modulePermissions.profiles.hasAccess,
     modulePermissions.admins.hasAccess,
     modulePermissions.roles.hasAccess,
     modulePermissions.permissions.hasAccess,
@@ -291,16 +310,16 @@ function AdminSidebarContent() {
     });
   }, []);
 
-  // Auto-expand menus that have active items - only run when pathname changes or navigationItems structure changes
+  // Auto-expand menus that have active items
   React.useEffect(() => {
-    if (navigationItems.length === 0) return; // Don't run if no items yet
+    if (navigationItems.length === 0) return;
 
     navigationItems.forEach((item) => {
       if (item.submenu && isSubmenuActive(item.submenu)) {
         setExpandedMenus((prev) => new Set(prev).add(item.id));
       }
     });
-  }, [pathname]); // Remove navigationItems dependency
+  }, [pathname]);
 
   // Handle logout
   const handleLogout = async () => {
@@ -372,12 +391,13 @@ function AdminSidebarContent() {
                   key={subItem.id}
                   href={subItem.href}
                   className={cn(
-                    'block rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white',
+                    'flex items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white',
                     isActive(subItem.href) &&
                       'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
                   )}
                 >
-                  {subItem.name}
+                  {subItem.icon && <subItem.icon className="h-4 w-4 flex-shrink-0 mr-3" />}
+                  <span>{subItem.name}</span>
                 </Link>
               ))}
             </div>
