@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { CalendarIcon, ImageIcon } from 'lucide-react';
+import { CalendarIcon, ImageIcon, Lock } from 'lucide-react';
 
 // Import shadcn components
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -31,11 +31,27 @@ import { Calendar } from '@/components/ui/calendar';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 
-const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageChange }) => {
+// Import permission hooks
+import { useEventPermissions } from '@/api/hooks/useModulePermissions';
+
+const EditEventForm = ({
+  form,
+  onSubmit,
+  isSubmitting = false,
+  onReset,
+  onImageChange,
+  eventPermissions: passedPermissions,
+}) => {
   const [imagePreview, setImagePreview] = useState(null);
+
+  // Use passed permissions if available, otherwise use hook
+  const hookPermissions = useEventPermissions();
+  const eventPermissions = passedPermissions || hookPermissions;
 
   // Handle file upload and preview
   const handleImageChange = (e) => {
+    if (!eventPermissions.canEdit) return;
+
     const file = e.target.files[0];
     if (file) {
       // Convert image file to base64
@@ -64,11 +80,24 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
     }
   }, [form, imagePreview]);
 
+  // Check if form should be disabled based on permissions
+  const isFormDisabled = eventPermissions.isLoading || !eventPermissions.canEdit;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardContent className="space-y-6 pt-6">
+            {/* Show permission warning if user doesn't have edit permission */}
+            {!eventPermissions.isLoading && !eventPermissions.canEdit && (
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-2">
+                <Lock className="h-4 w-4 text-orange-600" />
+                <p className="text-sm text-orange-600">
+                  You don't have permission to edit events. Form is read-only.
+                </p>
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="title"
@@ -76,7 +105,11 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                 <FormItem>
                   <FormLabel>Event Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Spring Fundraiser Gala" {...field} />
+                    <Input
+                      placeholder="Spring Fundraiser Gala"
+                      disabled={isFormDisabled}
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     The name of your event as it will appear to attendees
@@ -96,6 +129,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                     <Textarea
                       placeholder="Describe your event in detail..."
                       className="min-h-32"
+                      disabled={isFormDisabled}
                       {...field}
                     />
                   </FormControl>
@@ -118,6 +152,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                           <Button
                             variant="outline"
                             className="w-full flex justify-start text-left font-normal"
+                            disabled={isFormDisabled}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
@@ -130,6 +165,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                           selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
+                          disabled={isFormDisabled}
                         />
                       </PopoverContent>
                     </Popover>
@@ -151,6 +187,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                           <Button
                             variant="outline"
                             className="w-full flex justify-start text-left font-normal"
+                            disabled={isFormDisabled}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
@@ -163,7 +200,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                           selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
-                          disabled={(date) => date < form.getValues('start_date')}
+                          disabled={(date) => date < form.getValues('start_date') || isFormDisabled}
                         />
                       </PopoverContent>
                     </Popover>
@@ -182,7 +219,13 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                   <FormItem>
                     <FormLabel>Price ($)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        disabled={isFormDisabled}
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>Standard entry price</FormDescription>
                     <FormMessage />
@@ -197,7 +240,13 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                   <FormItem>
                     <FormLabel>Target Amount ($)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        disabled={isFormDisabled}
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>Fundraising goal for this event</FormDescription>
                     <FormMessage />
@@ -215,6 +264,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                   <FormControl>
                     <Input
                       placeholder="123 Main St, City, State"
+                      disabled={isFormDisabled}
                       {...field}
                       value={field.value || ''}
                     />
@@ -237,6 +287,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                     <Select
                       onValueChange={(value) => field.onChange(parseInt(value, 10))}
                       value={field.value.toString()}
+                      disabled={isFormDisabled}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -264,6 +315,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                         <Checkbox
                           checked={field.value === 1}
                           onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                          disabled={isFormDisabled}
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
@@ -283,6 +335,7 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                         <Checkbox
                           checked={field.value === 1}
                           onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                          disabled={isFormDisabled}
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
@@ -299,7 +352,10 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
               <FormLabel>Featured Image</FormLabel>
               <div className="mt-2 space-y-4">
                 <div>
-                  <Label htmlFor="featured_image" className="cursor-pointer">
+                  <Label
+                    htmlFor="featured_image"
+                    className={`cursor-pointer ${isFormDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
+                  >
                     <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center">
                       {imagePreview ? (
                         <div className="w-full">
@@ -309,14 +365,16 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                             className="h-48 object-cover rounded-md mx-auto"
                           />
                           <p className="text-sm text-center mt-2 text-muted-foreground">
-                            Click to change image
+                            {isFormDisabled ? 'Image upload disabled' : 'Click to change image'}
                           </p>
                         </div>
                       ) : (
                         <>
                           <ImageIcon className="h-10 w-10 text-gray-400" />
                           <p className="mt-2 text-sm text-muted-foreground">
-                            Click to upload an image (PNG, JPG)
+                            {isFormDisabled
+                              ? 'Image upload disabled'
+                              : 'Click to upload an image (PNG, JPG)'}
                           </p>
                         </>
                       )}
@@ -328,21 +386,38 @@ const EditEventForm = ({ form, onSubmit, isSubmitting = false, onReset, onImageC
                     onChange={handleImageChange}
                     className="hidden"
                     accept="image/*"
+                    disabled={isFormDisabled}
                   />
                 </div>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" type="button" onClick={onReset}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={onReset}
+              disabled={isFormDisabled}
+              title={!eventPermissions.canEdit ? "You don't have permission to edit events" : ''}
+            >
+              {!eventPermissions.canEdit && <Lock className="mr-2 h-4 w-4" />}
               Reset Changes
             </Button>
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isFormDisabled}
             >
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isFormDisabled ? (
+                <>
+                  <Lock className="mr-2 h-4 w-4" />
+                  No Permission
+                </>
+              ) : isSubmitting ? (
+                'Saving...'
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </CardFooter>
         </Card>

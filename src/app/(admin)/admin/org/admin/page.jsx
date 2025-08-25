@@ -13,8 +13,8 @@ import AdminsHeader from '@/components/admin/org/admin/AdminsHeader';
 import AdminsSearchBar from '@/components/admin/org/admin/AdminsSearchBar';
 import AdminsTable from '@/components/admin/org/admin/AdminsTable';
 import AdminsPagination from '@/components/admin/org/admin/AdminsPagination';
-import CreateAdminModal from '@/components/admin/org/admin/CreateAdminModal';
-import EditAdminModal from '@/components/admin/org/admin/EditAdminModal';
+import CreateAdminModal from '@/components/admin/org/admin/modals/CreateAdminModal';
+import EditAdminModal from '@/components/admin/org/admin/modals/EditAdminModal';
 
 const AdminsPage = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();

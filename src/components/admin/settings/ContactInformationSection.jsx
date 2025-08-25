@@ -1,24 +1,45 @@
+// src/components/admin/settings/ContactInformationSection.jsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Phone, Mail, Printer, Loader2, RefreshCcw, AlertCircle } from 'lucide-react';
-import { contactService } from '@/api/services/admin/contactService';
-import EditableField from './EditableField';
+import { MapPin, Phone, Mail, Printer, Loader2, RefreshCcw, AlertCircle, Lock } from 'lucide-react';
+import EditableField from '@/components/admin/shared/EditableField';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+// Import the protected settings service
+import {
+  getAllContacts,
+  updateContact,
+  prepareContactDataForForm,
+  safeUpdateContact,
+} from '@/api/services/admin/protected/settingsService';
+
+// Import permission hooks
+import { useContactPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
 const ContactInformationSection = () => {
+  const contactPermissions = useContactPermissions();
+
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchContacts = async () => {
+    // Only fetch if user has view permission
+    if (!contactPermissions.isLoading && !contactPermissions.canView) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const response = await contactService.getAllContacts();
+      const response = await getAllContacts();
       if (response.status === 'success') {
         setContacts(response.data || []);
       } else {
@@ -26,31 +47,51 @@ const ContactInformationSection = () => {
       }
     } catch (err) {
       console.error('Error fetching contacts:', err);
-      setError('Failed to load contact information. Please try again.');
-      toast.error('Could not load contact information');
+
+      if (isPermissionError(err)) {
+        setError(getPermissionErrorMessage(err));
+        toast.error(getPermissionErrorMessage(err));
+      } else if (err.message?.includes('permission')) {
+        setError('You do not have permission to view contact information.');
+        toast.error('You do not have permission to view contact information.');
+      } else {
+        setError('Failed to load contact information. Please try again.');
+        toast.error('Could not load contact information');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchContacts();
-  }, []);
+    if (!contactPermissions.isLoading) {
+      fetchContacts();
+    }
+  }, [contactPermissions.isLoading, contactPermissions.canView]);
 
   const handleUpdateContact = async (contactId, newValue) => {
+    // Check edit permissions before allowing updates
+    if (!contactPermissions.canEdit) {
+      toast.error("You don't have permission to edit contact information");
+      throw new Error('Edit permission required');
+    }
+
     try {
       const contactToUpdate = contacts.find((contact) => contact.id === contactId);
       if (!contactToUpdate) {
         throw new Error('Contact not found');
       }
 
-      // Create updated contact data
+      // Prepare the updated contact data with all required fields
       const updatedContactData = {
-        ...contactToUpdate,
+        name: contactToUpdate.name,
         value: newValue,
+        icon: contactToUpdate.icon || '', // Ensure icon is included (can be empty string)
+        status: contactToUpdate.status,
       };
 
-      const response = await contactService.updateContact(contactId, updatedContactData);
+      // Use the safe update function which handles permissions gracefully
+      const response = await safeUpdateContact(contactId, updatedContactData);
 
       if (response.status === 'success') {
         // Update the local state
@@ -66,19 +107,39 @@ const ContactInformationSection = () => {
       }
     } catch (err) {
       console.error(`Error updating contact ${contactId}:`, err);
-      toast.error(`Failed to update ${getContactName(contactId)}`);
+
+      if (isPermissionError(err)) {
+        toast.error(getPermissionErrorMessage(err));
+      } else {
+        toast.error(`Failed to update ${getContactName(contactId)}: ${err.message}`);
+      }
       throw err;
     }
   };
 
   const handleToggleStatus = async (contactId, newStatus) => {
+    // Check edit permissions before allowing status updates
+    if (!contactPermissions.canEdit) {
+      toast.error("You don't have permission to edit contact information");
+      throw new Error('Edit permission required');
+    }
+
     try {
       const contactToUpdate = contacts.find((contact) => contact.id === contactId);
       if (!contactToUpdate) {
         throw new Error('Contact not found');
       }
 
-      const response = await contactService.toggleContactStatus(contactId, newStatus);
+      // Prepare the updated contact data with all required fields
+      const updatedContactData = {
+        name: contactToUpdate.name,
+        value: contactToUpdate.value,
+        icon: contactToUpdate.icon || '', // Ensure icon is included (can be empty string)
+        status: newStatus,
+      };
+
+      // Use the safe update function which handles permissions gracefully
+      const response = await safeUpdateContact(contactId, updatedContactData);
 
       if (response.status === 'success') {
         // Update the local state
@@ -94,7 +155,12 @@ const ContactInformationSection = () => {
       }
     } catch (err) {
       console.error(`Error updating contact status ${contactId}:`, err);
-      toast.error(`Failed to update ${getContactName(contactId)} status`);
+
+      if (isPermissionError(err)) {
+        toast.error(getPermissionErrorMessage(err));
+      } else {
+        toast.error(`Failed to update ${getContactName(contactId)} status: ${err.message}`);
+      }
       throw err;
     }
   };
@@ -110,7 +176,7 @@ const ContactInformationSection = () => {
     } else if (name.includes('fax')) {
       return Printer;
     }
-    return null;
+    return Phone; // Default icon
   };
 
   const getContactName = (contactId) => {
@@ -118,7 +184,8 @@ const ContactInformationSection = () => {
     return contact ? contact.name : 'Contact';
   };
 
-  if (loading) {
+  // Show loading state while permissions are loading
+  if (contactPermissions.isLoading || loading) {
     return (
       <Card>
         <CardHeader>
@@ -135,6 +202,50 @@ const ContactInformationSection = () => {
     );
   }
 
+  // Show access denied if user has no contact permissions
+  if (!contactPermissions.hasAccess) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Contact Information</CardTitle>
+          <CardDescription>Manage company contact details displayed on the website</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <Lock className="h-4 w-4" />
+            <AlertTitle>Access Denied</AlertTitle>
+            <AlertDescription>
+              You don't have access to contact information management. Please contact an
+              administrator.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show view permission denied if user can't view
+  if (!contactPermissions.canView) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Contact Information</CardTitle>
+          <CardDescription>Manage company contact details displayed on the website</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <Lock className="h-4 w-4" />
+            <AlertTitle>View Permission Required</AlertTitle>
+            <AlertDescription>
+              You don't have permission to view contact information.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Handle error state
   if (error) {
     return (
       <Card>
@@ -148,10 +259,12 @@ const ContactInformationSection = () => {
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-          <Button onClick={fetchContacts} className="mt-2">
-            <RefreshCcw className="h-4 w-4 mr-2" />
-            Try Again
-          </Button>
+          {contactPermissions.canView && (
+            <Button onClick={fetchContacts} className="mt-2">
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
@@ -160,31 +273,61 @@ const ContactInformationSection = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contact Information</CardTitle>
-        <CardDescription>Manage company contact details displayed on the website</CardDescription>
+        <CardTitle>
+          Contact Information
+          {!contactPermissions.canEdit && (
+            <span className="text-orange-600 ml-2 text-sm">(Read-only)</span>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Manage company contact details displayed on the website
+          {!contactPermissions.canEdit && (
+            <span className="text-orange-600 ml-1">- View-only access</span>
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {contacts.map((contact) => (
-          <div key={contact.id} className="mb-4">
-            <EditableField
-              label={contact.name}
-              value={contact.value}
-              icon={getContactIcon(contact.name)}
-              onSave={(newValue) => handleUpdateContact(contact.id, newValue)}
-              type="text"
-              placeholder={`Enter ${contact.name.toLowerCase()}...`}
-              required={true}
-            />
-            <div className="mt-2">
-              <EditableField
-                label={`Show ${contact.name} on website`}
-                value={contact.status}
-                type="toggle"
-                onSave={(newStatus) => handleToggleStatus(contact.id, newStatus)}
-              />
-            </div>
+        {contacts.length === 0 ? (
+          <div className="text-center py-8">
+            <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No contact information found</p>
           </div>
-        ))}
+        ) : (
+          contacts.map((contact) => (
+            <div key={contact.id} className="mb-4">
+              <EditableField
+                label={contact.name}
+                value={contact.value}
+                icon={getContactIcon(contact.name)}
+                onSave={(newValue) => handleUpdateContact(contact.id, newValue)}
+                type="text"
+                placeholder={`Enter ${contact.name.toLowerCase()}...`}
+                required={true}
+                disabled={!contactPermissions.canEdit}
+              />
+              <div className="mt-2">
+                <EditableField
+                  label={`Show ${contact.name} on website`}
+                  value={contact.status}
+                  type="toggle"
+                  onSave={(newStatus) => handleToggleStatus(contact.id, newStatus)}
+                  disabled={!contactPermissions.canEdit}
+                />
+              </div>
+            </div>
+          ))
+        )}
+
+        {/* Show permission info for read-only access */}
+        {!contactPermissions.canEdit && (
+          <Alert className="mt-4">
+            <Lock className="h-4 w-4" />
+            <AlertDescription>
+              You have read-only access to contact information. Contact an administrator to make
+              changes.
+            </AlertDescription>
+          </Alert>
+        )}
       </CardContent>
     </Card>
   );

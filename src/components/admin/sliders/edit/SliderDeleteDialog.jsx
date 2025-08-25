@@ -1,3 +1,5 @@
+// src/components/admin/sliders/edit/SliderDeleteDialog.jsx
+
 'use client';
 
 import {
@@ -12,8 +14,29 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Lock } from 'lucide-react';
+
+// Import permission hooks
+import { useSliderPermissions } from '@/api/hooks/useModulePermissions';
 
 const SliderDeleteDialog = ({ isOpen, onOpenChange, onDelete, isDeleting, sliderTitle }) => {
+  const sliderPermissions = useSliderPermissions();
+
+  // If user doesn't have delete permission, show disabled button
+  if (!sliderPermissions.canDelete) {
+    return (
+      <Button
+        variant="outline"
+        disabled
+        className="opacity-50 cursor-not-allowed text-red-600"
+        title="You don't have permission to delete sliders"
+      >
+        <Lock className="mr-2 h-4 w-4" />
+        Delete Slider
+      </Button>
+    );
+  }
+
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild>

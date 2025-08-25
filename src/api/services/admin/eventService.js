@@ -1,3 +1,5 @@
+// src/api/services/admin/eventService.js
+
 import { apiService } from './apiService';
 import { API_BASE_URL, API_VERSION } from '@/api/config';
 import { getAuthToken } from './authService';

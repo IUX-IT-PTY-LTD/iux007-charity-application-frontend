@@ -1,4 +1,5 @@
-// components/admin/menus/create/MenuForm.jsx
+'use client';
+
 import React from 'react';
 import {
   FormControl,
@@ -19,13 +20,60 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Lock } from 'lucide-react';
+
+// Import permission hooks
+import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
 
 const MenuForm = ({ form, generateSlug, FormActions }) => {
+  const menuPermissions = useMenuPermissions();
+
+  // Check if form should be disabled
+  const isFormDisabled = !menuPermissions.canCreate;
+
+  const handleNameChange = (e, field) => {
+    if (isFormDisabled) return;
+
+    field.onChange(e);
+    if (!form.getValues('slug')) {
+      generateSlug(e.target.value);
+    }
+  };
+
+  const handleGenerateSlug = () => {
+    if (isFormDisabled) return;
+    generateSlug(form.getValues('name'));
+  };
+
+  if (menuPermissions.isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Menu Information</CardTitle>
+          <CardDescription>Loading form...</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Menu Information</CardTitle>
-        <CardDescription>Create a new navigation menu for your website.</CardDescription>
+        <CardTitle className="flex items-center gap-2">
+          Menu Information
+          {isFormDisabled && <Lock className="h-5 w-5 text-gray-400" />}
+        </CardTitle>
+        <CardDescription>
+          Create a new navigation menu for your website.
+          {isFormDisabled && (
+            <span className="text-red-600 block mt-1">
+              You don't have permission to create menus.
+            </span>
+          )}
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -39,12 +87,8 @@ const MenuForm = ({ form, generateSlug, FormActions }) => {
                 <Input
                   placeholder="e.g. Blog"
                   {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    if (!form.getValues('slug')) {
-                      generateSlug(e.target.value);
-                    }
-                  }}
+                  disabled={isFormDisabled}
+                  onChange={(e) => handleNameChange(e, field)}
                 />
               </FormControl>
               <FormDescription>The name displayed in the admin panel.</FormDescription>
@@ -61,15 +105,21 @@ const MenuForm = ({ form, generateSlug, FormActions }) => {
               <FormLabel>Slug</FormLabel>
               <div className="flex items-center space-x-2">
                 <FormControl>
-                  <Input placeholder="e.g. blog" {...field} />
+                  <Input placeholder="e.g. blog" {...field} disabled={isFormDisabled} />
                 </FormControl>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => generateSlug(form.getValues('name'))}
+                  onClick={handleGenerateSlug}
+                  disabled={isFormDisabled}
+                  title={
+                    isFormDisabled
+                      ? "You don't have permission to create menus"
+                      : 'Generate slug from name'
+                  }
                 >
-                  Generate
+                  {isFormDisabled ? <Lock className="h-4 w-4" /> : 'Generate'}
                 </Button>
               </div>
               <FormDescription>Used in URL and code references.</FormDescription>
@@ -85,7 +135,7 @@ const MenuForm = ({ form, generateSlug, FormActions }) => {
             <FormItem>
               <FormLabel>Order Priority</FormLabel>
               <FormControl>
-                <Input type="number" min={1} placeholder="1" {...field} />
+                <Input type="number" min={1} placeholder="1" {...field} disabled={isFormDisabled} />
               </FormControl>
               <FormDescription>Lower numbers appear first in navigation.</FormDescription>
               <FormMessage />
@@ -102,8 +152,9 @@ const MenuForm = ({ form, generateSlug, FormActions }) => {
             <FormItem>
               <FormLabel>Menu Status</FormLabel>
               <Select
-                onValueChange={(value) => field.onChange(parseInt(value, 10))}
+                onValueChange={(value) => !isFormDisabled && field.onChange(parseInt(value, 10))}
                 defaultValue={field.value.toString()}
+                disabled={isFormDisabled}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -120,9 +171,25 @@ const MenuForm = ({ form, generateSlug, FormActions }) => {
             </FormItem>
           )}
         />
+
+        {/* Permission Warning */}
+        {isFormDisabled && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mt-4">
+            <div className="flex items-center">
+              <Lock className="h-5 w-5 text-yellow-600 mr-2" />
+              <div>
+                <h3 className="text-sm font-medium text-yellow-800">Access Restricted</h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  You don't have permission to create menus. Please contact your administrator if
+                  you need access.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
 
-      <FormActions form={form} />
+      <FormActions />
     </Card>
   );
 };

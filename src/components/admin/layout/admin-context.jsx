@@ -1,79 +1,145 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCurrentUser, getAuthToken } from '@/api/services/admin/authService';
+import { getAdminById } from '@/api/services/admin/adminService';
+import { getCurrentUserPermissions } from '@/api/utils/permissionWrapper';
+import { getCurrentUser, getAuthToken, getUserId } from '@/api/services/admin/authService';
 
-// Create context
-const AdminContext = createContext({
-  pageTitle: 'Dashboard',
-  setPageTitle: () => {},
-  pageSubtitle: '',
-  setPageSubtitle: () => {},
-  adminProfile: null,
-  refreshProfile: () => {},
-  clearProfile: () => {},
-  isLoadingProfile: false,
-});
+const AdminContext = createContext(null);
 
-// Hook to use the admin context
-export const useAdminContext = () => useContext(AdminContext);
-
-// Provider component
 export const AdminProvider = ({ children }) => {
+  // UI state
   const [pageTitle, setPageTitle] = useState('Dashboard');
   const [pageSubtitle, setPageSubtitle] = useState('');
-  const [adminProfile, setAdminProfile] = useState(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
-  const fetchAdminProfile = async () => {
+  // Admin state
+  const [adminState, setAdminState] = useState({
+    profile: null,
+    permissions: [],
+    isLoading: true,
+    isInitialized: false,
+    error: null,
+  });
+
+  /** 🔹 Load full admin profile + permissions */
+  const loadAdminProfile = async () => {
     try {
+      setAdminState(prev => ({ ...prev, isLoading: true, error: null }));
+
+      // Check token first (like in the first version)
       setIsLoadingProfile(true);
       // Check if token exists before making API call
       const token = getAuthToken();
       if (!token) {
-        setAdminProfile(null);
-        setIsLoadingProfile(false);
+        setAdminState({
+          profile: null,
+          permissions: [],
+          isLoading: false,
+          isInitialized: true,
+          error: null,
+        });
         return;
       }
-      
-      const response = await getCurrentUser();
-      if (response.status === 'success' && response.data) {
-        setAdminProfile(response.data);
-      } else {
-        setAdminProfile(null);
+
+      // Get user ID
+      const userId = getUserId();
+      if (!userId) throw new Error('User not logged in');
+
+      // Get admin details
+      const userResponse = await getAdminById(userId);
+      if (!userResponse || !userResponse.data) {
+        throw new Error('Unable to load user profile');
       }
+
+      const userData = userResponse.data;
+
+      // Permissions
+      const userPermissions = await getCurrentUserPermissions();
+
+      // Normalized profile
+      const profile = {
+        ...userData,
+        role: userData.role || (userData.role_id ? { id: userData.role_id } : null),
+      };
+
+      setAdminState({
+        profile,
+        permissions: userPermissions,
+        isLoading: false,
+        isInitialized: true,
+        error: null,
+      });
+
+      console.log('Admin profile loaded:', {
+        user: userData.name,
+        userId: userData.id,
+        roleId: userData.role_id,
+        permissions: userPermissions.length,
+      });
     } catch (error) {
-      console.error('Error fetching admin profile:', error);
-      setAdminProfile(null);
-    } finally {
-      setIsLoadingProfile(false);
+      console.error('Error loading admin profile:', error);
+      setAdminState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: error.message,
+        profile: null,
+        permissions: [],
+      }));
     }
   };
 
-  // Load admin profile on initial mount
+  /** 🔹 Refresh profile (re-fetch everything) */
+  const refreshProfile = async () => {
+    await loadAdminProfile();
+  };
+
+  /** 🔹 Clear profile (log out or token expired) */
+  const clearProfile = () => {
+    setAdminState({
+      profile: null,
+      permissions: [],
+      isLoading: false,
+      isInitialized: true,
+      error: null,
+    });
+  };
+
+  // Load on mount
   useEffect(() => {
-    fetchAdminProfile();
+    loadAdminProfile();
   }, []);
 
-  const refreshProfile = () => {
-    fetchAdminProfile();
-  };
-
-  const clearProfile = () => {
-    setAdminProfile(null);
-    setIsLoadingProfile(false);
-  };
-
-  const value = {
+  const contextValue = {
+    // UI State
     pageTitle,
     setPageTitle,
     pageSubtitle,
     setPageSubtitle,
-    adminProfile,
+
+    // Admin State
+    adminProfile: adminState.profile,
+    permissions: adminState.permissions,
+    isLoading: adminState.isLoading,
+    isInitialized: adminState.isInitialized,
+    error: adminState.error,
+
+    // Actions
     refreshProfile,
     clearProfile,
-    isLoadingProfile,
+    hasPermission: (perm) => adminState.permissions.includes(perm),
   };
 
-  return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
+  return (
+    <AdminContext.Provider value={contextValue}>
+      {children}
+    </AdminContext.Provider>
+  );
 };
+
+export const useAdminContext = () => {
+  const context = useContext(AdminContext);
+  if (!context) throw new Error('useAdminContext must be used within an AdminProvider');
+  return context;
+};
+
+export { AdminContext };

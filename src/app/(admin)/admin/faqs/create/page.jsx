@@ -51,7 +51,7 @@ import {
   formatFaqDataForSubmission,
   isOrderingInUse,
   getNextAvailableOrdering,
-} from '@/api/services/admin/faqService';
+} from '@/api/services/admin/protected/faqService';
 import { isAuthenticated } from '@/api/services/admin/authService';
 
 // Define form schema with validation

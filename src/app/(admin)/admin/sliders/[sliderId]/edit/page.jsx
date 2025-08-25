@@ -1,3 +1,5 @@
+// src/app/(admin)/admin/sliders/[sliderId]/edit/page.jsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -6,19 +8,18 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Lock } from 'lucide-react';
 
 // Import components
 import SliderForm from '@/components/admin/sliders/edit/SliderForm';
 import SliderPreview from '@/components/admin/sliders/edit/SliderPreview';
 import SliderDeleteDialog from '@/components/admin/sliders/edit/SliderDeleteDialog';
-import SliderHeader from '@/components/admin/sliders/edit/SliderHeader';
 
 // Import UI components
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-// Import API services
+// Import PROTECTED API services
 import {
   getAllSliders,
   updateSlider,
@@ -27,8 +28,13 @@ import {
   formatSliderDataForSubmission,
   isOrderingInUse,
   prepareImageForSubmission,
-} from '@/api/services/admin/sliderService';
+} from '@/api/services/admin/protected/sliderService';
 import { isAuthenticated } from '@/api/services/admin/authService';
+
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useSliderPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
 
 // Define form schema with validation
 const formSchema = z.object({
@@ -45,10 +51,12 @@ const formSchema = z.object({
   image: z.any().optional(),
 });
 
-// Component for the edit page
-export default function EditSlider({ params }) {
+// Main Edit Component
+const EditSliderContent = ({ params }) => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const sliderPermissions = useSliderPermissions();
+
   const [slider, setSlider] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,66 +95,86 @@ export default function EditSlider({ params }) {
     }
   }, [router]);
 
+  // Check permissions
+  useEffect(() => {
+    if (!sliderPermissions.isLoading) {
+      if (!sliderPermissions.hasAccess) {
+        toast.error("You don't have access to the Sliders module.");
+        router.push('/admin/dashboard');
+      } else if (!sliderPermissions.canView) {
+        toast.error("You don't have permission to view sliders.");
+        router.push('/admin/sliders');
+      }
+    }
+  }, [sliderPermissions.isLoading, sliderPermissions.hasAccess, sliderPermissions.canView, router]);
+
   // Fetch slider data and all sliders for ordering validation
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch all sliders for ordering validation
-        const slidersResponse = await getAllSliders();
+      if (!sliderPermissions.isLoading && sliderPermissions.canView) {
+        setIsLoading(true);
+        try {
+          // Fetch all sliders for ordering validation
+          const slidersResponse = await getAllSliders();
 
-        if (slidersResponse.status === 'success' && slidersResponse.data) {
-          const allSliders = slidersResponse.data;
-          setExistingSliders(allSliders);
+          if (slidersResponse.status === 'success' && slidersResponse.data) {
+            const allSliders = slidersResponse.data;
+            setExistingSliders(allSliders);
 
-          // Find the slider we want to edit
-          const currentSlider = allSliders.find(
-            (s) => s.id.toString() === params.sliderId.toString()
-          );
+            // Find the slider we want to edit
+            const currentSlider = allSliders.find(
+              (s) => s.id.toString() === params.sliderId.toString()
+            );
 
-          if (currentSlider) {
-            setSlider(currentSlider);
+            if (currentSlider) {
+              setSlider(currentSlider);
 
-            // Create form values from the slider data
-            const formValues = {
-              title: currentSlider.title || '',
-              description: currentSlider.description || '',
-              ordering: Number(currentSlider.ordering) || 1,
-              status: currentSlider.status?.toString() || '1',
-              image: currentSlider.image || null,
-            };
+              // Create form values from the slider data
+              const formValues = {
+                title: currentSlider.title || '',
+                description: currentSlider.description || '',
+                ordering: Number(currentSlider.ordering) || 1,
+                status: currentSlider.status?.toString() || '1',
+                image: currentSlider.image || null,
+              };
 
-            // Set form values
-            form.reset(formValues);
+              // Set form values
+              form.reset(formValues);
 
-            // Store original form data for reset functionality
-            setOriginalFormData(formValues);
+              // Store original form data for reset functionality
+              setOriginalFormData(formValues);
 
-            // Set image preview
-            if (currentSlider.image) {
-              setImagePreview(currentSlider.image);
+              // Set image preview
+              if (currentSlider.image) {
+                setImagePreview(currentSlider.image);
+              }
+            } else {
+              toast.error('Slider not found');
+              router.push('/admin/sliders');
             }
           } else {
-            toast.error('Slider not found');
+            toast.error('Failed to load sliders data');
             router.push('/admin/sliders');
           }
-        } else {
-          toast.error('Failed to load sliders data');
+        } catch (error) {
+          console.error('Error fetching slider data:', error);
+
+          if (isPermissionError(error)) {
+            toast.error(getPermissionErrorMessage(error));
+          } else {
+            toast.error(error.message || 'Failed to load slider data');
+          }
           router.push('/admin/sliders');
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching slider data:', error);
-        toast.error(error.message || 'Failed to load slider data');
-        router.push('/admin/sliders');
-      } finally {
-        setIsLoading(false);
       }
     };
 
     if (params.sliderId) {
       fetchData();
     }
-  }, [params.sliderId, router, form]);
+  }, [params.sliderId, router, form, sliderPermissions.isLoading, sliderPermissions.canView]);
 
   // Track form changes
   useEffect(() => {
@@ -204,6 +232,11 @@ export default function EditSlider({ params }) {
 
   // Handle form submission
   const onSubmit = async (data) => {
+    if (!sliderPermissions.canEdit) {
+      toast.error("You don't have permission to edit sliders");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -241,7 +274,7 @@ export default function EditSlider({ params }) {
       // Format data for API submission
       const formattedData = formatSliderDataForSubmission(submissionData);
 
-      // Submit to API
+      // Submit to protected API
       const response = await updateSlider(params.sliderId, formattedData);
 
       if (response.status === 'success') {
@@ -249,13 +282,14 @@ export default function EditSlider({ params }) {
         setHasUnsavedChanges(false);
         router.push('/admin/sliders');
       } else {
-        toast.error(response.message || 'Failed to update slider');
+        throw new Error(response.message || 'Failed to update slider');
       }
     } catch (error) {
       console.error('Error updating slider:', error);
 
-      // Handle the ordering error from API
-      if (error.message && error.message.includes('ordering has already been taken')) {
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else if (error.message && error.message.includes('ordering has already been taken')) {
         toast.error('This ordering number is already in use. Please choose a different number.');
       } else {
         toast.error(error.message || 'An error occurred while updating the slider');
@@ -267,21 +301,31 @@ export default function EditSlider({ params }) {
 
   // Handle slider deletion
   const handleDelete = async () => {
+    if (!sliderPermissions.canDelete) {
+      toast.error("You don't have permission to delete sliders");
+      return;
+    }
+
     try {
       setIsDeleting(true);
 
-      // Call API to delete slider
+      // Call protected API to delete slider
       const response = await deleteSlider(params.sliderId);
 
       if (response.status === 'success') {
         toast.success('Slider deleted successfully!');
         router.push('/admin/sliders');
       } else {
-        toast.error(response.message || 'Failed to delete slider');
+        throw new Error(response.message || 'Failed to delete slider');
       }
     } catch (error) {
       console.error('Error deleting slider:', error);
-      toast.error(error.message || 'An error occurred while deleting the slider');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(error.message || 'An error occurred while deleting the slider');
+      }
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
@@ -299,7 +343,49 @@ export default function EditSlider({ params }) {
     }
   };
 
-  // Show loading state
+  // Show loading state while permissions are loading
+  if (sliderPermissions.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if user has no slider access
+  if (!sliderPermissions.hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">
+            You don't have permission to access the Sliders module.
+          </p>
+          <Button onClick={() => router.push('/admin/dashboard')}>Go to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show view permission denied if user can't view
+  if (!sliderPermissions.canView) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">View Permission Required</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to view slider details.</p>
+          <Button onClick={() => router.push('/admin/sliders')}>Back to Sliders</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while data is loading
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -332,6 +418,7 @@ export default function EditSlider({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
+              {/* Delete button with permission checking */}
               <SliderDeleteDialog
                 isOpen={isDeleteDialogOpen}
                 onOpenChange={setIsDeleteDialogOpen}
@@ -340,13 +427,25 @@ export default function EditSlider({ params }) {
                 sliderTitle={slider?.title}
               />
 
-              <Button
-                onClick={form.handleSubmit(onSubmit)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </Button>
+              {/* Save button with permission checking */}
+              {sliderPermissions.canEdit ? (
+                <Button
+                  onClick={form.handleSubmit(onSubmit)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
+              ) : (
+                <Button
+                  disabled
+                  className="opacity-50 cursor-not-allowed"
+                  title="You don't have permission to edit sliders"
+                >
+                  <Lock className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
+              )}
             </div>
           </div>
 
@@ -361,6 +460,7 @@ export default function EditSlider({ params }) {
                 onImageChange={handleImageChange}
                 imagePreview={imagePreview}
                 slider={slider}
+                sliderPermissions={sliderPermissions}
               />
             </div>
 
@@ -378,4 +478,15 @@ export default function EditSlider({ params }) {
       </div>
     </div>
   );
-}
+};
+
+// Wrapper component that provides permission context
+const EditSlider = ({ params }) => {
+  return (
+    <PermissionProvider>
+      <EditSliderContent params={params} />
+    </PermissionProvider>
+  );
+};
+
+export default EditSlider;

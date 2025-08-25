@@ -3,11 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
-import { Loader2, FileDown, UserSearch, AlertCircle } from 'lucide-react';
+import { Loader2, FileDown, UserSearch, AlertCircle, Lock, Shield } from 'lucide-react';
 import { format, parseISO, isSameDay, subDays } from 'date-fns';
 
-// Import user service
-import { userService } from '@/api/services/admin/userService';
+// Import protected user service
+import { getUsers, getUserDetails } from '@/api/services/admin/protected/userService';
+
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useUserPermissions } from '@/api/hooks/useModulePermissions';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
 
 // Import custom components
 import UserFilters from '@/components/admin/users/list/UserFilters';
@@ -43,10 +48,36 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
-const UsersPage = () => {
+// Permission-aware export button component
+const PermissionAwareExportButton = () => {
+  const userPermissions = useUserPermissions();
+
+  if (!userPermissions.canView) {
+    return null; // Hide export if user can't even view users
+  }
+
+  const handleExportUsers = () => {
+    toast.info('Exporting users...');
+    setTimeout(() => {
+      toast.success('Users exported successfully!');
+    }, 1500);
+  };
+
+  return (
+    <Button variant="outline" onClick={handleExportUsers}>
+      <FileDown className="mr-2 h-4 w-4" />
+      Export Users
+    </Button>
+  );
+};
+
+// Main Users Page Component
+const UsersPageContent = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const userPermissions = useUserPermissions();
 
   // Set page title
   useEffect(() => {
@@ -82,8 +113,22 @@ const UsersPage = () => {
   // Stats state
   const [recentlyAddedUsers, setRecentlyAddedUsers] = useState(0);
 
+  // Check for access and redirect if necessary
+  useEffect(() => {
+    if (!userPermissions.isLoading && !userPermissions.hasAccess) {
+      toast.error("You don't have access to the Users module.");
+      router.push('/admin/dashboard');
+    }
+  }, [userPermissions.isLoading, userPermissions.hasAccess, router]);
+
   // Load user data
   const fetchData = async (filters = {}) => {
+    // Don't fetch if user doesn't have view permission
+    if (!userPermissions.isLoading && !userPermissions.canView) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -112,8 +157,8 @@ const UsersPage = () => {
 
       console.log('Fetching users with params:', params);
 
-      // Fetch users from API
-      const response = await userService.getUsers(params);
+      // Fetch users from protected API
+      const response = await getUsers(params);
 
       if (response.status === 'success') {
         setUsers(response.data || []);
@@ -147,8 +192,14 @@ const UsersPage = () => {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError('Failed to load user data. Please try again later.');
-      toast.error('Failed to load user data');
+
+      if (isPermissionError(error)) {
+        setError(getPermissionErrorMessage(error));
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        setError('Failed to load user data. Please try again later.');
+        toast.error('Failed to load user data');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -183,22 +234,16 @@ const UsersPage = () => {
     });
   };
 
-  // Initial data load
+  // Initial data load - only when permissions are loaded
   useEffect(() => {
-    fetchData();
-  }, []); // Empty dependency array to only run once on mount
+    if (!userPermissions.isLoading) {
+      fetchData();
+    }
+  }, [userPermissions.isLoading]);
 
   // Handle user deletion (commented out for future implementation)
   const handleDeleteUser = (userId) => {
     toast.info('Delete functionality will be implemented in the future');
-  };
-
-  // Handle export users
-  const handleExportUsers = () => {
-    toast.info('Exporting users...');
-    setTimeout(() => {
-      toast.success('Users exported successfully!');
-    }, 1500);
   };
 
   // Apply client-side filtering for donation status
@@ -275,7 +320,35 @@ const UsersPage = () => {
   const sortedUsers = sortUsers(filteredUsers);
   const stats = calculateStats();
 
-  // Show loading state
+  // Show loading state while permissions are loading
+  if (userPermissions.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if user has no user permissions
+  if (!userPermissions.hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">
+            You don't have permission to access the Users module.
+          </p>
+          <Button onClick={() => router.push('/admin/dashboard')}>Go to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state for data
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -318,30 +391,47 @@ const UsersPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-7xl">
-        {/* <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        {/* Permission Status Banner */}
+        {/* <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="font-medium text-blue-900 mb-2">Your User Management Permissions:</h4>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Badge variant={userPermissions.canView ? 'default' : 'secondary'}>
+              View: {userPermissions.canView ? '✓' : '✗'}
+            </Badge>
+            <Badge variant={userPermissions.canView ? 'default' : 'secondary'}>
+              Details: {userPermissions.canView ? '✓' : '✗'}
+            </Badge>
+          </div>
+          {!userPermissions.canView && (
+            <p className="text-sm text-orange-600 mt-2">You have limited access to this module.</p>
+          )}
+        </div> */}
+
+        {/* Header with Export Button */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
             <p className="text-sm text-muted-foreground mt-1">
               View and manage registered user accounts
+              {!userPermissions.canView && (
+                <span className="text-orange-600 ml-2">(Limited access)</span>
+              )}
             </p>
           </div>
 
-          <div>
-            <Button variant="outline" onClick={handleExportUsers}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Export Users
-            </Button>
-          </div>
-        </div> */}
+          <PermissionAwareExportButton />
+        </div>
 
-        {/* User Statistics */}
-        <UserStats
-          totalUsers={stats.totalUsers}
-          recentlyAddedUsers={recentlyAddedUsers}
-          totalDonations={stats.totalDonations}
-          averageDonationsPerUser={stats.averageDonationsPerUser}
-          lastUpdateDate={lastUpdateDate}
-        />
+        {/* User Statistics - only show if user can view */}
+        {userPermissions.canView && (
+          <UserStats
+            totalUsers={stats.totalUsers}
+            recentlyAddedUsers={recentlyAddedUsers}
+            totalDonations={stats.totalDonations}
+            averageDonationsPerUser={stats.averageDonationsPerUser}
+            lastUpdateDate={lastUpdateDate}
+          />
+        )}
 
         {error && (
           <Alert variant="destructive" className="mb-6">
@@ -353,29 +443,44 @@ const UsersPage = () => {
 
         <Card>
           <CardHeader className="p-4 pb-0">
-            <div className="flex justify-between items-center">
-              {/* <div>
+            {/* <div className="flex justify-between items-center">
+              <div>
                 <CardTitle>Registered Users</CardTitle>
                 <CardDescription>
-                  Displaying {pagination.total} out of {pagination.total} total users
+                  {userPermissions.canView
+                    ? `Displaying ${pagination.total} out of ${pagination.total} total users`
+                    : "You don't have permission to view user data"}
                 </CardDescription>
-              </div> */}
-            </div>
-            <UserFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              roleFilter={roleFilter}
-              setRoleFilter={setRoleFilter}
-              dateFilter={dateFilter}
-              setDateFilter={setDateFilter}
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-              onFiltersChange={handleFiltersChange}
-            />
+              </div>
+            </div> */}
+
+            {/* Only show filters if user can view */}
+            {userPermissions.canView && (
+              <UserFilters
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                roleFilter={roleFilter}
+                setRoleFilter={setRoleFilter}
+                dateFilter={dateFilter}
+                setDateFilter={setDateFilter}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                onFiltersChange={handleFiltersChange}
+              />
+            )}
           </CardHeader>
 
           <CardContent className="p-0 pt-4">
-            {sortedUsers.length === 0 ? (
+            {!userPermissions.canView ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Lock className="h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Access Restricted</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  You don't have permission to view user data. Contact your administrator to request
+                  access.
+                </p>
+              </div>
+            ) : sortedUsers.length === 0 ? (
               renderEmptyState()
             ) : (
               <div className="border rounded-md">
@@ -395,7 +500,8 @@ const UsersPage = () => {
             )}
           </CardContent>
 
-          {sortedUsers.length > 0 && (
+          {/* Only show pagination if user can view and has data */}
+          {userPermissions.canView && sortedUsers.length > 0 && (
             <CardFooter className="flex flex-col sm:flex-row justify-between items-center p-4 gap-4">
               <div className="text-sm text-muted-foreground">
                 Showing {pagination.from} to {pagination.to} of {pagination.total} users
@@ -474,6 +580,15 @@ const UsersPage = () => {
         </Card>
       </div>
     </div>
+  );
+};
+
+// Wrapper component that provides permission context
+const UsersPage = () => {
+  return (
+    <PermissionProvider>
+      <UsersPageContent />
+    </PermissionProvider>
   );
 };
 

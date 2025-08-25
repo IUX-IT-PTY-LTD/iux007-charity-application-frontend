@@ -1,4 +1,5 @@
 // src/app/(admin)/admin/faqs/page.jsx
+// Complete Permission-aware FAQ page
 
 'use client';
 
@@ -15,6 +16,7 @@ import {
   ArrowUpDown,
   MessageSquare,
   HelpCircle,
+  Lock,
 } from 'lucide-react';
 
 import {
@@ -65,19 +67,102 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 
-// Import API services
+// Import protected API services
 import {
   getAllFaqs,
   updateFaq,
   deleteFaq,
   searchFaqs,
   sortFaqsByOrdering,
-} from '@/api/services/admin/faqService';
+} from '@/api/services/admin/protected/faqService';
 import { isAuthenticated } from '@/api/services/admin/authService';
+
+// Import permission hooks
+import { useFaqPermissions } from '@/api/hooks/useModulePermissions';
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { isPermissionError, getPermissionErrorMessage } from '@/api/utils/permissionErrors';
+
+// Permission-aware components
+const PermissionAwareButton = ({ permission, children, fallback = null, ...props }) => {
+  const permissions = useFaqPermissions();
+
+  if (permissions.isLoading) {
+    return (
+      <Button {...props} disabled>
+        Loading...
+      </Button>
+    );
+  }
+
+  const hasPermission =
+    permission === 'create'
+      ? permissions.canCreate
+      : permission === 'view'
+        ? permissions.canView
+        : permission === 'edit'
+          ? permissions.canEdit
+          : permission === 'delete'
+            ? permissions.canDelete
+            : false;
+
+  if (!hasPermission) {
+    if (fallback) return fallback;
+    return null; // Hide button completely
+  }
+
+  return <Button {...props}>{children}</Button>;
+};
+
+const PermissionAwareActionButton = ({ permission, children, disabledFallback, ...props }) => {
+  const permissions = useFaqPermissions();
+
+  if (permissions.isLoading) {
+    return (
+      <Button {...props} disabled>
+        Loading...
+      </Button>
+    );
+  }
+
+  const hasPermission =
+    permission === 'edit'
+      ? permissions.canEdit
+      : permission === 'delete'
+        ? permissions.canDelete
+        : false;
+
+  if (!hasPermission) {
+    if (disabledFallback) {
+      return (
+        <Button
+          {...props}
+          disabled
+          title="You don't have permission for this action"
+          className="opacity-50 cursor-not-allowed"
+        >
+          {disabledFallback}
+        </Button>
+      );
+    }
+    return (
+      <Button
+        {...props}
+        disabled
+        title="You don't have permission for this action"
+        className="opacity-50 cursor-not-allowed"
+      >
+        <Lock className="h-4 w-4" />
+      </Button>
+    );
+  }
+
+  return <Button {...props}>{children}</Button>;
+};
 
 const AdminFAQsList = () => {
   const router = useRouter();
   const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const faqPermissions = useFaqPermissions();
 
   // State management
   const [faqs, setFaqs] = useState([]);
@@ -107,9 +192,23 @@ const AdminFAQsList = () => {
     }
   }, [router]);
 
-  // Fetch FAQs from API
+  // Check if user has any FAQ access
+  useEffect(() => {
+    if (!faqPermissions.isLoading && !faqPermissions.hasAccess) {
+      toast.error("You don't have access to the FAQ module.");
+      router.push('/admin/dashboard');
+    }
+  }, [faqPermissions.isLoading, faqPermissions.hasAccess, router]);
+
+  // Fetch FAQs from API with permission handling
   useEffect(() => {
     const fetchFaqs = async () => {
+      // Don't fetch if user doesn't have view permission
+      if (!faqPermissions.isLoading && !faqPermissions.canView) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
 
       try {
@@ -122,14 +221,22 @@ const AdminFAQsList = () => {
         }
       } catch (error) {
         console.error('Error fetching FAQs:', error);
-        toast.error(error.message || 'Failed to load FAQs');
+
+        if (isPermissionError(error)) {
+          toast.error(getPermissionErrorMessage(error));
+        } else {
+          toast.error(error.message || 'Failed to load FAQs');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchFaqs();
-  }, []);
+    // Only fetch when permissions are loaded
+    if (!faqPermissions.isLoading) {
+      fetchFaqs();
+    }
+  }, [faqPermissions.isLoading, faqPermissions.canView]);
 
   // Handle sorting
   const handleSort = (field) => {
@@ -170,8 +277,13 @@ const AdminFAQsList = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentFaqs = filteredAndSortedFaqs.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Handle FAQ deletion
+  // Handle FAQ deletion with permission checking
   const handleDelete = async (id) => {
+    if (!faqPermissions.canDelete) {
+      toast.error("You don't have permission to delete FAQs");
+      return;
+    }
+
     try {
       setIsDeleting(true);
       setSelectedFaqId(id);
@@ -189,15 +301,25 @@ const AdminFAQsList = () => {
       }
     } catch (error) {
       console.error('Error deleting FAQ:', error);
-      toast.error(error.message || 'Failed to delete FAQ');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(error.message || 'Failed to delete FAQ');
+      }
     } finally {
       setIsDeleting(false);
       setSelectedFaqId(null);
     }
   };
 
-  // Handle status toggle
+  // Handle status toggle with permission checking
   const handleStatusChange = async (id, currentStatus) => {
+    if (!faqPermissions.canEdit) {
+      toast.error("You don't have permission to edit FAQs");
+      return;
+    }
+
     try {
       setIsStatusUpdating(true);
       setSelectedFaqId(id);
@@ -239,7 +361,12 @@ const AdminFAQsList = () => {
       }
     } catch (error) {
       console.error('Error updating FAQ status:', error);
-      toast.error(error.message || 'Failed to update FAQ status');
+
+      if (isPermissionError(error)) {
+        toast.error(getPermissionErrorMessage(error));
+      } else {
+        toast.error(error.message || 'Failed to update FAQ status');
+      }
     } finally {
       setIsStatusUpdating(false);
       setSelectedFaqId(null);
@@ -261,6 +388,32 @@ const AdminFAQsList = () => {
     { field: 'actions', label: 'Actions', sortable: false },
   ];
 
+  // Show loading state while permissions are loading
+  if (faqPermissions.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if user has no FAQ permissions
+  if (!faqPermissions.hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">You don't have permission to access the FAQ module.</p>
+          <Button onClick={() => router.push('/admin/dashboard')}>Go to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container px-4 py-6 mx-auto max-w-7xl">
@@ -268,19 +421,50 @@ const AdminFAQsList = () => {
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div>
               <CardTitle>Frequently Asked Questions</CardTitle>
-              {/* <CardDescription>Manage FAQs displayed on your website</CardDescription> */}
+              <CardDescription>
+                Manage FAQs displayed on your website
+                {!faqPermissions.canView && (
+                  <span className="text-orange-600 ml-2">(Read-only access)</span>
+                )}
+              </CardDescription>
             </div>
 
-            <Button
+            <PermissionAwareButton
+              permission="create"
               onClick={() => router.push('/admin/faqs/create')}
               className="bg-blue-600 hover:bg-blue-700 text-white"
+              fallback={
+                <Button disabled className="opacity-50">
+                  <Lock className="mr-2 h-4 w-4" />
+                  Create FAQ
+                </Button>
+              }
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Create FAQ
-            </Button>
+            </PermissionAwareButton>
           </CardHeader>
 
           <CardContent>
+            {/* Permission Status Banner */}
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Your FAQ Permissions:</h4>
+              <div className="flex flex-wrap gap-2 text-sm">
+                <Badge variant={faqPermissions.canCreate ? 'default' : 'secondary'}>
+                  Create: {faqPermissions.canCreate ? '✓' : '✗'}
+                </Badge>
+                <Badge variant={faqPermissions.canView ? 'default' : 'secondary'}>
+                  View: {faqPermissions.canView ? '✓' : '✗'}
+                </Badge>
+                <Badge variant={faqPermissions.canEdit ? 'default' : 'secondary'}>
+                  Edit: {faqPermissions.canEdit ? '✓' : '✗'}
+                </Badge>
+                <Badge variant={faqPermissions.canDelete ? 'default' : 'secondary'}>
+                  Delete: {faqPermissions.canDelete ? '✓' : '✗'}
+                </Badge>
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
               <div className="relative w-full sm:max-w-xs">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
@@ -366,6 +550,15 @@ const AdminFAQsList = () => {
                         Loading FAQs...
                       </TableCell>
                     </TableRow>
+                  ) : !faqPermissions.canView ? (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="h-24 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <Lock className="h-8 w-8 text-gray-400" />
+                          <p>You don't have permission to view FAQs</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ) : filteredAndSortedFaqs.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={columns.length} className="h-24 text-center">
@@ -396,7 +589,10 @@ const AdminFAQsList = () => {
                               onCheckedChange={() => handleStatusChange(faq.id, faq.status)}
                               aria-label={`Toggle status for ${faq.question}`}
                               className="data-[state=checked]:bg-black data-[state=checked]:text-white"
-                              disabled={isStatusUpdating && selectedFaqId === faq.id}
+                              disabled={
+                                !faqPermissions.canEdit ||
+                                (isStatusUpdating && selectedFaqId === faq.id)
+                              }
                             />
                             <Badge
                               variant={getStatusValue(faq.status) === 1 ? 'success' : 'destructive'}
@@ -412,26 +608,30 @@ const AdminFAQsList = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex justify-center gap-2">
-                            <Button
+                            <PermissionAwareActionButton
+                              permission="edit"
                               variant="ghost"
                               size="icon"
                               onClick={() => router.push(`/admin/faqs/${faq.id}/edit`)}
+                              disabledFallback={<Edit className="h-4 w-4" />}
                             >
                               <Edit className="h-4 w-4" />
                               <span className="sr-only">Edit</span>
-                            </Button>
+                            </PermissionAwareActionButton>
 
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button
+                                <PermissionAwareActionButton
+                                  permission="delete"
                                   variant="ghost"
                                   size="icon"
                                   className="text-red-600 hover:text-red-800 hover:bg-red-100"
                                   disabled={isDeleting && selectedFaqId === faq.id}
+                                  disabledFallback={<Trash2 className="h-4 w-4" />}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                   <span className="sr-only">Delete</span>
-                                </Button>
+                                </PermissionAwareActionButton>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
@@ -470,8 +670,8 @@ const AdminFAQsList = () => {
               {totalFaqs} FAQs
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* Pagination - only show if user can view */}
+            {faqPermissions.canView && totalPages > 1 && (
               <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
@@ -492,7 +692,6 @@ const AdminFAQsList = () => {
 
                 <div className="flex items-center gap-1 mx-2">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    // Show 5 pages around current page
                     const startPage = Math.max(1, currentPage - 2);
                     const endPage = Math.min(totalPages, startPage + 4);
                     const adjustedStartPage = Math.max(1, endPage - 4);
@@ -561,4 +760,13 @@ const AdminFAQsList = () => {
   );
 };
 
-export default AdminFAQsList;
+// Wrap the component with PermissionProvider
+const PermissionAwareFaqPageWrapper = () => {
+  return (
+    <PermissionProvider>
+      <AdminFAQsList />
+    </PermissionProvider>
+  );
+};
+
+export default PermissionAwareFaqPageWrapper;

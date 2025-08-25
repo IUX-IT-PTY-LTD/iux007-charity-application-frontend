@@ -4,9 +4,6 @@ import { toast } from 'react-hot-toast';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-// Import auth service
-import { forgotPassword } from '@/api/services/admin/MainauthService';
-
 const ForgotPasswordCard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

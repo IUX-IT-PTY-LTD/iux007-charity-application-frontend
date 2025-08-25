@@ -1,7 +1,12 @@
-// components/admin/admins/modals/CreateAdminModal.jsx
-import React, { useState } from 'react';
+// components/admin/org/admin/modals/CreateAdminModal.jsx
+
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { createAdmin } from '@/api/services/admin/adminService';
+import {
+  createAdmin,
+  getAvailableRoles,
+  getDefaultRoleId,
+} from '@/api/services/admin/adminService';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +18,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 
 const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
@@ -20,9 +32,40 @@ const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
     name: '',
     email: '',
     password: '',
+    role_id: '',
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+
+  // Load roles when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadRoles();
+    }
+  }, [isOpen]);
+
+  const loadRoles = async () => {
+    setIsLoadingRoles(true);
+    try {
+      const [rolesResponse, defaultRoleId] = await Promise.all([
+        getAvailableRoles(),
+        getDefaultRoleId(),
+      ]);
+
+      if (rolesResponse && rolesResponse.data) {
+        setRoles(rolesResponse.data);
+        // Set default role ID
+        setFormData((prev) => ({ ...prev, role_id: defaultRoleId.toString() }));
+      }
+    } catch (error) {
+      console.error('Error loading roles:', error);
+      toast.error('Failed to load roles');
+    } finally {
+      setIsLoadingRoles(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,6 +74,15 @@ const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
     // Clear error when typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleRoleChange = (value) => {
+    setFormData((prev) => ({ ...prev, role_id: value }));
+
+    // Clear role error if exists
+    if (errors.role_id) {
+      setErrors((prev) => ({ ...prev, role_id: '' }));
     }
   };
 
@@ -53,6 +105,10 @@ const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
+    if (!formData.role_id) {
+      newErrors.role_id = 'Role is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -67,7 +123,12 @@ const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await createAdmin(formData.name, formData.email, formData.password);
+      const response = await createAdmin(
+        formData.name,
+        formData.email,
+        formData.password,
+        parseInt(formData.role_id)
+      );
 
       if (response.status === 'success') {
         toast.success('Admin created successfully');
@@ -100,8 +161,23 @@ const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
       name: '',
       email: '',
       password: '',
+      role_id: '',
     });
     setErrors({});
+  };
+
+  // Get role display info
+  const getSelectedRoleInfo = () => {
+    const selectedRole = roles.find((role) => role.id.toString() === formData.role_id);
+    if (selectedRole) {
+      return (
+        <p className="text-xs text-gray-500 mt-1">
+          Role: {selectedRole.name}
+          {selectedRole.status === 0 && ' (Inactive)'}
+        </p>
+      );
+    }
+    return null;
   };
 
   return (
@@ -162,6 +238,40 @@ const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
             {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            {isLoadingRoles ? (
+              <div className="flex items-center space-x-2 p-2 border rounded">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm text-gray-500">Loading roles...</span>
+              </div>
+            ) : (
+              <Select value={formData.role_id} onValueChange={handleRoleChange}>
+                <SelectTrigger className={errors.role_id ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem
+                      key={role.id}
+                      value={role.id.toString()}
+                      disabled={role.status === 0}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span>{role.name}</span>
+                        {role.status === 0 && (
+                          <span className="text-xs text-gray-400 ml-2">(Inactive)</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {errors.role_id && <p className="text-xs text-red-500">{errors.role_id}</p>}
+            {getSelectedRoleInfo()}
+          </div>
+
           <DialogFooter className="pt-4">
             <Button
               type="button"
@@ -174,7 +284,7 @@ const CreateAdminModal = ({ isOpen, onClose, onAdminCreated }) => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || isLoadingRoles}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
