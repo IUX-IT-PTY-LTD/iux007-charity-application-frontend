@@ -204,14 +204,36 @@ const getNavigationItems = (permissions) => {
   }
 
   // if (permissions.events.hasAccess) {
-    items.push({
-      id: 'submitted',
-      name: 'Submitted Requests',
-      href: '/admin/requests/submitted',
-      icon: Calendar,
-      visible: true,
-      order: 8,
-    });
+  items.push({
+    id: 'submitted',
+    name: 'Submitted Requests',
+    href: '/admin/requests/submitted',
+    icon: Calendar,
+    visible: true,
+    order: 8,
+  });
+  // }
+
+  // if (permissions.events.hasAccess) {
+  items.push({
+    id: 'under-review',
+    name: 'Under Review Requests',
+    href: '/admin/requests/under-review',
+    icon: Calendar,
+    visible: true,
+    order: 9,
+  });
+  // }
+
+  // if (permissions.events.hasAccess) {
+  items.push({
+    id: 'approved',
+    name: 'Approved Requests',
+    href: '/admin/requests/approved',
+    icon: Calendar,
+    visible: true,
+    order: 10,
+  });
   // }
 
   // Sort items by order and filter visible ones
