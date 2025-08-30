@@ -337,7 +337,7 @@ const CharityRequestForm = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title">
-                    Fundraising Title <span className="text-red-500">*</span>
+                    Purpose of Fundraising <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="title"
