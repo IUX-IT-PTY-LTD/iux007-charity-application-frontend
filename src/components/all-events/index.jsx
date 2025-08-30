@@ -34,49 +34,17 @@ const Events = ({ data }) => {
                 />
               ))
             ) : (
-              // Demo events when no events are found
-              [
-                {
-                  uuid: 'demo-1',
-                  title: 'demo-1',
-                  description: 'Support education for underprivileged children',
-                  featured_image: fallbackImage,
-                  end_date: '2024-12-31',
-                  location: 'Multiple Locations',
-                  target_amount: 50000
-                },
-                {
-                  uuid: 'demo-2',
-                  title: 'demo-2',
-                  description: 'Providing meals to those in need',
-                  featured_image: fallbackImage,
-                  end_date: '2024-12-31',
-                  location: 'Nationwide',
-                  target_amount: 25000
-                },
-                {
-                  uuid: 'demo-3',
-                  title: 'demo-3',
-                  description: 'Supporting medical treatments for the underprivileged',
-                  featured_image: fallbackImage,
-                  end_date: '2024-12-31',
-                  location: 'Various Hospitals',
-                  target_amount: 100000
-                }
-              ].map((demoEvent) => (
-                <EventCard
-                  key={demoEvent.uuid}
-                  eventId={demoEvent.uuid}
-                  title={demoEvent.title}
-                  description={demoEvent.description}
-                  img={demoEvent.featured_image}
-                  time={demoEvent.end_date}
-                  venue={demoEvent.location}
-                  targetAmount={demoEvent.target_amount}
-                  // raised={demoEvent.total_donation}
-                  showDetails={true}
-                />
-              ))
+              <div className="col-span-full flex flex-col items-center justify-center py-12 px-4">
+                <div className="w-24 h-24 mb-6 text-gray-400">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Events Found</h3>
+                <p className="text-gray-500 text-center max-w-md">
+                  There are currently no events available. Check back later for upcoming events!
+                </p>
+              </div>
             )}
           </div>
         </div>

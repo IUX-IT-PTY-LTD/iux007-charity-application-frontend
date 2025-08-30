@@ -1,8 +1,8 @@
 // src/api/config/index.js
 
 // API Base URL
-export const API_BASE_URL = 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
-// export const API_BASE_URL = 'http://localhost:9094/api';
+// export const API_BASE_URL = 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
+export const API_BASE_URL = 'http://localhost:9094/api';
 export const API_VERSION = 'v1';
 
 // API Endpoints
@@ -15,6 +15,7 @@ export const ENDPOINTS = {
     CONATCTUS: '/contact-us',
     SETTINGS: '/settings',
     CUSTOMER_ENQUIRY: '/customer-inquiry',
+    COUNTRIES: '/countries'
   },
   // Auth endpoints
   AUTH: {

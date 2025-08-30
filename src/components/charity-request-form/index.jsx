@@ -1,6 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,15 +10,23 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ChevronLeft, ChevronRight, Upload, CheckCircle, Loader } from 'lucide-react';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 
 const CharityRequestForm = () => {
+  const router = useRouter();
+  const { isAuthenticated } = useSelector((state) => state.user);
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+  const [selectedPhoneCode, setSelectedPhoneCode] = useState('+61');
+  const [selectedReferencePhoneCode, setSelectedReferencePhoneCode] = useState('+61');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   
   const {
     register,
@@ -31,13 +41,13 @@ const CharityRequestForm = () => {
       name: '',
       phone: '',
       email: '',
-      country: '',
+      country: 'Australia',
       address: '',
       title: '',
       description: '',
       currency: 'USD',
       target_amount: '',
-      shortage_amount: '',
+      raised_amount: '',
       reference_name: '',
       reference_phone: '',
       reference_email: ''
@@ -61,15 +71,20 @@ const CharityRequestForm = () => {
         fieldsToValidate = [];
         break;
       case 4:
-        fieldsToValidate = ['currency', 'target_amount', 'shortage_amount'];
+        fieldsToValidate = ['currency', 'target_amount', 'raised_amount'];
         break;
       default:
         return true;
     }
 
-    // Step 4 requires document upload
+    // Step 4 requires document upload and terms acceptance
     if (currentStep === 4 && !uploadedFile) {
       alert('Please upload a required document before proceeding.');
+      return false;
+    }
+    
+    if (currentStep === 4 && !acceptedTerms) {
+      alert('Please accept the terms and conditions before proceeding.');
       return false;
     }
 
@@ -102,6 +117,11 @@ const CharityRequestForm = () => {
       return;
     }
 
+    if (!acceptedTerms) {
+      alert('Please accept the terms and conditions.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -118,7 +138,11 @@ const CharityRequestForm = () => {
       formData.append('description', data.description);
       formData.append('currency', data.currency);
       formData.append('target_amount', parseInt(data.target_amount));
-      formData.append('shortage_amount', parseInt(data.shortage_amount));
+      formData.append('raised_amount', parseInt(data.raised_amount));
+      
+      // Calculate shortage amount
+      const shortageAmount = parseInt(data.target_amount) - parseInt(data.raised_amount);
+      formData.append('shortage_amount', shortageAmount);
       
       // Append reference fields only if provided
       if (data.reference_name) formData.append('reference_name', data.reference_name);
@@ -151,6 +175,29 @@ const CharityRequestForm = () => {
     'Reference Information (Optional)',
     'Financial Requirements'
   ];
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        setLoadingCountries(true);
+        const response = await apiService.get(ENDPOINTS.COMMON.COUNTRIES);
+        if (response && response.data) {
+          setCountries(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  const handleSignIn = () => {
+    const currentUrl = window.location.pathname;
+    router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+  };
 
   const currencies = [
     { value: 'USD', label: 'USD - US Dollar' },
@@ -215,7 +262,35 @@ const CharityRequestForm = () => {
             {/* Step 1: Personal Information */}
             {currentStep === 1 && (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Authentication Check */}
+                {!isAuthenticated && (
+                  <div className="flex justify-center items-center">
+                    <Card className="border-yellow-200 bg-yellow-50 max-w-md w-full">
+                      <CardContent className="p-8 text-center">
+                        <div className="mb-6">
+                          {/* <div className="w-16 h-16 bg-yellow-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <ChevronRight className="w-8 h-8 text-yellow-600" />
+                          </div> */}
+                          <h4 className="text-xl font-semibold text-yellow-800 mb-2">Sign In Required</h4>
+                          <p className="text-yellow-700 text-sm">
+                            You need to be signed in to submit a charity fundraising request. Please sign in to continue.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={handleSignIn}
+                          className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3"
+                        >
+                          Sign In to Continue
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {isAuthenticated && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">
                       Full Name <span className="text-red-500">*</span>
@@ -241,18 +316,44 @@ const CharityRequestForm = () => {
                     <Label htmlFor="phone">
                       Phone Number <span className="text-red-500">*</span>
                     </Label>
-                    <Input
-                      id="phone"
-                      placeholder="+1 (555) 123-4567"
-                      {...register('phone', {
-                        required: 'Phone number is required',
-                        maxLength: {
-                          value: 255,
-                          message: 'Phone number must not exceed 255 characters'
-                        }
-                      })}
-                      className={errors.phone ? 'border-red-500' : ''}
-                    />
+                    <div className="flex space-x-2">
+                      <Select 
+                        onValueChange={(value) => setSelectedPhoneCode(value)}
+                        defaultValue="+61"
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {loadingCountries ? (
+                            <SelectItem value="loading" disabled>
+                              Loading...
+                            </SelectItem>
+                          ) : (
+                            countries.map((country) => (
+                              <SelectItem key={`phone-${country.id}-${country.code}`} value={country.phone_code}>
+                                <div className="flex items-center space-x-2">
+                                  <span>{country.flag}</span>
+                                  <span>{country.phone_code}</span>
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id="phone"
+                        placeholder="555 123-4567"
+                        {...register('phone', {
+                          required: 'Phone number is required',
+                          pattern: {
+                            value: /^[0-9\s\-\(\)]+$/,
+                            message: 'Please enter a valid phone number'
+                          }
+                        })}
+                        className={`flex-1 ${errors.phone ? 'border-red-500' : ''}`}
+                      />
+                    </div>
                     {errors.phone && (
                       <p className="text-red-500 text-sm">{errors.phone.message}</p>
                     )}
@@ -290,18 +391,34 @@ const CharityRequestForm = () => {
                     <Label htmlFor="country">
                       Country <span className="text-red-500">*</span>
                     </Label>
-                    <Input
-                      id="country"
-                      placeholder="Enter your country"
+                    <Select 
+                      onValueChange={(value) => setValue('country', value)}
+                      defaultValue="Australia"
                       {...register('country', {
-                        required: 'Country is required',
-                        maxLength: {
-                          value: 255,
-                          message: 'Country must not exceed 255 characters'
-                        }
+                        required: 'Country is required'
                       })}
-                      className={errors.country ? 'border-red-500' : ''}
-                    />
+                    >
+                      <SelectTrigger className={errors.country ? 'border-red-500' : ''}>
+                        <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select your country"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {loadingCountries ? (
+                          <SelectItem value="loading" disabled>
+                            Loading countries...
+                          </SelectItem>
+                        ) : (
+                          countries.map((country) => (
+                            <SelectItem key={`country-${country.id}`} value={country.name}>
+                              <div className="flex items-center space-x-2">
+                                <span>{country.flag}</span>
+                                <span>{country.name}</span>
+                                {/* <span className="text-gray-500 text-sm">({country.phone_code})</span> */}
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
                     {errors.country && (
                       <p className="text-red-500 text-sm">{errors.country.message}</p>
                     )}
@@ -329,6 +446,8 @@ const CharityRequestForm = () => {
                     <p className="text-red-500 text-sm">{errors.address.message}</p>
                   )}
                 </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -418,17 +537,43 @@ const CharityRequestForm = () => {
                     <Label htmlFor="reference_phone">
                       Reference Phone Number
                     </Label>
-                    <Input
-                      id="reference_phone"
-                      placeholder="+1 (555) 123-4567 (optional)"
-                      {...register('reference_phone', {
-                        maxLength: {
-                          value: 255,
-                          message: 'Reference phone must not exceed 255 characters'
-                        }
-                      })}
-                      className={errors.reference_phone ? 'border-red-500' : ''}
-                    />
+                    <div className="flex space-x-2">
+                      <Select 
+                        onValueChange={(value) => setSelectedReferencePhoneCode(value)}
+                        defaultValue="+61"
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {loadingCountries ? (
+                            <SelectItem value="loading" disabled>
+                              Loading...
+                            </SelectItem>
+                          ) : (
+                            countries.map((country) => (
+                              <SelectItem key={`ref-phone-${country.id}-${country.code}`} value={country.phone_code}>
+                                <div className="flex items-center space-x-2">
+                                  <span>{country.flag}</span>
+                                  <span>{country.phone_code}</span>
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id="reference_phone"
+                        placeholder="555 123-4567 (optional)"
+                        {...register('reference_phone', {
+                          pattern: {
+                            value: /^[0-9\s\-\(\)]*$/,
+                            message: 'Please enter a valid phone number'
+                          }
+                        })}
+                        className={`flex-1 ${errors.reference_phone ? 'border-red-500' : ''}`}
+                      />
+                    </div>
                     {errors.reference_phone && (
                       <p className="text-red-500 text-sm">{errors.reference_phone.message}</p>
                     )}
@@ -575,9 +720,38 @@ const CharityRequestForm = () => {
                     </div>
                   </div>
                   <p className="text-gray-500 text-sm">
-                    Accepted formats: PNG, JPG, JPEG, DOCX, ZIP, PDF (Max size: 10MB)
+                    Accepted formats: PDF (Max size: 10MB)
                   </p>
                 </div>
+
+                {/* Terms and Conditions */}
+                <Card className="border-blue-200 bg-blue-50">
+                  <CardContent className="p-6">
+                    <h4 className="font-semibold text-blue-800 mb-4">Terms and Conditions</h4>
+                    <div className="text-sm text-blue-700 space-y-2 mb-4">
+                      <p>By submitting this charity fundraising request, you agree to the following terms:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>All information provided is accurate and truthful</li>
+                        <li>You have the legal right to represent the cause or organization</li>
+                        <li>Funds raised will be used solely for the stated charitable purpose</li>
+                        <li>You will provide regular updates on fund usage and progress</li>
+                        <li>You understand that approval is subject to verification and review</li>
+                        <li>You agree to comply with all applicable laws and regulations</li>
+                      </ul>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="terms"
+                        checked={acceptedTerms}
+                        onCheckedChange={setAcceptedTerms}
+                        className="border-blue-400"
+                      />
+                      <Label htmlFor="terms" className="text-sm font-medium text-blue-800 cursor-pointer">
+                        I accept the terms and conditions <span className="text-red-500">*</span>
+                      </Label>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
@@ -601,6 +775,7 @@ const CharityRequestForm = () => {
                 <Button
                   type="button"
                   onClick={nextStep}
+                  disabled={currentStep === 1 && !isAuthenticated}
                   className="flex items-center space-x-2"
                 >
                   <span>Next</span>
@@ -609,7 +784,7 @@ const CharityRequestForm = () => {
               ) : (
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !acceptedTerms}
                   className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:opacity-50"
                 >
                   {isSubmitting ? (
