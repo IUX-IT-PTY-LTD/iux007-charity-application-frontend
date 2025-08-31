@@ -85,7 +85,7 @@ export default function FundRequestDetailsPage() {
         toast.success('Comment submitted successfully');
         setNewComment('');
         setUploadedFile(null);
-        fetchAdminMessages(); // Refresh messages
+        // fetchAdminMessages(); // Refresh messages
       }
     } catch (err) {
       console.error('Comment Submit Error:', err);
@@ -243,7 +243,7 @@ export default function FundRequestDetailsPage() {
           </Card>
 
           {/* Admin Messages */}
-          <Card className="shadow-lg">
+          {/* <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <MessageCircle className="h-5 w-5" />
@@ -275,10 +275,10 @@ export default function FundRequestDetailsPage() {
                 </div>
               )}
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Comment Section */}
-          <Card className="shadow-lg">
+          {/* <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Submit Comment or Additional Documents</CardTitle>
             </CardHeader>
@@ -344,7 +344,7 @@ export default function FundRequestDetailsPage() {
                 </div>
               </form>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         {/* Sidebar */}
