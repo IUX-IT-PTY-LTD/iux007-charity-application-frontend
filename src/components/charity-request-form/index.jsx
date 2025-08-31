@@ -48,6 +48,7 @@ const CharityRequestForm = () => {
       currency: 'USD',
       target_amount: '',
       raised_amount: '',
+      shortage_amount: '',
       reference_name: '',
       reference_phone: '',
       reference_email: ''
@@ -71,7 +72,7 @@ const CharityRequestForm = () => {
         fieldsToValidate = [];
         break;
       case 4:
-        fieldsToValidate = ['currency', 'target_amount', 'raised_amount'];
+        fieldsToValidate = ['currency', 'target_amount', 'shortage_amount'];
         break;
       default:
         return true;
@@ -138,11 +139,12 @@ const CharityRequestForm = () => {
       formData.append('description', data.description);
       formData.append('currency', data.currency);
       formData.append('target_amount', parseInt(data.target_amount));
-      formData.append('raised_amount', parseInt(data.raised_amount));
+      // formData.append('raised_amount', parseInt(data.raised_amount));
+      formData.append('shortage_amount', parseInt(data.shortage_amount));
       
       // Calculate shortage amount
-      const shortageAmount = parseInt(data.target_amount) - parseInt(data.raised_amount);
-      formData.append('shortage_amount', shortageAmount);
+      // const shortageAmount = parseInt(data.target_amount) - parseInt(data.raised_amount);
+      // formData.append('shortage_amount', shortageAmount);
       
       // Append reference fields only if provided
       if (data.reference_name) formData.append('reference_name', data.reference_name);
