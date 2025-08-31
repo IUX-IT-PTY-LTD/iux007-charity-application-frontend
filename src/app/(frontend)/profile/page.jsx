@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
@@ -16,7 +16,8 @@ import Loader from '@/components/shared/loader';
 export default function ProfilePage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState('profile');
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
   const [userInfo, setUserInfo] = useState(useSelector((state) => state.user.user));
   const [donations, setDonations] = useState([]);
   const [fundRaisingRequests, setFundRaisingRequests] = useState([]);
@@ -35,54 +36,12 @@ export default function ProfilePage() {
 
   const fetchFundRaisingRequests = async () => {
     try {
-      const response = await apiService.get(ENDPOINTS.FUND_RAISING.USER_REQUESTS);
+      const response = await apiService.get(ENDPOINTS.FUND_RAISING.REQUEST);
       if (response && response.status === 'success') {
         setFundRaisingRequests(response.data);
       }
     } catch (err) {
       console.error('Fund Raising Requests Fetch Error:', err);
-      // Set dummy data for demonstration
-      setFundRaisingRequests([
-        {
-          id: 1,
-          title: "Emergency Medical Treatment for Children",
-          description: "We are raising funds to provide emergency medical treatment for children in need. This campaign aims to help families who cannot afford critical medical care for their children.",
-          currency: "USD",
-          target_amount: 50000,
-          raised_amount: 12500,
-          shortage_amount: 37500,
-          country: "Australia",
-          status: "approved",
-          created_at: "2024-01-15T10:30:00Z",
-          reference_name: "Dr. Sarah Johnson"
-        },
-        {
-          id: 2,
-          title: "Education Fund for Underprivileged Youth",
-          description: "Supporting education for underprivileged youth by providing scholarships, books, and learning materials to help them build a better future.",
-          currency: "USD",
-          target_amount: 25000,
-          raised_amount: 8200,
-          shortage_amount: 16800,
-          country: "Australia",
-          status: "pending",
-          created_at: "2024-02-03T14:20:00Z",
-          reference_name: null
-        },
-        {
-          id: 3,
-          title: "Disaster Relief for Flood Victims",
-          description: "Providing immediate relief to families affected by recent floods including food, shelter, and basic necessities for recovery.",
-          currency: "AUD",
-          target_amount: 30000,
-          raised_amount: 0,
-          shortage_amount: 30000,
-          country: "Australia",
-          status: "under_review",
-          created_at: "2024-02-20T09:15:00Z",
-          reference_name: "Community Leader Mike Brown"
-        }
-      ]);
     }
   };
 
@@ -90,6 +49,20 @@ export default function ProfilePage() {
     fetchDonations();
     fetchFundRaisingRequests();
   }, []);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['profile', 'donations', 'fundraising'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    router.replace(url.pathname + url.search);
+  };
   const handleInfoUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -141,7 +114,7 @@ export default function ProfilePage() {
                   ? 'bg-primary/10 border-l-4 border-primary'
                   : 'hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('profile')}
+              onClick={() => handleTabChange('profile')}
             >
               <div className="flex items-center space-x-3">
                 <svg
@@ -166,7 +139,7 @@ export default function ProfilePage() {
                   ? 'bg-primary/10 border-l-4 border-primary'
                   : 'hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('donations')}
+              onClick={() => handleTabChange('donations')}
             >
               <div className="flex items-center space-x-3">
                 <svg
@@ -191,7 +164,7 @@ export default function ProfilePage() {
                   ? 'bg-primary/10 border-l-4 border-primary'
                   : 'hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('fundraising')}
+              onClick={() => handleTabChange('fundraising')}
             >
               <div className="flex items-center space-x-3">
                 <svg
@@ -579,7 +552,7 @@ export default function ProfilePage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => router.push(`/fund-request/${request.id}`)}
+                                onClick={() => router.push(`/fund-request/${request.uuid}`)}
                                 className="text-primary hover:bg-primary/10"
                               >
                                 View Details

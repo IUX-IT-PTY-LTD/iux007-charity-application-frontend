@@ -15,7 +15,7 @@ const DonationDetails = () => {
           <div className="xl:col-span-4 lg:col-span-3 md:col-span-2 col-span-1">
             {/* back button */}
             <div className="flex items-center">
-              <Link href={'/'} className="px-3 py-2 bg-primary text-white rounded-[10px]">
+              <Link href={'/profile?tab=donations'} className="px-3 py-2 bg-primary text-white rounded-[10px]">
                 <FaArrowLeft className="inline-block mr-2" />
                 Back
               </Link>

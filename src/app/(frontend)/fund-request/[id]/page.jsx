@@ -31,33 +31,12 @@ export default function FundRequestDetailsPage() {
   const fetchRequestDetails = async () => {
     try {
       setLoading(true);
-      const response = await apiService.get(`${ENDPOINTS.FUND_RAISING.DETAILS}/${id}`);
+      const response = await apiService.get(ENDPOINTS.FUND_RAISING.REQUEST_DETAILS(id));
       if (response && response.status === 'success') {
         setRequest(response.data);
       }
     } catch (err) {
       console.error('Request Details Fetch Error:', err);
-      // Dummy data for demonstration
-      setRequest({
-        id: parseInt(id),
-        title: "Emergency Medical Treatment for Children",
-        description: "We are raising funds to provide emergency medical treatment for children in need. This campaign aims to help families who cannot afford critical medical care for their children. The funds will be used to cover hospital bills, medication costs, and specialized treatments that are not covered by insurance.",
-        currency: "USD",
-        target_amount: 50000,
-        raised_amount: 12500,
-        shortage_amount: 37500,
-        country: "Australia",
-        address: "123 Main Street, Sydney, NSW 2000",
-        phone: "+61 2 1234 5678",
-        email: "john.doe@example.com",
-        status: "under_review",
-        created_at: "2024-01-15T10:30:00Z",
-        updated_at: "2024-02-01T15:45:00Z",
-        reference_name: "Dr. Sarah Johnson",
-        reference_phone: "+61 2 8765 4321",
-        reference_email: "sarah.johnson@hospital.com",
-        document_url: "/documents/medical-reports.pdf"
-      });
     } finally {
       setLoading(false);
     }
@@ -126,12 +105,16 @@ export default function FundRequestDetailsPage() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
+      case 'Pending Review':
         return 'bg-yellow-100 text-yellow-600 border-yellow-200';
       case 'approved':
+      case 'Approved':
         return 'bg-green-100 text-green-600 border-green-200';
       case 'rejected':
+      case 'Rejected':
         return 'bg-red-100 text-red-600 border-red-200';
       case 'under_review':
+      case 'Under Review':
         return 'bg-blue-100 text-blue-600 border-blue-200';
       default:
         return 'bg-gray-100 text-gray-600 border-gray-200';
@@ -170,7 +153,7 @@ export default function FundRequestDetailsPage() {
     );
   }
 
-  const progressPercentage = (request.raised_amount / request.target_amount) * 100;
+  const progressPercentage = ((request.raised_amount || 0) / request.target_amount) * 100;
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -180,7 +163,7 @@ export default function FundRequestDetailsPage() {
       <div className="mb-6">
         <Button
           variant="outline"
-          onClick={() => router.push('/profile')}
+          onClick={() => router.push('/profile?tab=fundraising')}
           className="mb-4 flex items-center space-x-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -190,7 +173,7 @@ export default function FundRequestDetailsPage() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">{request.title}</h1>
-            <p className="text-gray-600">Request ID: #{request.id}</p>
+            <p className="text-gray-600">Request Number: {request.request_number}</p>
           </div>
           <div className={`px-4 py-2 rounded-full border font-medium ${getStatusColor(request.status)}`}>
             {formatStatus(request.status)}
@@ -232,7 +215,7 @@ export default function FundRequestDetailsPage() {
                     <DollarSign className="h-6 w-6 text-blue-600 mx-auto mb-2" />
                     <p className="text-sm text-blue-600">Raised Amount</p>
                     <p className="text-lg font-bold text-blue-700">
-                      {request.currency} {parseInt(request.raised_amount).toLocaleString()}
+                      {request.currency} {parseInt(request.raised_amount || 0).toLocaleString()}
                     </p>
                   </CardContent>
                 </Card>
@@ -376,6 +359,10 @@ export default function FundRequestDetailsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
+                <p className="text-sm text-gray-500">Name</p>
+                <p className="font-medium">{request.name}</p>
+              </div>
+              <div>
                 <p className="text-sm text-gray-500">Email</p>
                 <p className="font-medium">{request.email}</p>
               </div>
@@ -458,7 +445,7 @@ export default function FundRequestDetailsPage() {
           </Card>
 
           {/* Documents */}
-          {request.document_url && (
+          {request.documents && (
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>Submitted Documents</CardTitle>
@@ -467,12 +454,12 @@ export default function FundRequestDetailsPage() {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <FileText className="h-5 w-5 text-gray-600" />
-                    <span className="text-sm font-medium">Original Document</span>
+                    <span className="text-sm font-medium">{request.documents}</span>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(request.document_url, '_blank')}
+                    onClick={() => window.open(`/documents/${request.documents}`, '_blank')}
                   >
                     View
                   </Button>
