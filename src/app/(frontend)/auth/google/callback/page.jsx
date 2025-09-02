@@ -76,7 +76,21 @@ export default function GoogleCallback() {
         if (response.data && response.status === 'success') {
           dispatch(setUser(response.data));
           toast.success('Google login successful');
-          router.push('/');
+          
+          // Check for redirect URL in state parameter
+          const state = searchParams.get('state');
+          let redirectUrl = '/';
+          
+          if (state) {
+            try {
+              const stateData = JSON.parse(atob(state));
+              redirectUrl = stateData.redirect || '/';
+            } catch (error) {
+              console.error('Failed to parse state parameter:', error);
+            }
+          }
+          
+          router.push(redirectUrl);
         } else {
           throw new Error(response.message || 'Google login failed');
         }

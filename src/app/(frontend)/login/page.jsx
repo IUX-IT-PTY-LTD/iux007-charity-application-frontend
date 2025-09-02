@@ -90,6 +90,10 @@ const Login = () => {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '142668446381-04pf87heqodbs2um3fi98aue4187r38r.apps.googleusercontent.com';
       const redirectUri = window.location.origin + '/auth/google/callback';
       
+      // Get redirect parameter to pass it through the OAuth flow
+      const redirectUrl = searchParams.get('redirect');
+      const stateParam = redirectUrl ? btoa(JSON.stringify({ redirect: redirectUrl })) : '';
+      
       // Use the correct Google OAuth endpoint
       const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${clientId}&` +
@@ -97,7 +101,8 @@ const Login = () => {
         `response_type=code&` +
         `scope=openid email profile&` +
         `access_type=offline&` +
-        `prompt=select_account`;
+        `prompt=select_account` +
+        (stateParam ? `&state=${encodeURIComponent(stateParam)}` : '');
       
       console.log('Redirecting to:', googleAuthUrl);
       window.location.href = googleAuthUrl;

@@ -21,6 +21,20 @@ const EventCard = ({
   // const progressPercentage = targetAmount > 0 ? Math.min((raised / targetAmount) * 100, 100) : 0;
   const progressPercentage = 100 - remainingPercentage;
   
+  // Format time to human readable format
+  const formatTime = (timeString) => {
+    try {
+      const date = new Date(timeString);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch {
+      return timeString; // fallback to original if not a valid date
+    }
+  };
+  
   // Determine progress bar color based on progress percentage
   const getProgressBarColor = () => {
     if (progressPercentage > 50) {
@@ -42,17 +56,17 @@ const EventCard = ({
       </div>
 
       <div className="flex flex-col flex-1">
-        <p className="text-xs justify-start items-center gap-3 flex mb-3">
+        <div className="text-xs justify-start items-center gap-3 flex mb-3">
           <span className="justify-start items-center gap-1 bg-primary text-white px-3 py-1 rounded inline-flex">
-            <FaClock /> {time}
+            <FaClock /> {formatTime(time)}
           </span>
           {venue && (
-            <span className="justify-start items-center gap-1 bg-primary text-white px-3 py-1 rounded inline-flex">
-              <FaMapMarkerAlt />
-              {venue}
+            <span className="flex items-center gap-1 bg-primary text-white px-3 py-1 rounded w-32 min-w-0">
+              <FaMapMarkerAlt className="flex-shrink-0" />
+              <span className="truncate" title={venue}>{venue}</span>
             </span>
           )}
-        </p>
+        </div>
 
         <Link href={`/events/${eventId}`}>
           <h3 className="text-medium font-semibold text-gray-800 mb-4 line-clamp-2 cursor-pointer hover:text-primary transition-colors">
