@@ -16,7 +16,8 @@ export const ENDPOINTS = {
     CONATCTUS: '/contact-us',
     SETTINGS: '/settings',
     CUSTOMER_ENQUIRY: '/customer-inquiry',
-    COUNTRIES: '/countries'
+    COUNTRIES: '/countries',
+    FUNDRAISING_CATEGORIES: '/fundraising-categories',
   },
   // Auth endpoints
   AUTH: {

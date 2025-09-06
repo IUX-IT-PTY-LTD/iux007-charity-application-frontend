@@ -193,6 +193,28 @@ export default function FundRequestDetailsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Request Details */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {request.category && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Category</p>
+                    <p className="font-medium text-gray-800">{request.category}</p>
+                  </div>
+                )}
+                {request.fund_type && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Fund Type</p>
+                    <p className="font-medium text-gray-800 capitalize">{request.fund_type}</p>
+                  </div>
+                )}
+                {request.fundraising_for && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Fundraising For</p>
+                    <p className="font-medium text-gray-800">{request.fundraising_for}</p>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <h3 className="font-semibold text-gray-800 mb-2">Description</h3>
                 <p className="text-gray-600 leading-relaxed">{request.description}</p>
@@ -232,13 +254,13 @@ export default function FundRequestDetailsPage() {
               </div>
 
               {/* Progress Bar */}
-              <div>
+              {/* <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-600">Fundraising Progress</span>
                   <span className="text-sm font-medium text-gray-600">{Math.round(progressPercentage)}%</span>
                 </div>
                 <Progress value={progressPercentage} className="h-3" />
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 

@@ -27,6 +27,10 @@ const CharityRequestForm = () => {
   const [selectedPhoneCode, setSelectedPhoneCode] = useState('+61');
   const [selectedReferencePhoneCode, setSelectedReferencePhoneCode] = useState('+61');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [fundType, setFundType] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   
   const {
     register,
@@ -51,7 +55,11 @@ const CharityRequestForm = () => {
       shortage_amount: '',
       reference_name: '',
       reference_phone: '',
-      reference_email: ''
+      reference_email: '',
+      category: '',
+      fund_type: '',
+      organization_name: '',
+      person_name: ''
     }
   });
 
@@ -66,24 +74,30 @@ const CharityRequestForm = () => {
         fieldsToValidate = ['name', 'phone', 'email', 'country', 'address'];
         break;
       case 2:
-        fieldsToValidate = ['title', 'description'];
+        fieldsToValidate = ['title', 'description', 'category', 'fund_type'];
+        if (fundType === 'organization') {
+          fieldsToValidate.push('organization_name');
+        } else if (fundType === 'individual') {
+          fieldsToValidate.push('person_name');
+        }
         break;
       case 3:
-        fieldsToValidate = [];
+        fieldsToValidate = ['currency', 'target_amount', 'shortage_amount'];
         break;
       case 4:
-        fieldsToValidate = ['currency', 'target_amount', 'shortage_amount'];
+        fieldsToValidate = [];
         break;
       default:
         return true;
     }
 
-    // Step 4 requires document upload and terms acceptance
-    if (currentStep === 4 && !uploadedFile) {
+    // Step 3 requires document upload
+    if (currentStep === 3 && !uploadedFile) {
       alert('Please upload a required document before proceeding.');
       return false;
     }
     
+    // Step 4 requires terms acceptance
     if (currentStep === 4 && !acceptedTerms) {
       alert('Please accept the terms and conditions before proceeding.');
       return false;
@@ -118,10 +132,10 @@ const CharityRequestForm = () => {
       return;
     }
 
-    if (!acceptedTerms) {
-      alert('Please accept the terms and conditions.');
-      return;
-    }
+    // if (!acceptedTerms) {
+    //   alert('Please accept the terms and conditions.');
+    //   return;
+    // }
 
     setIsSubmitting(true);
 
@@ -137,6 +151,13 @@ const CharityRequestForm = () => {
       formData.append('address', data.address);
       formData.append('title', data.title);
       formData.append('description', data.description);
+      formData.append('fundraising_category_id', parseInt(data.category));
+      formData.append('fund_type', data.fund_type);
+      if (data.fund_type === 'organization') {
+        formData.append('fundraising_for', data.organization_name);
+      } else if (data.fund_type === 'individual') {
+        formData.append('fundraising_for', data.person_name);
+      }
       formData.append('currency', data.currency);
       formData.append('target_amount', parseInt(data.target_amount));
       // formData.append('raised_amount', parseInt(data.raised_amount));
@@ -173,9 +194,9 @@ const CharityRequestForm = () => {
 
   const stepTitles = [
     'Personal Information',
-    'Charity Details',
-    'Reference Information (Optional)',
-    'Financial Requirements'
+    'Charity Details', 
+    'Financial Requirements',
+    'Reference Information & Terms'
   ];
 
   useEffect(() => {
@@ -193,7 +214,22 @@ const CharityRequestForm = () => {
       }
     };
 
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const response = await apiService.get(ENDPOINTS.COMMON.FUNDRAISING_CATEGORIES);
+        if (response && response.data) {
+          setCategories(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
     fetchCountries();
+    fetchCategories();
   }, []);
 
   const handleSignIn = () => {
@@ -219,8 +255,8 @@ const CharityRequestForm = () => {
             <p className="text-gray-600 mb-6">
               Thank you for your fundraising request. We will review your application and get back to you soon.
             </p>
-            <Button onClick={() => setSubmitSuccess(false)} className="mt-4">
-              Submit Another Request
+            <Button onClick={() => router.push('/profile?tab=fundraising')} className="mt-4">
+              GoTo FundRaising Requests
             </Button>
           </CardContent>
         </Card>
@@ -270,9 +306,6 @@ const CharityRequestForm = () => {
                     <Card className="border-yellow-200 bg-yellow-50 max-w-md w-full">
                       <CardContent className="p-8 text-center">
                         <div className="mb-6">
-                          {/* <div className="w-16 h-16 bg-yellow-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <ChevronRight className="w-8 h-8 text-yellow-600" />
-                          </div> */}
                           <h4 className="text-xl font-semibold text-yellow-800 mb-2">Sign In Required</h4>
                           <p className="text-yellow-700 text-sm">
                             You need to be signed in to submit a charity fundraising request. Please sign in to continue.
@@ -293,161 +326,160 @@ const CharityRequestForm = () => {
                 {isAuthenticated && (
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">
-                      Full Name <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="name"
-                      placeholder="Enter your full name"
-                      {...register('name', {
-                        required: 'Name is required',
-                        maxLength: {
-                          value: 255,
-                          message: 'Name must not exceed 255 characters'
-                        }
-                      })}
-                      className={errors.name ? 'border-red-500' : ''}
-                    />
-                    {errors.name && (
-                      <p className="text-red-500 text-sm">{errors.name.message}</p>
-                    )}
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="name">
+                          Full Name <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="name"
+                          placeholder="Enter your full name"
+                          {...register('name', {
+                            required: 'Name is required',
+                            maxLength: {
+                              value: 255,
+                              message: 'Name must not exceed 255 characters'
+                            }
+                          })}
+                          className={errors.name ? 'border-red-500' : ''}
+                        />
+                        {errors.name && (
+                          <p className="text-red-500 text-sm">{errors.name.message}</p>
+                        )}
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">
-                      Phone Number <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex space-x-2">
-                      <Select 
-                        onValueChange={(value) => setSelectedPhoneCode(value)}
-                        defaultValue="+61"
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {loadingCountries ? (
-                            <SelectItem value="loading" disabled>
-                              Loading...
-                            </SelectItem>
-                          ) : (
-                            countries.map((country) => (
-                              <SelectItem key={`phone-${country.id}-${country.code}`} value={country.phone_code}>
-                                <div className="flex items-center space-x-2">
-                                  <span>{country.flag}</span>
-                                  <span>{country.phone_code}</span>
-                                </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">
+                          Phone Number <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="flex space-x-2">
+                          <Select 
+                            onValueChange={(value) => setSelectedPhoneCode(value)}
+                            defaultValue="+61"
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {loadingCountries ? (
+                                <SelectItem value="loading" disabled>
+                                  Loading...
+                                </SelectItem>
+                              ) : (
+                                countries.map((country) => (
+                                  <SelectItem key={`phone-${country.id}-${country.code}`} value={country.phone_code}>
+                                    <div className="flex items-center space-x-2">
+                                      <span>{country.flag}</span>
+                                      <span>{country.phone_code}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            id="phone"
+                            placeholder="555 123-4567"
+                            {...register('phone', {
+                              required: 'Phone number is required',
+                              pattern: {
+                                value: /^[0-9\s\-\(\)]+$/,
+                                message: 'Please enter a valid phone number'
+                              }
+                            })}
+                            className={`flex-1 ${errors.phone ? 'border-red-500' : ''}`}
+                          />
+                        </div>
+                        {errors.phone && (
+                          <p className="text-red-500 text-sm">{errors.phone.message}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">
+                          Email Address <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="your.email@example.com"
+                          {...register('email', {
+                            required: 'Email is required',
+                            maxLength: {
+                              value: 255,
+                              message: 'Email must not exceed 255 characters'
+                            },
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Please enter a valid email address'
+                            }
+                          })}
+                          className={errors.email ? 'border-red-500' : ''}
+                        />
+                        {errors.email && (
+                          <p className="text-red-500 text-sm">{errors.email.message}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="country">
+                          Country <span className="text-red-500">*</span>
+                        </Label>
+                        <Select 
+                          onValueChange={(value) => setValue('country', value)}
+                          defaultValue="Australia"
+                          {...register('country', {
+                            required: 'Country is required'
+                          })}
+                        >
+                          <SelectTrigger className={errors.country ? 'border-red-500' : ''}>
+                            <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select your country"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {loadingCountries ? (
+                              <SelectItem value="loading" disabled>
+                                Loading countries...
                               </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        id="phone"
-                        placeholder="555 123-4567"
-                        {...register('phone', {
-                          required: 'Phone number is required',
-                          pattern: {
-                            value: /^[0-9\s\-\(\)]+$/,
-                            message: 'Please enter a valid phone number'
+                            ) : (
+                              countries.map((country) => (
+                                <SelectItem key={`country-${country.id}`} value={country.name}>
+                                  <div className="flex items-center space-x-2">
+                                    <span>{country.flag}</span>
+                                    <span>{country.name}</span>
+                                  </div>
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                        {errors.country && (
+                          <p className="text-red-500 text-sm">{errors.country.message}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="address">
+                        Address <span className="text-red-500">*</span>
+                      </Label>
+                      <Textarea
+                        id="address"
+                        placeholder="Enter your complete address"
+                        rows={3}
+                        {...register('address', {
+                          required: 'Address is required',
+                          maxLength: {
+                            value: 500,
+                            message: 'Address must not exceed 500 characters'
                           }
                         })}
-                        className={`flex-1 ${errors.phone ? 'border-red-500' : ''}`}
+                        className={errors.address ? 'border-red-500' : ''}
                       />
+                      {errors.address && (
+                        <p className="text-red-500 text-sm">{errors.address.message}</p>
+                      )}
                     </div>
-                    {errors.phone && (
-                      <p className="text-red-500 text-sm">{errors.phone.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">
-                      Email Address <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      {...register('email', {
-                        required: 'Email is required',
-                        maxLength: {
-                          value: 255,
-                          message: 'Email must not exceed 255 characters'
-                        },
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: 'Please enter a valid email address'
-                        }
-                      })}
-                      className={errors.email ? 'border-red-500' : ''}
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm">{errors.email.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="country">
-                      Country <span className="text-red-500">*</span>
-                    </Label>
-                    <Select 
-                      onValueChange={(value) => setValue('country', value)}
-                      defaultValue="Australia"
-                      {...register('country', {
-                        required: 'Country is required'
-                      })}
-                    >
-                      <SelectTrigger className={errors.country ? 'border-red-500' : ''}>
-                        <SelectValue placeholder={loadingCountries ? "Loading countries..." : "Select your country"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {loadingCountries ? (
-                          <SelectItem value="loading" disabled>
-                            Loading countries...
-                          </SelectItem>
-                        ) : (
-                          countries.map((country) => (
-                            <SelectItem key={`country-${country.id}`} value={country.name}>
-                              <div className="flex items-center space-x-2">
-                                <span>{country.flag}</span>
-                                <span>{country.name}</span>
-                                {/* <span className="text-gray-500 text-sm">({country.phone_code})</span> */}
-                              </div>
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                    {errors.country && (
-                      <p className="text-red-500 text-sm">{errors.country.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">
-                    Address <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="address"
-                    placeholder="Enter your complete address"
-                    rows={3}
-                    {...register('address', {
-                      required: 'Address is required',
-                      maxLength: {
-                        value: 500,
-                        message: 'Address must not exceed 500 characters'
-                      }
-                    })}
-                    className={errors.address ? 'border-red-500' : ''}
-                  />
-                  {errors.address && (
-                    <p className="text-red-500 text-sm">{errors.address.message}</p>
-                  )}
-                </div>
                   </div>
                 )}
               </div>
@@ -456,6 +488,117 @@ const CharityRequestForm = () => {
             {/* Step 2: Charity Details */}
             {currentStep === 2 && (
               <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="category">
+                    Category <span className="text-red-500">*</span>
+                  </Label>
+                  <Select 
+                    onValueChange={(value) => {
+                      setSelectedCategory(value);
+                      setValue('category', parseInt(value));
+                    }}
+                    {...register('category', {
+                      required: 'Category is required'
+                    })}
+                  >
+                    <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {loadingCategories ? (
+                        <SelectItem value="loading" disabled>
+                          Loading categories...
+                        </SelectItem>
+                      ) : (
+                        categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {errors.category && (
+                    <p className="text-red-500 text-sm">{errors.category.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="fund_type">
+                    Fund Type <span className="text-red-500">*</span>
+                  </Label>
+                  <Select 
+                    onValueChange={(value) => {
+                      setFundType(value);
+                      setValue('fund_type', value);
+                    }}
+                    {...register('fund_type', {
+                      required: 'Fund type is required'
+                    })}
+                  >
+                    <SelectTrigger className={errors.fund_type ? 'border-red-500' : ''}>
+                      <SelectValue placeholder="Select fund type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="individual">
+                        Individual
+                      </SelectItem>
+                      <SelectItem value="organization">
+                        Organization
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.fund_type && (
+                    <p className="text-red-500 text-sm">{errors.fund_type.message}</p>
+                  )}
+                </div>
+
+                {fundType === 'organization' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="organization_name">
+                      Organization Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="organization_name"
+                      placeholder="Enter organization name"
+                      {...register('organization_name', {
+                        required: fundType === 'organization' ? 'Organization name is required' : false,
+                        maxLength: {
+                          value: 255,
+                          message: 'Organization name must not exceed 255 characters'
+                        }
+                      })}
+                      className={errors.organization_name ? 'border-red-500' : ''}
+                    />
+                    {errors.organization_name && (
+                      <p className="text-red-500 text-sm">{errors.organization_name.message}</p>
+                    )}
+                  </div>
+                )}
+
+                {fundType === 'individual' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="person_name">
+                      Person Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="person_name"
+                      placeholder="Enter the person's name"
+                      {...register('person_name', {
+                        required: fundType === 'individual' ? 'Person name is required' : false,
+                        maxLength: {
+                          value: 255,
+                          message: 'Person name must not exceed 255 characters'
+                        }
+                      })}
+                      className={errors.person_name ? 'border-red-500' : ''}
+                    />
+                    {errors.person_name && (
+                      <p className="text-red-500 text-sm">{errors.person_name.message}</p>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="title">
                     Purpose of Fundraising <span className="text-red-500">*</span>
@@ -504,113 +647,8 @@ const CharityRequestForm = () => {
               </div>
             )}
 
-            {/* Step 3: Reference Information (Optional) */}
+            {/* Step 3: Financial Requirements */}
             {currentStep === 3 && (
-              <div className="space-y-6">
-                <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                  <h4 className="font-semibold text-blue-800 mb-2">Reference Information (Optional)</h4>
-                  <p className="text-blue-700 text-sm">
-                    You may provide a reference who can vouch for your charity request. This is optional but helps us verify the authenticity of your application.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reference_name">
-                    Reference Name
-                  </Label>
-                  <Input
-                    id="reference_name"
-                    placeholder="Enter reference person's full name (optional)"
-                    {...register('reference_name', {
-                      maxLength: {
-                        value: 255,
-                        message: 'Reference name must not exceed 255 characters'
-                      }
-                    })}
-                    className={errors.reference_name ? 'border-red-500' : ''}
-                  />
-                  {errors.reference_name && (
-                    <p className="text-red-500 text-sm">{errors.reference_name.message}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="reference_phone">
-                      Reference Phone Number
-                    </Label>
-                    <div className="flex space-x-2">
-                      <Select 
-                        onValueChange={(value) => setSelectedReferencePhoneCode(value)}
-                        defaultValue="+61"
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {loadingCountries ? (
-                            <SelectItem value="loading" disabled>
-                              Loading...
-                            </SelectItem>
-                          ) : (
-                            countries.map((country) => (
-                              <SelectItem key={`ref-phone-${country.id}-${country.code}`} value={country.phone_code}>
-                                <div className="flex items-center space-x-2">
-                                  <span>{country.flag}</span>
-                                  <span>{country.phone_code}</span>
-                                </div>
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        id="reference_phone"
-                        placeholder="555 123-4567 (optional)"
-                        {...register('reference_phone', {
-                          pattern: {
-                            value: /^[0-9\s\-\(\)]*$/,
-                            message: 'Please enter a valid phone number'
-                          }
-                        })}
-                        className={`flex-1 ${errors.reference_phone ? 'border-red-500' : ''}`}
-                      />
-                    </div>
-                    {errors.reference_phone && (
-                      <p className="text-red-500 text-sm">{errors.reference_phone.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="reference_email">
-                      Reference Email Address
-                    </Label>
-                    <Input
-                      id="reference_email"
-                      type="email"
-                      placeholder="reference@example.com (optional)"
-                      {...register('reference_email', {
-                        maxLength: {
-                          value: 255,
-                          message: 'Reference email must not exceed 255 characters'
-                        },
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: 'Please enter a valid email address'
-                        }
-                      })}
-                      className={errors.reference_email ? 'border-red-500' : ''}
-                    />
-                    {errors.reference_email && (
-                      <p className="text-red-500 text-sm">{errors.reference_email.message}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Financial Requirements & Document Upload */}
-            {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="currency">
@@ -725,6 +763,116 @@ const CharityRequestForm = () => {
                     Accepted formats: PDF (Max size: 10MB)
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Step 4: Reference Information & Terms */}
+            {currentStep === 4 && (
+              <div className="space-y-6">
+                {/* Reference Information Section */}
+                <div>
+                  <div className="mb-6">
+                    <h4 className="font-semibold text-gray-800 mb-2">Reference Information (Optional)</h4>
+                    <p className="text-gray-600 text-sm">
+                      You may provide a reference who can vouch for your charity request. This is optional but helps us verify the authenticity of your application.
+                    </p>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="reference_name">
+                        Reference Name
+                      </Label>
+                      <Input
+                        id="reference_name"
+                        placeholder="Enter reference person's full name (optional)"
+                        {...register('reference_name', {
+                          maxLength: {
+                            value: 255,
+                            message: 'Reference name must not exceed 255 characters'
+                          }
+                        })}
+                        className={errors.reference_name ? 'border-red-500' : ''}
+                      />
+                      {errors.reference_name && (
+                        <p className="text-red-500 text-sm">{errors.reference_name.message}</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="reference_phone">
+                          Reference Phone Number
+                        </Label>
+                        <div className="flex space-x-2">
+                          <Select 
+                            onValueChange={(value) => setSelectedReferencePhoneCode(value)}
+                            defaultValue="+61"
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {loadingCountries ? (
+                                <SelectItem value="loading" disabled>
+                                  Loading...
+                                </SelectItem>
+                              ) : (
+                                countries.map((country) => (
+                                  <SelectItem key={`ref-phone-${country.id}-${country.code}`} value={country.phone_code}>
+                                    <div className="flex items-center space-x-2">
+                                      <span>{country.flag}</span>
+                                      <span>{country.phone_code}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            id="reference_phone"
+                            placeholder="555 123-4567 (optional)"
+                            {...register('reference_phone', {
+                              pattern: {
+                                value: /^[0-9\s\-\(\)]*$/,
+                                message: 'Please enter a valid phone number'
+                              }
+                            })}
+                            className={`flex-1 ${errors.reference_phone ? 'border-red-500' : ''}`}
+                          />
+                        </div>
+                        {errors.reference_phone && (
+                          <p className="text-red-500 text-sm">{errors.reference_phone.message}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="reference_email">
+                          Reference Email Address
+                        </Label>
+                        <Input
+                          id="reference_email"
+                          type="email"
+                          placeholder="reference@example.com (optional)"
+                          {...register('reference_email', {
+                            maxLength: {
+                              value: 255,
+                              message: 'Reference email must not exceed 255 characters'
+                            },
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Please enter a valid email address'
+                            }
+                          })}
+                          className={errors.reference_email ? 'border-red-500' : ''}
+                        />
+                        {errors.reference_email && (
+                          <p className="text-red-500 text-sm">{errors.reference_email.message}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Terms and Conditions */}
                 <Card className="border-blue-200 bg-blue-50">
@@ -786,7 +934,7 @@ const CharityRequestForm = () => {
               ) : (
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !acceptedTerms}
+                  disabled={isSubmitting}
                   className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:opacity-50"
                 >
                   {isSubmitting ? (
