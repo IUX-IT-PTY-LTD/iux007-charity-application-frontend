@@ -154,18 +154,18 @@ const Checkout = () => {
       img: '/assets/img/4logos.png',
       description: 'Visa, Mastercard, American Express'
     },
-    {
-      id: 'commonwealth',
-      name: 'Commonwealth Bank',
-      img: '/assets/img/commonwealthBank.jpg', // Using existing image as placeholder
-      description: 'Commonwealth Bank Gateway'
-    },
-    {
-      id: 'nab',
-      name: 'NAB Gateway',
-      img: '/assets/img/nab.png', // Using existing image as placeholder
-      description: 'NAB Bank Gateway'
-    },
+    // {
+    //   id: 'commonwealth',
+    //   name: 'Commonwealth Bank',
+    //   img: '/assets/img/commonwealthBank.jpg', // Using existing image as placeholder
+    //   description: 'Commonwealth Bank Gateway'
+    // },
+    // {
+    //   id: 'nab',
+    //   name: 'NAB Gateway',
+    //   img: '/assets/img/nab.png', // Using existing image as placeholder
+    //   description: 'NAB Bank Gateway'
+    // },
   ];
 
   //   payment methods
