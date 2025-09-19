@@ -933,7 +933,13 @@ const CharityRequestForm = () => {
                 </Button>
               ) : (
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={async () => {
+                    const isValid = await validateCurrentStep();
+                    if (isValid) {
+                      handleSubmit(onSubmit)();
+                    }
+                  }}
                   disabled={isSubmitting}
                   className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:opacity-50"
                 >
