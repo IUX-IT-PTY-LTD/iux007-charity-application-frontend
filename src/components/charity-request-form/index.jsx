@@ -941,7 +941,7 @@ const CharityRequestForm = () => {
                     }
                   }}
                   disabled={isSubmitting}
-                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                  className="flex items-center space-x-2 bg-primary hover:bg-primary/90 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
