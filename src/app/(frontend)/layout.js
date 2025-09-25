@@ -6,6 +6,7 @@ import '../../styles/globals.css';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '../../store/store';
+import { ColorSchemeProvider } from '@/contexts/ColorSchemeContext';
 
 // export const metadata = {
 //   title: 'Charity',
@@ -24,9 +25,11 @@ export default function RootLayout({ children }) {
       <body className={poppins.className}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-            <Header />
-            {children}
-            <Footer />
+            <ColorSchemeProvider>
+              <Header />
+              {children}
+              <Footer />
+            </ColorSchemeProvider>
           </PersistGate>
         </Provider>
       </body>

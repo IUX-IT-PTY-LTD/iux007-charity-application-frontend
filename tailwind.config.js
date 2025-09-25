@@ -9,10 +9,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#DB375A',
-        secondary: '#16423C',
-        accent: '#C4DAD2',
-        light: '#E9EFEC',
+        primary: 'var(--primary)',
+        secondary: 'var(--secondary)',
+        accent: 'var(--accent)',
+        light: 'var(--light)',
         // primary: {
         // 	DEFAULT: 'hsl(var(--primary))',
         // 	foreground: 'hsl(var(--primary-foreground))'

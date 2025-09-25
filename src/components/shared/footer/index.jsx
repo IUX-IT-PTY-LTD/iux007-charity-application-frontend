@@ -81,7 +81,7 @@ const Footer = () => {
                 <Link
                   key={social}
                   href={`https://${social}.com`}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-primary transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -106,13 +106,13 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row justify-center md:justify-start gap-2 md:gap-8">
               <Link
                 href="/privacy-policy"
-                className="text-gray-400 hover:text-white transition-colors text-sm md:text-base"
+                className="text-gray-400 hover:text-primary transition-colors text-sm md:text-base"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/terms-of-service"
-                className="text-gray-400 hover:text-white transition-colors text-sm md:text-base"
+                className="text-gray-400 hover:text-primary transition-colors text-sm md:text-base"
               >
                 Terms of Service
               </Link>

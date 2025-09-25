@@ -11,6 +11,7 @@ import { useRouter, usePathname } from 'next/navigation';
 // Import auth service
 import { isAuthenticated } from '@/api/services/admin/authService';
 import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { ColorSchemeProvider } from '@/contexts/ColorSchemeContext';
 
 // Import font outside of component to avoid re-instantiation
 const poppins = Poppins({
@@ -84,12 +85,14 @@ export default function AdminLayout({ children }) {
     return (
       <html lang="en" suppressHydrationWarning className={poppins.className}>
         <body className="overflow-hidden bg-background text-foreground antialiased">
-          <AdminProvider>
-            <AdminShell>
-              <PermissionProvider>{children}</PermissionProvider>
-            </AdminShell>
-            <Toaster />
-          </AdminProvider>
+          <ColorSchemeProvider>
+            <AdminProvider>
+              <AdminShell>
+                <PermissionProvider>{children}</PermissionProvider>
+              </AdminShell>
+              <Toaster />
+            </AdminProvider>
+          </ColorSchemeProvider>
         </body>
       </html>
     );

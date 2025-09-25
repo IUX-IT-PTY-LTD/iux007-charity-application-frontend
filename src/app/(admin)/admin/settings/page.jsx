@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, Phone, ExternalLink, Lock } from 'lucide-react';
+import { Building2, Phone, ExternalLink, Lock, Palette } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 
 import ContactInformationSection from '@/components/admin/settings/ContactInformationSection';
 import FooterLinkManagementSection from '@/components/admin/settings/FooterLinkManagementSection';
+import ColorSchemeSection from '@/components/admin/settings/ColorSchemeSection';
 
 // Import permission hooks and context
 import { PermissionProvider } from '@/api/contexts/PermissionContext';
@@ -90,6 +91,7 @@ const SettingsPageContent = () => {
   // Determine which tabs to show based on permissions
   const showContactTab = contactPermissions.hasAccess;
   const showFooterTab = adminPermissions.hasAccess;
+  const showColorSchemeTab = adminPermissions.hasAccess; // Color scheme requires admin permissions
 
   // If only one tab is available, show it directly
   if (showContactTab && !showFooterTab) {
@@ -153,16 +155,25 @@ const SettingsPageContent = () => {
           </Alert>
         ) : null}
 
-        <Tabs defaultValue={showContactTab ? 'contact' : 'footer'} className="w-full">
-          <TabsList className="mb-6 grid grid-cols-2 w-full max-w-7xl">
+        <Tabs defaultValue={showContactTab ? 'contact' : showColorSchemeTab ? 'colors' : 'footer'} className="w-full">
+          <TabsList className="mb-6 grid grid-cols-3 w-full max-w-7xl">
             <TabsTrigger
               value="contact"
               className="flex items-center gap-2"
               disabled={!showContactTab}
             >
               <Phone className="h-4 w-4" />
-              <span className="hidden sm:inline">Contact Information</span>
+              <span className="hidden sm:inline">Contact Info</span>
               {!showContactTab && <Lock className="h-3 w-3 ml-1" />}
+            </TabsTrigger>
+            <TabsTrigger
+              value="colors"
+              className="flex items-center gap-2"
+              disabled={!showColorSchemeTab}
+            >
+              <Palette className="h-4 w-4" />
+              <span className="hidden sm:inline">Color Scheme</span>
+              {!showColorSchemeTab && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
             <TabsTrigger
               value="footer"
@@ -170,7 +181,7 @@ const SettingsPageContent = () => {
               disabled={!showFooterTab}
             >
               <ExternalLink className="h-4 w-4" />
-              <span className="hidden sm:inline">Footer Management</span>
+              <span className="hidden sm:inline">Footer Links</span>
               {!showFooterTab && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
           </TabsList>
@@ -197,6 +208,33 @@ const SettingsPageContent = () => {
 
                 <div className="max-w-4xl">
                   <ContactInformationSection />
+                </div>
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Color Scheme Tab */}
+          {showColorSchemeTab && (
+            <TabsContent value="colors" className="space-y-6">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold mb-1">
+                    Color Scheme
+                    {!adminPermissions.canEdit && (
+                      <span className="text-orange-600 ml-2 text-sm">(Read-only)</span>
+                    )}
+                  </h2>
+                  <p className="text-muted-foreground mb-4">
+                    Customize your website's color scheme. Colors will be applied across buttons, links, loaders, and footer.
+                    {!adminPermissions.canEdit && (
+                      <span className="text-orange-600 ml-1">- View-only access</span>
+                    )}
+                  </p>
+                  <Separator className="my-4" />
+                </div>
+
+                <div className="max-w-4xl">
+                  <ColorSchemeSection />
                 </div>
               </div>
             </TabsContent>
@@ -238,6 +276,20 @@ const SettingsPageContent = () => {
                   <AlertTitle>Access Denied</AlertTitle>
                   <AlertDescription>
                     You don't have permission to access contact information settings.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </TabsContent>
+          )}
+
+          {!showColorSchemeTab && (
+            <TabsContent value="colors" className="space-y-6">
+              <div className="flex items-center justify-center py-16">
+                <Alert variant="destructive" className="max-w-md">
+                  <Lock className="h-4 w-4" />
+                  <AlertTitle>Access Denied</AlertTitle>
+                  <AlertDescription>
+                    You don't have permission to access color scheme settings.
                   </AlertDescription>
                 </Alert>
               </div>

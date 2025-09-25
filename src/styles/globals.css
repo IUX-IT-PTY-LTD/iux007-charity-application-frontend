@@ -5,11 +5,22 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap'); */
 
 :root {
-  --primary: #db375a;
-  --secondary: #16423c;
+  --primary: #3954db;
+  --secondary: #135705;
   --accent: #c4dad2;
   --light: #e9efec;
 }
+
+/* Ensure Tailwind classes work with CSS variables */
+.bg-primary { background-color: var(--primary) !important; }
+.text-primary { color: var(--primary) !important; }
+.border-primary { border-color: var(--primary) !important; }
+.bg-secondary { background-color: var(--secondary) !important; }
+.text-secondary { color: var(--secondary) !important; }
+.border-secondary { border-color: var(--secondary) !important; }
+.bg-accent { background-color: var(--accent) !important; }
+.text-accent { color: var(--accent) !important; }
+.border-accent { border-color: var(--accent) !important; }
 
 li.active a {
   color: var(--primary);

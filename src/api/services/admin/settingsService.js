@@ -407,6 +407,102 @@ export const getAccreditationSettings = (settings) => {
 };
 
 /**
+ * Get color scheme settings
+ * @returns {Promise} - Promise resolving to color scheme settings object
+ */
+export const getColorSchemeSettings = async () => {
+  try {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    return await apiService.get(`/admin/${version}/settings/color-schemes`);
+  } catch (error) {
+    console.error('Error fetching color scheme settings:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get color scheme settings from existing settings array (helper function)
+ * @param {Array} settings - Array of settings
+ * @returns {Object} - Object with color scheme settings
+ */
+export const getColorSchemeSettingsFromArray = (settings) => {
+  if (!Array.isArray(settings)) return {};
+
+  const colorKeys = ['primary_color', 'secondary_color', 'accent_color', 'light_color'];
+  const colorSettings = {};
+
+  colorKeys.forEach((key) => {
+    const setting = settings.find((s) => s.key === key);
+    colorSettings[key] = setting || null;
+  });
+
+  return colorSettings;
+};
+
+/**
+ * Update multiple color scheme settings
+ * @param {Object} colorData - Object containing color values
+ * @returns {Promise} - Promise resolving to the updated settings
+ */
+export const updateColorScheme = async (colorData) => {
+  try {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    // Validate color data
+    const validation = validateColorSchemeData(colorData);
+    if (!validation.isValid) {
+      throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+    }
+
+    return await apiService.post(`/admin/${version}/settings/color-schemes`, colorData);
+  } catch (error) {
+    console.error('Error updating color scheme:', error);
+    throw error;
+  }
+};
+
+/**
+ * Validate color scheme data
+ * @param {Object} colorData - Color scheme data to validate
+ * @returns {Object} - Object with isValid boolean and errors array
+ */
+export const validateColorSchemeData = (colorData) => {
+  const errors = [];
+
+  // Required color fields
+  const requiredColors = ['primary_color', 'secondary_color', 'accent_color', 'light_color'];
+  
+  requiredColors.forEach((colorKey) => {
+    if (!colorData[colorKey] || colorData[colorKey].trim() === '') {
+      errors.push(`${colorKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} is required`);
+    } else if (!isValidHexColor(colorData[colorKey])) {
+      errors.push(`${colorKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} must be a valid hex color`);
+    }
+  });
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+/**
+ * Check if a string is a valid hex color
+ * @param {string} color - Color string to validate
+ * @returns {boolean} - True if valid hex color
+ */
+export const isValidHexColor = (color) => {
+  if (!color || typeof color !== 'string') return false;
+  const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+  return hexColorRegex.test(color.trim());
+};
+
+/**
  * Prepare contact data for form editing
  * @param {Object} contactData - Raw contact data from API
  * @returns {Object} - Formatted data for form
