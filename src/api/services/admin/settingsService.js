@@ -160,8 +160,10 @@ export const updateSetting = async (settingId, settingData) => {
       throw new Error('Setting ID is required.');
     }
 
-    // Check if this is file data (has 'file' property with base64)
-    const isFileData = settingData.file && typeof settingData.file === 'string' && settingData.file.length > 100;
+    // Check if this is file data (has 'value' property with data URL and type is image)
+    const isFileData = settingData.type === 'image' && settingData.value && 
+                      typeof settingData.value === 'string' && 
+                      settingData.value.startsWith('data:image/'); // Data URL format
 
     if (isFileData) {
       // For file uploads, send the data as JSON directly without standard validation

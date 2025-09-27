@@ -125,15 +125,13 @@ const CompanyProfileSection = () => {
       
       let response;
       
-      // File upload logic temporarily commented out
-      /*
       if (isLogoField && uploadedFile) {
         // Create JSON data with base64 file
         const fileData = {
           key: settingData.key,
           type: 'image',
           status: settingData.status,
-          value: uploadedFile.file
+          value: uploadedFile.file // This is already clean base64 without data: prefix
         };
         
         // Update setting with file data
@@ -146,7 +144,6 @@ const CompanyProfileSection = () => {
           return updated;
         });
       } else {
-      */
         // Validate setting data for non-file updates
         const validation = validateSettingData(settingData);
         if (!validation.isValid) {
@@ -156,7 +153,7 @@ const CompanyProfileSection = () => {
 
         // Regular setting update
         response = await updateSetting(settingId, settingData);
-      // }
+      }
       
       // Update the original settings
       setSettings(prev => prev.map(setting => 
@@ -228,7 +225,7 @@ const CompanyProfileSection = () => {
     // Convert file to base64
     const reader = new FileReader();
     reader.onload = (e) => {
-      const base64String = e.target.result;
+      const base64String = e.target.result; // Keep full data URL with prefix
       
       // Store the file data for later upload
       setUploadedFiles(prev => ({
@@ -286,8 +283,7 @@ const CompanyProfileSection = () => {
                 </div>
               )}
               <div className="flex-1 space-y-3">
-{/* File upload functionality temporarily commented out
-                {isLogoField && (
+{isLogoField && (
                   <div>
                     <Label className="text-xs font-medium mb-2 block">Upload New Image</Label>
                     <Input
@@ -302,12 +298,17 @@ const CompanyProfileSection = () => {
                       className="mb-2"
                       disabled={loading}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Upload an image file (JPG, PNG, SVG, etc.)
-                    </p>
+                    {uploadedFiles[setting.id] ? (
+                      <p className="text-xs text-green-600 font-medium">
+                        ✓ File selected: {uploadedFiles[setting.id].name}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Upload an image file (JPG, PNG, SVG, etc.)
+                      </p>
+                    )}
                   </div>
                 )}
-                */}
                 <div>
                   <Label className="text-xs font-medium mb-2 block">Or Enter Image URL</Label>
                   <Input
@@ -387,11 +388,11 @@ const CompanyProfileSection = () => {
   const hasChanges = () => {
     return settings.some(setting => {
       const edited = editedSettings[setting.id];
-      // const hasUploadedFile = uploadedFiles[setting.id]; // Commented out temporarily
+      const hasUploadedFile = uploadedFiles[setting.id];
       return edited && (
         edited.value !== setting.value ||
-        edited.status !== setting.status
-        // || hasUploadedFile // Commented out temporarily
+        edited.status !== setting.status ||
+        hasUploadedFile
       );
     });
   };
@@ -454,8 +455,8 @@ const CompanyProfileSection = () => {
             if (!editedSetting) return null;
 
             const fieldType = editedSetting.type || 'text';
-            // const hasUploadedFile = uploadedFiles[setting.id]; // Commented out temporarily
-            const hasChanged = editedSetting.value !== setting.value || editedSetting.status !== setting.status; // || hasUploadedFile;
+            const hasUploadedFile = uploadedFiles[setting.id];
+            const hasChanged = editedSetting.value !== setting.value || editedSetting.status !== setting.status || hasUploadedFile;
 
             return (
               <div key={setting.id} className="border border-gray-200 rounded-lg p-4 space-y-4">
