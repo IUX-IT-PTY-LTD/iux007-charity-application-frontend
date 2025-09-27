@@ -2,6 +2,7 @@
 
 import { apiService } from './apiService';
 import { getAuthToken } from './authService';
+import { ENDPOINTS } from '@/api/config';
 
 // API version - match what's in your environment
 const version = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
@@ -87,11 +88,7 @@ export const updateContact = async (contactId, contactData) => {
  */
 export const getAllSettings = async () => {
   try {
-    if (!getAuthToken()) {
-      throw new Error('Authentication required. Please log in.');
-    }
-
-    return await apiService.get(`/admin/${version}/settings`);
+    return await apiService.get('/admin/v1' + ENDPOINTS.COMMON.SETTINGS);
   } catch (error) {
     console.error('Error fetching settings:', error);
     throw error;
@@ -118,7 +115,7 @@ export const createSetting = async (settingData) => {
     // Format data for API submission
     const formattedData = formatSettingDataForSubmission(settingData);
 
-    return await apiService.post(`/admin/${version}/settings/create`, formattedData);
+    return await apiService.post(`${ENDPOINTS.COMMON.SETTINGS}/create`, formattedData);
   } catch (error) {
     console.error('Error creating setting:', error);
     throw error;
@@ -150,7 +147,7 @@ export const getSettingById = async (settingId) => {
 /**
  * Update setting by ID
  * @param {number|string} settingId - ID of the setting to update
- * @param {Object} settingData - Setting data to be updated
+ * @param {Object|FormData} settingData - Setting data to be updated
  * @returns {Promise} - Promise resolving to the updated setting
  */
 export const updateSetting = async (settingId, settingData) => {
@@ -163,7 +160,15 @@ export const updateSetting = async (settingId, settingData) => {
       throw new Error('Setting ID is required.');
     }
 
-    // Validate required fields
+    // Check if this is file data (has 'file' property with base64)
+    const isFileData = settingData.file && typeof settingData.file === 'string' && settingData.file.length > 100;
+
+    if (isFileData) {
+      // For file uploads, send the data as JSON directly without standard validation
+      return await apiService.put(`/admin/${version}/settings/update/${settingId}`, settingData);
+    }
+
+    // Validate required fields for regular data
     const validation = validateSettingData(settingData);
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);

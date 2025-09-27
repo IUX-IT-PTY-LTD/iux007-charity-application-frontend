@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import ContactInformationSection from '@/components/admin/settings/ContactInformationSection';
 import FooterLinkManagementSection from '@/components/admin/settings/FooterLinkManagementSection';
 import ColorSchemeSection from '@/components/admin/settings/ColorSchemeSection';
+import CompanyProfileSection from '@/components/admin/settings/CompanyProfileSection';
 
 // Import permission hooks and context
 import { PermissionProvider } from '@/api/contexts/PermissionContext';
@@ -92,6 +93,7 @@ const SettingsPageContent = () => {
   const showContactTab = contactPermissions.hasAccess;
   const showFooterTab = adminPermissions.hasAccess;
   const showColorSchemeTab = adminPermissions.hasAccess; // Color scheme requires admin permissions
+  const showCompanyProfileTab = adminPermissions.hasAccess; // Company profile requires admin permissions
 
   // If only one tab is available, show it directly
   if (showContactTab && !showFooterTab) {
@@ -155,8 +157,8 @@ const SettingsPageContent = () => {
           </Alert>
         ) : null}
 
-        <Tabs defaultValue={showContactTab ? 'contact' : showColorSchemeTab ? 'colors' : 'footer'} className="w-full">
-          <TabsList className="mb-6 grid grid-cols-3 w-full max-w-7xl">
+        <Tabs defaultValue={showContactTab ? 'contact' : showCompanyProfileTab ? 'company' : showColorSchemeTab ? 'colors' : 'footer'} className="w-full">
+          <TabsList className="mb-6 grid grid-cols-4 w-full max-w-7xl">
             <TabsTrigger
               value="contact"
               className="flex items-center gap-2"
@@ -165,6 +167,15 @@ const SettingsPageContent = () => {
               <Phone className="h-4 w-4" />
               <span className="hidden sm:inline">Contact Info</span>
               {!showContactTab && <Lock className="h-3 w-3 ml-1" />}
+            </TabsTrigger>
+            <TabsTrigger
+              value="company"
+              className="flex items-center gap-2"
+              disabled={!showCompanyProfileTab}
+            >
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Company Profile</span>
+              {!showCompanyProfileTab && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
             <TabsTrigger
               value="colors"
@@ -208,6 +219,33 @@ const SettingsPageContent = () => {
 
                 <div className="max-w-4xl">
                   <ContactInformationSection />
+                </div>
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Company Profile Tab */}
+          {showCompanyProfileTab && (
+            <TabsContent value="company" className="space-y-6">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold mb-1">
+                    Company Profile
+                    {!adminPermissions.canEdit && (
+                      <span className="text-orange-600 ml-2 text-sm">(Read-only)</span>
+                    )}
+                  </h2>
+                  <p className="text-muted-foreground mb-4">
+                    Manage your organization's profile information, logos, and social media links.
+                    {!adminPermissions.canEdit && (
+                      <span className="text-orange-600 ml-1">- View-only access</span>
+                    )}
+                  </p>
+                  <Separator className="my-4" />
+                </div>
+
+                <div className="max-w-4xl">
+                  <CompanyProfileSection />
                 </div>
               </div>
             </TabsContent>
@@ -276,6 +314,20 @@ const SettingsPageContent = () => {
                   <AlertTitle>Access Denied</AlertTitle>
                   <AlertDescription>
                     You don't have permission to access contact information settings.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </TabsContent>
+          )}
+
+          {!showCompanyProfileTab && (
+            <TabsContent value="company" className="space-y-6">
+              <div className="flex items-center justify-center py-16">
+                <Alert variant="destructive" className="max-w-md">
+                  <Lock className="h-4 w-4" />
+                  <AlertTitle>Access Denied</AlertTitle>
+                  <AlertDescription>
+                    You don't have permission to access company profile settings.
                   </AlertDescription>
                 </Alert>
               </div>

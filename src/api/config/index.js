@@ -18,6 +18,7 @@ export const ENDPOINTS = {
     CUSTOMER_ENQUIRY: '/customer-inquiry',
     COUNTRIES: '/countries',
     FUNDRAISING_CATEGORIES: '/fundraising-categories',
+    
   },
   // Auth endpoints
   AUTH: {
