@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowUpDown, Eye, Edit3, Calendar, DollarSign, Users, FileText } from 'lucide-react';
+import { ArrowUpDown, Eye, Edit3, FileText } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -26,14 +26,14 @@ const RequestsTable = ({
 }) => {
   // Column definitions for sortable headers
   const columns = [
-    { field: 'request_id', label: 'Request ID', sortable: true },
-    { field: 'requester_name', label: 'Requester', sortable: true },
-    { field: 'organization_name', label: 'Organization', sortable: true },
-    { field: 'request_purpose', label: 'Request Purpose', sortable: true },
-    { field: 'request_amount', label: 'Amount', sortable: true },
-    { field: 'request_category', label: 'Category', sortable: true },
-    { field: 'submission_date', label: 'Submitted', sortable: true },
-    { field: 'current_status', label: 'Status', sortable: true },
+    { field: 'request_number', label: 'Request ID', sortable: true },
+    { field: 'name', label: 'Requester', sortable: true },
+    { field: 'fundraising_for', label: 'Fundraising For', sortable: true },
+    { field: 'title', label: 'Title', sortable: true },
+    { field: 'target_amount', label: 'Amount', sortable: true },
+    { field: 'fundraising_category', label: 'Category', sortable: true },
+    { field: 'created_at', label: 'Submitted', sortable: true },
+    { field: 'status', label: 'Status', sortable: true },
     { field: 'actions', label: 'Actions', sortable: false },
   ];
 
@@ -60,12 +60,25 @@ const RequestsTable = ({
     return <Badge className={statusOption.color}>{statusOption.label}</Badge>;
   };
 
-  // Check if status can be changed (reviewer permissions)
+  // Check if status can be changed (reviewer can change submitted/resubmitted/information_needed)
   const canChangeStatus = (currentStatus) => {
-    // Reviewer can change: submitted -> information_needed/technical_check_passed
-    // And information_needed -> technical_check_passed
-    // Once technical_check_passed, no more changes from this page
-    return ['submitted', 'information_needed'].includes(currentStatus);
+    return ['Submitted', 'Resubmitted', 'Information Needed'].includes(currentStatus);
+  };
+
+  // Get fund type badge
+  const getFundTypeBadge = (fundType) => {
+    if (fundType === 'individual') {
+      return (
+        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+          Individual
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="bg-purple-50 text-purple-700">
+        Organization
+      </Badge>
+    );
   };
 
   return (
@@ -124,54 +137,57 @@ const RequestsTable = ({
               >
                 <TableCell className="text-center">
                   <div className="font-mono text-sm font-medium text-blue-600">
-                    {request.request_id}
+                    {request.request_number}
                   </div>
                 </TableCell>
 
                 <TableCell className="text-center">
                   <div className="flex flex-col items-center">
-                    <div className="font-medium">{request.requester_name}</div>
-                    <div className="text-xs text-gray-500">{request.requester_email}</div>
+                    <div className="font-medium">{request.name}</div>
+                    <div className="text-xs text-gray-500">{request.email}</div>
+                    <div className="text-xs text-gray-400">{request.phone}</div>
                   </div>
                 </TableCell>
 
                 <TableCell className="text-center max-w-48">
-                  <div className="font-medium truncate" title={request.organization_name}>
-                    {request.organization_name || 'Individual Request'}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="font-medium truncate" title={request.fundraising_for}>
+                      {request.fundraising_for}
+                    </div>
+                    {getFundTypeBadge(request.fund_type)}
                   </div>
-                  {request.organization_type && (
-                    <div className="text-xs text-gray-500">{request.organization_type}</div>
-                  )}
                 </TableCell>
 
                 <TableCell className="text-left max-w-64">
-                  <div className="font-medium truncate" title={request.request_purpose}>
-                    {request.request_purpose}
+                  <div className="font-medium truncate" title={request.title}>
+                    {request.title}
                   </div>
                 </TableCell>
 
                 <TableCell className="text-center">
                   <div className="flex flex-col items-center">
                     <span className="font-semibold text-green-600">
-                      {formatCurrency(request.request_amount)}
+                      {formatCurrency(request.target_amount)}
                     </span>
-                    <span className="text-xs text-gray-500">ZIP file attached</span>
+                    {request.shortage_amount > 0 && (
+                      <span className="text-xs text-gray-500">
+                        Shortage: {formatCurrency(request.shortage_amount)}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
 
                 <TableCell className="text-center">
                   <Badge variant="outline" className="bg-gray-50">
-                    {request.request_category}
+                    {request.fundraising_category}
                   </Badge>
                 </TableCell>
 
                 <TableCell className="text-center">
-                  <div className="text-sm">{formatDate(request.submission_date)}</div>
+                  <div className="text-sm">{formatDate(request.created_at)}</div>
                 </TableCell>
 
-                <TableCell className="text-center">
-                  {getStatusBadge(request.current_status)}
-                </TableCell>
+                <TableCell className="text-center">{getStatusBadge(request.status)}</TableCell>
 
                 <TableCell className="text-center">
                   <div className="flex justify-center gap-1">
@@ -188,7 +204,7 @@ const RequestsTable = ({
                       <span className="sr-only">View Details</span>
                     </Button>
 
-                    {canChangeStatus(request.current_status) && (
+                    {canChangeStatus(request.status) && (
                       <Button
                         variant="ghost"
                         size="icon"

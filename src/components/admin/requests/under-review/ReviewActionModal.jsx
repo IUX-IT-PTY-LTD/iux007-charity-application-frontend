@@ -22,7 +22,7 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
   if (!request) return null;
 
   const isApproval = actionType === 'approve';
-  const actionLabel = isApproval ? 'Approve' : 'Deny';
+  const actionLabel = isApproval ? 'Approve' : 'Reject';
   const actionColor = isApproval ? 'green' : 'red';
   const ActionIcon = isApproval ? ThumbsUp : ThumbsDown;
 
@@ -39,6 +39,10 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
 
     if (!comment.trim()) {
       errors.push('Comment is required');
+    }
+
+    if (comment.trim().length < 5) {
+      errors.push('Comment must be at least 5 characters long');
     }
 
     if (comment.length > 500) {
@@ -61,9 +65,8 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
     setIsSubmitting(true);
 
     try {
-      await onSubmit(request.id, actionType, comment.trim());
-      toast.success(`Request ${actionType}d successfully`);
-      onClose();
+      await onSubmit(request.uuid, actionType, comment.trim());
+      // Success handling is done in parent component
     } catch (error) {
       console.error(`Error ${actionType}ing request:`, error);
       toast.error(`Failed to ${actionType} request`);
@@ -72,10 +75,20 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
     }
   };
 
+  // Format currency
+  const formatCurrency = (amount, currency = 'USD') => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="sticky top-0 bg-background pb-4 border-b">
+        <DialogHeader className="sticky top-0 bg-background pb-4 border-t">
           <DialogTitle className="flex items-center gap-3">
             <ActionIcon className={`h-6 w-6 text-${actionColor}-600`} />
             {actionLabel} Request
@@ -89,23 +102,18 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm">Request ID:</span>
                 <span className="font-mono text-purple-600 text-sm break-all">
-                  {request.request_id}
+                  {request.request_number}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm">Requester:</span>
-                <span className="text-sm break-all">{request.requester_name}</span>
+                <span className="text-sm break-all">{request.name}</span>
               </div>
             </div>
             <div className="flex items-center justify-between mt-3 pt-3 border-t">
               <span className="font-medium text-sm">Amount:</span>
               <span className="font-semibold text-green-600">
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(request.request_amount)}
+                {formatCurrency(request.target_amount, request.currency || 'USD')}
               </span>
             </div>
           </div>
@@ -118,12 +126,12 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
               <ActionIcon className={`h-5 w-5 text-${actionColor}-600 flex-shrink-0 mt-0.5`} />
               <div>
                 <h4 className={`font-medium text-${actionColor}-800 mb-1`}>
-                  {isApproval ? 'Approval Confirmation' : 'Denial Confirmation'}
+                  {isApproval ? 'Approval Confirmation' : 'Rejection Confirmation'}
                 </h4>
                 <p className={`text-sm text-${actionColor}-700`}>
                   {isApproval
-                    ? 'By approving this request, you are indicating that it meets the criteria and should proceed to the final approval stage. Your approval will count towards the minimum 3 required approvals.'
-                    : 'By denying this request, you are indicating that it does not meet the criteria or has issues that prevent approval. Please provide detailed feedback in your comment.'}
+                    ? 'By approving this request, you are indicating that it meets the criteria and should proceed. Your approval will count towards the required approvals for this request.'
+                    : 'By rejecting this request, you are indicating that it does not meet the criteria or has issues that prevent approval. Please provide detailed feedback in your comment.'}
                 </p>
               </div>
             </div>
@@ -132,7 +140,7 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
           {/* Comment Section */}
           <div className="space-y-3">
             <Label htmlFor="comment" className="text-sm font-medium">
-              {isApproval ? 'Approval Comments' : 'Denial Reason'}{' '}
+              {isApproval ? 'Approval Comments' : 'Rejection Reason'}{' '}
               <span className="text-red-500">*</span>
             </Label>
             <Textarea
@@ -140,7 +148,7 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
               placeholder={
                 isApproval
                   ? "Provide your comments on why you're approving this request..."
-                  : 'Explain the reasons for denial and any recommendations for the requester...'
+                  : 'Explain the reasons for rejection and any recommendations...'
               }
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -170,13 +178,13 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
                   {isApproval ? (
                     <>
                       <li>• Confirm all documentation is complete and accurate</li>
-                      <li>• Verify the request aligns with charity objectives</li>
+                      <li>• Verify the request aligns with fundraising objectives</li>
                       <li>• Ensure the requested amount is reasonable for the stated purpose</li>
                       <li>• Consider the potential impact and beneficiaries</li>
                     </>
                   ) : (
                     <>
-                      <li>• Provide specific reasons for denial</li>
+                      <li>• Provide specific reasons for rejection</li>
                       <li>• Mention missing documentation or information</li>
                       <li>• Suggest improvements or alternatives if applicable</li>
                       <li>• Be constructive in your feedback</li>
@@ -187,7 +195,7 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
             </div>
           </div>
 
-          {/* Warning for denial */}
+          {/* Warning for rejection */}
           {!isApproval && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-start gap-3">
@@ -195,8 +203,9 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
                 <div>
                   <h4 className="font-medium text-red-800 mb-1">Important Note</h4>
                   <p className="text-sm text-red-700">
-                    Denied requests cannot proceed to final approval. The requester may be notified
-                    of the denial reason and may have the option to address concerns and resubmit.
+                    Rejected requests cannot proceed to final approval. The requester may be
+                    notified of the rejection reason and may have the option to address concerns and
+                    resubmit.
                   </p>
                 </div>
               </div>
@@ -211,8 +220,8 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
                 <div>
                   <h4 className="font-medium text-green-800 mb-1">Next Steps</h4>
                   <p className="text-sm text-green-700">
-                    Once this request receives 3 or more approvals, it will automatically move to
-                    the final approval stage where administrators can make the final decision.
+                    Once this request receives the required number of approvals, it will move to the
+                    next stage where administrators can make the final decision.
                   </p>
                 </div>
               </div>
@@ -240,7 +249,7 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                  {isApproval ? 'Approving...' : 'Denying...'}
+                  {isApproval ? 'Approving...' : 'Rejecting...'}
                 </>
               ) : (
                 <>
