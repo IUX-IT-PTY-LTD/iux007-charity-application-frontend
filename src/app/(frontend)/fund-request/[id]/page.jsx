@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, MessageCircle, Upload, CheckCircle, FileText, User, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Upload, CheckCircle, FileText, User, Calendar, DollarSign, Edit, AlertCircle } from 'lucide-react';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { toast, ToastContainer } from 'react-toastify';
@@ -17,7 +17,7 @@ export default function FundRequestDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
   const [request, setRequest] = useState(null);
-  const [adminMessages, setAdminMessages] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +25,6 @@ export default function FundRequestDetailsPage() {
 
   useEffect(() => {
     fetchRequestDetails();
-    fetchAdminMessages();
   }, [id]);
 
   const fetchRequestDetails = async () => {
@@ -34,6 +33,10 @@ export default function FundRequestDetailsPage() {
       const response = await apiService.get(ENDPOINTS.FUND_RAISING.REQUEST_DETAILS(id));
       if (response && response.status === 'success') {
         setRequest(response.data);
+        // Extract reviews from the response if available
+        if (response.data.reviews && response.data.reviews.length > 0) {
+          setReviews(response.data.reviews);
+        }
       }
     } catch (err) {
       console.error('Request Details Fetch Error:', err);
@@ -42,31 +45,6 @@ export default function FundRequestDetailsPage() {
     }
   };
 
-  const fetchAdminMessages = async () => {
-    try {
-      const response = await apiService.get(`${ENDPOINTS.FUND_RAISING.MESSAGES}/${id}`);
-      if (response && response.status === 'success') {
-        setAdminMessages(response.data);
-      }
-    } catch (err) {
-      console.error('Admin Messages Fetch Error:', err);
-      // Dummy admin messages
-      setAdminMessages([
-        {
-          id: 1,
-          message: "Thank you for your fundraising request. We have received your application and are currently reviewing the documentation. Please provide additional medical certificates to support your case.",
-          created_at: "2024-01-20T14:30:00Z",
-          admin_name: "Admin Team"
-        },
-        {
-          id: 2,
-          message: "We have reviewed your updated documents. Your request looks promising and we are moving forward with the verification process. Expected completion by end of this month.",
-          created_at: "2024-02-05T09:15:00Z",
-          admin_name: "Review Manager"
-        }
-      ]);
-    }
-  };
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -116,6 +94,9 @@ export default function FundRequestDetailsPage() {
       case 'under_review':
       case 'Under Review':
         return 'bg-blue-100 text-blue-600 border-blue-200';
+      case 'information_needed':
+      case 'Information Needed':
+        return 'bg-orange-100 text-orange-600 border-orange-200';
       default:
         return 'bg-gray-100 text-gray-600 border-gray-200';
     }
@@ -123,6 +104,14 @@ export default function FundRequestDetailsPage() {
 
   const formatStatus = (status) => {
     return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const handleEditRequest = () => {
+    router.push(`/fund-request/edit/${id}`);
+  };
+
+  const isInformationNeeded = (status) => {
+    return status === 'information_needed' || status === 'Information Needed';
   };
 
   if (loading) {
@@ -175,8 +164,19 @@ export default function FundRequestDetailsPage() {
             <h1 className="text-3xl font-bold text-gray-800 mb-2">{request.title}</h1>
             <p className="text-gray-600">Request Number: {request.request_number}</p>
           </div>
-          <div className={`px-4 py-2 rounded-full border font-medium ${getStatusColor(request.status)}`}>
-            {formatStatus(request.status)}
+          <div className="flex items-center gap-3">
+            <div className={`px-4 py-2 rounded-full border font-medium ${getStatusColor(request.status)}`}>
+              {formatStatus(request.status)}
+            </div>
+            {isInformationNeeded(request.status) && (
+              <Button
+                onClick={handleEditRequest}
+                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+              >
+                <Edit className="h-4 w-4" />
+                <span>Edit Request</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -264,40 +264,164 @@ export default function FundRequestDetailsPage() {
             </CardContent>
           </Card>
 
-          {/* Admin Messages */}
-          {/* <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <MessageCircle className="h-5 w-5" />
-                <span>Admin Messages</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {adminMessages.length === 0 ? (
-                <p className="text-gray-500 text-center py-6">No messages from admin yet.</p>
-              ) : (
+          {/* Information Needed Alert & Admin Review Comments */}
+          {isInformationNeeded(request.status) && (
+            <Card className="shadow-lg border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-orange-800">
+                  <AlertCircle className="h-5 w-5" />
+                  <span>Action Required - Information Needed</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  {adminMessages.map((message) => (
-                    <div key={message.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-medium text-blue-800">{message.admin_name}</span>
-                        <span className="text-sm text-blue-600">
-                          {new Date(message.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-blue-700">{message.message}</p>
+                  <div className="bg-white border border-orange-200 rounded-lg p-4">
+                    <p className="text-orange-700 mb-3">
+                      Your fundraising request requires additional information or corrections. 
+                      Please review the admin comments below and edit your request accordingly.
+                    </p>
+                    <Button
+                      onClick={handleEditRequest}
+                      className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      <span>Edit Your Request</span>
+                    </Button>
+                  </div>
+                  
+                  {/* Admin Review Comments */}
+                  {request.review_comments && (
+                    <div className="bg-white border border-orange-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-orange-800 mb-2">Admin Review Comments:</h4>
+                      <p className="text-orange-700 whitespace-pre-wrap">{request.review_comments}</p>
                     </div>
-                  ))}
+                  )}
+                  
+                  {/* Show admin reviews */}
+                  {reviews.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-orange-800">Admin Reviews:</h4>
+                      {reviews.map((review) => (
+                        <div key={review.id} className="bg-white border border-orange-200 rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <span className="font-medium text-orange-800">{review.admin.name}</span>
+                              <span className="text-sm text-orange-600 ml-2">({review.admin.email})</span>
+                            </div>
+                            <div className="text-right">
+                              {review.status && (
+                                <div className={`px-2 py-1 rounded-full text-xs font-medium mb-1 ${
+                                  review.status === 'information_needed' 
+                                    ? 'bg-orange-100 text-orange-600' 
+                                    : review.status === 'approved'
+                                    ? 'bg-green-100 text-green-600'
+                                    : review.status === 'rejected'
+                                    ? 'bg-red-100 text-red-600'
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  {review.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </div>
+                              )}
+                              <span className="text-xs text-orange-600">
+                                {new Date(review.created_at).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          {review.comments && (
+                            <p className="text-orange-700 mb-2">{review.comments}</p>
+                          )}
+                          {review.deadline && (
+                            <div className="text-sm text-orange-600">
+                              <strong>Deadline:</strong> {new Date(review.deadline).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card> */}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Admin Messages and Reviews for other statuses */}
+          {!isInformationNeeded(request.status) && (reviews.length > 0) && (
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MessageCircle className="h-5 w-5" />
+                  <span>Admin Reviews</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Show reviews first */}
+                  {reviews.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-blue-800">Admin Reviews:</h4>
+                      {reviews.map((review) => (
+                        <div key={review.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <span className="font-medium text-blue-800">{review.admin.name}</span>
+                              <span className="text-sm text-blue-600 ml-2">({review.admin.email})</span>
+                            </div>
+                            <div className="text-right">
+                              {review.status && (
+                                <div className={`px-2 py-1 rounded-full text-xs font-medium mb-1 ${
+                                  review.status === 'information_needed' 
+                                    ? 'bg-orange-100 text-orange-600' 
+                                    : review.status === 'approved'
+                                    ? 'bg-green-100 text-green-600'
+                                    : review.status === 'rejected'
+                                    ? 'bg-red-100 text-red-600'
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                  {review.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </div>
+                              )}
+                              <span className="text-xs text-blue-600">
+                                {new Date(review.created_at).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          {review.comments && (
+                            <p className="text-blue-700 mb-2">{review.comments}</p>
+                          )}
+                          {review.deadline && (
+                            <div className="text-sm text-blue-600">
+                              <strong>Deadline:</strong> {new Date(review.deadline).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Comment Section */}
           {/* <Card className="shadow-lg">

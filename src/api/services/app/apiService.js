@@ -3,7 +3,10 @@ import axios from 'axios';
 
 class ApiService {
   constructor() {
-    this.baseUrl = API_BASE_URL + '/' + API_VERSION;
+    this.baseUrl = API_BASE_URL + '/' + (API_VERSION || 'v1');
+    console.log('ApiService initialized with baseUrl:', this.baseUrl);
+    console.log('API_BASE_URL:', API_BASE_URL);
+    console.log('API_VERSION:', API_VERSION);
   }
 
   // Generic GET request
@@ -89,6 +92,37 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('API PUT Error:', error);
+      throw error;
+    }
+  }
+
+  // PUT request for FormData (file uploads)
+  async putForm(endpoint, formData, options = {}) {
+    try {
+      console.log('API Service - PUT Form URL:', `${this.baseUrl}${endpoint}`);
+      console.log('Base URL:', this.baseUrl);
+      console.log('Endpoint:', endpoint);
+      
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          ...this.getAuthHeader(),
+          ...options.headers,
+        },
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw { response: { data: result } };
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('API PUT Form Error:', error);
       throw error;
     }
   }

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Save, RefreshCw, Upload, Globe, Type, Image as ImageIcon, Eye, ExternalLink } from 'lucide-react';
+import { Building2, Save, RefreshCw, Upload, Globe, Type, Image as ImageIcon, Eye, ExternalLink, Hash } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { 
@@ -35,7 +35,7 @@ const CompanyProfileSection = () => {
         
         // Filter company profile related settings
         const companySettings = settingsData.filter(setting => 
-          ['company_name', 'company_logo', 'customer_inquiry_email', 'facebook', 'instagram', 'twitter', 'linkedin', 'youtube', 'acnc_logo', 'acnc_link'].includes(setting.key)
+          ['company_name', 'fund_raising_max_approval', 'company_logo', 'customer_inquiry_email', 'facebook', 'instagram', 'twitter', 'linkedin', 'youtube', 'acnc_logo', 'acnc_link'].includes(setting.key)
         );
         
         setSettings(companySettings);
@@ -67,6 +67,7 @@ const CompanyProfileSection = () => {
     if (key.includes('logo')) return 'image';
     if (key.includes('link')) return 'url';
     if (key === 'customer_inquiry_email') return 'text'; // Email field should be text input
+    if (key === 'fund_raising_max_approval') return 'number';
     return 'text';
   };
 
@@ -74,6 +75,7 @@ const CompanyProfileSection = () => {
   const getDisplayName = (key) => {
     const nameMap = {
       company_name: 'Company Name',
+      fund_raising_max_approval: 'Fund Raising Approval Needed',
       company_logo: 'Company Logo',
       customer_inquiry_email: 'Customer Inquiry Email',
       facebook: 'Facebook Link',
@@ -91,6 +93,7 @@ const CompanyProfileSection = () => {
   const getFieldDescription = (key) => {
     const descMap = {
       company_name: 'The name of your organization displayed across the website',
+      fund_raising_max_approval: 'Maximum approvals needed for publishing for fundraising requests',
       company_logo: 'Your organization\'s logo (recommended: SVG or PNG format)',
       customer_inquiry_email: 'Email address for customer inquiries and support',
       facebook: 'Link to your organization\'s Facebook page',
@@ -364,6 +367,18 @@ const CompanyProfileSection = () => {
           </div>
         );
         
+      case 'number':
+        return (
+          <Input
+            type="number"
+            value={editedSetting.value}
+            onChange={(e) => handleInputChange(setting.id, 'value', e.target.value)}
+            placeholder={`Enter ${getDisplayName(setting.key).toLowerCase()}`}
+            min="0"
+            step="1"
+          />
+        );
+        
       default: // text
         const inputType = setting.key === 'customer_inquiry_email' ? 'email' : 'text';
         return (
@@ -381,6 +396,7 @@ const CompanyProfileSection = () => {
     switch (type) {
       case 'image': return <ImageIcon className="h-4 w-4" />;
       case 'url': return <Globe className="h-4 w-4" />;
+      case 'number': return <Hash className="h-4 w-4" />;
       default: return <Type className="h-4 w-4" />;
     }
   };
