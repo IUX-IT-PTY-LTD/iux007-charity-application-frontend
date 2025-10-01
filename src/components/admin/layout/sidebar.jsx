@@ -20,6 +20,7 @@ import {
   Shield,
   UserCircle,
   Globe, // Added for Website section
+  Info, // Added for About Us
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -114,6 +115,15 @@ const getNavigationItems = (permissions) => {
       order: 3,
     });
   }
+
+  // About Us - always visible (no permission required for content management)
+  websiteSubmenuItems.push({
+    id: 'website-about-us',
+    name: 'About Us',
+    href: '/admin/about-us',
+    icon: Info,
+    order: 4,
+  });
 
   // Sort website submenu items by order
   websiteSubmenuItems.sort((a, b) => a.order - b.order);
