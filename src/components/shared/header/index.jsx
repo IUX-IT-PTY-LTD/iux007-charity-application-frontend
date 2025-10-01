@@ -85,7 +85,7 @@ const Header = () => {
       {isLoading && <Loader title="Logging Out..." />}
         <div className="flex flex-wrap items-center justify-between gap-5 w-full">
           <Link href="./" className="flex justify-start items-center gap-3">
-            <Image src="/assets/img/logo.svg" width={100} height={100} alt="logo" className="w-8" />
+            <Image src={settings?.logo || "/assets/img/logo.svg"} width={100} height={100} alt="logo" className="w-8" />
             <span>
               <strong className="text-primary font-semibold text-lg">{settings?.site_name}</strong>
             </span>
@@ -120,7 +120,7 @@ const Header = () => {
               <li className="mb-6 hidden max-lg:block">
                 <Link href="./">
                   <Image
-                    src="/assets/img/logo.svg"
+                    src={settings?.logo || "/assets/img/logo.svg"}
                     alt="logo"
                     width={100}
                     height={100}
