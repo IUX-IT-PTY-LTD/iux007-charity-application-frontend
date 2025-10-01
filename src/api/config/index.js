@@ -1,8 +1,9 @@
 // src/api/config/index.js
 
 // API Base URL
-export const API_BASE_URL = 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
+// export const API_BASE_URL = 'https://polished-dusk-oxhdccceltzf.on-vapor.com/api';
 // export const API_BASE_URL = 'http://localhost:9094/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export const API_VERSION = 'v1';
 
 // API Endpoints
@@ -15,6 +16,9 @@ export const ENDPOINTS = {
     CONATCTUS: '/contact-us',
     SETTINGS: '/settings',
     CUSTOMER_ENQUIRY: '/customer-inquiry',
+    COUNTRIES: '/countries',
+    FUNDRAISING_CATEGORIES: '/fundraising-categories',
+    
   },
   // Auth endpoints
   AUTH: {
@@ -24,6 +28,7 @@ export const ENDPOINTS = {
     REGISTER: '/registration',
     LOGOUT: '/logout',
     CHANGE_PASSWORD: '/change-password',
+    SOCIAL_LOGIN: '/auth/social-login',
   },
 
   // Forgot password endpoints
@@ -61,6 +66,7 @@ export const ENDPOINTS = {
 
   //FundRaising Request
   FUND_RAISING: {
-    REQUEST: '/fund-raising/requests'
+    REQUEST: '/fund-raising/requests',
+    REQUEST_DETAILS: (uuid) => `/fund-raising/requests/${uuid}`,
   }
 };

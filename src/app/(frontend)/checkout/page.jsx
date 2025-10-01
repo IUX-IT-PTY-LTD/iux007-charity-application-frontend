@@ -149,17 +149,27 @@ const Checkout = () => {
 
   const paymentMethods = [
     {
-      id: 1,
+      id: 'credit-cards',
+      name: 'Credit Cards',
       img: '/assets/img/4logos.png',
+      description: 'Visa, Mastercard, American Express'
     },
-    {
-      id: 2,
-      img: '/assets/img/payment-card-gpay-apple.png',
-    },
+    // {
+    //   id: 'commonwealth',
+    //   name: 'Commonwealth Bank',
+    //   img: '/assets/img/commonwealthBank.jpg', // Using existing image as placeholder
+    //   description: 'Commonwealth Bank Gateway'
+    // },
+    // {
+    //   id: 'nab',
+    //   name: 'NAB Gateway',
+    //   img: '/assets/img/nab.png', // Using existing image as placeholder
+    //   description: 'NAB Bank Gateway'
+    // },
   ];
 
   //   payment methods
-  const [paymentMethod, setPaymentMethod] = React.useState(paymentMethods[0]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState(paymentMethods[0]);
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-16 px-4 md:px-0">
       <div className="max-w-6xl mx-auto">
@@ -583,30 +593,167 @@ const Checkout = () => {
                       <p className="text-gray-600">Total: ${Number(totalAmount || 0).toFixed(2)}</p>
                     </div>
 
-                    <div className="grid">
-                      {!stripePublishableKey ? (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                          <h3 className="text-lg font-semibold text-red-800 mb-2">Payment Configuration Error</h3>
-                          <p className="text-red-600 mb-4">
-                            Stripe payment is not properly configured. Please contact support.
-                          </p>
-                          <button
-                            onClick={() => setShowPaymentForm(false)}
-                            className="px-4 md:px-6 py-2 text-sm md:text-base bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    {/* Payment Method Selection */}
+                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                      <h4 className="text-xl font-semibold text-gray-900 mb-6">Select Payment Method</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {paymentMethods.map((method) => (
+                          <div
+                            key={method.id}
+                            onClick={() => setSelectedPaymentMethod(method)}
+                            className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all duration-200 ${
+                              selectedPaymentMethod.id === method.id
+                                ? 'border-primary bg-primary/5 shadow-lg'
+                                : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                            }`}
                           >
-                            Go Back
-                          </button>
+                            {selectedPaymentMethod.id === method.id && (
+                              <div className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                            <div className="text-center space-y-3">
+                              <div className="w-16 h-16 mx-auto rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
+                                <Image
+                                  src={method.img}
+                                  alt={method.name}
+                                  width={60}
+                                  height={40}
+                                  className="max-w-full max-h-full object-contain"
+                                />
+                              </div>
+                              <div>
+                                <h5 className="font-semibold text-gray-900">{method.name}</h5>
+                                <p className="text-sm text-gray-600">{method.description}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Payment Form Based on Selected Method */}
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                      <h4 className="text-xl font-semibold text-gray-900 mb-6">
+                        Pay with {selectedPaymentMethod.name}
+                      </h4>
+                      
+                      {selectedPaymentMethod.id === 'credit-cards' ? (
+                        // Credit Cards - Stripe Payment
+                        <div className="grid">
+                          {!stripePublishableKey ? (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                              <h3 className="text-lg font-semibold text-red-800 mb-2">Payment Configuration Error</h3>
+                              <p className="text-red-600 mb-4">
+                                Stripe payment is not properly configured. Please contact support.
+                              </p>
+                              <button
+                                onClick={() => setShowPaymentForm(false)}
+                                className="px-4 md:px-6 py-2 text-sm md:text-base bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Go Back
+                              </button>
+                            </div>
+                          ) : stripePromise ? (
+                            <Elements stripe={stripePromise}>
+                              <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
+                            </Elements>
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                              <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Payment System...</h3>
+                              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            </div>
+                          )}
                         </div>
-                      ) : stripePromise ? (
-                        <Elements stripe={stripePromise}>
-                          <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
-                        </Elements>
-                      ) : (
-                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-                          <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Payment System...</h3>
-                          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      ) : selectedPaymentMethod.id === 'commonwealth' ? (
+                        // Commonwealth Bank Gateway
+                        <div className="space-y-6">
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            <div className="flex items-center space-x-3 mb-4">
+                              <Image
+                                src={selectedPaymentMethod.img}
+                                alt="Commonwealth Bank"
+                                width={40}
+                                height={40}
+                                className="rounded"
+                              />
+                              <div>
+                                <h5 className="font-semibold text-gray-900">Commonwealth Bank Gateway</h5>
+                                <p className="text-sm text-gray-600">Secure payment via Commonwealth Bank</p>
+                              </div>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 border">
+                              <p className="text-sm text-gray-700 mb-4">
+                                You will be redirected to Commonwealth Bank's secure payment gateway to complete your transaction.
+                              </p>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium">Amount:</span>
+                                  <span className="ml-2">${Number(totalAmount || 0).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Currency:</span>
+                                  <span className="ml-2">AUD</span>
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              className="w-full mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                              onClick={() => {
+                                // TODO: Implement Commonwealth Bank gateway redirect
+                                alert('Commonwealth Bank payment integration coming soon!');
+                              }}
+                            >
+                              Continue to Commonwealth Bank
+                            </button>
+                          </div>
                         </div>
-                      )}
+                      ) : selectedPaymentMethod.id === 'nab' ? (
+                        // NAB Gateway
+                        <div className="space-y-6">
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                            <div className="flex items-center space-x-3 mb-4">
+                              <Image
+                                src={selectedPaymentMethod.img}
+                                alt="NAB Gateway"
+                                width={40}
+                                height={40}
+                                className="rounded"
+                              />
+                              <div>
+                                <h5 className="font-semibold text-gray-900">NAB Gateway</h5>
+                                <p className="text-sm text-gray-600">Secure payment via NAB Bank</p>
+                              </div>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 border">
+                              <p className="text-sm text-gray-700 mb-4">
+                                You will be redirected to NAB's secure payment gateway to complete your transaction.
+                              </p>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium">Amount:</span>
+                                  <span className="ml-2">${Number(totalAmount || 0).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Currency:</span>
+                                  <span className="ml-2">AUD</span>
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              className="w-full mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                              onClick={() => {
+                                // TODO: Implement NAB gateway redirect
+                                alert('NAB Gateway payment integration coming soon!');
+                              }}
+                            >
+                              Continue to NAB Gateway
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="flex justify-between pt-8 border-t">

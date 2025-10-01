@@ -60,27 +60,17 @@ const FeaturedEvents = ({ data }) => {
               </SwiperSlide>
             ))
           ) : (
-            [1, 2, 3, 4].map((index) => (
-              <SwiperSlide key={`demo-${index}`}>
-                <div className="transform transition duration-300 hover:scale-105">
-                  <FeaturedEventsCard
-                    eventId="demo-event"
-                    title="Demo Event"
-                    description="This is a sample event description. Join us for an amazing experience!"
-                    img={fallbackImage}
-                    time={new Date().toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                    venue="Sample Location"
-                    fixedDonation={true}
-                    donationAmount={50}
-                    showDetails={false}
-                  />
-                </div>
-              </SwiperSlide>
-            ))
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <div className="w-24 h-24 mb-6 text-gray-400">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Events Found</h3>
+              <p className="text-gray-500 text-center max-w-md">
+                There are currently no featured events available. Check back later for upcoming events!
+              </p>
+            </div>
           )}
         </Swiper>
       </div>

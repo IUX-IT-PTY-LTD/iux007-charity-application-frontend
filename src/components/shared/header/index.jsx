@@ -9,6 +9,7 @@ import { ENDPOINTS } from '@/api/config';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout as logoutAction } from '@/store/features/userSlice';
 import  Loader  from '@/components/shared/loader';
+import toast from 'react-hot-toast';
 
 
 const Header = () => {

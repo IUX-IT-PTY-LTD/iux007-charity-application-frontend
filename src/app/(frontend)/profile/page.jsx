@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
@@ -16,9 +16,11 @@ import Loader from '@/components/shared/loader';
 export default function ProfilePage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState('profile');
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
   const [userInfo, setUserInfo] = useState(useSelector((state) => state.user.user));
   const [donations, setDonations] = useState([]);
+  const [fundRaisingRequests, setFundRaisingRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchDonations = async () => {
@@ -32,9 +34,35 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchFundRaisingRequests = async () => {
+    try {
+      const response = await apiService.get(ENDPOINTS.FUND_RAISING.REQUEST);
+      if (response && response.status === 'success') {
+        setFundRaisingRequests(response.data);
+      }
+    } catch (err) {
+      console.error('Fund Raising Requests Fetch Error:', err);
+    }
+  };
+
   useEffect(() => {
     fetchDonations();
+    fetchFundRaisingRequests();
   }, []);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['profile', 'donations', 'fundraising'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    router.replace(url.pathname + url.search);
+  };
   const handleInfoUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -83,10 +111,10 @@ export default function ProfilePage() {
             <div
               className={`px-6 py-4 cursor-pointer transition-colors ${
                 activeTab === 'profile'
-                  ? 'bg-blue-50 border-l-4 border-blue-500'
+                  ? 'bg-primary/10 border-l-4 border-primary'
                   : 'hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('profile')}
+              onClick={() => handleTabChange('profile')}
             >
               <div className="flex items-center space-x-3">
                 <svg
@@ -108,10 +136,10 @@ export default function ProfilePage() {
             <div
               className={`px-6 py-4 cursor-pointer transition-colors ${
                 activeTab === 'donations'
-                  ? 'bg-blue-50 border-l-4 border-blue-500'
+                  ? 'bg-primary/10 border-l-4 border-primary'
                   : 'hover:bg-gray-50'
               }`}
-              onClick={() => setActiveTab('donations')}
+              onClick={() => handleTabChange('donations')}
             >
               <div className="flex items-center space-x-3">
                 <svg
@@ -128,6 +156,31 @@ export default function ProfilePage() {
                   />
                 </svg>
                 <span className="font-medium text-gray-700">Donations</span>
+              </div>
+            </div>
+            <div
+              className={`px-6 py-4 cursor-pointer transition-colors ${
+                activeTab === 'fundraising'
+                  ? 'bg-primary/10 border-l-4 border-primary'
+                  : 'hover:bg-gray-50'
+              }`}
+              onClick={() => handleTabChange('fundraising')}
+            >
+              <div className="flex items-center space-x-3">
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
+                </svg>
+                <span className="font-medium text-gray-700">Fund Requests</span>
               </div>
             </div>
           </div>
@@ -193,7 +246,7 @@ export default function ProfilePage() {
                       />
                       <Button
                         type="button"
-                        className="absolute bottom-0 right-0 rounded-full bg-blue-600 p-2 hover:bg-blue-700"
+                        className="absolute bottom-0 right-0 rounded-full bg-primary p-2 hover:bg-primary/90"
                         onClick={() => document.getElementById('profilePicture').click()}
                       >
                         <svg
@@ -221,7 +274,7 @@ export default function ProfilePage() {
                         id="name"
                         value={userInfo.name}
                         onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
-                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        className="border-gray-300 focus:border-primary focus:ring-primary"
                       />
                     </div>
                     <div className="space-y-2">
@@ -236,7 +289,7 @@ export default function ProfilePage() {
                         data-testid="email"
                         value={userInfo.email}
                         onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        className="border-gray-300 focus:border-primary focus:ring-primary"
                       />
                     </div>
                     <div className="space-y-2">
@@ -247,7 +300,7 @@ export default function ProfilePage() {
                         id="phone"
                         value={userInfo.phone}
                         onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
-                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        className="border-gray-300 focus:border-primary focus:ring-primary"
                       />
                     </div>
                     <div className="space-y-2">
@@ -258,12 +311,12 @@ export default function ProfilePage() {
                         id="address"
                         value={userInfo.address}
                         onChange={(e) => setUserInfo({ ...userInfo, address: e.target.value })}
-                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        className="border-gray-300 focus:border-primary focus:ring-primary"
                       />
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6">
+                    <Button type="submit" className="bg-primary hover:bg-primary/90 text-white px-6">
                       Save Changes
                     </Button>
                   </div>
@@ -326,7 +379,7 @@ export default function ProfilePage() {
                           </div>
                           <button
                             onClick={() => handleViewInvoice(donation.uuid)}
-                            className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                            className="text-primary hover:text-primary/80 flex items-center gap-2"
                           >
                             <svg
                               className="w-5 h-5"
@@ -360,7 +413,7 @@ export default function ProfilePage() {
                                 </span>
                               </div>
                             ))}
-                            <div className="flex justify-between items-center text-sm text-blue-600">
+                            <div className="flex justify-between items-center text-sm text-primary">
                               <span>Admin Contribution</span>
                               <span className="font-medium">
                                 +${donation.admin_contribution_amount}
@@ -385,11 +438,127 @@ export default function ProfilePage() {
                                   ? 'bg-green-100 text-green-600'
                                   : donation.status.toLowerCase() === 'failed'
                                     ? 'bg-yellow-100 text-yellow-600'
-                                    : 'bg-blue-100 text-blue-600'
+                                    : 'bg-primary/10 text-primary'
                             }`}
                           >
                             {donation.status}
                           </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 'fundraising' && (
+            <Card className="shadow-lg">
+              <CardHeader className="bg-gray-50 border-b">
+                <CardTitle className="text-xl text-gray-800">Fund Raising Requests</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {fundRaisingRequests.length === 0 ? (
+                  <div className="text-center py-12">
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No fundraising requests yet</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Submit your first fundraising request to get started.
+                    </p>
+                    <button
+                      onClick={() => router.push('/charity-request')}
+                      className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors mt-4"
+                    >
+                      Create Request
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {fundRaisingRequests.map((request) => (
+                      <div
+                        key={request.id}
+                        className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex-1">
+                            <h3 
+                              className="text-xl font-semibold text-gray-800 mb-2 cursor-pointer hover:text-primary transition-colors"
+                              onClick={() => router.push(`/fund-request/${request.id}`)}
+                            >
+                              {request.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                              {request.description}
+                            </p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-500">Target:</span>
+                                <p className="font-medium">{request.currency} {parseInt(request.target_amount).toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Raised:</span>
+                                <p className="font-medium text-green-600">{request.currency} {parseInt(request.raised_amount || 0).toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Shortage:</span>
+                                <p className="font-medium text-red-600">{request.currency} {parseInt(request.shortage_amount).toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Country:</span>
+                                <p className="font-medium">{request.country}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                request.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-600'
+                                  : request.status === 'approved'
+                                    ? 'bg-green-100 text-green-600'
+                                    : request.status === 'rejected'
+                                      ? 'bg-red-100 text-red-600'
+                                      : 'bg-primary/10 text-primary'
+                              }`}
+                            >
+                              {request.status || 'Under Review'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-100 pt-4">
+                          <div className="flex justify-between items-center text-sm text-gray-500">
+                            <span>Submitted: {new Date(request.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })}</span>
+                            <div className="flex space-x-4">
+                              {request.reference_name && (
+                                <span>Reference: {request.reference_name}</span>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(`/fund-request/${request.uuid}`)}
+                                className="text-primary hover:bg-primary/10"
+                              >
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}

@@ -2,6 +2,7 @@
 
 import { apiService } from './apiService';
 import { getAuthToken } from './authService';
+import { ENDPOINTS } from '@/api/config';
 
 // API version - match what's in your environment
 const version = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
@@ -87,11 +88,7 @@ export const updateContact = async (contactId, contactData) => {
  */
 export const getAllSettings = async () => {
   try {
-    if (!getAuthToken()) {
-      throw new Error('Authentication required. Please log in.');
-    }
-
-    return await apiService.get(`/admin/${version}/settings`);
+    return await apiService.get('/admin/v1' + ENDPOINTS.COMMON.SETTINGS);
   } catch (error) {
     console.error('Error fetching settings:', error);
     throw error;
@@ -118,7 +115,7 @@ export const createSetting = async (settingData) => {
     // Format data for API submission
     const formattedData = formatSettingDataForSubmission(settingData);
 
-    return await apiService.post(`/admin/${version}/settings/create`, formattedData);
+    return await apiService.post(`${ENDPOINTS.COMMON.SETTINGS}/create`, formattedData);
   } catch (error) {
     console.error('Error creating setting:', error);
     throw error;
@@ -150,7 +147,7 @@ export const getSettingById = async (settingId) => {
 /**
  * Update setting by ID
  * @param {number|string} settingId - ID of the setting to update
- * @param {Object} settingData - Setting data to be updated
+ * @param {Object|FormData} settingData - Setting data to be updated
  * @returns {Promise} - Promise resolving to the updated setting
  */
 export const updateSetting = async (settingId, settingData) => {
@@ -163,7 +160,17 @@ export const updateSetting = async (settingId, settingData) => {
       throw new Error('Setting ID is required.');
     }
 
-    // Validate required fields
+    // Check if this is file data (has 'value' property with data URL and type is image)
+    const isFileData = settingData.type === 'image' && settingData.value && 
+                      typeof settingData.value === 'string' && 
+                      settingData.value.startsWith('data:image/'); // Data URL format
+
+    if (isFileData) {
+      // For file uploads, send the data as JSON directly without standard validation
+      return await apiService.put(`/admin/${version}/settings/update/${settingId}`, settingData);
+    }
+
+    // Validate required fields for regular data
     const validation = validateSettingData(settingData);
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
@@ -404,6 +411,102 @@ export const getAccreditationSettings = (settings) => {
     logo: acncLogo || null,
     link: acncLink || null,
   };
+};
+
+/**
+ * Get color scheme settings
+ * @returns {Promise} - Promise resolving to color scheme settings object
+ */
+export const getColorSchemeSettings = async () => {
+  try {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    return await apiService.get(`/admin/${version}/settings/color-schemes`);
+  } catch (error) {
+    console.error('Error fetching color scheme settings:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get color scheme settings from existing settings array (helper function)
+ * @param {Array} settings - Array of settings
+ * @returns {Object} - Object with color scheme settings
+ */
+export const getColorSchemeSettingsFromArray = (settings) => {
+  if (!Array.isArray(settings)) return {};
+
+  const colorKeys = ['primary_color', 'secondary_color', 'accent_color', 'light_color'];
+  const colorSettings = {};
+
+  colorKeys.forEach((key) => {
+    const setting = settings.find((s) => s.key === key);
+    colorSettings[key] = setting || null;
+  });
+
+  return colorSettings;
+};
+
+/**
+ * Update multiple color scheme settings
+ * @param {Object} colorData - Object containing color values
+ * @returns {Promise} - Promise resolving to the updated settings
+ */
+export const updateColorScheme = async (colorData) => {
+  try {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    // Validate color data
+    const validation = validateColorSchemeData(colorData);
+    if (!validation.isValid) {
+      throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+    }
+
+    return await apiService.post(`/admin/${version}/settings/color-schemes`, colorData);
+  } catch (error) {
+    console.error('Error updating color scheme:', error);
+    throw error;
+  }
+};
+
+/**
+ * Validate color scheme data
+ * @param {Object} colorData - Color scheme data to validate
+ * @returns {Object} - Object with isValid boolean and errors array
+ */
+export const validateColorSchemeData = (colorData) => {
+  const errors = [];
+
+  // Required color fields
+  const requiredColors = ['primary_color', 'secondary_color', 'accent_color', 'light_color'];
+  
+  requiredColors.forEach((colorKey) => {
+    if (!colorData[colorKey] || colorData[colorKey].trim() === '') {
+      errors.push(`${colorKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} is required`);
+    } else if (!isValidHexColor(colorData[colorKey])) {
+      errors.push(`${colorKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} must be a valid hex color`);
+    }
+  });
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+/**
+ * Check if a string is a valid hex color
+ * @param {string} color - Color string to validate
+ * @returns {boolean} - True if valid hex color
+ */
+export const isValidHexColor = (color) => {
+  if (!color || typeof color !== 'string') return false;
+  const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+  return hexColorRegex.test(color.trim());
 };
 
 /**
