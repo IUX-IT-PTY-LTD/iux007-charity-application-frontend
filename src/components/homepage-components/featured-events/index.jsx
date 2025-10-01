@@ -16,7 +16,7 @@ const FeaturedEvents = ({ data }) => {
     <div className="container mx-auto px-4 py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-10 text-center">
-          Featured Events
+          Featured Projects
         </h2>
         <Swiper
           modules={[Navigation, Pagination]}

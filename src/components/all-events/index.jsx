@@ -12,7 +12,7 @@ const Events = ({ data }) => {
       <div className="container mx-auto">
         <div className="mx-auto">
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-10 text-center">
-            All Events
+            All Projects
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-xl:gap-4 gap-6">
