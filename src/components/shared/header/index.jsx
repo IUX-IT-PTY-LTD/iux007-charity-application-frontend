@@ -21,6 +21,7 @@ const Header = () => {
   const [settings, setSettings] = useState([]);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const fetchMenus = async () => {
     try {
@@ -79,6 +80,28 @@ const Header = () => {
     }
   };
 
+  const toggleDropdown = (menuId) => {
+    setOpenDropdown(openDropdown === menuId ? null : menuId);
+  };
+
+  const closeDropdowns = () => {
+    setOpenDropdown(null);
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        closeDropdowns();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-[70px] tracking-wide relative z-50">
       <div className="container mx-auto">
@@ -132,16 +155,75 @@ const Header = () => {
               {menus.map((menu, index) => (
                 <li
                   key={index}
-                  className={`max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
+                  className={`relative max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
                     pathname === '/' + menu.slug ? 'active' : ''
                   }`}
                 >
-                  <Link
-                    href={`/${menu.slug}`}
-                    className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
-                  >
-                    {menu.name}
-                  </Link>
+                  {menu.children && menu.children.length > 0 ? (
+                    <div 
+                      className="relative dropdown-container"
+                    >
+                      <button
+                        onClick={() => toggleDropdown(menu.id)}
+                        className="hover:text-primary text-gray-500 font-semibold text-[15px] flex items-center gap-1 w-full text-left"
+                      >
+                        {menu.name}
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            openDropdown === menu.id ? 'rotate-180' : ''
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {/* Desktop Dropdown */}
+                      <div
+                        className={`absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200 max-lg:hidden ${
+                          openDropdown === menu.id ? 'block' : 'hidden'
+                        }`}
+                      >
+                        {menu.children.map((child, childIndex) => (
+                          <Link
+                            key={childIndex}
+                            href={`/${child.slug}`}
+                            onClick={() => closeDropdowns()}
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors duration-200 no-underline hover:no-underline"
+                          >
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                      
+                      {/* Mobile Dropdown */}
+                      <div
+                        className={`lg:hidden mt-2 pl-4 space-y-2 ${
+                          openDropdown === menu.id ? 'block' : 'hidden'
+                        }`}
+                      >
+                        {menu.children.map((child, childIndex) => (
+                          <Link
+                            key={childIndex}
+                            href={`/${child.slug}`}
+                            onClick={() => closeDropdowns()}
+                            className="block py-2 text-gray-600 hover:text-primary transition-colors duration-200 border-l-2 border-gray-200 pl-3 no-underline hover:no-underline"
+                          >
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <Link
+                      href={`/${menu.slug}`}
+                      className="hover:text-primary text-gray-500 block font-semibold text-[15px]"
+                    >
+                      {menu.name}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

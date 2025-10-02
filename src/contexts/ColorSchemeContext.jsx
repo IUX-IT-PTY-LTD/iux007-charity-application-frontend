@@ -64,7 +64,7 @@ export const ColorSchemeProvider = ({ children }) => {
       
       // Extract current colors or use defaults
       const currentColors = {
-        primary_color: colorSettings?.primary_color || '#3954db', // Use your API default
+        primary_color: colorSettings?.primary_color || '#DB375A', // Use your API default
         secondary_color: colorSettings?.secondary_color || '#135705', // Use your API default
         accent_color: colorSettings?.accent_color || '#C4DAD2',
         light_color: colorSettings?.light_color || '#E9EFEC'

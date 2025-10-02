@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 // Import protected services
-import { createMenu } from '@/api/services/admin/protected/menuService';
+import { createMenu, getMenus } from '@/api/services/admin/protected/menuService';
 import { isAuthenticated } from '@/api/services/admin/authService';
 
 // Import permission hooks and context
@@ -39,6 +39,7 @@ const formSchema = z.object({
     message: 'Ordering must be a positive number.',
   }),
   status: z.number().int().min(0).max(1).default(1),
+  parent_id: z.string().optional(),
 });
 
 // Main Create Menu Page Component
@@ -47,12 +48,36 @@ const CreateMenuPageContent = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const menuPermissions = useMenuPermissions();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allMenus, setAllMenus] = useState([]);
+  const [loadingMenus, setLoadingMenus] = useState(true);
 
   // Set page title
   useEffect(() => {
     setPageTitle('Create New Menu Item');
     setPageSubtitle('Add a new navigation menu to your website');
   }, [setPageTitle, setPageSubtitle]);
+
+  // Fetch all menus for parent selection
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        setLoadingMenus(true);
+        const response = await getMenus();
+        if (response.status === 'success') {
+          setAllMenus(response.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching menus:', error);
+        toast.error('Failed to load menus for parent selection');
+      } finally {
+        setLoadingMenus(false);
+      }
+    };
+
+    if (menuPermissions.hasAccess) {
+      fetchMenus();
+    }
+  }, [menuPermissions.hasAccess]);
 
   // Check authentication
   useEffect(() => {
@@ -77,6 +102,7 @@ const CreateMenuPageContent = () => {
       slug: '',
       ordering: 1,
       status: 1,
+      parent_id: 'none',
     },
     resolver: zodResolver(formSchema),
   });
@@ -107,7 +133,13 @@ const CreateMenuPageContent = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await createMenu(data);
+      // Prepare data for API
+      const submitData = {
+        ...data,
+        parent_id: data.parent_id === 'none' ? null : data.parent_id, // Convert 'none' to null
+      };
+
+      const response = await createMenu(submitData);
 
       if (response.status === 'success') {
         toast.success('Menu created successfully!');
@@ -244,6 +276,8 @@ const CreateMenuPageContent = () => {
                 <MenuForm
                   form={form}
                   generateSlug={generateSlug}
+                  allMenus={allMenus}
+                  loadingMenus={loadingMenus}
                   FormActions={() => (
                     <FormActions
                       form={form}

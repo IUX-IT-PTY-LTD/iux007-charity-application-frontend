@@ -25,7 +25,7 @@ import { Lock } from 'lucide-react';
 // Import permission hooks
 import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
 
-const MenuForm = ({ form, generateSlug, FormActions }) => {
+const MenuForm = ({ form, generateSlug, allMenus, loadingMenus, FormActions }) => {
   const menuPermissions = useMenuPermissions();
 
   // Check if form should be disabled
@@ -123,6 +123,37 @@ const MenuForm = ({ form, generateSlug, FormActions }) => {
                 </Button>
               </div>
               <FormDescription>Used in URL and code references.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="parent_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Parent Menu</FormLabel>
+              <Select
+                onValueChange={(value) => !isFormDisabled && field.onChange(value)}
+                value={field.value}
+                disabled={isFormDisabled || loadingMenus}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingMenus ? "Loading menus..." : "Select parent menu (optional)"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">None (Top Level Menu)</SelectItem>
+                  {allMenus.map((menu) => (
+                    <SelectItem key={menu.id} value={menu.id.toString()}>
+                      {menu.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>Choose a parent menu to create a submenu, or leave empty for top-level menu.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
