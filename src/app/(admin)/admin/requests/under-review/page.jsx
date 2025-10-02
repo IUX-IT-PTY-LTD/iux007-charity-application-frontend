@@ -175,17 +175,20 @@ const UnderReviewRequestsPage = () => {
   };
 
   // Handle action submission (approve/deny)
-  const handleActionSubmit = async (uuid, action, comment) => {
+  const handleActionSubmit = async (uuid, apiAction, comment) => {
     try {
       const approvalData = {
-        action: action === 'approve' ? 'accepted' : 'rejected',
+        action: apiAction, // Already mapped to 'accepted' or 'rejected' from modal
         comments: comment,
       };
 
       const response = await submitApproval(uuid, approvalData);
 
       if (response.status === 'success') {
-        toast.success(response.message || `Request ${action}d successfully`);
+        toast.success(
+          response.message ||
+            `Request ${apiAction === 'accepted' ? 'approved' : 'rejected'} successfully`
+        );
 
         // Refresh the requests list
         await fetchRequests();
@@ -195,11 +198,13 @@ const UnderReviewRequestsPage = () => {
         setSelectedRequest(null);
         setActionType(null);
       } else {
-        toast.error(response.message || `Failed to ${action} request`);
+        toast.error(
+          response.message || `Failed to ${apiAction === 'accepted' ? 'approve' : 'reject'} request`
+        );
       }
     } catch (error) {
-      console.error(`Error ${action}ing request:`, error);
-      toast.error(error.message || `Failed to ${action} request`);
+      console.error(`Error submitting approval:`, error);
+      toast.error(error.message || `Failed to submit approval`);
     }
   };
 

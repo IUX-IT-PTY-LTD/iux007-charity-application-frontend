@@ -65,7 +65,9 @@ const ReviewActionModal = ({ request, isOpen, onClose, onSubmit, actionType }) =
     setIsSubmitting(true);
 
     try {
-      await onSubmit(request.uuid, actionType, comment.trim());
+      // Map actionType to API expected values
+      const apiAction = actionType === 'approve' ? 'accepted' : 'rejected';
+      await onSubmit(request.uuid, apiAction, comment.trim());
       // Success handling is done in parent component
     } catch (error) {
       console.error(`Error ${actionType}ing request:`, error);

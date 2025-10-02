@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
+import { toast } from 'sonner';
 
 // Import UI components
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -14,124 +15,14 @@ import RequestsPagination from '@/components/admin/requests/submitted/RequestsPa
 import ApprovedDetailsModal from '@/components/admin/requests/approved/ApprovedDetailsModal';
 import ConnectEventModal from '@/components/admin/requests/approved/ConnectEventModal';
 
-// Demo data - only approved requests
-const DEMO_APPROVED_REQUESTS = [
-  {
-    id: 11,
-    request_id: 'CR-2024-011',
-    requester_name: 'Dr. Jennifer Martinez',
-    requester_email: 'j.martinez@literacy4all.org',
-    requester_phone: '+1-555-0444',
-    organization_name: 'Literacy for All Foundation',
-    organization_type: 'Educational Non-Profit',
-    organization_address: '123 Reading Street, Book City, State 12345',
-    request_purpose: 'Adult Literacy Program for Immigrants',
-    request_description:
-      'Comprehensive adult literacy program designed specifically for recent immigrants. Program includes English language classes, basic literacy skills, and citizenship preparation. Will serve 150 adults over 12 months.',
-    request_amount: 45000,
-    request_category: 'Education',
-    submission_date: '2024-08-05T10:30:00Z',
-    current_status: 'approved_final',
-    connected_event_id: 'EVT-2024-015',
-    attached_file: {
-      name: 'adult_literacy_program_proposal.zip',
-      size: '7.3 MB',
-      url: '/files/adult_literacy_program_proposal.zip',
-    },
-  },
-  {
-    id: 12,
-    request_id: 'CR-2024-012',
-    requester_name: 'Robert Chen',
-    requester_email: 'r.chen@communityhealth.org',
-    requester_phone: '+1-555-0555',
-    organization_name: 'Community Health Network',
-    organization_type: 'Healthcare Non-Profit',
-    organization_address: '456 Wellness Avenue, Health City, State 67890',
-    request_purpose: 'Mobile Vaccination Clinic for Rural Areas',
-    request_description:
-      'Mobile vaccination clinic to provide COVID-19, flu, and routine immunizations to underserved rural communities. Clinic will visit 20 rural locations monthly, providing free vaccinations and health screenings.',
-    request_amount: 62000,
-    request_category: 'Healthcare',
-    submission_date: '2024-08-07T14:15:00Z',
-    current_status: 'approved_final',
-    connected_event_id: null,
-    attached_file: {
-      name: 'mobile_vaccination_clinic_proposal.zip',
-      size: '9.8 MB',
-      url: '/files/mobile_vaccination_clinic_proposal.zip',
-    },
-  },
-  {
-    id: 13,
-    request_id: 'CR-2024-013',
-    requester_name: 'Maria Rodriguez',
-    requester_email: 'maria.r@email.com',
-    requester_phone: '+1-555-0666',
-    organization_name: null,
-    organization_type: null,
-    organization_address: null,
-    request_purpose: 'Community Garden and Food Security Initiative',
-    request_description:
-      'Individual initiative to establish a community garden that will provide fresh produce to local food banks and teach urban gardening skills to low-income families. Includes educational workshops and sustainable farming techniques.',
-    request_amount: 18000,
-    request_category: 'Community Development',
-    submission_date: '2024-08-09T11:20:00Z',
-    current_status: 'approved_final',
-    connected_event_id: null,
-    attached_file: {
-      name: 'community_garden_initiative.zip',
-      size: '4.2 MB',
-      url: '/files/community_garden_initiative.zip',
-    },
-  },
-  {
-    id: 14,
-    request_id: 'CR-2024-014',
-    requester_name: 'Dr. Ahmed Hassan',
-    requester_email: 'a.hassan@greentech.org',
-    requester_phone: '+1-555-0777',
-    organization_name: 'Green Technology Solutions',
-    organization_type: 'Environmental NGO',
-    organization_address: '789 Solar Drive, Clean City, State 11223',
-    request_purpose: 'Solar Energy Training Program for Veterans',
-    request_description:
-      'Training program to provide veterans with solar panel installation and maintenance skills. Program includes certification preparation, job placement assistance, and tools for starting solar energy careers.',
-    request_amount: 85000,
-    request_category: 'Environment',
-    submission_date: '2024-08-11T16:45:00Z',
-    current_status: 'approved_final',
-    connected_event_id: 'EVT-2024-023',
-    attached_file: {
-      name: 'solar_training_veterans_proposal.zip',
-      size: '11.5 MB',
-      url: '/files/solar_training_veterans_proposal.zip',
-    },
-  },
-  {
-    id: 15,
-    request_id: 'CR-2024-015',
-    requester_name: 'Lisa Thompson',
-    requester_email: 'l.thompson@youtharts.org',
-    requester_phone: '+1-555-0888',
-    organization_name: 'Youth Arts Collective',
-    organization_type: 'Arts Non-Profit',
-    organization_address: '321 Creative Boulevard, Arts District, State 44556',
-    request_purpose: 'After-School Arts Program for At-Risk Youth',
-    request_description:
-      'After-school arts program providing creative outlets for at-risk youth ages 12-17. Program includes visual arts, music, drama, and digital media classes. Includes mentorship and college/career guidance.',
-    request_amount: 38000,
-    request_category: 'Arts & Culture',
-    submission_date: '2024-08-13T09:30:00Z',
-    current_status: 'approved_final',
-    connected_event_id: null,
-    attached_file: {
-      name: 'youth_arts_program_proposal.zip',
-      size: '6.7 MB',
-      url: '/files/youth_arts_program_proposal.zip',
-    },
-  },
-];
+// Import API service
+import {
+  getAllFundRequests,
+  getFundRequestByUuid,
+  FUND_REQUEST_STATUS,
+  publishFundRequest,
+  formatPublishDataForSubmission,
+} from '@/api/services/admin/fundRequestService';
 
 const CATEGORY_OPTIONS = [
   'Education',
@@ -142,6 +33,8 @@ const CATEGORY_OPTIONS = [
   'Technology',
   'Arts & Culture',
   'Sports & Recreation',
+  'Food & Hunger Relief',
+  'Medical Emergency',
 ];
 
 // Main Approved Requests Page Component
@@ -149,12 +42,12 @@ const ApprovedRequestsPage = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
 
   // State management
-  const [requests, setRequests] = useState(DEMO_APPROVED_REQUESTS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [requests, setRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [eventConnectionFilter, setEventConnectionFilter] = useState('all');
-  const [sortField, setSortField] = useState('submission_date');
+  const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
 
   // Modal states
@@ -172,6 +65,58 @@ const ApprovedRequestsPage = () => {
     setPageSubtitle('Connect approved charity requests to events');
   }, [setPageTitle, setPageSubtitle]);
 
+  // Transform API data to component structure
+  const transformRequestData = (apiRequest) => ({
+    id: apiRequest.uuid,
+    request_id: apiRequest.request_number,
+    requester_name: apiRequest.name,
+    requester_email: apiRequest.email,
+    requester_phone: apiRequest.phone,
+    organization_name: apiRequest.fund_type === 'organization' ? apiRequest.fundraising_for : null,
+    organization_type: apiRequest.fund_type === 'organization' ? 'Non-Profit Organization' : null,
+    organization_address: apiRequest.address || null,
+    request_purpose: apiRequest.title,
+    request_description: apiRequest.description || apiRequest.details || 'No description available',
+    request_amount: parseFloat(apiRequest.target_amount) || 0,
+    request_category: apiRequest.fundraising_category,
+    submission_date: apiRequest.created_at,
+    current_status: apiRequest.status.toLowerCase().replace(/\s+/g, '_'),
+    connected_event_id: apiRequest.event_id || null,
+    attached_file: apiRequest.documents
+      ? {
+          name: apiRequest.documents,
+          size: 'N/A',
+          url: apiRequest.document_url || `/documents/${apiRequest.documents}`,
+        }
+      : null,
+    user_info: apiRequest.user_info || apiRequest.user,
+    approval_summary: apiRequest.approval_summary,
+  });
+
+  // Fetch approved requests from API
+  useEffect(() => {
+    const fetchApprovedRequests = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getAllFundRequests([FUND_REQUEST_STATUS.APPROVED]);
+
+        if (response.status === 'success' && Array.isArray(response.data)) {
+          const transformedRequests = response.data.map(transformRequestData);
+          setRequests(transformedRequests);
+        } else {
+          toast.error('Unexpected response format from server');
+        }
+      } catch (error) {
+        console.error('Error fetching approved requests:', error);
+        toast.error('Failed to load approved requests. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchApprovedRequests();
+  }, []);
+
   // Handle sorting
   const handleSort = (field) => {
     if (sortField === field) {
@@ -182,10 +127,21 @@ const ApprovedRequestsPage = () => {
     }
   };
 
-  // Handle request selection
-  const handleRequestClick = (request) => {
-    setSelectedRequest(request);
-    setShowDetailsModal(true);
+  // Handle request selection - fetch full details
+  const handleRequestClick = async (request) => {
+    try {
+      // Fetch full request details
+      const response = await getFundRequestByUuid(request.id);
+
+      if (response.status === 'success' && response.data) {
+        const fullRequestData = transformRequestData(response.data);
+        setSelectedRequest(fullRequestData);
+        setShowDetailsModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+      toast.error('Failed to load request details');
+    }
   };
 
   // Handle connect event action
@@ -195,20 +151,35 @@ const ApprovedRequestsPage = () => {
   };
 
   // Handle event connection submission
-  const handleConnectSubmit = (requestId, eventId) => {
-    const updatedRequests = requests.map((request) => {
-      if (request.id === requestId) {
-        return {
-          ...request,
-          connected_event_id: eventId,
-        };
-      }
-      return request;
-    });
+  const handleConnectSubmit = async (requestId, eventId) => {
+    try {
+      // Format the publish data
+      const publishData = formatPublishDataForSubmission({ event_id: eventId });
 
-    setRequests(updatedRequests);
-    setShowConnectModal(false);
-    setSelectedRequest(null);
+      // Call the API to publish/connect the request
+      await publishFundRequest(requestId, publishData);
+
+      // Update local state to reflect the connection
+      const updatedRequests = requests.map((request) => {
+        if (request.id === requestId) {
+          return {
+            ...request,
+            connected_event_id: eventId,
+          };
+        }
+        return request;
+      });
+
+      setRequests(updatedRequests);
+      setShowConnectModal(false);
+      setSelectedRequest(null);
+
+      toast.success('Request successfully connected to event');
+    } catch (error) {
+      console.error('Error connecting event:', error);
+      toast.error(error.message || 'Failed to connect request to event');
+      throw error;
+    }
   };
 
   // Filter and sort requests
@@ -243,7 +214,7 @@ const ApprovedRequestsPage = () => {
   const sortedRequests = [...filteredRequests].sort((a, b) => {
     const modifier = sortDirection === 'asc' ? 1 : -1;
 
-    if (sortField === 'submission_date') {
+    if (sortField === 'submission_date' || sortField === 'created_at') {
       return (new Date(a.submission_date) - new Date(b.submission_date)) * modifier;
     } else if (sortField === 'request_amount') {
       return (a.request_amount - b.request_amount) * modifier;

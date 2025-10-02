@@ -34,12 +34,11 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
 
   // Format date
   const formatDate = (dateString) => {
-    return format(new Date(dateString), 'PPP p');
-  };
-
-  // Format file size
-  const formatFileSize = (sizeStr) => {
-    return sizeStr;
+    try {
+      return format(new Date(dateString), 'PPP p');
+    } catch (error) {
+      return dateString;
+    }
   };
 
   // Handle file download
@@ -132,6 +131,19 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
                 <div>
                   <span className="font-medium">Phone:</span> {request.requester_phone}
                 </div>
+                {request.user_info && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="text-xs text-gray-500 mb-1">User Account Info:</div>
+                    <div>
+                      <span className="font-medium">User ID:</span> {request.user_info.id}
+                    </div>
+                    {request.user_info.name && (
+                      <div>
+                        <span className="font-medium">Account Name:</span> {request.user_info.name}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -147,12 +159,16 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
                     <div>
                       <span className="font-medium">Name:</span> {request.organization_name}
                     </div>
-                    <div>
-                      <span className="font-medium">Type:</span> {request.organization_type}
-                    </div>
-                    <div>
-                      <span className="font-medium">Address:</span> {request.organization_address}
-                    </div>
+                    {request.organization_type && (
+                      <div>
+                        <span className="font-medium">Type:</span> {request.organization_type}
+                      </div>
+                    )}
+                    {request.organization_address && (
+                      <div>
+                        <span className="font-medium">Address:</span> {request.organization_address}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="text-gray-500 italic">
@@ -206,9 +222,58 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
 
             <div className="space-y-2">
               <h4 className="font-medium">Description</h4>
-              <p className="text-sm text-gray-700 leading-relaxed">{request.request_description}</p>
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {request.request_description}
+              </p>
             </div>
           </div>
+
+          {/* Approval Summary */}
+          {request.approval_summary && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-emerald-600" />
+                  Approval Summary
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <div className="text-xs text-gray-600">Total Approvers</div>
+                    <div className="text-lg font-semibold">
+                      {request.approval_summary.total_approvers_needed ||
+                        request.approval_summary.total_approval_users ||
+                        0}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <div className="text-xs text-gray-600">Approved</div>
+                    <div className="text-lg font-semibold text-green-700">
+                      {request.approval_summary.approved ||
+                        request.approval_summary.approved_count ||
+                        0}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-red-50 rounded-lg">
+                    <div className="text-xs text-gray-600">Rejected</div>
+                    <div className="text-lg font-semibold text-red-700">
+                      {request.approval_summary.rejected ||
+                        request.approval_summary.rejected_count ||
+                        0}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-yellow-50 rounded-lg">
+                    <div className="text-xs text-gray-600">Pending</div>
+                    <div className="text-lg font-semibold text-yellow-700">
+                      {request.approval_summary.pending ||
+                        request.approval_summary.pending_approvals ||
+                        0}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator />
 
@@ -226,9 +291,7 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
                     <FileText className="h-8 w-8 text-gray-500" />
                     <div>
                       <div className="font-medium text-sm">{request.attached_file.name}</div>
-                      <div className="text-xs text-gray-500">
-                        {formatFileSize(request.attached_file.size)}
-                      </div>
+                      <div className="text-xs text-gray-500">{request.attached_file.size}</div>
                     </div>
                   </div>
                   <Button
@@ -238,13 +301,13 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
                     className="text-emerald-600 hover:text-emerald-800"
                   >
                     <Download className="h-4 w-4 mr-1" />
-                    Download ZIP
+                    Download
                   </Button>
                 </div>
               </div>
 
               <p className="text-xs text-gray-500">
-                This ZIP file contains all supporting documents for the request.
+                This file contains all supporting documents for the request.
               </p>
             </div>
           )}

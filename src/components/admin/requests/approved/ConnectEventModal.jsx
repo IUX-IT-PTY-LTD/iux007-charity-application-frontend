@@ -9,11 +9,9 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Link, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { Link, AlertCircle, CheckCircle } from 'lucide-react';
 
 const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
   const [eventId, setEventId] = useState('');
@@ -45,14 +43,10 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
       errors.push('Event ID is required');
     }
 
-    // Basic event ID format validation
-    const eventIdPattern = /^[A-Za-z0-9\-_]+$/;
-    if (eventId.trim() && !eventIdPattern.test(eventId.trim())) {
-      errors.push('Event ID can only contain letters, numbers, hyphens, and underscores');
-    }
-
-    if (eventId.trim() && eventId.trim().length < 3) {
-      errors.push('Event ID must be at least 3 characters long');
+    // Event ID must be a positive integer
+    const eventIdNumber = parseInt(eventId.trim(), 10);
+    if (eventId.trim() && (isNaN(eventIdNumber) || eventIdNumber <= 0)) {
+      errors.push('Event ID must be a positive number');
     }
 
     return errors;
@@ -70,13 +64,14 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
     setIsSubmitting(true);
 
     try {
-      await onSubmit(request.id, eventId.trim());
-      toast.success('Request successfully connected to event');
+      // Convert eventId to integer before submitting
+      const eventIdNumber = parseInt(eventId.trim(), 10);
+      await onSubmit(request.id, eventIdNumber);
       setEventId('');
       onClose();
     } catch (error) {
       console.error('Error connecting event:', error);
-      toast.error(error.message || 'Failed to connect request to event');
+      // Error handling is done in parent component
     } finally {
       setIsSubmitting(false);
     }
@@ -141,7 +136,7 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
                   <li>• Create the charity event manually in the events system</li>
                   <li>• Copy the Event ID from the created event</li>
                   <li>• Enter the Event ID below to link this request to the event</li>
-                  <li>• Once connected, the request will show as linked to the event</li>
+                  <li>• Once connected, the request will be published and linked to the event</li>
                 </ul>
               </div>
             </div>
@@ -154,8 +149,9 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
             </Label>
             <Input
               id="eventId"
-              type="text"
-              placeholder="Enter the Event ID (e.g., EVT-2024-001)"
+              type="number"
+              min="1"
+              placeholder="Enter the Event ID (e.g., 12345)"
               value={eventId}
               onChange={(e) => setEventId(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -168,7 +164,7 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
               autoFocus
             />
             <div className="text-xs text-gray-500">
-              Event ID should match the ID from the events system
+              Event ID must be the numeric ID from the events system
             </div>
 
             {/* Individual validation errors */}
@@ -188,9 +184,10 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
               <div>
                 <h4 className="font-medium text-green-800 mb-1">After Connection</h4>
                 <p className="text-sm text-green-700">
-                  Once connected, this request will be marked as linked to the event. The connection
-                  will be visible in both the requests list and event details. This helps track
-                  which approved requests have been converted into actual charity events.
+                  Once connected, this request will be published and marked as linked to the event.
+                  The status will change to "Published" and the connection will be visible in both
+                  the requests list and event details. This helps track which approved requests have
+                  been converted into actual charity events.
                 </p>
               </div>
             </div>
