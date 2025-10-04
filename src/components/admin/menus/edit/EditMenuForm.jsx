@@ -26,7 +26,7 @@ import { Lock, Eye } from 'lucide-react';
 // Import permission hooks
 import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
 
-const EditMenuForm = ({ form, generateSlug, originalSlug, menuPermissions, FormActions }) => {
+const EditMenuForm = ({ form, generateSlug, originalSlug, menuPermissions, parentMenus = [], FormActions }) => {
   // Use passed permissions or hook (for flexibility)
   const permissions = menuPermissions || useMenuPermissions();
 
@@ -38,9 +38,7 @@ const EditMenuForm = ({ form, generateSlug, originalSlug, menuPermissions, FormA
     if (isFormDisabled) return;
 
     field.onChange(e);
-    if (originalSlug === form.getValues('slug')) {
-      generateSlug(e.target.value);
-    }
+    // Don't auto-generate slug when editing existing menu
   };
 
   const handleGenerateSlug = () => {
@@ -111,15 +109,16 @@ const EditMenuForm = ({ form, generateSlug, originalSlug, menuPermissions, FormA
             <FormItem>
               <FormLabel className="flex items-center gap-2">
                 Slug
-                {isFormDisabled && <Lock className="h-4 w-4 text-gray-400" />}
+                <Lock className="h-4 w-4 text-gray-400" />
               </FormLabel>
               <div className="flex items-center space-x-2">
                 <FormControl>
                   <Input
                     placeholder="e.g. blog"
                     {...field}
-                    disabled={isFormDisabled}
-                    className={isFormDisabled ? 'bg-gray-100 dark:bg-gray-800' : ''}
+                    disabled={true}
+                    className="bg-gray-100 dark:bg-gray-800"
+                    readOnly
                   />
                 </FormControl>
                 <Button
@@ -127,17 +126,47 @@ const EditMenuForm = ({ form, generateSlug, originalSlug, menuPermissions, FormA
                   variant="outline"
                   size="sm"
                   onClick={handleGenerateSlug}
-                  disabled={isFormDisabled}
-                  title={
-                    isFormDisabled
-                      ? "You don't have permission to edit menus"
-                      : 'Generate slug from name'
-                  }
+                  disabled={true}
+                  title="Slug cannot be changed when editing an existing menu"
                 >
-                  {isFormDisabled ? <Lock className="h-4 w-4" /> : 'Generate'}
+                  <Lock className="h-4 w-4" />
                 </Button>
               </div>
-              <FormDescription>Used in URL and code references.</FormDescription>
+              <FormDescription>Used in URL and code references. Cannot be changed when editing.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="parent_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                Parent Menu
+                {isFormDisabled && <Lock className="h-4 w-4 text-gray-400" />}
+              </FormLabel>
+              <Select
+                onValueChange={(value) => !isFormDisabled && field.onChange(value === "null" ? null : parseInt(value, 10))}
+                value={field.value?.toString() || "null"}
+                disabled={isFormDisabled}
+              >
+                <FormControl>
+                  <SelectTrigger className={isFormDisabled ? 'bg-gray-100 dark:bg-gray-800' : ''}>
+                    <SelectValue placeholder="Select parent menu (optional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="null">No Parent (Top Level)</SelectItem>
+                  {parentMenus.map((menu) => (
+                    <SelectItem key={menu.id} value={menu.id.toString()}>
+                      {menu.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>Select a parent menu to make this a submenu.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

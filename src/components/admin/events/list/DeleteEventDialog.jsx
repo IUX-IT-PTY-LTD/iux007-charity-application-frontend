@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
+import { Trash2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -14,7 +14,36 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
+// Import permission hooks
+import { useEventPermissions } from '@/api/hooks/useModulePermissions';
+
 const DeleteEventDialog = ({ event, onDelete }) => {
+  const eventPermissions = useEventPermissions();
+
+  // Show loading state
+  if (eventPermissions.isLoading) {
+    return (
+      <Button variant="ghost" size="icon" disabled>
+        Loading...
+      </Button>
+    );
+  }
+
+  // Show disabled button if no delete permission
+  if (!eventPermissions.canDelete) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        disabled
+        title="You don't have permission to delete events"
+        className="opacity-50 cursor-not-allowed text-red-600"
+      >
+        <Lock className="h-4 w-4" />
+        <span className="sr-only">Delete (No Permission)</span>
+      </Button>
+    );
+  }
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
