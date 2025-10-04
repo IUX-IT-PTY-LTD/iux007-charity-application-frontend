@@ -812,7 +812,9 @@ const EditPageBuilderContent = () => {
             meta_title: data.meta_title || '',
             meta_description: data.meta_description || '',
             status: data.status,
-            components: data.content_data || []
+            components: data.content_data || [],
+            menu_id: data.menu_id,
+            menu: data.menu
           });
         } else {
           throw new Error(response.message || 'Failed to fetch page');
@@ -895,6 +897,7 @@ const EditPageBuilderContent = () => {
         meta_title: pageData.meta_title,
         meta_description: pageData.meta_description,
         status: pageData.status, // Already boolean
+        menu_id: pageData.menu_id,
       };
       
       const response = await updatePage(pageData.id, updateData);
@@ -953,10 +956,6 @@ const EditPageBuilderContent = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Edit Page</h1>
-                <p className="text-gray-600">{pageData.title}</p>
-              </div>
             </div>
             <div className="flex space-x-2">
               <Button 
@@ -1047,13 +1046,37 @@ const EditPageBuilderContent = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {pageData?.menu && (
+                  <div>
+                    <Label>Associated Menu</Label>
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center">
+                        <div className="text-blue-600 mr-3">📋</div>
+                        <div>
+                          <p className="font-medium text-blue-900">{pageData.menu.name}</p>
+                          <p className="text-sm text-blue-700">Slug: {pageData.menu.slug}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-600 mt-2">
+                        This page was created from a menu. Title and slug cannot be changed.
+                      </p>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="title">Page Title</Label>
                   <Input
                     id="title"
                     value={pageData.title}
                     onChange={(e) => setPageData(prev => ({ ...prev, title: e.target.value }))}
+                    disabled={!!pageData?.menu_id}
+                    className={pageData?.menu_id ? "bg-gray-100 cursor-not-allowed" : ""}
                   />
+                  {pageData?.menu_id && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      Auto-filled from selected menu. Cannot be edited.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="slug">Slug</Label>
@@ -1061,7 +1084,14 @@ const EditPageBuilderContent = () => {
                     id="slug"
                     value={pageData.slug}
                     onChange={(e) => setPageData(prev => ({ ...prev, slug: e.target.value }))}
+                    disabled={!!pageData?.menu_id}
+                    className={pageData?.menu_id ? "bg-gray-100 cursor-not-allowed" : ""}
                   />
+                  {pageData?.menu_id && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      Auto-filled from selected menu. Cannot be edited.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="meta_title">Meta Title</Label>

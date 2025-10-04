@@ -1052,7 +1052,8 @@ const CreatePageBuilderContent = () => {
         content_data: pageData.components, // Transform components to content_data
         meta_title: pageData.meta_title,
         meta_description: pageData.meta_description,
-        status: pageData.status === 1 ? true : false
+        status: pageData.status === 1 ? true : false,
+        menu_id: pageData.selectedMenuId ? parseInt(pageData.selectedMenuId) : null
       };
 
       const response = await createPage(apiData);
@@ -1098,10 +1099,6 @@ const CreatePageBuilderContent = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Create New Page</h1>
-                <p className="text-gray-600">Build a dynamic page with drag-and-drop components</p>
-              </div>
             </div>
             <div className="flex space-x-2">
               <Button variant="outline" disabled={!pageData.slug}>
