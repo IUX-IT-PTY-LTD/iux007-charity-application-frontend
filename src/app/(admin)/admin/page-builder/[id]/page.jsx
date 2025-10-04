@@ -293,13 +293,74 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
         return (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="src">Image URL</Label>
-              <Input
-                id="src"
-                value={localComponent.content.src || ''}
-                onChange={(e) => updateContent('src', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
+              <Label htmlFor="image-upload">Upload Image</Label>
+              <div className="space-y-3">
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      try {
+                        // Import the upload service
+                        const { uploadImage, validateImageFile } = await import('@/api/services/admin/imageUploadService');
+                        
+                        // Validate file
+                        const validation = validateImageFile(file);
+                        if (!validation.isValid) {
+                          toast.error(validation.error);
+                          return;
+                        }
+
+                        // Show loading state
+                        updateContent('uploading', true);
+                        
+                        // Upload image
+                        const response = await uploadImage(file);
+                        
+                        if (response.status === 'success') {
+                          updateContent('src', response.data.filePath);
+                          updateContent('uploading', false);
+                          toast.success('Image uploaded successfully!');
+                        } else {
+                          throw new Error(response.message || 'Upload failed');
+                        }
+                      } catch (error) {
+                        updateContent('uploading', false);
+                        console.error('Upload error:', error);
+                        toast.error(error.message || 'Failed to upload image');
+                      }
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {localComponent.content.uploading && (
+                  <div className="flex items-center space-x-2 text-sm text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span>Uploading image...</span>
+                  </div>
+                )}
+                {localComponent.content.src && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-green-600">✓ Image uploaded</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateContent('src', '')}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    <img 
+                      src={localComponent.content.src} 
+                      alt="Preview" 
+                      className="max-w-full h-32 object-cover rounded border"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <Label htmlFor="alt">Alt Text</Label>
