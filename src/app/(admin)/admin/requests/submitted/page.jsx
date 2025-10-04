@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
+import { toast } from 'sonner';
 
 // Import UI components
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -14,171 +15,40 @@ import RequestsPagination from '@/components/admin/requests/submitted/RequestsPa
 import RequestDetailsModal from '@/components/admin/requests/submitted/RequestDetailsModal';
 import StatusChangeModal from '@/components/admin/requests/submitted/StatusChangeModal';
 
-// Demo data - will be replaced with API calls
-const DEMO_REQUESTS = [
-  {
-    id: 1,
-    request_id: 'CR-2024-001',
-    requester_name: 'John Smith',
-    requester_email: 'john.smith@example.com',
-    requester_phone: '+1-555-0123',
-    organization_name: 'Hope Foundation',
-    organization_type: 'Non-Profit',
-    organization_address: '123 Main St, City, State 12345',
-    request_purpose: 'Educational Support for Underprivileged Children',
-    request_description:
-      'We are seeking funding to provide educational materials and scholarships for underprivileged children in our community. This program will help them access quality education and break the cycle of poverty.',
-    request_amount: 25000,
-    request_category: 'Education',
-    submission_date: '2024-08-20T10:30:00Z',
-    current_status: 'submitted',
-    attached_file: {
-      name: 'education_support_documents.zip',
-      size: '4.7 MB',
-      url: '/files/education_support_documents.zip',
-    },
-    status_history: [
-      {
-        status: 'submitted',
-        changed_by: 'System',
-        changed_at: '2024-08-20T10:30:00Z',
-        comment: 'Request submitted successfully',
-      },
-    ],
-    deadline: null,
-  },
-  {
-    id: 2,
-    request_id: 'CR-2024-002',
-    requester_name: 'Sarah Johnson',
-    requester_email: 'sarah.j@healthcareorg.org',
-    requester_phone: '+1-555-0456',
-    organization_name: 'Community Health Initiative',
-    organization_type: 'Healthcare NGO',
-    organization_address: '456 Health Ave, Medical District, State 67890',
-    request_purpose: 'Mobile Health Clinic for Rural Areas',
-    request_description:
-      'Requesting funds to establish a mobile health clinic that will serve remote rural communities. The clinic will provide basic healthcare services, vaccinations, and health education.',
-    request_amount: 45000,
-    request_category: 'Healthcare',
-    submission_date: '2024-08-18T14:15:00Z',
-    current_status: 'information_needed',
-    attached_file: {
-      name: 'mobile_clinic_proposal.zip',
-      size: '8.3 MB',
-      url: '/files/mobile_clinic_proposal.zip',
-    },
-    status_history: [
-      {
-        status: 'submitted',
-        changed_by: 'System',
-        changed_at: '2024-08-18T14:15:00Z',
-        comment: 'Request submitted successfully',
-      },
-      {
-        status: 'information_needed',
-        changed_by: 'Dr. Michael Brown',
-        changed_at: '2024-08-19T09:20:00Z',
-        comment:
-          'Please provide additional documentation regarding medical equipment specifications and vendor quotes.',
-      },
-    ],
-    deadline: null,
-  },
-  {
-    id: 3,
-    request_id: 'CR-2024-003',
-    requester_name: 'Ahmed Hassan',
-    requester_email: 'ahmed.h@environmentfund.org',
-    requester_phone: '+1-555-0789',
-    organization_name: 'Green Earth Foundation',
-    organization_type: 'Environmental NGO',
-    organization_address: '789 Eco Street, Green Valley, State 11223',
-    request_purpose: 'Clean Water Initiative',
-    request_description:
-      'Implementation of water filtration systems in rural villages to provide clean drinking water. The project includes installation, maintenance training, and ongoing support.',
-    request_amount: 35000,
-    request_category: 'Environment',
-    submission_date: '2024-08-15T11:45:00Z',
-    current_status: 'technical_check_passed',
-    attached_file: {
-      name: 'water_initiative_documents.zip',
-      size: '6.9 MB',
-      url: '/files/water_initiative_documents.zip',
-    },
-    status_history: [
-      {
-        status: 'submitted',
-        changed_by: 'System',
-        changed_at: '2024-08-15T11:45:00Z',
-        comment: 'Request submitted successfully',
-      },
-      {
-        status: 'technical_check_passed',
-        changed_by: 'Engineering Team Lead',
-        changed_at: '2024-08-22T16:30:00Z',
-        comment:
-          'Technical review completed. All specifications meet requirements. Ready for approval process.',
-      },
-    ],
-    deadline: '2024-09-05T23:59:59Z',
-  },
-  {
-    id: 4,
-    request_id: 'CR-2024-004',
-    requester_name: 'Maria Rodriguez',
-    requester_email: 'maria.rodriguez@email.com',
-    requester_phone: '+1-555-0321',
-    organization_name: null,
-    organization_type: null,
-    organization_address: null,
-    request_purpose: 'Community Art Workshop for Youth',
-    request_description:
-      'Individual request to organize art workshops for local youth. This initiative aims to provide creative outlets and skill development opportunities for children in the neighborhood.',
-    request_amount: 5000,
-    request_category: 'Arts & Culture',
-    submission_date: '2024-08-22T09:15:00Z',
-    current_status: 'submitted',
-    attached_file: {
-      name: 'art_workshop_proposal.zip',
-      size: '2.1 MB',
-      url: '/files/art_workshop_proposal.zip',
-    },
-    status_history: [
-      {
-        status: 'submitted',
-        changed_by: 'System',
-        changed_at: '2024-08-22T09:15:00Z',
-        comment: 'Request submitted successfully',
-      },
-    ],
-    deadline: null,
-  },
-];
+// Import service
+import {
+  getAllFundRequests,
+  getFundRequestByUuid,
+  submitReview,
+  FUND_REQUEST_STATUS,
+  searchFundRequests,
+  sortByDate,
+  filterByStatus,
+} from '@/api/services/admin/fundRequestService';
 
 const STATUS_OPTIONS = [
-  { value: 'submitted', label: 'Submitted', color: 'bg-blue-100 text-blue-800' },
+  { value: 'Submitted', label: 'Submitted', color: 'bg-blue-100 text-blue-800' },
+  { value: 'Resubmitted', label: 'Resubmitted', color: 'bg-cyan-100 text-cyan-800' },
   {
-    value: 'information_needed',
+    value: 'Information Needed',
     label: 'Information Needed',
     color: 'bg-yellow-100 text-yellow-800',
   },
-  {
-    value: 'technical_check_passed',
-    label: 'Technical Check Passed',
-    color: 'bg-green-100 text-green-800',
-  },
-  { value: 'under_review', label: 'Under Review', color: 'bg-purple-100 text-purple-800' },
-  { value: 'approved', label: 'Approved', color: 'bg-emerald-100 text-emerald-800' },
-  { value: 'denied', label: 'Denied', color: 'bg-red-100 text-red-800' },
+  { value: 'In Review', label: 'In Review', color: 'bg-purple-100 text-purple-800' },
+  { value: 'Approved', label: 'Approved', color: 'bg-green-100 text-green-800' },
+  { value: 'Rejected', label: 'Rejected', color: 'bg-red-100 text-red-800' },
+  { value: 'Published', label: 'Published', color: 'bg-emerald-100 text-emerald-800' },
+  { value: 'Expired', label: 'Expired', color: 'bg-gray-100 text-gray-800' },
 ];
 
 const CATEGORY_OPTIONS = [
+  'Medical Emergency',
+  'Food & Hunger Relief',
+  'Community Development',
   'Education',
+  'Emergency Relief',
   'Healthcare',
   'Environment',
-  'Community Development',
-  'Emergency Relief',
   'Technology',
   'Arts & Culture',
   'Sports & Recreation',
@@ -189,18 +59,20 @@ const SubmittedRequestsPage = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
 
   // State management
-  const [requests, setRequests] = useState(DEMO_REQUESTS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [requests, setRequests] = useState([]);
+  const [allRequests, setAllRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortField, setSortField] = useState('submission_date');
+  const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
 
   // Modal states
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -208,9 +80,60 @@ const SubmittedRequestsPage = () => {
 
   // Set page title
   useEffect(() => {
-    setPageTitle('Charity Requests');
-    setPageSubtitle('Review and manage submitted charity requests');
+    setPageTitle('Fundraising Requests');
+    setPageSubtitle('Review and manage submitted fundraising requests');
   }, [setPageTitle, setPageSubtitle]);
+
+  // Fetch requests on mount
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  // Fetch all fundraising requests
+  const fetchRequests = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch requests with statuses that can be reviewed (use lowercase with underscores for API)
+      const response = await getAllFundRequests(['submitted', 'resubmitted', 'information_needed']);
+
+      if (response.status === 'success' && response.data) {
+        setAllRequests(response.data);
+        setRequests(response.data);
+      } else {
+        toast.error('Failed to fetch requests');
+        setAllRequests([]);
+        setRequests([]);
+      }
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+      toast.error(error.message || 'Failed to fetch fundraising requests');
+      setAllRequests([]);
+      setRequests([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch single request details
+  const fetchRequestDetails = async (uuid) => {
+    setIsLoadingDetails(true);
+    try {
+      const response = await getFundRequestByUuid(uuid);
+
+      if (response.status === 'success' && response.data) {
+        return response.data;
+      } else {
+        toast.error('Failed to fetch request details');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+      toast.error(error.message || 'Failed to fetch request details');
+      return null;
+    } finally {
+      setIsLoadingDetails(false);
+    }
+  };
 
   // Handle sorting
   const handleSort = (field) => {
@@ -222,88 +145,110 @@ const SubmittedRequestsPage = () => {
     }
   };
 
-  // Handle request selection
-  const handleRequestClick = (request) => {
-    setSelectedRequest(request);
-    setShowDetailsModal(true);
+  // Handle request selection - fetch full details
+  const handleRequestClick = async (request) => {
+    const details = await fetchRequestDetails(request.uuid);
+    if (details) {
+      setSelectedRequest(details);
+      setShowDetailsModal(true);
+    }
   };
 
   // Handle status change initiation
-  const handleStatusChange = (request) => {
-    setSelectedRequest(request);
-    setShowStatusModal(true);
+  const handleStatusChange = async (request) => {
+    // If we don't have full details, fetch them
+    if (!request.description) {
+      const details = await fetchRequestDetails(request.uuid);
+      if (details) {
+        setSelectedRequest(details);
+        setShowStatusModal(true);
+      }
+    } else {
+      setSelectedRequest(request);
+      setShowStatusModal(true);
+    }
   };
 
   // Handle status change submission
-  const handleStatusChangeSubmit = (requestId, newStatus, comment, deadline = null) => {
-    const updatedRequests = requests.map((request) => {
-      if (request.id === requestId) {
-        const updatedStatusHistory = [
-          ...request.status_history,
-          {
-            status: newStatus,
-            changed_by: 'Current Reviewer', // This will be replaced with actual user data
-            changed_at: new Date().toISOString(),
-            comment: comment,
-          },
-        ];
+  const handleStatusChangeSubmit = async (uuid, newStatus, comment, deadline = null) => {
+    try {
+      const reviewData = {
+        status: newStatus.toLowerCase().replace(/ /g, '_'),
+        comments: comment,
+        deadline: deadline,
+      };
 
-        return {
-          ...request,
-          current_status: newStatus,
-          status_history: updatedStatusHistory,
-          deadline: deadline || request.deadline,
-        };
+      const response = await submitReview(uuid, reviewData);
+
+      if (response.status === 'success') {
+        toast.success(response.message || 'Status updated successfully');
+
+        // Refresh the requests list
+        await fetchRequests();
+
+        setShowStatusModal(false);
+        setSelectedRequest(null);
+      } else {
+        toast.error(response.message || 'Failed to update status');
       }
-      return request;
-    });
-
-    setRequests(updatedRequests);
-    setShowStatusModal(false);
-    setSelectedRequest(null);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast.error(error.message || 'Failed to update status');
+    }
   };
 
-  // Filter and sort requests
-  const filteredRequests = requests.filter((request) => {
-    // Search filter
-    const matchesSearch =
-      !searchQuery ||
-      request.request_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.requester_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.organization_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.request_title.toLowerCase().includes(searchQuery.toLowerCase());
+  // Apply filters and search
+  useEffect(() => {
+    let filtered = [...allRequests];
 
-    // Status filter
-    const matchesStatus = statusFilter === 'all' || request.current_status === statusFilter;
-
-    // Category filter
-    const matchesCategory = categoryFilter === 'all' || request.request_category === categoryFilter;
-
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
-
-  const sortedRequests = [...filteredRequests].sort((a, b) => {
-    const modifier = sortDirection === 'asc' ? 1 : -1;
-
-    if (sortField === 'submission_date') {
-      return (new Date(a.submission_date) - new Date(b.submission_date)) * modifier;
-    } else if (sortField === 'request_amount') {
-      return (a.request_amount - b.request_amount) * modifier;
-    } else if (typeof a[sortField] === 'string') {
-      return a[sortField].localeCompare(b[sortField]) * modifier;
-    } else {
-      return (a[sortField] - b[sortField]) * modifier;
+    // Apply search
+    if (searchQuery) {
+      filtered = searchFundRequests(filtered, searchQuery);
     }
-  });
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filterByStatus(filtered, statusFilter);
+    }
+
+    // Apply category filter
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter((req) => req.fundraising_category === categoryFilter);
+    }
+
+    // Apply sorting
+    if (sortField === 'created_at') {
+      filtered = sortByDate(filtered, sortDirection);
+    } else if (sortField === 'target_amount') {
+      filtered = [...filtered].sort((a, b) => {
+        const modifier = sortDirection === 'asc' ? 1 : -1;
+        return (Number(a.target_amount) - Number(b.target_amount)) * modifier;
+      });
+    } else {
+      filtered = [...filtered].sort((a, b) => {
+        const modifier = sortDirection === 'asc' ? 1 : -1;
+        const aValue = a[sortField] || '';
+        const bValue = b[sortField] || '';
+
+        if (typeof aValue === 'string') {
+          return aValue.localeCompare(bValue) * modifier;
+        }
+        return (aValue - bValue) * modifier;
+      });
+    }
+
+    setRequests(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [allRequests, searchQuery, statusFilter, categoryFilter, sortField, sortDirection]);
 
   // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentRequests = sortedRequests.slice(indexOfFirstItem, indexOfLastItem);
+  const currentRequests = requests.slice(indexOfFirstItem, indexOfLastItem);
 
   // Get status counts for filters
-  const statusCounts = requests.reduce((acc, request) => {
-    acc[request.current_status] = (acc[request.current_status] || 0) + 1;
+  const statusCounts = allRequests.reduce((acc, request) => {
+    acc[request.status] = (acc[request.status] || 0) + 1;
     return acc;
   }, {});
 
@@ -323,7 +268,7 @@ const SubmittedRequestsPage = () => {
               setStatusFilter={setStatusFilter}
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
-              totalRequests={sortedRequests.length}
+              totalRequests={requests.length}
               statusCounts={statusCounts}
               statusOptions={STATUS_OPTIONS}
               categoryOptions={CATEGORY_OPTIONS}
@@ -344,13 +289,13 @@ const SubmittedRequestsPage = () => {
 
           <CardFooter>
             {/* Pagination */}
-            {sortedRequests.length > 0 && (
+            {requests.length > 0 && (
               <RequestsPagination
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 itemsPerPage={itemsPerPage}
                 setItemsPerPage={setItemsPerPage}
-                totalItems={sortedRequests.length}
+                totalItems={requests.length}
                 indexOfFirstItem={indexOfFirstItem}
                 indexOfLastItem={indexOfLastItem}
               />
@@ -370,6 +315,7 @@ const SubmittedRequestsPage = () => {
           }}
           onStatusChange={handleStatusChange}
           statusOptions={STATUS_OPTIONS}
+          isLoading={isLoadingDetails}
         />
       )}
 

@@ -20,8 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
-import { Calendar as CalendarIcon, MessageSquare } from 'lucide-react';
-import { AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -33,28 +32,21 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
 
   if (!request) return null;
 
-  // Get available status transitions based on current status
-  const getAvailableStatuses = (currentStatus) => {
-    switch (currentStatus) {
-      case 'submitted':
-        return ['information_needed', 'technical_check_passed'];
-      case 'information_needed':
-        return ['technical_check_passed', 'information_needed']; // Can request more info again
-      default:
-        return [];
-    }
+  // Get available status transitions (only information_needed and in_review)
+  const getAvailableStatuses = () => {
+    return [
+      { value: 'Information Needed', label: 'Information Needed', apiValue: 'information_needed' },
+      { value: 'In Review', label: 'In Review', apiValue: 'in_review' },
+    ];
   };
 
-  const availableStatusValues = getAvailableStatuses(request.current_status);
-  const availableStatuses = statusOptions.filter((status) =>
-    availableStatusValues.includes(status.value)
-  );
+  const availableStatuses = getAvailableStatuses();
 
   // Get current status info
-  const currentStatusInfo = statusOptions.find((s) => s.value === request.current_status);
+  const currentStatusInfo = statusOptions.find((s) => s.value === request.status);
 
-  // Check if deadline is required - needed when changing to technical_check_passed
-  const requiresDeadline = selectedStatus === 'technical_check_passed';
+  // Deadline is required for both statuses
+  const requiresDeadline = selectedStatus !== '';
 
   // Reset form when modal opens/closes
   React.useEffect(() => {
@@ -81,6 +73,15 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
     }
   };
 
+  // Format date to YYYY-MM-DD
+  const formatDateForAPI = (date) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Form validation
   const getValidationErrors = () => {
     const errors = [];
@@ -93,12 +94,16 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
       errors.push('Comment is required');
     }
 
+    if (comment.trim().length < 5) {
+      errors.push('Comment must be at least 5 characters long');
+    }
+
     if (comment.length > 500) {
       errors.push('Comment must be 500 characters or less');
     }
 
     if (requiresDeadline && !deadline) {
-      errors.push('Deadline is required when passing technical check');
+      errors.push('Deadline is required when sending for review');
     }
 
     if (requiresDeadline && deadline && isDateDisabled(deadline)) {
@@ -121,14 +126,19 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
     setIsSubmitting(true);
 
     try {
-      // Prepare deadline (convert to ISO string if exists)
-      const deadlineISO = deadline ? deadline.toISOString() : null;
+      // Get the API value for the selected status
+      const statusObj = availableStatuses.find((s) => s.value === selectedStatus);
+      const apiStatus = statusObj
+        ? statusObj.apiValue
+        : selectedStatus.toLowerCase().replace(/ /g, '_');
 
-      // Call parent handler
-      await onSubmit(request.id, selectedStatus, comment.trim(), deadlineISO);
+      // Prepare deadline (convert to YYYY-MM-DD format)
+      const deadlineFormatted = deadline ? formatDateForAPI(deadline) : null;
 
-      toast.success('Status updated successfully');
-      onClose();
+      // Call parent handler with uuid, status, comment, and deadline
+      await onSubmit(request.uuid, apiStatus, comment.trim(), deadlineFormatted);
+
+      // Success handling is done in parent component
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Failed to update status');
@@ -139,18 +149,13 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
 
   // Get status change icon
   const getStatusIcon = (status) => {
-    switch (status) {
-      case 'information_needed':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-      case 'technical_check_passed':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'under_review':
-        return <Clock className="h-5 w-5 text-purple-600" />;
-      case 'denied':
-        return <XCircle className="h-5 w-5 text-red-600" />;
-      default:
-        return <MessageSquare className="h-5 w-5 text-blue-600" />;
+    if (status === 'Information Needed') {
+      return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
     }
+    if (status === 'In Review') {
+      return <CheckCircle className="h-5 w-5 text-purple-600" />;
+    }
+    return <MessageSquare className="h-5 w-5 text-blue-600" />;
   };
 
   return (
@@ -170,12 +175,12 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm">Request ID:</span>
                 <span className="font-mono text-blue-600 text-sm break-all">
-                  {request.request_id}
+                  {request.request_number}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-medium text-sm">Requester:</span>
-                <span className="text-sm break-all">{request.requester_name}</span>
+                <span className="text-sm break-all">{request.name}</span>
               </div>
             </div>
             <div className="flex items-center justify-between mt-3 pt-3 border-t">
@@ -209,7 +214,7 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
 
             {selectedStatus && (
               <div className="text-sm">
-                {selectedStatus === 'information_needed' && (
+                {selectedStatus === 'Information Needed' && (
                   <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                     <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
                     <span className="text-yellow-800">
@@ -217,12 +222,12 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
                     </span>
                   </div>
                 )}
-                {selectedStatus === 'technical_check_passed' && (
-                  <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-green-800">
+                {selectedStatus === 'In Review' && (
+                  <div className="flex items-start gap-2 p-3 bg-purple-50 border border-purple-200 rounded-md">
+                    <CheckCircle className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-purple-800">
                       This confirms the technical review is complete and requirements are met. The
-                      request will be automatically sent to approvers with the deadline you set.
+                      request will be sent to approvers with the deadline you set.
                     </span>
                   </div>
                 )}
@@ -230,7 +235,7 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
             )}
           </div>
 
-          {/* Deadline Selection (only for technical_check_passed) */}
+          {/* Deadline Selection (required for both statuses) */}
           {requiresDeadline && (
             <div className="space-y-3">
               <Label className="text-sm font-medium">
@@ -241,14 +246,15 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
                 onSelect={handleDateSelect}
                 disabled={isDateDisabled}
                 fromDate={new Date()}
-                placeholder="Select deadline for approvers"
+                placeholder="Select deadline for review"
                 className={cn(
                   !isFormValid && requiresDeadline && !deadline ? 'border-red-300 bg-red-50' : ''
                 )}
               />
               <div className="text-xs text-gray-500">
-                Approvers will have until this date to review and make their decisions on this
-                request.
+                {selectedStatus === 'Information Needed'
+                  ? 'Requester will have until this date to provide the additional information.'
+                  : 'Approvers will have until this date to review and make their decisions on this request.'}
               </div>
               {requiresDeadline && !deadline && !isFormValid && (
                 <p className="text-xs text-red-600">Deadline is required</p>
@@ -283,7 +289,7 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
           </div>
 
           {/* Warning for information needed */}
-          {selectedStatus === 'information_needed' && (
+          {selectedStatus === 'Information Needed' && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
@@ -299,17 +305,17 @@ const StatusChangeModal = ({ request, isOpen, onClose, onSubmit, statusOptions }
             </div>
           )}
 
-          {/* Warning for technical check passed */}
-          {selectedStatus === 'technical_check_passed' && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          {/* Warning for in review */}
+          {selectedStatus === 'In Review' && (
+            <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
               <div className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-green-800 mb-1">Ready for Approval</h4>
-                  <p className="text-sm text-green-700">
-                    This request will be automatically moved to the approval process and sent to all
-                    eligible approvers. The deadline you set will determine how long approvers have
-                    to make their decisions.
+                  <h4 className="font-medium text-purple-800 mb-1">Ready for Approval</h4>
+                  <p className="text-sm text-purple-700">
+                    This request will be sent to the approval process and assigned approvers will be
+                    notified. The deadline you set will determine how long approvers have to make
+                    their decisions.
                   </p>
                 </div>
               </div>

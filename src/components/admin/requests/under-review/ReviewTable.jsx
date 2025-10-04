@@ -10,8 +10,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Users,
-  DollarSign,
-  Calendar,
 } from 'lucide-react';
 import {
   Table,
@@ -38,14 +36,14 @@ const ReviewTable = ({
 }) => {
   // Column definitions for sortable headers
   const columns = [
-    { field: 'request_id', label: 'Request ID', sortable: true },
-    { field: 'requester_name', label: 'Requester', sortable: true },
-    { field: 'organization_name', label: 'Organization', sortable: true },
-    { field: 'request_purpose', label: 'Request Purpose', sortable: true },
-    { field: 'request_amount', label: 'Amount', sortable: true },
-    { field: 'request_category', label: 'Category', sortable: true },
+    { field: 'request_number', label: 'Request ID', sortable: true },
+    { field: 'name', label: 'Requester', sortable: true },
+    { field: 'fundraising_for', label: 'Fundraising For', sortable: true },
+    { field: 'title', label: 'Title', sortable: true },
+    { field: 'target_amount', label: 'Amount', sortable: true },
+    { field: 'fundraising_category', label: 'Category', sortable: true },
     { field: 'approval_count', label: 'Approvals', sortable: true },
-    { field: 'deadline', label: 'Deadline', sortable: true },
+    { field: 'deadline', label: 'Deadline', sortable: false },
     { field: 'actions', label: 'Actions', sortable: false },
   ];
 
@@ -59,8 +57,24 @@ const ReviewTable = ({
     }).format(amount);
   };
 
+  // Get deadline from reviews
+  const getDeadline = (reviews) => {
+    if (!reviews || reviews.length === 0) return null;
+    const latestReview = reviews[reviews.length - 1];
+    return latestReview.deadline || null;
+  };
+
   // Get deadline status and styling
   const getDeadlineInfo = (deadline) => {
+    if (!deadline) {
+      return {
+        text: 'No deadline',
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-50',
+        icon: <Clock className="h-4 w-4 text-gray-500" />,
+      };
+    }
+
     const deadlineDate = new Date(deadline);
     const now = new Date();
     const isOverdue = isPast(deadlineDate);
@@ -68,21 +82,21 @@ const ReviewTable = ({
 
     if (isOverdue) {
       return {
-        text: `Overdue (${Math.abs(daysLeft)} days)`,
+        text: `Overdue (${Math.abs(daysLeft)}d)`,
         color: 'text-red-600',
         bgColor: 'bg-red-50',
         icon: <AlertTriangle className="h-4 w-4 text-red-500" />,
       };
     } else if (daysLeft <= 3) {
       return {
-        text: `${daysLeft} days left`,
+        text: `${daysLeft}d left`,
         color: 'text-yellow-600',
         bgColor: 'bg-yellow-50',
         icon: <Clock className="h-4 w-4 text-yellow-500" />,
       };
     } else {
       return {
-        text: `${daysLeft} days left`,
+        text: `${daysLeft}d left`,
         color: 'text-green-600',
         bgColor: 'bg-green-50',
         icon: <CheckCircle className="h-4 w-4 text-green-500" />,
@@ -91,9 +105,9 @@ const ReviewTable = ({
   };
 
   // Get approval progress info
-  const getApprovalInfo = (approvals) => {
-    const approvalCount = approvals.length;
-    const requiredApprovals = 3;
+  const getApprovalInfo = (approvalSummary) => {
+    const approvalCount = approvalSummary?.approved_count || 0;
+    const requiredApprovals = approvalSummary?.total_approval_users || 3;
     const progressPercentage = Math.min((approvalCount / requiredApprovals) * 100, 100);
 
     let color = 'bg-red-500';
@@ -117,16 +131,9 @@ const ReviewTable = ({
     };
   };
 
-  // Check if user has already approved/denied this request
-  const getUserAction = (approvals, denials, currentUserId = 'current_user') => {
-    const hasApproved = approvals.some((approval) => approval.reviewer_id === currentUserId);
-    const hasDenied = denials.some((denial) => denial.reviewer_id === currentUserId);
-
-    return { hasApproved, hasDenied, hasActed: hasApproved || hasDenied };
-  };
-
   // Check if deadline has passed
   const isDeadlinePassed = (deadline) => {
+    if (!deadline) return false;
     return isPast(new Date(deadline));
   };
 
@@ -181,10 +188,10 @@ const ReviewTable = ({
             </TableRow>
           ) : (
             requests.map((request) => {
-              const deadlineInfo = getDeadlineInfo(request.deadline);
-              const approvalInfo = getApprovalInfo(request.approvals);
-              const userAction = getUserAction(request.approvals, request.denials);
-              const deadlinePassed = isDeadlinePassed(request.deadline);
+              const deadline = getDeadline(request.reviews);
+              const deadlineInfo = getDeadlineInfo(deadline);
+              const approvalInfo = getApprovalInfo(request.approval_summary);
+              const deadlinePassed = isDeadlinePassed(deadline);
 
               return (
                 <TableRow
@@ -194,36 +201,39 @@ const ReviewTable = ({
                 >
                   <TableCell className="text-center">
                     <div className="font-mono text-sm font-medium text-purple-600">
-                      {request.request_id}
+                      {request.request_number}
                     </div>
                   </TableCell>
 
                   <TableCell className="text-center">
                     <div className="flex flex-col items-center">
-                      <div className="font-medium">{request.requester_name}</div>
-                      <div className="text-xs text-gray-500">{request.requester_email}</div>
+                      <div className="font-medium">{request.name}</div>
+                      <div className="text-xs text-gray-500">{request.email}</div>
                     </div>
                   </TableCell>
 
                   <TableCell className="text-center max-w-48">
-                    <div className="font-medium truncate" title={request.organization_name}>
-                      {request.organization_name || 'Individual Request'}
+                    <div className="font-medium truncate" title={request.fundraising_for}>
+                      {request.fundraising_for}
                     </div>
-                    {request.organization_type && (
-                      <div className="text-xs text-gray-500">{request.organization_type}</div>
-                    )}
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${request.fund_type === 'individual' ? 'bg-blue-50' : 'bg-purple-50'}`}
+                    >
+                      {request.fund_type === 'individual' ? 'Individual' : 'Organization'}
+                    </Badge>
                   </TableCell>
 
                   <TableCell className="text-left max-w-64">
-                    <div className="font-medium truncate" title={request.request_purpose}>
-                      {request.request_purpose}
+                    <div className="font-medium truncate" title={request.title}>
+                      {request.title}
                     </div>
                   </TableCell>
 
                   <TableCell className="text-center">
                     <div className="flex flex-col items-center">
                       <span className="font-semibold text-green-600">
-                        {formatCurrency(request.request_amount)}
+                        {formatCurrency(request.target_amount)}
                       </span>
                       <span className="text-xs text-gray-500">Requested</span>
                     </div>
@@ -231,7 +241,7 @@ const ReviewTable = ({
 
                   <TableCell className="text-center">
                     <Badge variant="outline" className="bg-gray-50">
-                      {request.request_category}
+                      {request.fundraising_category}
                     </Badge>
                   </TableCell>
 
@@ -260,9 +270,11 @@ const ReviewTable = ({
                           {deadlineInfo.text}
                         </span>
                       </div>
-                      <div className="text-xs text-gray-600 mt-1">
-                        {formatDistanceToNow(new Date(request.deadline), { addSuffix: true })}
-                      </div>
+                      {deadline && (
+                        <div className="text-xs text-gray-600 mt-1">
+                          {formatDistanceToNow(new Date(deadline), { addSuffix: true })}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
 
@@ -281,7 +293,7 @@ const ReviewTable = ({
                         <span className="sr-only">View Details</span>
                       </Button>
 
-                      {!userAction.hasActed && !deadlinePassed && (
+                      {!deadlinePassed && (
                         <>
                           <Button
                             variant="ghost"
@@ -304,35 +316,20 @@ const ReviewTable = ({
                               e.stopPropagation();
                               onDeny(request);
                             }}
-                            title="Deny Request"
+                            title="Reject Request"
                             className="text-red-600 hover:text-red-800 hover:bg-red-50"
                           >
                             <ThumbsDown className="h-4 w-4" />
-                            <span className="sr-only">Deny</span>
+                            <span className="sr-only">Reject</span>
                           </Button>
                         </>
                       )}
 
-                      {deadlinePassed && !userAction.hasActed && (
+                      {deadlinePassed && (
                         <div className="flex items-center gap-1">
                           <Badge className="bg-gray-100 text-gray-600 text-xs px-2 py-1">
-                            Deadline Passed
+                            Expired
                           </Badge>
-                        </div>
-                      )}
-
-                      {userAction.hasActed && (
-                        <div className="flex items-center gap-1">
-                          {userAction.hasApproved && (
-                            <Badge className="bg-green-100 text-green-800 text-xs px-2 py-1">
-                              Approved
-                            </Badge>
-                          )}
-                          {userAction.hasDenied && (
-                            <Badge className="bg-red-100 text-red-800 text-xs px-2 py-1">
-                              Denied
-                            </Badge>
-                          )}
                         </div>
                       )}
                     </div>

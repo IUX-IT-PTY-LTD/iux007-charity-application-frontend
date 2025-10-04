@@ -46,6 +46,15 @@ const ApprovedTable = ({
     }).format(amount);
   };
 
+  // Format date safely
+  const formatDate = (dateString) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch (error) {
+      return 'Unknown date';
+    }
+  };
+
   // Get event connection status
   const getEventConnectionStatus = (request) => {
     if (request.connected_event_id) {
@@ -166,9 +175,7 @@ const ApprovedTable = ({
                   </TableCell>
 
                   <TableCell className="text-center">
-                    <div className="text-sm">
-                      {formatDistanceToNow(new Date(request.submission_date), { addSuffix: true })}
-                    </div>
+                    <div className="text-sm">{formatDate(request.submission_date)}</div>
                   </TableCell>
 
                   <TableCell className="text-center">
