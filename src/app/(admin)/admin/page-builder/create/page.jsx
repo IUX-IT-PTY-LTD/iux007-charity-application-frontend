@@ -1,0 +1,1482 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminContext } from '@/components/admin/layout/admin-context';
+import { Lock, Save, Eye, Settings, Plus, Trash2, Edit3, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
+
+// Import UI components
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
+// Import protected services
+import { isAuthenticated } from '@/api/services/admin/authService';
+import { createPage } from '@/api/services/admin/pageBuilderService';
+import { getPageBuilderMenus } from '@/api/services/admin/protected/menuService';
+
+// Import permission hooks and context
+import { PermissionProvider } from '@/api/contexts/PermissionContext';
+import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
+
+// Import component types and utilities
+import { COMPONENT_TYPES, getDefaultComponent } from '../components';
+
+// Component Editor Modal
+const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
+  const [localComponent, setLocalComponent] = useState(component);
+
+  useEffect(() => {
+    setLocalComponent(component);
+  }, [component]);
+
+  const handleSave = () => {
+    onUpdate(localComponent);
+    onClose();
+  };
+
+  const updateContent = (key, value) => {
+    setLocalComponent(prev => ({
+      ...prev,
+      content: {
+        ...prev.content,
+        [key]: value,
+      },
+    }));
+  };
+
+  const renderEditor = () => {
+    if (!component) return null;
+
+    switch (component.type) {
+      case COMPONENT_TYPES.HERO:
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={localComponent.content.title || ''}
+                onChange={(e) => updateContent('title', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="subtitle">Subtitle</Label>
+              <Textarea
+                id="subtitle"
+                value={localComponent.content.subtitle || ''}
+                onChange={(e) => updateContent('subtitle', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="backgroundImage">Background Image URL</Label>
+              <Input
+                id="backgroundImage"
+                value={localComponent.content.backgroundImage || ''}
+                onChange={(e) => updateContent('backgroundImage', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+            <div>
+              <Label htmlFor="buttonText">Button Text</Label>
+              <Input
+                id="buttonText"
+                value={localComponent.content.buttonText || ''}
+                onChange={(e) => updateContent('buttonText', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="buttonLink">Button Link</Label>
+              <Input
+                id="buttonLink"
+                value={localComponent.content.buttonLink || ''}
+                onChange={(e) => updateContent('buttonLink', e.target.value)}
+                placeholder="#, /page, https://example.com"
+              />
+            </div>
+          </div>
+        );
+      
+      case COMPONENT_TYPES.TEXT:
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="text">Text Content</Label>
+              
+              {/* Rich Text Formatting Toolbar */}
+              <div className="border rounded-t-md bg-gray-50 p-2 flex flex-wrap gap-1">
+                <div className="flex gap-1 border-r pr-2 mr-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<strong>${selectedText || 'Bold text'}</strong>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Bold"
+                  >
+                    <strong>B</strong>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<em>${selectedText || 'Italic text'}</em>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Italic"
+                  >
+                    <em>I</em>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<u>${selectedText || 'Underlined text'}</u>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Underline"
+                  >
+                    <u>U</u>
+                  </Button>
+                </div>
+
+                <div className="flex gap-1 border-r pr-2 mr-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const linkText = selectedText || 'Link text';
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<a href="https://example.com" class="text-blue-600 hover:underline">${linkText}</a>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Add Link"
+                  >
+                    🔗
+                  </Button>
+                </div>
+
+                <div className="flex gap-1 border-r pr-2 mr-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const newText = localComponent.content.text + 
+                        '\n<ul class="list-disc list-inside space-y-1">\n  <li>List item 1</li>\n  <li>List item 2</li>\n  <li>List item 3</li>\n</ul>';
+                      updateContent('text', newText);
+                    }}
+                    title="Bullet List"
+                  >
+                    • List
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const newText = localComponent.content.text + 
+                        '\n<ol class="list-decimal list-inside space-y-1">\n  <li>First item</li>\n  <li>Second item</li>\n  <li>Third item</li>\n</ol>';
+                      updateContent('text', newText);
+                    }}
+                    title="Numbered List"
+                  >
+                    1. List
+                  </Button>
+                </div>
+
+                <div className="flex gap-1">
+                  <Select
+                    onValueChange={(value) => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const headingText = selectedText || 'Heading text';
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<${value} class="font-bold ${value === 'h1' ? 'text-3xl' : value === 'h2' ? 'text-2xl' : value === 'h3' ? 'text-xl' : value === 'h4' ? 'text-lg' : 'text-base'} mb-2">${headingText}</${value}>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                  >
+                    <SelectTrigger className="w-20 h-8">
+                      <SelectValue placeholder="H" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="h1">H1</SelectItem>
+                      <SelectItem value="h2">H2</SelectItem>
+                      <SelectItem value="h3">H3</SelectItem>
+                      <SelectItem value="h4">H4</SelectItem>
+                      <SelectItem value="h5">H5</SelectItem>
+                      <SelectItem value="h6">H6</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Additional HTML Elements Toolbar */}
+              <div className="border-x border-b rounded-b-md bg-gray-50 p-2 border-t-0">
+                <div className="flex flex-wrap gap-1 text-xs">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<p class="mb-4">Your paragraph text here.</p>';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Paragraph"
+                  >
+                    P
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<div class="p-4 bg-blue-50 border-l-4 border-blue-400 my-4">\n  <p class="text-blue-800">This is an info box.</p>\n</div>';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Info Box"
+                  >
+                    📝 Box
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<blockquote class="border-l-4 border-gray-300 pl-4 italic text-gray-600 my-4">\n  "This is a quote."\n</blockquote>';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Quote"
+                  >
+                    💬 Quote
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<hr class="my-6 border-gray-300" />';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Horizontal Line"
+                  >
+                    ➖ Line
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<span class="bg-yellow-200 px-1 rounded">${selectedText || 'highlighted text'}</span>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Highlight Text"
+                  >
+                    🖍️ Highlight
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">${selectedText || 'code'}</code>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Inline Code"
+                  >
+                    &lt;/&gt; Code
+                  </Button>
+                </div>
+              </div>
+
+              <Textarea
+                id="text"
+                rows={12}
+                value={localComponent.content.text || ''}
+                onChange={(e) => updateContent('text', e.target.value)}
+                placeholder="Enter your text content here. Use the toolbar above for formatting or write HTML directly."
+                className="rounded-t-none border-t-0 font-mono text-sm"
+              />
+              
+              <div className="text-xs text-gray-500 space-y-1">
+                <p><strong>Tips:</strong></p>
+                <ul className="list-disc list-inside space-y-0.5 ml-2">
+                  <li>Select text in the editor and use toolbar buttons to format</li>
+                  <li>You can write HTML directly in the text area</li>
+                  <li>Common tags: &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;u&gt;, &lt;a&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;, &lt;h1-h6&gt;</li>
+                  <li>Use Tailwind CSS classes for styling</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="alignment">Text Alignment</Label>
+              <Select
+                value={localComponent.content.alignment || 'left'}
+                onValueChange={(value) => updateContent('alignment', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                  <SelectItem value="justify">Justify</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Live Preview */}
+            <div>
+              <Label>Live Preview</Label>
+              <div className={`border rounded-lg p-4 bg-white min-h-[100px] text-${localComponent.content.alignment || 'left'}`}>
+                {localComponent.content.text ? (
+                  <div 
+                    className="prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: localComponent.content.text }}
+                  />
+                ) : (
+                  <p className="text-gray-500 italic">Your formatted text will appear here...</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case COMPONENT_TYPES.IMAGE:
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="image-upload">Upload Image</Label>
+              <div className="space-y-3">
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      try {
+                        // Import the upload service
+                        const { uploadImage, validateImageFile } = await import('@/api/services/admin/imageUploadService');
+                        
+                        // Validate file
+                        const validation = validateImageFile(file);
+                        if (!validation.isValid) {
+                          toast.error(validation.error);
+                          return;
+                        }
+
+                        // Show loading state
+                        updateContent('uploading', true);
+                        
+                        // Upload image
+                        const response = await uploadImage(file);
+                        
+                        if (response.status === 'success') {
+                          updateContent('src', response.data.filePath);
+                          updateContent('uploading', false);
+                          toast.success('Image uploaded successfully!');
+                        } else {
+                          throw new Error(response.message || 'Upload failed');
+                        }
+                      } catch (error) {
+                        updateContent('uploading', false);
+                        console.error('Upload error:', error);
+                        toast.error(error.message || 'Failed to upload image');
+                      }
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {localComponent.content.uploading && (
+                  <div className="flex items-center space-x-2 text-sm text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span>Uploading image...</span>
+                  </div>
+                )}
+                {localComponent.content.src && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-green-600">✓ Image uploaded</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateContent('src', '')}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    <img 
+                      src={localComponent.content.src} 
+                      alt="Preview" 
+                      className="max-w-full h-32 object-cover rounded border"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="alt">Alt Text</Label>
+              <Input
+                id="alt"
+                value={localComponent.content.alt || ''}
+                onChange={(e) => updateContent('alt', e.target.value)}
+                placeholder="Describe the image for accessibility"
+              />
+            </div>
+            <div>
+              <Label htmlFor="caption">Caption (optional)</Label>
+              <Input
+                id="caption"
+                value={localComponent.content.caption || ''}
+                onChange={(e) => updateContent('caption', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="alignment">Alignment</Label>
+              <Select
+                value={localComponent.content.alignment || 'center'}
+                onValueChange={(value) => updateContent('alignment', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case COMPONENT_TYPES.CTA:
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={localComponent.content.title || ''}
+                onChange={(e) => updateContent('title', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={localComponent.content.description || ''}
+                onChange={(e) => updateContent('description', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="buttonText">Button Text</Label>
+              <Input
+                id="buttonText"
+                value={localComponent.content.buttonText || ''}
+                onChange={(e) => updateContent('buttonText', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="buttonLink">Button Link</Label>
+              <Input
+                id="buttonLink"
+                value={localComponent.content.buttonLink || ''}
+                onChange={(e) => updateContent('buttonLink', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+
+      case COMPONENT_TYPES.TESTIMONIAL:
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="quote">Quote</Label>
+              <Textarea
+                id="quote"
+                value={localComponent.content.quote || ''}
+                onChange={(e) => updateContent('quote', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="author">Author Name</Label>
+              <Input
+                id="author"
+                value={localComponent.content.author || ''}
+                onChange={(e) => updateContent('author', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="role">Author Role/Title</Label>
+              <Input
+                id="role"
+                value={localComponent.content.role || ''}
+                onChange={(e) => updateContent('role', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="avatar">Avatar URL (optional)</Label>
+              <Input
+                id="avatar"
+                value={localComponent.content.avatar || ''}
+                onChange={(e) => updateContent('avatar', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+
+      case COMPONENT_TYPES.COLUMNS:
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label>Columns</Label>
+              <div className="space-y-4">
+                {localComponent.content.columns.map((column, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Column {index + 1}</h4>
+                      {localComponent.content.columns.length > 1 && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            const newColumns = localComponent.content.columns.filter((_, i) => i !== index);
+                            updateContent('columns', newColumns);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor={`icon-${index}`}>Icon</Label>
+                      <Input
+                        id={`icon-${index}`}
+                        value={column.icon || ''}
+                        onChange={(e) => {
+                          const newColumns = [...localComponent.content.columns];
+                          newColumns[index] = { ...newColumns[index], icon: e.target.value };
+                          updateContent('columns', newColumns);
+                        }}
+                        placeholder="🚀"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`title-${index}`}>Title</Label>
+                      <Input
+                        id={`title-${index}`}
+                        value={column.title || ''}
+                        onChange={(e) => {
+                          const newColumns = [...localComponent.content.columns];
+                          newColumns[index] = { ...newColumns[index], title: e.target.value };
+                          updateContent('columns', newColumns);
+                        }}
+                        placeholder="Feature Title"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`text-${index}`}>Description</Label>
+                      <Textarea
+                        id={`text-${index}`}
+                        value={column.text || ''}
+                        onChange={(e) => {
+                          const newColumns = [...localComponent.content.columns];
+                          newColumns[index] = { ...newColumns[index], text: e.target.value };
+                          updateContent('columns', newColumns);
+                        }}
+                        placeholder="Feature description"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const newColumns = [
+                      ...localComponent.content.columns,
+                      { title: 'New Feature', text: 'Description of your feature.', icon: '⭐' }
+                    ];
+                    updateContent('columns', newColumns);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Column
+                </Button>
+                <span className="text-sm text-gray-600">
+                  {localComponent.content.columns.length} column{localComponent.content.columns.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="layout">Layout</Label>
+              <Select
+                value={localComponent.content.layout || 'equal'}
+                onValueChange={(value) => updateContent('layout', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="equal">Equal Width</SelectItem>
+                  <SelectItem value="featured">Featured First</SelectItem>
+                  <SelectItem value="sidebar">Sidebar Layout</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case COMPONENT_TYPES.SPACER:
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="height">Spacer Height</Label>
+              <div className="space-y-2">
+                <Input
+                  id="height"
+                  value={localComponent.content.height || '50px'}
+                  onChange={(e) => updateContent('height', e.target.value)}
+                  placeholder="50px"
+                />
+                <p className="text-xs text-gray-500">
+                  Enter a valid CSS height value (e.g., 50px, 2rem, 10vh)
+                </p>
+              </div>
+            </div>
+            <div>
+              <Label>Quick Height Options</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => updateContent('height', '25px')}
+                  className={localComponent.content.height === '25px' ? 'bg-blue-50 border-blue-300' : ''}
+                >
+                  Small (25px)
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => updateContent('height', '50px')}
+                  className={localComponent.content.height === '50px' ? 'bg-blue-50 border-blue-300' : ''}
+                >
+                  Medium (50px)
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => updateContent('height', '100px')}
+                  className={localComponent.content.height === '100px' ? 'bg-blue-50 border-blue-300' : ''}
+                >
+                  Large (100px)
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => updateContent('height', '150px')}
+                  className={localComponent.content.height === '150px' ? 'bg-blue-50 border-blue-300' : ''}
+                >
+                  X-Large (150px)
+                </Button>
+              </div>
+            </div>
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <Label className="text-sm font-medium">Preview</Label>
+              <div 
+                style={{ height: localComponent.content.height || '50px' }}
+                className="bg-gray-200 border-2 border-dashed border-gray-400 rounded mt-2 flex items-center justify-center"
+              >
+                <span className="text-gray-600 text-sm">
+                  Spacer ({localComponent.content.height || '50px'})
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return <p>No editor available for this component type.</p>;
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit {component?.type} Component</DialogTitle>
+          <DialogDescription>
+            Configure the properties for this component.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="py-4">
+          {renderEditor()}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            Save Changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Component Preview
+const ComponentPreview = ({ component, onEdit, onDelete, onMoveUp, onMoveDown, index, totalComponents }) => {
+  const renderPreview = () => {
+    switch (component.type) {
+      case COMPONENT_TYPES.HERO:
+        return (
+          <div 
+            className="relative p-8 bg-cover bg-center rounded-lg text-white min-h-[300px] flex items-center justify-center"
+            style={{ 
+              backgroundImage: component.content.backgroundImage 
+                ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${component.content.backgroundImage})` 
+                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            }}
+          >
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">{component.content.title}</h1>
+              <p className="text-xl mb-6">{component.content.subtitle}</p>
+              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                {component.content.buttonText}
+              </button>
+            </div>
+          </div>
+        );
+
+      case COMPONENT_TYPES.TEXT:
+        return (
+          <div 
+            className={`prose max-w-none text-${component.content.alignment || 'left'}`}
+            dangerouslySetInnerHTML={{ __html: component.content.text }}
+          />
+        );
+
+      case COMPONENT_TYPES.IMAGE:
+        return (
+          <div className={`text-${component.content.alignment || 'center'}`}>
+            {component.content.src ? (
+              <div>
+                <img 
+                  src={component.content.src} 
+                  alt={component.content.alt}
+                  className="max-w-full h-auto rounded-lg"
+                />
+                {component.content.caption && (
+                  <p className="text-sm text-gray-600 mt-2 italic">{component.content.caption}</p>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gray-200 h-48 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500">No image selected</span>
+              </div>
+            )}
+          </div>
+        );
+
+      case COMPONENT_TYPES.CTA:
+        return (
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-lg text-center">
+            <h3 className="text-2xl font-bold mb-4">{component.content.title}</h3>
+            <p className="text-lg mb-6 opacity-90">{component.content.description}</p>
+            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+              {component.content.buttonText}
+            </button>
+          </div>
+        );
+
+      case COMPONENT_TYPES.TESTIMONIAL:
+        return (
+          <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-blue-500">
+            <blockquote className="text-lg italic mb-4">
+              "{component.content.quote}"
+            </blockquote>
+            <div className="flex items-center">
+              {component.content.avatar && (
+                <img 
+                  src={component.content.avatar} 
+                  alt={component.content.author}
+                  className="w-12 h-12 rounded-full mr-4"
+                />
+              )}
+              <div>
+                <div className="font-semibold">{component.content.author}</div>
+                <div className="text-sm text-gray-600">{component.content.role}</div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case COMPONENT_TYPES.COLUMNS:
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {component.content.columns.map((column, idx) => (
+              <div key={idx} className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-3xl mb-3">{column.icon}</div>
+                <h4 className="text-lg font-semibold mb-2">{column.title}</h4>
+                <p className="text-gray-600">{column.text}</p>
+              </div>
+            ))}
+          </div>
+        );
+
+      case COMPONENT_TYPES.SPACER:
+        return (
+          <div 
+            style={{ height: component.content.height }}
+            className="bg-gray-100 border-2 border-dashed border-gray-300 rounded flex items-center justify-center"
+          >
+            <span className="text-gray-500 text-sm">Spacer ({component.content.height})</span>
+          </div>
+        );
+
+      default:
+        return <div className="p-4 bg-gray-100 rounded border-2 border-dashed">Unknown component type: {component.type}</div>;
+    }
+  };
+
+  return (
+    <div className="group relative border rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="flex space-x-1 bg-white rounded-md shadow-lg p-1">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={onMoveUp}
+            disabled={index === 0}
+            title="Move up"
+          >
+            ↑
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={onMoveDown}
+            disabled={index === totalComponents - 1}
+            title="Move down"
+          >
+            ↓
+          </Button>
+          <Button size="sm" variant="outline" onClick={onEdit} title="Edit">
+            <Edit3 className="h-3 w-3" />
+          </Button>
+          <Button size="sm" variant="destructive" onClick={onDelete} title="Delete">
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="pr-32">
+        {renderPreview()}
+      </div>
+    </div>
+  );
+};
+
+// Main Create Page Builder Component
+const CreatePageBuilderContent = () => {
+  const router = useRouter();
+  const { setPageTitle, setPageSubtitle } = useAdminContext();
+  const menuPermissions = useMenuPermissions();
+  
+  const [pageData, setPageData] = useState({
+    title: '',
+    slug: '',
+    meta_title: '',
+    meta_description: '',
+    status: 1,
+    components: [],
+    selectedMenuId: '',
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingComponent, setEditingComponent] = useState(null);
+  const [showComponentEditor, setShowComponentEditor] = useState(false);
+  const [pageBuilderMenus, setPageBuilderMenus] = useState([]);
+  const [loadingMenus, setLoadingMenus] = useState(true);
+  const [isMenuSelected, setIsMenuSelected] = useState(false);
+
+  // Set page title
+  useEffect(() => {
+    setPageTitle('Create New Page');
+    setPageSubtitle('Build a dynamic page with our page builder');
+  }, [setPageTitle, setPageSubtitle]);
+
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      toast.error('Authentication required. Please log in.');
+      router.push('/admin/login');
+    }
+  }, [router]);
+
+  // Fetch page builder menus
+  useEffect(() => {
+    const fetchPageBuilderMenus = async () => {
+      try {
+        setLoadingMenus(true);
+        const response = await getPageBuilderMenus();
+        if (response.status === 'success') {
+          setPageBuilderMenus(response.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching page builder menus:', error);
+        // Don't show error toast as this is optional feature
+      } finally {
+        setLoadingMenus(false);
+      }
+    };
+
+    if (menuPermissions.hasAccess) {
+      fetchPageBuilderMenus();
+    }
+  }, [menuPermissions.hasAccess]);
+
+  // Generate slug from title
+  const generateSlug = (title) => {
+    const slug = title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
+    
+    setPageData(prev => ({ ...prev, slug }));
+  };
+
+  // Handle menu selection
+  const handleMenuSelection = (menuId) => {
+    if (menuId === 'none' || !menuId) {
+      setPageData(prev => ({ 
+        ...prev, 
+        selectedMenuId: '',
+        title: '',
+        slug: '',
+        meta_title: '',
+      }));
+      setIsMenuSelected(false);
+    } else {
+      const selectedMenu = pageBuilderMenus.find(menu => menu.id.toString() === menuId);
+      if (selectedMenu) {
+        setPageData(prev => ({ 
+          ...prev, 
+          selectedMenuId: menuId,
+          title: selectedMenu.name,
+          slug: selectedMenu.slug,
+          meta_title: selectedMenu.name,
+        }));
+        setIsMenuSelected(true);
+      }
+    }
+  };
+
+  // Add new component
+  const addComponent = (type) => {
+    const newComponent = getDefaultComponent(type);
+    setPageData(prev => ({
+      ...prev,
+      components: [...prev.components, newComponent],
+    }));
+    toast.success('Component added successfully');
+  };
+
+  // Update component
+  const updateComponent = (updatedComponent) => {
+    setPageData(prev => ({
+      ...prev,
+      components: prev.components.map(comp => 
+        comp.id === updatedComponent.id ? updatedComponent : comp
+      ),
+    }));
+    toast.success('Component updated successfully');
+  };
+
+  // Delete component
+  const deleteComponent = (componentId) => {
+    setPageData(prev => ({
+      ...prev,
+      components: prev.components.filter(comp => comp.id !== componentId),
+    }));
+    toast.success('Component deleted successfully');
+  };
+
+  // Move component
+  const moveComponent = (index, direction) => {
+    const newComponents = [...pageData.components];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (newIndex >= 0 && newIndex < newComponents.length) {
+      [newComponents[index], newComponents[newIndex]] = [newComponents[newIndex], newComponents[index]];
+      setPageData(prev => ({ ...prev, components: newComponents }));
+      toast.success('Component moved successfully');
+    }
+  };
+
+  // Save page
+  const savePage = async () => {
+    if (!pageData.title.trim()) {
+      toast.error('Please enter a page title');
+      return;
+    }
+
+    if (!pageData.slug.trim()) {
+      toast.error('Please enter a page slug');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Transform pageData to match API expectations
+      const apiData = {
+        title: pageData.title,
+        slug: pageData.slug,
+        content_data: pageData.components, // Transform components to content_data
+        meta_title: pageData.meta_title,
+        meta_description: pageData.meta_description,
+        status: pageData.status === 1 ? true : false,
+        menu_id: pageData.selectedMenuId ? parseInt(pageData.selectedMenuId) : null
+      };
+
+      const response = await createPage(apiData);
+      
+      if (response.status === 'success') {
+        toast.success('Page created successfully!');
+        router.push('/admin/page-builder');
+      } else {
+        throw new Error(response.message || 'Failed to create page');
+      }
+    } catch (error) {
+      console.error('Error saving page:', error);
+      toast.error(error.message || 'Failed to create page');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Show loading state
+  if (menuPermissions.isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading page builder...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container px-4 py-6 mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <Button
+                variant="outline"
+                onClick={() => router.push('/admin/page-builder')}
+                className="mr-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" disabled={!pageData.slug}>
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
+              <Button onClick={savePage} disabled={isSaving}>
+                <Save className="h-4 w-4 mr-2" />
+                {isSaving ? 'Creating...' : 'Create Page'}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar - Component Library & Settings */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Component Library */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Components
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.HERO)}
+                >
+                  🎯 Hero Section
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.TEXT)}
+                >
+                  📝 Text Block
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.IMAGE)}
+                >
+                  🖼️ Image
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.COLUMNS)}
+                >
+                  📋 Columns
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.TESTIMONIAL)}
+                >
+                  💬 Testimonial
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.CTA)}
+                >
+                  🚀 Call to Action
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.SPACER)}
+                >
+                  ⬜ Spacer
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Page Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Page Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="menu">Select Menu (Optional)</Label>
+                  <Select
+                    value={pageData.selectedMenuId}
+                    onValueChange={handleMenuSelection}
+                    disabled={loadingMenus}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingMenus ? "Loading menus..." : "Choose a menu to auto-fill details"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None (Manual Entry)</SelectItem>
+                      {pageBuilderMenus.map((menu) => (
+                        <SelectItem key={menu.id} value={menu.id.toString()}>
+                          {menu.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {pageBuilderMenus.length === 0 && !loadingMenus && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      No menus available for page builder. Create a menu with "Show in Page Builder" enabled.
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="title">Page Title *</Label>
+                  <Input
+                    id="title"
+                    value={pageData.title}
+                    onChange={(e) => {
+                      if (!isMenuSelected) {
+                        const title = e.target.value;
+                        setPageData(prev => ({ ...prev, title }));
+                        if (title && !pageData.slug) {
+                          generateSlug(title);
+                        }
+                      }
+                    }}
+                    placeholder="Enter page title"
+                    disabled={isMenuSelected}
+                    className={isMenuSelected ? "bg-gray-100 cursor-not-allowed" : ""}
+                  />
+                  {isMenuSelected && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      Auto-filled from selected menu. Deselect menu to edit manually.
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="slug">Slug *</Label>
+                  <Input
+                    id="slug"
+                    value={pageData.slug}
+                    onChange={(e) => {
+                      if (!isMenuSelected) {
+                        setPageData(prev => ({ ...prev, slug: e.target.value }));
+                      }
+                    }}
+                    placeholder="page-url-slug"
+                    disabled={isMenuSelected}
+                    className={isMenuSelected ? "bg-gray-100 cursor-not-allowed" : ""}
+                  />
+                  {pageData.slug && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      URL: yoursite.com/{pageData.slug}
+                    </p>
+                  )}
+                  {isMenuSelected && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      Auto-filled from selected menu. Deselect menu to edit manually.
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="meta_title">Meta Title</Label>
+                  <Input
+                    id="meta_title"
+                    value={pageData.meta_title}
+                    onChange={(e) => setPageData(prev => ({ ...prev, meta_title: e.target.value }))}
+                    placeholder="SEO title"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="meta_description">Meta Description</Label>
+                  <Textarea
+                    id="meta_description"
+                    value={pageData.meta_description}
+                    onChange={(e) => setPageData(prev => ({ ...prev, meta_description: e.target.value }))}
+                    placeholder="SEO description"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={pageData.status.toString()}
+                    onValueChange={(value) => setPageData(prev => ({ ...prev, status: parseInt(value) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Active</SelectItem>
+                      <SelectItem value="0">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content - Page Canvas */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Page Preview</CardTitle>
+                <p className="text-sm text-gray-600">
+                  {pageData.components.length} component{pageData.components.length !== 1 ? 's' : ''} added
+                </p>
+              </CardHeader>
+              <CardContent>
+                {pageData.components.length === 0 ? (
+                  <div className="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
+                    <div className="text-6xl mb-4">🎨</div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Start Building Your Page</h3>
+                    <p className="text-gray-500 mb-6">Use the component library on the left to add elements to your page</p>
+                    <div className="flex justify-center space-x-2">
+                      <Button onClick={() => addComponent(COMPONENT_TYPES.HERO)}>
+                        Add Hero Section
+                      </Button>
+                      <Button variant="outline" onClick={() => addComponent(COMPONENT_TYPES.TEXT)}>
+                        Add Text Block
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {pageData.components.map((component, index) => (
+                      <ComponentPreview
+                        key={component.id}
+                        component={component}
+                        index={index}
+                        totalComponents={pageData.components.length}
+                        onEdit={() => {
+                          setEditingComponent(component);
+                          setShowComponentEditor(true);
+                        }}
+                        onDelete={() => deleteComponent(component.id)}
+                        onMoveUp={() => moveComponent(index, 'up')}
+                        onMoveDown={() => moveComponent(index, 'down')}
+                      />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Sticky Bottom Save Bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
+          <div className="container px-4 py-4 mx-auto max-w-7xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  {pageData.components.length} component{pageData.components.length !== 1 ? 's' : ''} added
+                </span>
+                {pageData.title && (
+                  <span className="text-sm text-gray-600">
+                    • Page: {pageData.title}
+                  </span>
+                )}
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/admin/page-builder')}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={!pageData.slug || isSaving}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </Button>
+                <Button
+                  onClick={savePage}
+                  disabled={isSaving || !pageData.title || !pageData.slug}
+                  className="min-w-[120px]"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {isSaving ? 'Creating...' : 'Create Page'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Add padding to bottom to account for sticky save bar */}
+        <div className="h-20"></div>
+
+        {/* Component Editor Modal */}
+        {editingComponent && (
+          <ComponentEditor
+            component={editingComponent}
+            isOpen={showComponentEditor}
+            onUpdate={updateComponent}
+            onClose={() => {
+              setShowComponentEditor(false);
+              setEditingComponent(null);
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component with permission provider
+const CreatePageBuilder = () => {
+  return (
+    <PermissionProvider>
+      <CreatePageBuilderContent />
+    </PermissionProvider>
+  );
+};
+
+export default CreatePageBuilder;

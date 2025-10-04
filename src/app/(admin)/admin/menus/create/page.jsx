@@ -40,6 +40,7 @@ const formSchema = z.object({
   }),
   status: z.number().int().min(0).max(1).default(1),
   parent_id: z.string().optional(),
+  show_in_page_builder: z.boolean().default(false),
 });
 
 // Main Create Menu Page Component
@@ -103,6 +104,7 @@ const CreateMenuPageContent = () => {
       ordering: 1,
       status: 1,
       parent_id: 'none',
+      show_in_page_builder: false,
     },
     resolver: zodResolver(formSchema),
   });
