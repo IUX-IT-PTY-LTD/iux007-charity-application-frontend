@@ -57,6 +57,16 @@ export const deleteMenu = menuPermissions.withDeletePermission(
   }
 );
 
+/**
+ * Get menus for page builder (requires menu_view permission)
+ */
+export const getPageBuilderMenus = menuPermissions.withViewPermission(
+  menuService.getPageBuilderMenus.bind(menuService),
+  {
+    context: { operation: 'getPageBuilderMenus' },
+  }
+);
+
 // ==================== DIRECT EXPORT OF MENU SERVICE INSTANCE ====================
 
 /**

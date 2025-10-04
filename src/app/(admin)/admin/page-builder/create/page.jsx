@@ -31,6 +31,7 @@ import {
 // Import protected services
 import { isAuthenticated } from '@/api/services/admin/authService';
 import { createPage } from '@/api/services/admin/pageBuilderService';
+import { getPageBuilderMenus } from '@/api/services/admin/protected/menuService';
 
 // Import permission hooks and context
 import { PermissionProvider } from '@/api/contexts/PermissionContext';
@@ -904,10 +905,14 @@ const CreatePageBuilderContent = () => {
     meta_description: '',
     status: 1,
     components: [],
+    selectedMenuId: '',
   });
   const [isSaving, setIsSaving] = useState(false);
   const [editingComponent, setEditingComponent] = useState(null);
   const [showComponentEditor, setShowComponentEditor] = useState(false);
+  const [pageBuilderMenus, setPageBuilderMenus] = useState([]);
+  const [loadingMenus, setLoadingMenus] = useState(true);
+  const [isMenuSelected, setIsMenuSelected] = useState(false);
 
   // Set page title
   useEffect(() => {
@@ -923,6 +928,28 @@ const CreatePageBuilderContent = () => {
     }
   }, [router]);
 
+  // Fetch page builder menus
+  useEffect(() => {
+    const fetchPageBuilderMenus = async () => {
+      try {
+        setLoadingMenus(true);
+        const response = await getPageBuilderMenus();
+        if (response.status === 'success') {
+          setPageBuilderMenus(response.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching page builder menus:', error);
+        // Don't show error toast as this is optional feature
+      } finally {
+        setLoadingMenus(false);
+      }
+    };
+
+    if (menuPermissions.hasAccess) {
+      fetchPageBuilderMenus();
+    }
+  }, [menuPermissions.hasAccess]);
+
   // Generate slug from title
   const generateSlug = (title) => {
     const slug = title
@@ -934,6 +961,32 @@ const CreatePageBuilderContent = () => {
       .replace(/-+$/, '');
     
     setPageData(prev => ({ ...prev, slug }));
+  };
+
+  // Handle menu selection
+  const handleMenuSelection = (menuId) => {
+    if (menuId === 'none' || !menuId) {
+      setPageData(prev => ({ 
+        ...prev, 
+        selectedMenuId: '',
+        title: '',
+        slug: '',
+        meta_title: '',
+      }));
+      setIsMenuSelected(false);
+    } else {
+      const selectedMenu = pageBuilderMenus.find(menu => menu.id.toString() === menuId);
+      if (selectedMenu) {
+        setPageData(prev => ({ 
+          ...prev, 
+          selectedMenuId: menuId,
+          title: selectedMenu.name,
+          slug: selectedMenu.slug,
+          meta_title: selectedMenu.name,
+        }));
+        setIsMenuSelected(true);
+      }
+    }
   };
 
   // Add new component
@@ -1137,31 +1190,76 @@ const CreatePageBuilderContent = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
+                  <Label htmlFor="menu">Select Menu (Optional)</Label>
+                  <Select
+                    value={pageData.selectedMenuId}
+                    onValueChange={handleMenuSelection}
+                    disabled={loadingMenus}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingMenus ? "Loading menus..." : "Choose a menu to auto-fill details"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None (Manual Entry)</SelectItem>
+                      {pageBuilderMenus.map((menu) => (
+                        <SelectItem key={menu.id} value={menu.id.toString()}>
+                          {menu.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {pageBuilderMenus.length === 0 && !loadingMenus && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      No menus available for page builder. Create a menu with "Show in Page Builder" enabled.
+                    </p>
+                  )}
+                </div>
+                <div>
                   <Label htmlFor="title">Page Title *</Label>
                   <Input
                     id="title"
                     value={pageData.title}
                     onChange={(e) => {
-                      const title = e.target.value;
-                      setPageData(prev => ({ ...prev, title }));
-                      if (title && !pageData.slug) {
-                        generateSlug(title);
+                      if (!isMenuSelected) {
+                        const title = e.target.value;
+                        setPageData(prev => ({ ...prev, title }));
+                        if (title && !pageData.slug) {
+                          generateSlug(title);
+                        }
                       }
                     }}
                     placeholder="Enter page title"
+                    disabled={isMenuSelected}
+                    className={isMenuSelected ? "bg-gray-100 cursor-not-allowed" : ""}
                   />
+                  {isMenuSelected && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      Auto-filled from selected menu. Deselect menu to edit manually.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="slug">Slug *</Label>
                   <Input
                     id="slug"
                     value={pageData.slug}
-                    onChange={(e) => setPageData(prev => ({ ...prev, slug: e.target.value }))}
+                    onChange={(e) => {
+                      if (!isMenuSelected) {
+                        setPageData(prev => ({ ...prev, slug: e.target.value }));
+                      }
+                    }}
                     placeholder="page-url-slug"
+                    disabled={isMenuSelected}
+                    className={isMenuSelected ? "bg-gray-100 cursor-not-allowed" : ""}
                   />
                   {pageData.slug && (
                     <p className="text-xs text-gray-500 mt-1">
                       URL: yoursite.com/{pageData.slug}
+                    </p>
+                  )}
+                  {isMenuSelected && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      Auto-filled from selected menu. Deselect menu to edit manually.
                     </p>
                   )}
                 </div>

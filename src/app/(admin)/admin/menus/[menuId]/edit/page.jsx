@@ -39,6 +39,7 @@ const formSchema = z.object({
     message: 'Ordering must be a positive number.',
   }),
   status: z.number().int().min(0).max(1).default(1),
+  show_in_page_builder: z.boolean().default(false),
 });
 
 // Main Edit Menu Page Component
@@ -62,6 +63,7 @@ const EditMenuPageContent = () => {
       slug: '',
       ordering: 1,
       status: 1,
+      show_in_page_builder: false,
     },
     resolver: zodResolver(formSchema),
   });

@@ -145,6 +145,25 @@ class MenuService {
       throw error;
     }
   }
+
+  /**
+   * Get menus that are available for page builder
+   * @returns {Promise<Object>} - Menus with show_in_page_builder enabled
+   */
+  async getPageBuilderMenus() {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    try {
+      const endpoint = `/${this.baseEndpoint}/menus/page-builder`;
+      const response = await apiService.get(endpoint);
+      return response;
+    } catch (error) {
+      console.error('Error fetching page builder menus:', error);
+      throw error;
+    }
+  }
 }
 
 export const menuService = new MenuService();

@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Lock, Eye } from 'lucide-react';
 
 // Import permission hooks
@@ -194,6 +195,32 @@ const EditMenuForm = ({ form, generateSlug, originalSlug, menuPermissions, FormA
                 </SelectContent>
               </Select>
               <FormDescription>When active, this menu will be available for use.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="show_in_page_builder"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isFormDisabled}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="flex items-center gap-2">
+                  Show in Page Builder
+                  {isFormDisabled && <Lock className="h-4 w-4 text-gray-400" />}
+                </FormLabel>
+                <FormDescription>
+                  When enabled, this menu will be available as an option in the Page Builder settings to auto-fill page title and slug.
+                </FormDescription>
+              </div>
               <FormMessage />
             </FormItem>
           )}
