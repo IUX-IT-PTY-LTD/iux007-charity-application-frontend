@@ -959,7 +959,10 @@ const EditPageBuilderContent = () => {
               </div>
             </div>
             <div className="flex space-x-2">
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={() => window.open(`/${pageData.slug}`, '_blank')}
+              >
                 <Eye className="h-4 w-4 mr-2" />
                 Preview
               </Button>
@@ -1165,6 +1168,7 @@ const EditPageBuilderContent = () => {
                 <Button
                   variant="outline"
                   disabled={isSaving}
+                  onClick={() => window.open(`/${pageData.slug}`, '_blank')}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   Preview

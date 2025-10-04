@@ -167,7 +167,8 @@ class PageBuilderService {
     }
 
     try {
-      const endpoint = `/${this.baseEndpoint}/page-builder/view/${slug}`;
+      // Use public endpoint for page viewing (apiService already includes /api/v1)
+      const endpoint = `/page-builder/view/${slug}`;
       const response = await apiService.get(endpoint);
       return response;
     } catch (error) {
