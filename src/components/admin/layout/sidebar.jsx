@@ -21,6 +21,7 @@ import {
   UserCircle,
   Globe, // Added for Website section
   Info, // Added for About Us
+  Layout, // Added for Page Builder
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -83,6 +84,15 @@ const getNavigationItems = (permissions) => {
   // Website submenu - only show if user has access to any website-related permissions
   const websiteSubmenuItems = [];
 
+  // Page Builder - always visible (no permission required for content management)
+  websiteSubmenuItems.push({
+    id: 'website-page-builder',
+    name: 'Page Builder',
+    href: '/admin/page-builder',
+    icon: Layout,
+    order: 1,
+  });
+
   // Menus
   if (permissions.menus.hasAccess) {
     websiteSubmenuItems.push({
@@ -90,7 +100,7 @@ const getNavigationItems = (permissions) => {
       name: 'Menus',
       href: '/admin/menus',
       icon: MenuIcon,
-      order: 1,
+      order: 2,
     });
   }
 
@@ -101,7 +111,7 @@ const getNavigationItems = (permissions) => {
       name: 'FAQs',
       href: '/admin/faqs',
       icon: HelpCircle,
-      order: 2,
+      order: 3,
     });
   }
 
@@ -112,7 +122,7 @@ const getNavigationItems = (permissions) => {
       name: 'Sliders',
       href: '/admin/sliders',
       icon: Images,
-      order: 3,
+      order: 4,
     });
   }
 
@@ -122,7 +132,7 @@ const getNavigationItems = (permissions) => {
     name: 'About Us',
     href: '/admin/about-us',
     icon: Info,
-    order: 4,
+    order: 5,
   });
 
   // Sort website submenu items by order
