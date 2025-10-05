@@ -193,8 +193,7 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
             <span className="sr-only">Edit</span>
           </PermissionAwareActionButton>
 
-          {/* Uncomment when DeleteEventDialog is available and permission-aware */}
-          {/* <DeleteEventDialog event={event} onDelete={handleDelete} /> */}
+          <DeleteEventDialog event={event} onDelete={handleDelete} />
         </div>
       </TableCell>
     </TableRow>

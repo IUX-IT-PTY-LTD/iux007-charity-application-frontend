@@ -14,7 +14,7 @@ import { Form } from '@/components/ui/form';
 import { toast } from 'sonner';
 
 // Import protected services
-import { getMenuDetails, updateMenu, deleteMenu } from '@/api/services/admin/protected/menuService';
+import { getMenuDetails, updateMenu, deleteMenu, getMenus } from '@/api/services/admin/protected/menuService';
 import { isAuthenticated } from '@/api/services/admin/authService';
 
 // Import permission hooks and context
@@ -32,9 +32,8 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: 'Menu name must be at least 2 characters.',
   }),
-  slug: z.string().min(2, {
-    message: 'Slug must be at least 2 characters.',
-  }),
+  slug: z.string().optional(),
+  parent_id: z.coerce.number().nullable().optional(),
   ordering: z.coerce.number().int().positive({
     message: 'Ordering must be a positive number.',
   }),
@@ -55,12 +54,14 @@ const EditMenuPageContent = () => {
   const [error, setError] = useState(null);
   const [originalSlug, setOriginalSlug] = useState('');
   const [originalOrdering, setOriginalOrdering] = useState(null);
+  const [parentMenus, setParentMenus] = useState([]);
 
   // Define form with zod validation
   const form = useForm({
     defaultValues: {
       name: '',
       slug: '',
+      parent_id: null,
       ordering: 1,
       status: 1,
       show_in_page_builder: false,
@@ -91,6 +92,28 @@ const EditMenuPageContent = () => {
       router.push('/admin/menus');
     }
   }, [menuPermissions.isLoading, menuPermissions.canView, router]);
+
+  // Fetch parent menus for dropdown
+  useEffect(() => {
+    const fetchParentMenus = async () => {
+      if (menuPermissions.isLoading || !menuPermissions.canView) {
+        return;
+      }
+
+      try {
+        const response = await getMenus();
+        if (response.status === 'success') {
+          // Filter out the current menu to prevent self-parent assignment
+          const availableParents = response.data.filter(menu => menu.id.toString() !== menuId);
+          setParentMenus(availableParents);
+        }
+      } catch (error) {
+        console.error('Error fetching parent menus:', error);
+      }
+    };
+
+    fetchParentMenus();
+  }, [menuId, menuPermissions.isLoading, menuPermissions.canView]);
 
   // Fetch menu data with permission handling
   useEffect(() => {
@@ -381,6 +404,7 @@ const EditMenuPageContent = () => {
                   generateSlug={generateSlug}
                   originalSlug={originalSlug}
                   menuPermissions={menuPermissions}
+                  parentMenus={parentMenus}
                   FormActions={() => (
                     <EditFormActions
                       isSubmitting={isSubmitting}
