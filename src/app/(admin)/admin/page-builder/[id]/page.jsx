@@ -86,31 +86,320 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                 onChange={(e) => updateContent('subtitle', e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="backgroundImage">Background Image URL</Label>
-              <Input
-                id="backgroundImage"
-                value={localComponent.content.backgroundImage || ''}
-                onChange={(e) => updateContent('backgroundImage', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
+            
+            {/* Background Settings */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Background Settings</h4>
+              
+              <div>
+                <Label htmlFor="backgroundType">Background Type</Label>
+                <Select
+                  value={localComponent.content.backgroundType || 'color'}
+                  onValueChange={(value) => updateContent('backgroundType', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="color">Solid Color</SelectItem>
+                    <SelectItem value="gradient">Gradient</SelectItem>
+                    <SelectItem value="image">Image</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {localComponent.content.backgroundType === 'color' && (
+                <div>
+                  <Label htmlFor="backgroundColor">Background Color</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="backgroundColor"
+                      type="color"
+                      value={localComponent.content.backgroundColor || '#667eea'}
+                      onChange={(e) => updateContent('backgroundColor', e.target.value)}
+                      className="w-16 h-10"
+                    />
+                    <Input
+                      value={localComponent.content.backgroundColor || '#667eea'}
+                      onChange={(e) => updateContent('backgroundColor', e.target.value)}
+                      placeholder="#667eea"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {localComponent.content.backgroundType === 'gradient' && (
+                <div className="space-y-2">
+                  <Label>Gradient Colors</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="gradientStart" className="text-xs">Start Color</Label>
+                      <Input
+                        id="gradientStart"
+                        type="color"
+                        value={localComponent.content.gradientStart || '#667eea'}
+                        onChange={(e) => updateContent('gradientStart', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="gradientEnd" className="text-xs">End Color</Label>
+                      <Input
+                        id="gradientEnd"
+                        type="color"
+                        value={localComponent.content.gradientEnd || '#764ba2'}
+                        onChange={(e) => updateContent('gradientEnd', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="gradientDirection">Gradient Direction</Label>
+                    <Select
+                      value={localComponent.content.gradientDirection || '135deg'}
+                      onValueChange={(value) => updateContent('gradientDirection', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="to right">Left to Right</SelectItem>
+                        <SelectItem value="to left">Right to Left</SelectItem>
+                        <SelectItem value="to bottom">Top to Bottom</SelectItem>
+                        <SelectItem value="to top">Bottom to Top</SelectItem>
+                        <SelectItem value="135deg">Diagonal (135°)</SelectItem>
+                        <SelectItem value="45deg">Diagonal (45°)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {localComponent.content.backgroundType === 'image' && (
+                <div>
+                  <Label htmlFor="hero-background-upload">Upload Background Image</Label>
+                  <div className="space-y-3">
+                    <input
+                      id="hero-background-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          try {
+                            const { uploadImage, validateImageFile } = await import('@/api/services/admin/imageUploadService');
+                            
+                            const validation = validateImageFile(file);
+                            if (!validation.isValid) {
+                              toast.error(validation.error);
+                              return;
+                            }
+
+                            updateContent('uploadingBackground', true);
+                            
+                            const response = await uploadImage(file);
+                            
+                            if (response.status === 'success') {
+                              updateContent('backgroundImage', response.data.filePath);
+                              updateContent('uploadingBackground', false);
+                              toast.success('Background image uploaded successfully!');
+                            } else {
+                              throw new Error(response.message || 'Upload failed');
+                            }
+                          } catch (error) {
+                            updateContent('uploadingBackground', false);
+                            console.error('Upload error:', error);
+                            toast.error(error.message || 'Failed to upload background image');
+                          }
+                        }
+                      }}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    {localComponent.content.uploadingBackground && (
+                      <div className="flex items-center space-x-2 text-sm text-blue-600">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <span>Uploading background image...</span>
+                      </div>
+                    )}
+                    {localComponent.content.backgroundImage && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-green-600">✓ Background image uploaded</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              try {
+                                const { deleteImage } = await import('@/api/services/admin/imageUploadService');
+                                await deleteImage(localComponent.content.backgroundImage);
+                                updateContent('backgroundImage', '');
+                                toast.success('Background image removed successfully!');
+                              } catch (error) {
+                                console.error('Delete error:', error);
+                                toast.error('Failed to remove background image');
+                              }
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                        <img 
+                          src={localComponent.content.backgroundImage} 
+                          alt="Background Preview" 
+                          className="max-w-full h-20 object-cover rounded border"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-3">
+                    <Label htmlFor="backgroundOverlay">Background Overlay Opacity</Label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={localComponent.content.backgroundOverlay || 40}
+                        onChange={(e) => updateContent('backgroundOverlay', e.target.value)}
+                        className="flex-1"
+                      />
+                      <span className="text-sm text-gray-600 w-12">{localComponent.content.backgroundOverlay || 40}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div>
-              <Label htmlFor="buttonText">Button Text</Label>
-              <Input
-                id="buttonText"
-                value={localComponent.content.buttonText || ''}
-                onChange={(e) => updateContent('buttonText', e.target.value)}
-              />
+
+            {/* Height Settings */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Size Settings</h4>
+              
+              <div>
+                <Label htmlFor="height">Hero Height</Label>
+                <Select
+                  value={localComponent.content.height || 'medium'}
+                  onValueChange={(value) => updateContent('height', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small (300px)</SelectItem>
+                    <SelectItem value="medium">Medium (500px)</SelectItem>
+                    <SelectItem value="large">Large (700px)</SelectItem>
+                    <SelectItem value="fullscreen">Full Screen (100vh)</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {localComponent.content.height === 'custom' && (
+                <div>
+                  <Label htmlFor="customHeight">Custom Height</Label>
+                  <Input
+                    id="customHeight"
+                    value={localComponent.content.customHeight || '400px'}
+                    onChange={(e) => updateContent('customHeight', e.target.value)}
+                    placeholder="400px, 50vh, 2rem"
+                  />
+                </div>
+              )}
             </div>
-            <div>
-              <Label htmlFor="buttonLink">Button Link</Label>
-              <Input
-                id="buttonLink"
-                value={localComponent.content.buttonLink || ''}
-                onChange={(e) => updateContent('buttonLink', e.target.value)}
-                placeholder="#, /page, https://example.com"
-              />
+
+            {/* Text Settings */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Text Settings</h4>
+              
+              <div>
+                <Label htmlFor="textAlignment">Text Alignment</Label>
+                <Select
+                  value={localComponent.content.textAlignment || 'center'}
+                  onValueChange={(value) => updateContent('textAlignment', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Left</SelectItem>
+                    <SelectItem value="center">Center</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="textColor">Text Color</Label>
+                <div className="flex space-x-2">
+                  <Input
+                    id="textColor"
+                    type="color"
+                    value={localComponent.content.textColor || '#ffffff'}
+                    onChange={(e) => updateContent('textColor', e.target.value)}
+                    className="w-16 h-10"
+                  />
+                  <Input
+                    value={localComponent.content.textColor || '#ffffff'}
+                    onChange={(e) => updateContent('textColor', e.target.value)}
+                    placeholder="#ffffff"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Button Settings */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Button Settings</h4>
+              
+              <div>
+                <Label htmlFor="buttonText">Button Text</Label>
+                <Input
+                  id="buttonText"
+                  value={localComponent.content.buttonText || ''}
+                  onChange={(e) => updateContent('buttonText', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="buttonLink">Button Link</Label>
+                <Input
+                  id="buttonLink"
+                  value={localComponent.content.buttonLink || ''}
+                  onChange={(e) => updateContent('buttonLink', e.target.value)}
+                  placeholder="#, /page, https://example.com"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="buttonStyle">Button Style</Label>
+                <Select
+                  value={localComponent.content.buttonStyle || 'primary'}
+                  onValueChange={(value) => updateContent('buttonStyle', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="primary">Primary (Blue)</SelectItem>
+                    <SelectItem value="secondary">Secondary (Gray)</SelectItem>
+                    <SelectItem value="outline">Outline</SelectItem>
+                    <SelectItem value="ghost">Ghost</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="buttonSize">Button Size</Label>
+                <Select
+                  value={localComponent.content.buttonSize || 'medium'}
+                  onValueChange={(value) => updateContent('buttonSize', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         );
@@ -693,21 +982,90 @@ const ComponentPreview = ({ component, onEdit, onDelete, onMoveUp, onMoveDown, i
   const renderPreview = () => {
     switch (component.type) {
       case COMPONENT_TYPES.HERO:
+        const getHeroHeight = () => {
+          switch (component.content.height) {
+            case 'small': return '300px';
+            case 'medium': return '500px';
+            case 'large': return '700px';
+            case 'fullscreen': return '100vh';
+            case 'custom': return component.content.customHeight || '400px';
+            default: return '500px';
+          }
+        };
+
+        const getHeroBackground = () => {
+          const type = component.content.backgroundType || 'gradient';
+          const overlay = component.content.backgroundOverlay || 40;
+          
+          if (type === 'color') {
+            return component.content.backgroundColor || '#667eea';
+          } else if (type === 'gradient') {
+            const start = component.content.gradientStart || '#667eea';
+            const end = component.content.gradientEnd || '#764ba2';
+            const direction = component.content.gradientDirection || '135deg';
+            return `linear-gradient(${direction}, ${start} 0%, ${end} 100%)`;
+          } else if (type === 'image' && component.content.backgroundImage) {
+            return `linear-gradient(rgba(0,0,0,${overlay/100}), rgba(0,0,0,${overlay/100})), url(${component.content.backgroundImage})`;
+          } else {
+            return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+          }
+        };
+
+        const getButtonClasses = () => {
+          const style = component.content.buttonStyle || 'primary';
+          const size = component.content.buttonSize || 'medium';
+          
+          let baseClasses = 'font-semibold rounded-lg transition-colors ';
+          
+          // Size classes
+          switch (size) {
+            case 'small':
+              baseClasses += 'px-4 py-2 text-sm ';
+              break;
+            case 'large':
+              baseClasses += 'px-10 py-4 text-lg ';
+              break;
+            default:
+              baseClasses += 'px-8 py-3 ';
+          }
+          
+          // Style classes
+          switch (style) {
+            case 'secondary':
+              baseClasses += 'bg-gray-600 text-white hover:bg-gray-700 ';
+              break;
+            case 'outline':
+              baseClasses += 'border-2 border-white text-white bg-transparent hover:bg-white hover:text-gray-900 ';
+              break;
+            case 'ghost':
+              baseClasses += 'text-white bg-transparent hover:bg-white hover:bg-opacity-20 ';
+              break;
+            default:
+              baseClasses += 'bg-white text-blue-600 hover:bg-gray-100 ';
+          }
+          
+          return baseClasses;
+        };
+
         return (
           <div 
-            className="relative p-8 bg-cover bg-center rounded-lg text-white min-h-[300px] flex items-center justify-center"
+            className="relative bg-cover bg-center rounded-lg flex items-center justify-center"
             style={{ 
-              backgroundImage: component.content.backgroundImage 
-                ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${component.content.backgroundImage})` 
-                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+              height: getHeroHeight(),
+              background: getHeroBackground(),
+              color: component.content.textColor || '#ffffff'
             }}
           >
-            <div className="text-center">
-              <h1 className="text-4xl font-bold mb-4">{component.content.title}</h1>
-              <p className="text-xl mb-6">{component.content.subtitle}</p>
-              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                {component.content.buttonText}
-              </button>
+            <div className={`text-${component.content.textAlignment || 'center'} max-w-4xl mx-auto px-8`}>
+              <h1 className="text-4xl font-bold mb-4">{component.content.title || 'Hero Title'}</h1>
+              {component.content.subtitle && (
+                <p className="text-xl mb-6">{component.content.subtitle}</p>
+              )}
+              {component.content.buttonText && (
+                <button className={getButtonClasses()}>
+                  {component.content.buttonText}
+                </button>
+              )}
             </div>
           </div>
         );

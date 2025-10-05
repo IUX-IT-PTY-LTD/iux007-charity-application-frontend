@@ -4,29 +4,98 @@ import React from 'react';
 import { COMPONENT_TYPES } from '@/app/(admin)/admin/page-builder/components';
 
 // Individual component renderers
-const HeroComponent = ({ content }) => (
-  <div 
-    className="relative bg-cover bg-center text-white min-h-[500px] flex items-center justify-center"
-    style={{ 
-      backgroundImage: content.backgroundImage 
-        ? `linear-gradient(rgba(0,0,0,${content.overlayOpacity || 0.5}), rgba(0,0,0,${content.overlayOpacity || 0.5})), url(${content.backgroundImage})` 
-        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-    }}
-  >
-    <div className="text-center px-4 max-w-4xl">
-      <h1 className="text-4xl md:text-6xl font-bold mb-6">{content.title}</h1>
-      <p className="text-xl md:text-2xl mb-8 opacity-90">{content.subtitle}</p>
-      {content.buttonText && content.buttonLink && (
-        <a 
-          href={content.buttonLink}
-          className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-lg"
-        >
-          {content.buttonText}
-        </a>
-      )}
+const HeroComponent = ({ content }) => {
+  const getHeroHeight = () => {
+    switch (content.height) {
+      case 'small': return '300px';
+      case 'medium': return '500px';
+      case 'large': return '700px';
+      case 'fullscreen': return '100vh';
+      case 'custom': return content.customHeight || '500px';
+      default: return '500px';
+    }
+  };
+
+  const getHeroBackground = () => {
+    const type = content.backgroundType || 'gradient';
+    const overlay = content.backgroundOverlay || 40;
+    
+    if (type === 'color') {
+      return content.backgroundColor || '#667eea';
+    } else if (type === 'gradient') {
+      const start = content.gradientStart || '#667eea';
+      const end = content.gradientEnd || '#764ba2';
+      const direction = content.gradientDirection || '135deg';
+      return `linear-gradient(${direction}, ${start} 0%, ${end} 100%)`;
+    } else if (type === 'image' && content.backgroundImage) {
+      return `linear-gradient(rgba(0,0,0,${overlay/100}), rgba(0,0,0,${overlay/100})), url(${content.backgroundImage})`;
+    } else {
+      return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
+  };
+
+  const getButtonClasses = () => {
+    const style = content.buttonStyle || 'primary';
+    const size = content.buttonSize || 'medium';
+    
+    let baseClasses = 'inline-block font-semibold rounded-lg transition-colors ';
+    
+    // Size classes
+    switch (size) {
+      case 'small':
+        baseClasses += 'px-4 py-2 text-sm ';
+        break;
+      case 'large':
+        baseClasses += 'px-10 py-4 text-xl ';
+        break;
+      default:
+        baseClasses += 'px-8 py-4 text-lg ';
+    }
+    
+    // Style classes
+    switch (style) {
+      case 'secondary':
+        baseClasses += 'bg-gray-600 text-white hover:bg-gray-700 ';
+        break;
+      case 'outline':
+        baseClasses += 'border-2 border-white text-white bg-transparent hover:bg-white hover:text-gray-900 ';
+        break;
+      case 'ghost':
+        baseClasses += 'text-white bg-transparent hover:bg-white hover:bg-opacity-20 ';
+        break;
+      default:
+        baseClasses += 'bg-white text-blue-600 hover:bg-gray-100 ';
+    }
+    
+    return baseClasses;
+  };
+
+  return (
+    <div 
+      className="relative bg-cover bg-center flex items-center justify-center"
+      style={{ 
+        height: getHeroHeight(),
+        background: getHeroBackground(),
+        color: content.textColor || '#ffffff'
+      }}
+    >
+      <div className={`text-${content.textAlignment || 'center'} px-4 max-w-4xl mx-auto`}>
+        <h1 className="text-4xl md:text-6xl font-bold mb-6">{content.title || 'Hero Title'}</h1>
+        {content.subtitle && (
+          <p className="text-xl md:text-2xl mb-8 opacity-90">{content.subtitle}</p>
+        )}
+        {content.buttonText && (
+          <a 
+            href={content.buttonLink || '#'}
+            className={getButtonClasses()}
+          >
+            {content.buttonText}
+          </a>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const TextComponent = ({ content }) => (
   <div className={`prose prose-lg max-w-none text-${content.alignment || 'left'} py-8`}>
