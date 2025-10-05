@@ -549,14 +549,120 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                 </div>
               </div>
 
+              {/* Additional HTML Elements Toolbar */}
+              <div className="border-x border-b rounded-b-md bg-gray-50 p-2 border-t-0">
+                <div className="flex flex-wrap gap-1 text-xs">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<p class="mb-4">Your paragraph text here.</p>';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Paragraph"
+                  >
+                    P
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<div class="p-4 bg-blue-50 border-l-4 border-blue-400 my-4">\n  <p class="text-blue-800">This is an info box.</p>\n</div>';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Info Box"
+                  >
+                    📝 Box
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<blockquote class="border-l-4 border-gray-300 pl-4 italic text-gray-600 my-4">\n  "This is a quote."\n</blockquote>';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Quote"
+                  >
+                    💬 Quote
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const newText = localComponent.content.text + '\n<hr class="my-6 border-gray-300" />';
+                      updateContent('text', newText);
+                    }}
+                    title="Add Horizontal Line"
+                  >
+                    ➖ Line
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<span class="bg-yellow-200 px-1 rounded">${selectedText || 'highlighted text'}</span>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Highlight Text"
+                  >
+                    🖍️ Highlight
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const textarea = document.getElementById('text');
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const selectedText = localComponent.content.text.substring(start, end);
+                      const newText = localComponent.content.text.substring(0, start) + 
+                        `<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">${selectedText || 'code'}</code>` + 
+                        localComponent.content.text.substring(end);
+                      updateContent('text', newText);
+                    }}
+                    title="Inline Code"
+                  >
+                    &lt;/&gt; Code
+                  </Button>
+                </div>
+              </div>
+
               <Textarea
                 id="text"
-                rows={8}
+                rows={12}
                 value={localComponent.content.text || ''}
                 onChange={(e) => updateContent('text', e.target.value)}
                 placeholder="Enter your text content here. Use the toolbar above for formatting or write HTML directly."
                 className="rounded-t-none border-t-0 font-mono text-sm"
               />
+              
+              <div className="text-xs text-gray-500 space-y-1">
+                <p><strong>Tips:</strong></p>
+                <ul className="list-disc list-inside space-y-0.5 ml-2">
+                  <li>Select text in the editor and use toolbar buttons to format</li>
+                  <li>You can write HTML directly in the text area</li>
+                  <li>Common tags: &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;u&gt;, &lt;a&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;, &lt;h1-h6&gt;</li>
+                  <li>Use Tailwind CSS classes for styling</li>
+                </ul>
+              </div>
             </div>
             <div>
               <Label htmlFor="alignment">Text Alignment</Label>
