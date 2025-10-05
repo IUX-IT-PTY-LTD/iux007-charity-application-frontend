@@ -348,7 +348,17 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => updateContent('src', '')}
+                        onClick={async () => {
+                          try {
+                            const { deleteImage } = await import('@/api/services/admin/imageUploadService');
+                            await deleteImage(localComponent.content.src);
+                            updateContent('src', '');
+                            toast.success('Image removed successfully!');
+                          } catch (error) {
+                            console.error('Delete error:', error);
+                            toast.error('Failed to remove image');
+                          }
+                        }}
                       >
                         Remove
                       </Button>

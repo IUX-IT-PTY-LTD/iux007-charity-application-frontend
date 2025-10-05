@@ -37,12 +37,8 @@ export const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('image', file);
 
-    // Upload to backend
-    return await apiService.post(`/admin/${version}/upload/image`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Upload to backend - Don't set Content-Type, let browser handle it
+    return await apiService.post(`/admin/${version}/upload/image`, formData);
   } catch (error) {
     console.error('Error uploading image:', error);
     throw error;
@@ -103,6 +99,31 @@ export const validateImageFile = (file) => {
     isValid: true,
     error: null
   };
+};
+
+/**
+ * Delete an uploaded image from S3 storage
+ * @param {string} filePath - Path of the image to delete
+ * @returns {Promise} - Promise resolving to deletion response
+ */
+export const deleteImage = async (filePath) => {
+  try {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    if (!filePath) {
+      throw new Error('No file path provided for deletion');
+    }
+
+    // Call delete API - use POST method for deletion with JSON body
+    return await apiService.post(`/admin/${version}/upload/image/delete`, {
+      filePath: filePath
+    });
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    throw error;
+  }
 };
 
 /**
