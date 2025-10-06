@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { FaClock, FaMapMarkerAlt, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
-import { useState, useEffect } from'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { setUserCart } from '@/store/features/userSlice';
@@ -61,7 +61,7 @@ const FeaturedEventsCard = ({
     }
     
     router.push('/checkout');
-  }
+  };
 
   const CustomPopup = () => {
     if (!showPopup) return null;
@@ -131,12 +131,12 @@ const FeaturedEventsCard = ({
             {title}
           </h3>
         </Link>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-3">{description}</p>
+        <p className="text-gray-600 text-sm mb-4 line-clamp-3 text-justify">{description}</p>
         <div className="space-y-4">
           {fixedDonation ? (
            <div className="text-center h-[84px] flex flex-col items-center justify-center">
               <div className="text-sm text-gray-600 mb-1">Fixed Donation</div>
-              <div className="text-2xl font-bold text-primary">
+              <div className="text-2xl font-bold text-gray-800">
                 ${donationAmount}
               </div>
             </div>
@@ -152,11 +152,11 @@ const FeaturedEventsCard = ({
                     }}
                     className={`${
                       selectedAmount === amount
-                        ? 'bg-primary text-white'
+                        ? 'bg-gray-800 text-white'
                         : showError 
-                        ? 'bg-red-100 text-red-600 border border-red-300 hover:bg-red-200' 
-                        : 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
-                    } px-3 py-1.5 rounded-lg text-sm transition-colors duration-200`}
+                        ? 'bg-red-100 text-red-600 border border-red-300' 
+                        : 'bg-gray-100 text-gray-800'
+                    } px-3 py-1.5 rounded-lg text-sm font-medium`}
                   >
                     ${amount}
                   </button>

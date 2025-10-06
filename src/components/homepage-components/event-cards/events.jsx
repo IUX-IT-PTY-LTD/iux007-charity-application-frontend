@@ -56,15 +56,16 @@ const EventCard = ({
       </div>
 
       <div className="flex flex-col flex-1">
-        <div className="text-xs justify-start items-center gap-3 flex mb-3">
-          <span className="justify-start items-center gap-1 bg-primary text-white px-3 py-1 rounded inline-flex">
-            <FaClock /> {formatTime(time)}
-          </span>
+        <div className="flex items-center gap-2 mb-3 text-xs">
+          <div className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded flex-shrink-0">
+            <FaClock className="text-xs" />
+            <span className="whitespace-nowrap text-xs">{formatTime(time)}</span>
+          </div>
           {venue && (
-            <span className="flex items-center gap-1 bg-primary text-white px-3 py-1 rounded w-32 min-w-0">
-              <FaMapMarkerAlt className="flex-shrink-0" />
-              <span className="truncate" title={venue}>{venue}</span>
-            </span>
+            <div className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded min-w-0 flex-1">
+              <FaMapMarkerAlt className="text-xs flex-shrink-0" />
+              <span className="truncate text-xs" title={venue}>{venue}</span>
+            </div>
           )}
         </div>
 

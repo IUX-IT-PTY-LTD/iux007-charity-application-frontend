@@ -104,13 +104,57 @@ const processStripePayment = async (clientSecret) => {
 
   if (result.paymentIntent.status === 'succeeded') {
     setMessage('Payment succeeded!');
-    // Show success popup
+    // Show charity-themed success popup
     await Swal.fire({
-      icon: 'success',
-      title: 'Payment Successful!',
-      text: 'Thank you for your donation. Your payment has been processed successfully.',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#3085d6'
+      html: `
+        <div class="charity-popup-content">
+          <div class="charity-popup-header">
+            <div class="charity-popup-icon">
+              <svg width="40" height="40" fill="white" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+            <h2 class="charity-popup-title">
+              Thank You for Your Generosity! 🙏
+            </h2>
+            <p class="charity-popup-description">
+              Your donation of <strong class="charity-popup-amount">$${totalAmount}</strong> has been processed successfully
+            </p>
+          </div>
+          
+          <div class="charity-popup-impact">
+            <div class="charity-popup-impact-header">
+              <span class="charity-popup-sparkle">✨</span>
+              <span class="charity-popup-impact-title">Your Impact</span>
+            </div>
+            <p class="charity-popup-impact-text">
+              Your generous contribution will help make a real difference in people's lives. Every donation, no matter the size, brings hope and positive change to those who need it most.
+            </p>
+          </div>
+          
+          <div class="charity-popup-footer">
+            <p class="charity-popup-footer-text">
+              📧 A receipt has been sent to your email address<br>
+              🏠 You'll be redirected to the homepage shortly
+            </p>
+          </div>
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: '🏠 Return Home',
+      confirmButtonColor: 'var(--primary)',
+      width: '500px',
+      backdrop: 'rgba(0,0,0,0.4)',
+      customClass: {
+        popup: 'charity-success-popup',
+        confirmButton: 'charity-success-button'
+      },
+      showClass: {
+        popup: 'animate__animated animate__zoomIn animate__faster'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__zoomOut animate__faster'
+      }
     });
     router.push('/');
   }

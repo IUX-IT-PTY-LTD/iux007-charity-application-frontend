@@ -20,6 +20,7 @@ const Checkout = () => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [userAgreed, setUserAgreed] = useState(false);
   const [adminContributionAmount, setAdminContributionAmount] = useState(0);
+  const [adminInputValue, setAdminInputValue] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [checkoutData, setCheckoutData] = useState(null);
@@ -49,6 +50,7 @@ const Checkout = () => {
       // Set admin contribution amount (5% of subtotal)
       const adminContrib = subtotal * 0.05;
       setAdminContributionAmount(adminContrib);
+      setAdminInputValue(adminContrib.toFixed(2));
 
       // Set total amount (subtotal + admin contribution)
       setTotalAmount(subtotal + adminContrib);
@@ -369,18 +371,28 @@ const Checkout = () => {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2">
                         <input
-                          type="number"
-                          value={adminContributionAmount.toFixed(2)}
+                          type="text"
+                          value={adminInputValue}
                           onChange={(e) => {
-                            const value = Math.max(0, Number(e.target.value));
-                            setAdminContributionAmount(value);
+                            const inputValue = e.target.value;
+                            // Allow typing numbers and decimal point
+                            if (inputValue === '' || /^\d*\.?\d*$/.test(inputValue)) {
+                              setAdminInputValue(inputValue);
+                              const numValue = parseFloat(inputValue) || 0;
+                              setAdminContributionAmount(Math.max(0, numValue));
+                            }
                           }}
-                          min="0"
-                          placeholder="Admin contribution amount"
+                          onBlur={() => {
+                            // Format the value when focus is lost
+                            const numValue = parseFloat(adminInputValue) || 0;
+                            setAdminInputValue(numValue.toFixed(2));
+                            setAdminContributionAmount(numValue);
+                          }}
+                          placeholder="0.00"
                           className="w-48 px-4 py-2 rounded-lg border border-gray-200 focus:border-primary text-sm transition-all"
                         />
                         <span className="text-sm text-gray-500">
-                          (Suggested : ${adminContributionAmount.toFixed(2)})
+                          (Suggested: ${(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.05).toFixed(2)})
                         </span>
                       </div>
                     </div>

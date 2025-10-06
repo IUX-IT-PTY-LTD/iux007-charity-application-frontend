@@ -926,7 +926,7 @@ const CharityRequestForm = () => {
                   type="button"
                   onClick={nextStep}
                   disabled={currentStep === 1 && !isAuthenticated}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 text-white"
                 >
                   <span>Next</span>
                   <ChevronRight className="h-4 w-4" />
@@ -941,7 +941,7 @@ const CharityRequestForm = () => {
                     }
                   }}
                   disabled={isSubmitting}
-                  className="flex items-center space-x-2 bg-primary hover:bg-primary/90 disabled:opacity-50"
+                  className="flex items-center space-x-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white"
                 >
                   {isSubmitting ? (
                     <>
