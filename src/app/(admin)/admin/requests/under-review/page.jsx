@@ -60,6 +60,7 @@ const UnderReviewRequestsPage = () => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [actionType, setActionType] = useState(null); // 'approve' or 'deny'
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [loadingRequestId, setLoadingRequestId] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -103,6 +104,7 @@ const UnderReviewRequestsPage = () => {
   // Fetch single request details
   const fetchRequestDetails = async (uuid) => {
     setIsLoadingDetails(true);
+    setLoadingRequestId(uuid);
     try {
       const response = await getFundRequestByUuid(uuid);
 
@@ -118,6 +120,7 @@ const UnderReviewRequestsPage = () => {
       return null;
     } finally {
       setIsLoadingDetails(false);
+      setLoadingRequestId(null);
     }
   };
 
@@ -360,6 +363,7 @@ const UnderReviewRequestsPage = () => {
               onRequestClick={handleRequestClick}
               onApprove={handleApprove}
               onDeny={handleDeny}
+              loadingRequestId={loadingRequestId}
             />
           </CardContent>
 

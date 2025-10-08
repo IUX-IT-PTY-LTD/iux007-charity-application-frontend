@@ -267,7 +267,7 @@ export const submitReview = async (uuid, reviewData) => {
  * Submit an approval action for a fundraising request
  * @param {string} uuid - UUID of the fundraising request
  * @param {Object} approvalData - Approval data containing action and comments
- * @param {string} approvalData.action - Approval action ('accepted' or 'rejected')
+ * @param {string} approvalData.action - Approval action ('approved' or 'rejected')
  * @param {string} approvalData.comments - Approval comments
  * @returns {Promise} - Promise resolving to the approval result
  */
@@ -367,9 +367,9 @@ export const validateApprovalData = (approvalData) => {
   });
 
   // Action validation
-  const validActions = ['accepted', 'rejected'];
+  const validActions = ['approved', 'rejected'];
   if (approvalData.action && !validActions.includes(approvalData.action)) {
-    errors.push('Action must be either "accepted" or "rejected"');
+    errors.push('Action must be either "approved" or "rejected"');
   }
 
   // Comments validation

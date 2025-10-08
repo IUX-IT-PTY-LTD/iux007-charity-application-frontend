@@ -33,6 +33,7 @@ const ReviewTable = ({
   onRequestClick,
   onApprove,
   onDeny,
+  loadingRequestId = null, // ID of the request currently being loaded
 }) => {
   // Column definitions for sortable headers
   const columns = [
@@ -106,7 +107,7 @@ const ReviewTable = ({
 
   // Get approval progress info
   const getApprovalInfo = (approvalSummary) => {
-    const approvalCount = approvalSummary?.approved_count || 0;
+    const approvalCount = approvalSummary?.approved || 0;
     const requiredApprovals = approvalSummary?.total_approval_users || 3;
     const progressPercentage = Math.min((approvalCount / requiredApprovals) * 100, 100);
 
@@ -279,60 +280,32 @@ const ReviewTable = ({
                   </TableCell>
 
                   <TableCell className="text-center">
-                    <div className="flex justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRequestClick(request);
-                        }}
-                        title="View Details"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">View Details</span>
-                      </Button>
-
-                      {!deadlinePassed && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApprove(request);
-                            }}
-                            title="Approve Request"
-                            className="text-green-600 hover:text-green-800 hover:bg-green-50"
-                          >
-                            <ThumbsUp className="h-4 w-4" />
-                            <span className="sr-only">Approve</span>
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDeny(request);
-                            }}
-                            title="Reject Request"
-                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                          >
-                            <ThumbsDown className="h-4 w-4" />
-                            <span className="sr-only">Reject</span>
-                          </Button>
-                        </>
-                      )}
-
-                      {deadlinePassed && (
-                        <div className="flex items-center gap-1">
-                          <Badge className="bg-gray-100 text-gray-600 text-xs px-2 py-1">
-                            Expired
-                          </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRequestClick(request);
+                      }}
+                      title="Review Request"
+                      disabled={loadingRequestId === request.uuid}
+                      className="group relative text-purple-600 hover:text-white hover:bg-purple-600 border border-purple-200 hover:border-purple-600 transition-all duration-200 px-3 py-2 h-auto"
+                    >
+                      {loadingRequestId === request.uuid ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-purple-200 border-t-purple-600"></div>
+                          <span className="text-xs font-medium">Loading...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-xs font-medium text-purple-600 group-hover:text-white transition-all duration-200">
+                            Review
+                          </span>
                         </div>
                       )}
-                    </div>
+                      <span className="sr-only">View Details & Take Action</span>
+                    </Button>
                   </TableCell>
                 </TableRow>
               );
