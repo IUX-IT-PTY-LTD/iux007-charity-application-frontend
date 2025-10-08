@@ -9,21 +9,48 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Link, AlertCircle, CheckCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Link, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { apiService } from '@/api/services/admin/apiService';
 
 const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
   const [eventId, setEventId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availableEvents, setAvailableEvents] = useState([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
   if (!request) return null;
 
-  // Reset form when modal opens/closes
+  // Fetch approved requests without events
+  const fetchApprovedRequestsWithoutEvents = async () => {
+    setIsLoadingEvents(true);
+    try {
+      const response = await apiService.get('/admin/v1/fundraising-requests/approved-without-events');
+      if (response.status === 'success' && response.data) {
+        setAvailableEvents(response.data);
+      } else {
+        toast.error('Failed to load available events');
+        setAvailableEvents([]);
+      }
+    } catch (error) {
+      console.error('Error fetching approved requests without events:', error);
+      toast.error('Failed to load available events');
+      setAvailableEvents([]);
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  };
+
+  // Reset form and fetch events when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setEventId('');
       setIsSubmitting(false);
+      fetchApprovedRequestsWithoutEvents();
+    } else {
+      setAvailableEvents([]);
     }
   }, [isOpen]);
 
@@ -39,21 +66,15 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
   const getValidationErrors = () => {
     const errors = [];
 
-    if (!eventId.trim()) {
-      errors.push('Event ID is required');
-    }
-
-    // Event ID must be a positive integer
-    const eventIdNumber = parseInt(eventId.trim(), 10);
-    if (eventId.trim() && (isNaN(eventIdNumber) || eventIdNumber <= 0)) {
-      errors.push('Event ID must be a positive number');
+    if (!eventId) {
+      errors.push('Please select an event to connect');
     }
 
     return errors;
   };
 
   const validationErrors = getValidationErrors();
-  const isFormValid = validationErrors.length === 0 && eventId.trim().length > 0;
+  const isFormValid = validationErrors.length === 0 && eventId;
 
   // Handle form submission
   const handleSubmit = async () => {
@@ -64,9 +85,8 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
     setIsSubmitting(true);
 
     try {
-      // Convert eventId to integer before submitting
-      const eventIdNumber = parseInt(eventId.trim(), 10);
-      await onSubmit(request.id, eventIdNumber);
+      // Pass request UUID and event_id to parent component
+      await onSubmit(request.uuid, parseInt(eventId, 10));
       setEventId('');
       onClose();
     } catch (error) {
@@ -77,12 +97,6 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
     }
   };
 
-  // Handle key press for form submission
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && isFormValid && !isSubmitting) {
-      handleSubmit();
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -133,42 +147,67 @@ const ConnectEventModal = ({ request, isOpen, onClose, onSubmit }) => {
               <div>
                 <h4 className="font-medium text-blue-800 mb-1">Event Connection Process</h4>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Create the charity event manually in the events system</li>
-                  <li>• Copy the Event ID from the created event</li>
-                  <li>• Enter the Event ID below to link this request to the event</li>
-                  <li>• Once connected, the request will be published and linked to the event</li>
+                  <li>• Select an approved fundraising request from the dropdown below</li>
+                  <li>• The selected request will be converted into a charity event</li>
+                  <li>• Once connected, both requests will be linked together</li>
+                  <li>• This helps track which approved requests have been converted into events</li>
                 </ul>
               </div>
             </div>
           </div>
 
-          {/* Event ID Input */}
+          {/* Event Selection Dropdown */}
           <div className="space-y-3">
-            <Label htmlFor="eventId" className="text-sm font-medium">
-              Event ID <span className="text-red-500">*</span>
+            <Label htmlFor="eventSelect" className="text-sm font-medium">
+              Select Event to Connect <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="eventId"
-              type="number"
-              min="1"
-              placeholder="Enter the Event ID (e.g., 12345)"
-              value={eventId}
-              onChange={(e) => setEventId(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className={`${
-                validationErrors.length > 0 && eventId.trim()
-                  ? 'border-red-300 focus:border-red-500'
-                  : ''
-              }`}
-              disabled={isSubmitting}
-              autoFocus
-            />
+            {isLoadingEvents ? (
+              <div className="flex items-center justify-center p-4 border border-gray-200 rounded-md">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-sm text-gray-600">Loading available events...</span>
+              </div>
+            ) : (
+              <Select
+                value={eventId}
+                onValueChange={setEventId}
+                disabled={isSubmitting || availableEvents.length === 0}
+              >
+                <SelectTrigger 
+                  id="eventSelect"
+                  className={`${
+                    validationErrors.length > 0 && !eventId
+                      ? 'border-red-300 focus:border-red-500'
+                      : ''
+                  }`}
+                >
+                  <SelectValue placeholder={
+                    availableEvents.length === 0 
+                      ? "No approved requests available" 
+                      : "Select an approved request to connect..."
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableEvents.map((event) => (
+                    <SelectItem key={event.id} value={event.id.toString()}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{event.title}</span>
+                        <span className="text-xs text-gray-500">{event.request_number}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            
             <div className="text-xs text-gray-500">
-              Event ID must be the numeric ID from the events system
+              {availableEvents.length > 0 
+                ? `${availableEvents.length} approved request${availableEvents.length === 1 ? '' : 's'} available for connection`
+                : 'No approved requests without events found'
+              }
             </div>
 
-            {/* Individual validation errors */}
-            {validationErrors.length > 0 && eventId.trim() && (
+            {/* Validation errors */}
+            {validationErrors.length > 0 && !eventId && (
               <div className="text-xs text-red-600 space-y-1">
                 {validationErrors.map((error, index) => (
                   <div key={index}>• {error}</div>

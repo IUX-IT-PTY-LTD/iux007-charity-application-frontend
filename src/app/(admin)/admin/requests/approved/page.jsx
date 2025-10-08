@@ -68,6 +68,7 @@ const ApprovedRequestsPage = () => {
   // Transform API data to component structure
   const transformRequestData = (apiRequest) => ({
     id: apiRequest.uuid,
+    uuid: apiRequest.uuid, // Keep UUID for API calls
     request_id: apiRequest.request_number,
     requester_name: apiRequest.name,
     requester_email: apiRequest.email,
@@ -151,17 +152,17 @@ const ApprovedRequestsPage = () => {
   };
 
   // Handle event connection submission
-  const handleConnectSubmit = async (requestId, eventId) => {
+  const handleConnectSubmit = async (requestUuid, eventId) => {
     try {
       // Format the publish data
       const publishData = formatPublishDataForSubmission({ event_id: eventId });
 
-      // Call the API to publish/connect the request
-      await publishFundRequest(requestId, publishData);
+      // Call the API to publish/connect the request using UUID
+      await publishFundRequest(requestUuid, publishData);
 
       // Update local state to reflect the connection
       const updatedRequests = requests.map((request) => {
-        if (request.id === requestId) {
+        if (request.uuid === requestUuid) {
           return {
             ...request,
             connected_event_id: eventId,

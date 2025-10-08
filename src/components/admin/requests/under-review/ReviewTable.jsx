@@ -108,7 +108,7 @@ const ReviewTable = ({
   // Get approval progress info
   const getApprovalInfo = (approvalSummary) => {
     const approvalCount = approvalSummary?.approved || 0;
-    const requiredApprovals = approvalSummary?.total_approval_users || 3;
+    const requiredApprovals = approvalSummary?.total_approvers_needed || 3;
     const progressPercentage = Math.min((approvalCount / requiredApprovals) * 100, 100);
 
     let color = 'bg-red-500';
