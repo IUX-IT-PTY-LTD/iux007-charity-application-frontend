@@ -99,7 +99,7 @@ const ApprovedRequestsPage = () => {
     const fetchApprovedRequests = async () => {
       setIsLoading(true);
       try {
-        const response = await getAllFundRequests([FUND_REQUEST_STATUS.APPROVED]);
+        const response = await getAllFundRequests([FUND_REQUEST_STATUS.APPROVED, FUND_REQUEST_STATUS.PUBLISHED]);
 
         if (response.status === 'success' && Array.isArray(response.data)) {
           const transformedRequests = response.data.map(transformRequestData);
