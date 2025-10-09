@@ -681,6 +681,352 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Typography Settings */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Typography Settings</h4>
+              
+              <div>
+                <Label htmlFor="fontSize">Font Size</Label>
+                <Select
+                  value={localComponent.content.fontSize || 'base'}
+                  onValueChange={(value) => updateContent('fontSize', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="xs">Extra Small (12px)</SelectItem>
+                    <SelectItem value="sm">Small (14px)</SelectItem>
+                    <SelectItem value="base">Base (16px)</SelectItem>
+                    <SelectItem value="lg">Large (18px)</SelectItem>
+                    <SelectItem value="xl">Extra Large (20px)</SelectItem>
+                    <SelectItem value="2xl">2X Large (24px)</SelectItem>
+                    <SelectItem value="3xl">3X Large (30px)</SelectItem>
+                    <SelectItem value="4xl">4X Large (36px)</SelectItem>
+                    <SelectItem value="5xl">5X Large (48px)</SelectItem>
+                    <SelectItem value="6xl">6X Large (60px)</SelectItem>
+                    <SelectItem value="custom">Custom Size</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {localComponent.content.fontSize === 'custom' && (
+                <div>
+                  <Label htmlFor="customFontSize">Custom Font Size</Label>
+                  <Input
+                    id="customFontSize"
+                    value={localComponent.content.customFontSize || ''}
+                    onChange={(e) => updateContent('customFontSize', e.target.value)}
+                    placeholder="16px, 1.2rem, 1.5em"
+                  />
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="lineHeight">Line Height (Line Spacing)</Label>
+                <Select
+                  value={localComponent.content.lineHeight || 'normal'}
+                  onValueChange={(value) => updateContent('lineHeight', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None (1.0)</SelectItem>
+                    <SelectItem value="tight">Tight (1.25)</SelectItem>
+                    <SelectItem value="snug">Snug (1.375)</SelectItem>
+                    <SelectItem value="normal">Normal (1.5)</SelectItem>
+                    <SelectItem value="relaxed">Relaxed (1.625)</SelectItem>
+                    <SelectItem value="loose">Loose (2.0)</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {localComponent.content.lineHeight === 'custom' && (
+                <div>
+                  <Label htmlFor="customLineHeight">Custom Line Height</Label>
+                  <Input
+                    id="customLineHeight"
+                    value={localComponent.content.customLineHeight || ''}
+                    onChange={(e) => updateContent('customLineHeight', e.target.value)}
+                    placeholder="1.6, 24px, 1.5rem"
+                  />
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="fontWeight">Font Weight</Label>
+                <Select
+                  value={localComponent.content.fontWeight || 'normal'}
+                  onValueChange={(value) => updateContent('fontWeight', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="thin">Thin (100)</SelectItem>
+                    <SelectItem value="extralight">Extra Light (200)</SelectItem>
+                    <SelectItem value="light">Light (300)</SelectItem>
+                    <SelectItem value="normal">Normal (400)</SelectItem>
+                    <SelectItem value="medium">Medium (500)</SelectItem>
+                    <SelectItem value="semibold">Semi Bold (600)</SelectItem>
+                    <SelectItem value="bold">Bold (700)</SelectItem>
+                    <SelectItem value="extrabold">Extra Bold (800)</SelectItem>
+                    <SelectItem value="black">Black (900)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="textColor">Text Color</Label>
+                <div className="flex space-x-2">
+                  <Input
+                    id="textColor"
+                    type="color"
+                    value={localComponent.content.textColor || '#000000'}
+                    onChange={(e) => updateContent('textColor', e.target.value)}
+                    className="w-16 h-10"
+                  />
+                  <Input
+                    value={localComponent.content.textColor || ''}
+                    onChange={(e) => updateContent('textColor', e.target.value)}
+                    placeholder="#000000 (leave empty for default)"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="preserveLineBreaks">Line Break Handling</Label>
+                <Select
+                  value={localComponent.content.preserveLineBreaks || 'normal'}
+                  onValueChange={(value) => updateContent('preserveLineBreaks', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal (HTML default)</SelectItem>
+                    <SelectItem value="preserve">Preserve Line Breaks</SelectItem>
+                    <SelectItem value="nowrap">No Line Wrapping</SelectItem>
+                    <SelectItem value="pre">Preserve All Whitespace</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Controls how line breaks and spacing in the text editor are displayed
+                </p>
+              </div>
+            </div>
+
+            {/* Spacing Settings */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Spacing Settings</h4>
+              
+              <div>
+                <Label htmlFor="marginTop">Top Margin</Label>
+                <Select
+                  value={localComponent.content.marginTop || 'normal'}
+                  onValueChange={(value) => updateContent('marginTop', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="small">Small (8px)</SelectItem>
+                    <SelectItem value="normal">Normal (16px)</SelectItem>
+                    <SelectItem value="large">Large (24px)</SelectItem>
+                    <SelectItem value="xlarge">Extra Large (32px)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="marginBottom">Bottom Margin</Label>
+                <Select
+                  value={localComponent.content.marginBottom || 'normal'}
+                  onValueChange={(value) => updateContent('marginBottom', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="small">Small (8px)</SelectItem>
+                    <SelectItem value="normal">Normal (16px)</SelectItem>
+                    <SelectItem value="large">Large (24px)</SelectItem>
+                    <SelectItem value="xlarge">Extra Large (32px)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="contentSpacing">Content Line Spacing (Between Elements)</Label>
+                <Select
+                  value={localComponent.content.contentSpacing || 'normal'}
+                  onValueChange={(value) => updateContent('contentSpacing', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tight">Tight Spacing</SelectItem>
+                    <SelectItem value="normal">Normal Spacing</SelectItem>
+                    <SelectItem value="relaxed">Relaxed Spacing</SelectItem>
+                    <SelectItem value="loose">Loose Spacing</SelectItem>
+                    <SelectItem value="custom">Custom Spacing</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Controls spacing between paragraphs, headings, and other content elements
+                </p>
+              </div>
+
+              {localComponent.content.contentSpacing === 'custom' && (
+                <div>
+                  <Label htmlFor="customContentSpacing">Custom Content Spacing</Label>
+                  <Input
+                    id="customContentSpacing"
+                    value={localComponent.content.customContentSpacing || ''}
+                    onChange={(e) => updateContent('customContentSpacing', e.target.value)}
+                    placeholder="1.5rem, 24px, 1.5em"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Spacing between content elements (paragraphs, headings, lists, etc.)
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="paragraphSpacing">Paragraph Spacing</Label>
+                <Select
+                  value={localComponent.content.paragraphSpacing || 'normal'}
+                  onValueChange={(value) => updateContent('paragraphSpacing', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Extra Spacing</SelectItem>
+                    <SelectItem value="small">Small (0.5rem)</SelectItem>
+                    <SelectItem value="normal">Normal (1rem)</SelectItem>
+                    <SelectItem value="large">Large (1.5rem)</SelectItem>
+                    <SelectItem value="xlarge">Extra Large (2rem)</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Additional spacing specifically between paragraphs
+                </p>
+              </div>
+
+              {localComponent.content.paragraphSpacing === 'custom' && (
+                <div>
+                  <Label htmlFor="customParagraphSpacing">Custom Paragraph Spacing</Label>
+                  <Input
+                    id="customParagraphSpacing"
+                    value={localComponent.content.customParagraphSpacing || ''}
+                    onChange={(e) => updateContent('customParagraphSpacing', e.target.value)}
+                    placeholder="1rem, 16px, 1em"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Live Preview */}
+            <div>
+              <Label>Live Preview</Label>
+              <div className={`border rounded-lg p-4 bg-white min-h-[100px] text-${localComponent.content.alignment || 'left'}`}>
+                {localComponent.content.text ? (
+                  <div 
+                    className={`prose max-w-none ${
+                      // Font size classes
+                      localComponent.content.fontSize && localComponent.content.fontSize !== 'custom' ? `text-${localComponent.content.fontSize}` : ''
+                    } ${
+                      // Line height classes
+                      localComponent.content.lineHeight && localComponent.content.lineHeight !== 'custom' ? `leading-${localComponent.content.lineHeight}` : ''
+                    } ${
+                      // Font weight classes
+                      localComponent.content.fontWeight ? `font-${localComponent.content.fontWeight}` : ''
+                    }`}
+                    style={{
+                      // Custom font size
+                      fontSize: localComponent.content.fontSize === 'custom' ? localComponent.content.customFontSize : undefined,
+                      // Custom line height
+                      lineHeight: localComponent.content.lineHeight === 'custom' ? localComponent.content.customLineHeight : undefined,
+                      // Text color
+                      color: localComponent.content.textColor || undefined,
+                      // Line break handling
+                      whiteSpace: localComponent.content.preserveLineBreaks === 'preserve' ? 'pre-line' :
+                        localComponent.content.preserveLineBreaks === 'nowrap' ? 'nowrap' :
+                        localComponent.content.preserveLineBreaks === 'pre' ? 'pre-wrap' : 'normal',
+                      // Margins
+                      marginTop: localComponent.content.marginTop === 'none' ? '0' :
+                        localComponent.content.marginTop === 'small' ? '8px' :
+                        localComponent.content.marginTop === 'normal' ? '16px' :
+                        localComponent.content.marginTop === 'large' ? '24px' :
+                        localComponent.content.marginTop === 'xlarge' ? '32px' : undefined,
+                      marginBottom: localComponent.content.marginBottom === 'none' ? '0' :
+                        localComponent.content.marginBottom === 'small' ? '8px' :
+                        localComponent.content.marginBottom === 'normal' ? '16px' :
+                        localComponent.content.marginBottom === 'large' ? '24px' :
+                        localComponent.content.marginBottom === 'xlarge' ? '32px' : undefined,
+                    }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: (() => {
+                        if (!localComponent.content.text) return '';
+                        
+                        // Get spacing values
+                        const contentSpacing = localComponent.content.contentSpacing === 'custom' 
+                          ? localComponent.content.customContentSpacing 
+                          : localComponent.content.contentSpacing === 'tight' ? '0.75rem'
+                          : localComponent.content.contentSpacing === 'relaxed' ? '1.5rem'
+                          : localComponent.content.contentSpacing === 'loose' ? '2rem'
+                          : '1rem';
+                          
+                        const paragraphSpacing = localComponent.content.paragraphSpacing === 'custom' 
+                          ? localComponent.content.customParagraphSpacing 
+                          : localComponent.content.paragraphSpacing === 'none' ? '0'
+                          : localComponent.content.paragraphSpacing === 'small' ? '0.5rem'
+                          : localComponent.content.paragraphSpacing === 'large' ? '1.5rem'
+                          : localComponent.content.paragraphSpacing === 'xlarge' ? '2rem'
+                          : '1rem';
+                        
+                        // Process HTML with direct spacing values
+                        let processedHtml = localComponent.content.text;
+                        
+                        // First, remove any existing spacing divs to avoid duplicates
+                        processedHtml = processedHtml.replace(
+                          /<div style="height: [^"]*; margin: 0; padding: 0;"><\/div>/g, 
+                          ''
+                        );
+                        
+                        // Add spacing after paragraphs
+                        if (paragraphSpacing && paragraphSpacing !== '0') {
+                          processedHtml = processedHtml.replace(
+                            /<\/p>/g, 
+                            `</p><div style="height: ${paragraphSpacing}; margin: 0; padding: 0;"></div>`
+                          );
+                        }
+                        
+                        // Add spacing after headings, lists, and blockquotes (but not divs to avoid conflicts)
+                        if (contentSpacing && contentSpacing !== '0') {
+                          processedHtml = processedHtml.replace(
+                            /<\/(h[1-6]|ul|ol|blockquote)>/g, 
+                            `</$1><div style="height: ${contentSpacing}; margin: 0; padding: 0;"></div>`
+                          );
+                        }
+                        
+                        return processedHtml;
+                      })()
+                    }}
+                  />
+                ) : (
+                  <p className="text-gray-500 italic">Your formatted text will appear here...</p>
+                )}
+              </div>
+            </div>
           </div>
         );
 
@@ -1333,10 +1679,136 @@ const ComponentPreview = ({ component, onEdit, onDelete, onMoveUp, onMoveDown, i
         );
 
       case COMPONENT_TYPES.TEXT:
+        const getTextClasses = () => {
+          let classes = ['prose', 'max-w-none'];
+          
+          // Add alignment
+          classes.push(`text-${component.content.alignment || 'left'}`);
+          
+          // Add font size
+          const fontSize = component.content.fontSize || 'base';
+          if (fontSize !== 'custom') {
+            classes.push(`text-${fontSize}`);
+          }
+          
+          // Add line height
+          const lineHeight = component.content.lineHeight || 'normal';
+          if (lineHeight !== 'custom') {
+            classes.push(`leading-${lineHeight}`);
+          }
+          
+          // Add font weight
+          const fontWeight = component.content.fontWeight || 'normal';
+          classes.push(`font-${fontWeight}`);
+          
+          return classes.join(' ');
+        };
+
+        const getTextStyles = () => {
+          let styles = {};
+          
+          // Custom font size
+          if (component.content.fontSize === 'custom' && component.content.customFontSize) {
+            styles.fontSize = component.content.customFontSize;
+          }
+          
+          // Custom line height
+          if (component.content.lineHeight === 'custom' && component.content.customLineHeight) {
+            styles.lineHeight = component.content.customLineHeight;
+          }
+          
+          // Text color
+          if (component.content.textColor) {
+            styles.color = component.content.textColor;
+          }
+          
+          // Margins
+          if (component.content.marginTop) {
+            const marginMap = { none: '0', small: '8px', normal: '16px', large: '24px', xlarge: '32px' };
+            styles.marginTop = marginMap[component.content.marginTop] || component.content.marginTop;
+          }
+          
+          if (component.content.marginBottom) {
+            const marginMap = { none: '0', small: '8px', normal: '16px', large: '24px', xlarge: '32px' };
+            styles.marginBottom = marginMap[component.content.marginBottom] || component.content.marginBottom;
+          }
+          
+          // Line break handling
+          styles.whiteSpace = component.content.preserveLineBreaks === 'preserve' ? 'pre-line' :
+            component.content.preserveLineBreaks === 'nowrap' ? 'nowrap' :
+            component.content.preserveLineBreaks === 'pre' ? 'pre-wrap' : 'normal';
+          
+          // Content spacing (CSS custom properties for spacing control)
+          styles['--content-spacing'] = component.content.contentSpacing === 'custom' 
+            ? component.content.customContentSpacing 
+            : component.content.contentSpacing === 'tight' ? '0.75rem'
+            : component.content.contentSpacing === 'relaxed' ? '1.5rem'
+            : component.content.contentSpacing === 'loose' ? '2rem'
+            : '1rem';
+            
+          styles['--paragraph-spacing'] = component.content.paragraphSpacing === 'custom' 
+            ? component.content.customParagraphSpacing 
+            : component.content.paragraphSpacing === 'none' ? '0'
+            : component.content.paragraphSpacing === 'small' ? '0.5rem'
+            : component.content.paragraphSpacing === 'large' ? '1.5rem'
+            : component.content.paragraphSpacing === 'xlarge' ? '2rem'
+            : '1rem';
+          
+          return styles;
+        };
+
+        const processContentSpacing = (html) => {
+          if (!html) return html;
+          
+          // Get spacing values
+          const contentSpacing = component.content.contentSpacing === 'custom' 
+            ? component.content.customContentSpacing 
+            : component.content.contentSpacing === 'tight' ? '0.75rem'
+            : component.content.contentSpacing === 'relaxed' ? '1.5rem'
+            : component.content.contentSpacing === 'loose' ? '2rem'
+            : '1rem';
+            
+          const paragraphSpacing = component.content.paragraphSpacing === 'custom' 
+            ? component.content.customParagraphSpacing 
+            : component.content.paragraphSpacing === 'none' ? '0'
+            : component.content.paragraphSpacing === 'small' ? '0.5rem'
+            : component.content.paragraphSpacing === 'large' ? '1.5rem'
+            : component.content.paragraphSpacing === 'xlarge' ? '2rem'
+            : '1rem';
+          
+          // Process HTML with direct spacing values
+          let processedHtml = html;
+          
+          // First, remove any existing spacing divs to avoid duplicates
+          processedHtml = processedHtml.replace(
+            /<div style="height: [^"]*; margin: 0; padding: 0;"><\/div>/g, 
+            ''
+          );
+          
+          // Add spacing after paragraphs
+          if (paragraphSpacing && paragraphSpacing !== '0') {
+            processedHtml = processedHtml.replace(
+              /<\/p>/g, 
+              `</p><div style="height: ${paragraphSpacing}; margin: 0; padding: 0;"></div>`
+            );
+          }
+          
+          // Add spacing after headings, lists, and blockquotes (but not divs to avoid conflicts)
+          if (contentSpacing && contentSpacing !== '0') {
+            processedHtml = processedHtml.replace(
+              /<\/(h[1-6]|ul|ol|blockquote)>/g, 
+              `</$1><div style="height: ${contentSpacing}; margin: 0; padding: 0;"></div>`
+            );
+          }
+          
+          return processedHtml;
+        };
+
         return (
           <div 
-            className={`prose max-w-none text-${component.content.alignment || 'left'}`}
-            dangerouslySetInnerHTML={{ __html: component.content.text }}
+            className={getTextClasses()}
+            style={getTextStyles()}
+            dangerouslySetInnerHTML={{ __html: processContentSpacing(component.content.text) }}
           />
         );
 

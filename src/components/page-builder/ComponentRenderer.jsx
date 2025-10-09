@@ -97,11 +97,153 @@ const HeroComponent = ({ content }) => {
   );
 };
 
-const TextComponent = ({ content }) => (
-  <div className={`prose prose-lg max-w-none text-${content.alignment || 'left'} py-8`}>
-    <div dangerouslySetInnerHTML={{ __html: content.text }} />
-  </div>
-);
+const TextComponent = ({ content }) => {
+  const getTextClasses = () => {
+    let classes = ['prose', 'prose-lg', 'max-w-none', 'py-8'];
+    
+    // Add alignment
+    classes.push(`text-${content.alignment || 'left'}`);
+    
+    // Add font size (only if not custom)
+    const fontSize = content.fontSize || 'base';
+    if (fontSize !== 'custom') {
+      classes.push(`text-${fontSize}`);
+    }
+    
+    // Add line height (only if not custom)
+    const lineHeight = content.lineHeight || 'normal';
+    if (lineHeight !== 'custom') {
+      classes.push(`leading-${lineHeight}`);
+    }
+    
+    // Add font weight
+    const fontWeight = content.fontWeight || 'normal';
+    classes.push(`font-${fontWeight}`);
+    
+    return classes.join(' ');
+  };
+
+  const getTextStyles = () => {
+    let styles = {};
+    
+    // Custom font size
+    if (content.fontSize === 'custom' && content.customFontSize) {
+      styles.fontSize = content.customFontSize;
+    }
+    
+    // Custom line height
+    if (content.lineHeight === 'custom' && content.customLineHeight) {
+      styles.lineHeight = content.customLineHeight;
+    }
+    
+    // Text color (override default if specified)
+    if (content.textColor && content.textColor !== '#000000') {
+      styles.color = content.textColor;
+    }
+    
+    // Margins
+    if (content.marginTop) {
+      const marginMap = { 
+        none: '0', 
+        small: '8px', 
+        normal: '32px', // Default py-8 equivalent
+        large: '48px', 
+        xlarge: '64px' 
+      };
+      styles.paddingTop = marginMap[content.marginTop] || content.marginTop;
+    }
+    
+    if (content.marginBottom) {
+      const marginMap = { 
+        none: '0', 
+        small: '8px', 
+        normal: '32px', // Default py-8 equivalent
+        large: '48px', 
+        xlarge: '64px' 
+      };
+      styles.paddingBottom = marginMap[content.marginBottom] || content.marginBottom;
+    }
+    
+    // Line break handling
+    styles.whiteSpace = content.preserveLineBreaks === 'preserve' ? 'pre-line' :
+      content.preserveLineBreaks === 'nowrap' ? 'nowrap' :
+      content.preserveLineBreaks === 'pre' ? 'pre-wrap' : 'normal';
+    
+    // Content spacing (CSS custom properties for spacing control)
+    styles['--content-spacing'] = content.contentSpacing === 'custom' 
+      ? content.customContentSpacing 
+      : content.contentSpacing === 'tight' ? '0.75rem'
+      : content.contentSpacing === 'relaxed' ? '1.5rem'
+      : content.contentSpacing === 'loose' ? '2rem'
+      : '1rem';
+      
+    styles['--paragraph-spacing'] = content.paragraphSpacing === 'custom' 
+      ? content.customParagraphSpacing 
+      : content.paragraphSpacing === 'none' ? '0'
+      : content.paragraphSpacing === 'small' ? '0.5rem'
+      : content.paragraphSpacing === 'large' ? '1.5rem'
+      : content.paragraphSpacing === 'xlarge' ? '2rem'
+      : '1rem';
+    
+    return styles;
+  };
+
+  const processContentSpacing = (html) => {
+    if (!html) return html;
+    
+    // Get spacing values
+    const contentSpacing = content.contentSpacing === 'custom' 
+      ? content.customContentSpacing 
+      : content.contentSpacing === 'tight' ? '0.75rem'
+      : content.contentSpacing === 'relaxed' ? '1.5rem'
+      : content.contentSpacing === 'loose' ? '2rem'
+      : '1rem';
+      
+    const paragraphSpacing = content.paragraphSpacing === 'custom' 
+      ? content.customParagraphSpacing 
+      : content.paragraphSpacing === 'none' ? '0'
+      : content.paragraphSpacing === 'small' ? '0.5rem'
+      : content.paragraphSpacing === 'large' ? '1.5rem'
+      : content.paragraphSpacing === 'xlarge' ? '2rem'
+      : '1rem';
+    
+    // Process HTML with direct spacing values
+    let processedHtml = html;
+    
+    // First, remove any existing spacing divs to avoid duplicates
+    processedHtml = processedHtml.replace(
+      /<div style="height: [^"]*; margin: 0; padding: 0;"><\/div>/g, 
+      ''
+    );
+    
+    // Add spacing after paragraphs
+    if (paragraphSpacing && paragraphSpacing !== '0') {
+      processedHtml = processedHtml.replace(
+        /<\/p>/g, 
+        `</p><div style="height: ${paragraphSpacing}; margin: 0; padding: 0;"></div>`
+      );
+    }
+    
+    // Add spacing after headings, lists, and blockquotes (but not divs to avoid conflicts)
+    if (contentSpacing && contentSpacing !== '0') {
+      processedHtml = processedHtml.replace(
+        /<\/(h[1-6]|ul|ol|blockquote)>/g, 
+        `</$1><div style="height: ${contentSpacing}; margin: 0; padding: 0;"></div>`
+      );
+    }
+    
+    return processedHtml;
+  };
+
+  return (
+    <div 
+      className={getTextClasses()}
+      style={getTextStyles()}
+    >
+      <div dangerouslySetInnerHTML={{ __html: processContentSpacing(content.text) }} />
+    </div>
+  );
+};
 
 const ImageComponent = ({ content }) => {
   const getImageDimensions = () => {
