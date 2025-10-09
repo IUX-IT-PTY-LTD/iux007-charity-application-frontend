@@ -380,7 +380,31 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.open(`/storage/${request.documents}`, '_blank')}
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(request.documents);
+                            if (!response.ok) {
+                              throw new Error(`Failed to download: ${response.status} ${response.statusText}`);
+                            }
+                            
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            
+                            // Extract filename from URL or use a default name
+                            const filename = request.documents.split('/').pop() || 'document';
+                            link.download = filename;
+                            
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                          } catch (error) {
+                            console.error('Download failed:', error);
+                            alert(`Failed to download document: ${error.message}`);
+                          }
+                        }}
                         className="text-purple-600 hover:text-purple-800"
                       >
                         <Download className="h-4 w-4 mr-1" />

@@ -45,7 +45,6 @@ import {
 import {
   StatCard,
   CampaignPerformance,
-  RecentDonations,
 } from '@/components/admin/dashboard/Components';
 
 import { NotificationsButton } from '@/components/admin/dashboard/Notifications';
@@ -61,7 +60,6 @@ const AdminDashboard = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
   const [timeframe, setTimeframe] = useState('month');
   const [stats, setStats] = useState(null);
-  const [recentDonations, setRecentDonations] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [eventsData, setEventsData] = useState([]);
   const [monthlyDonationsData, setMonthlyDonationsData] = useState([]);
@@ -137,35 +135,6 @@ const AdminDashboard = () => {
           console.error('Error fetching monthly donations statistics:', error);
         }
 
-        // Generate recent donations
-        const recentDonationsMock = [];
-        const names = [
-          'John Smith',
-          'Emma Wilson',
-          'Michael Johnson',
-          'Sarah Davis',
-          'Robert Brown',
-        ];
-        const events = [
-          'Winter Clothes Drive',
-          'Education for All',
-          'Food Bank Fundraiser',
-          'Flood Relief',
-          'Annual Charity Gala',
-        ];
-        const now = new Date();
-
-        for (let i = 0; i < 5; i++) {
-          recentDonationsMock.push({
-            id: `don-${i + 1}`,
-            donor_name: names[i],
-            amount: Math.floor(Math.random() * 900) + 100,
-            event_name: events[i],
-            date: new Date(now - Math.floor(Math.random() * 5 * 24 * 60 * 60 * 1000)).toISOString(),
-            anonymous: i === 2, // Make one donation anonymous
-          });
-        }
-        setRecentDonations(recentDonationsMock);
 
         // Generate campaign data
         const campaignsMock = [
@@ -369,15 +338,10 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Overview Tab - Simplified to just CampaignPerformance and RecentDonations */}
+            {/* Overview Tab - Campaign Performance */}
             <TabsContent value="overview">
-              <div className="flex flex-row gap-6">
-                <div className="flex-1">
-                  <CampaignPerformance campaigns={campaigns} />
-                </div>
-                <div className="flex-1">
-                  <RecentDonations donations={recentDonations} />
-                </div>
+              <div className="w-full">
+                <CampaignPerformance campaigns={campaigns} />
               </div>
             </TabsContent>
 
