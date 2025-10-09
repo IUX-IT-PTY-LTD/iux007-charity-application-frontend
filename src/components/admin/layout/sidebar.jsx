@@ -44,7 +44,7 @@ import {
 } from '@/api/hooks/useModulePermissions';
 
 // Navigation items with permission checks
-const getNavigationItems = (permissions) => {
+const getNavigationItems = (permissions, isSuperAdmin = false) => {
   const items = [];
 
   // Dashboard - always visible (no permission required)
@@ -58,7 +58,7 @@ const getNavigationItems = (permissions) => {
   });
 
   // Users module
-  if (permissions.users.hasAccess) {
+  if (isSuperAdmin || permissions.users.hasAccess) {
     items.push({
       id: 'users',
       name: 'Users',
@@ -70,7 +70,7 @@ const getNavigationItems = (permissions) => {
   }
 
   // Events module
-  if (permissions.events.hasAccess) {
+  if (isSuperAdmin || permissions.events.hasAccess) {
     items.push({
       id: 'events',
       name: 'Events',
@@ -94,7 +94,7 @@ const getNavigationItems = (permissions) => {
   });
 
   // Menus
-  if (permissions.menus.hasAccess) {
+  if (isSuperAdmin || permissions.menus.hasAccess) {
     websiteSubmenuItems.push({
       id: 'website-menus',
       name: 'Menus',
@@ -105,7 +105,7 @@ const getNavigationItems = (permissions) => {
   }
 
   // FAQs
-  if (permissions.faqs.hasAccess) {
+  if (isSuperAdmin || permissions.faqs.hasAccess) {
     websiteSubmenuItems.push({
       id: 'website-faqs',
       name: 'FAQs',
@@ -116,7 +116,7 @@ const getNavigationItems = (permissions) => {
   }
 
   // Sliders
-  if (permissions.sliders.hasAccess) {
+  if (isSuperAdmin || permissions.sliders.hasAccess) {
     websiteSubmenuItems.push({
       id: 'website-sliders',
       name: 'Sliders',
@@ -126,20 +126,11 @@ const getNavigationItems = (permissions) => {
     });
   }
 
-  // About Us - always visible (no permission required for content management)
-  websiteSubmenuItems.push({
-    id: 'website-about-us',
-    name: 'About Us',
-    href: '/admin/about-us',
-    icon: Info,
-    order: 5,
-  });
-
   // Sort website submenu items by order
   websiteSubmenuItems.sort((a, b) => a.order - b.order);
 
-  // Only show Website menu if user has access to any website feature
-  if (websiteSubmenuItems.length > 0) {
+  // Only show Website menu if user has access to any website feature or is super admin
+  if (isSuperAdmin || websiteSubmenuItems.length > 0) {
     items.push({
       id: 'website',
       name: 'Website',
@@ -161,7 +152,7 @@ const getNavigationItems = (permissions) => {
   });
 
   // Profile - always visible (application level)
-  if (permissions.profiles.hasAccess) {
+  if (isSuperAdmin || permissions.profiles.hasAccess) {
     items.push({
       id: 'profile',
       name: 'My Profile',
@@ -176,7 +167,7 @@ const getNavigationItems = (permissions) => {
   const orgSubmenuItems = [];
 
   // Admin Management
-  if (permissions.admins.hasAccess) {
+  if (isSuperAdmin || permissions.admins.hasAccess) {
     orgSubmenuItems.push({
       id: 'org-admins',
       name: 'Admin Management',
@@ -187,7 +178,7 @@ const getNavigationItems = (permissions) => {
   }
 
   // Role Management
-  if (permissions.roles.hasAccess) {
+  if (isSuperAdmin || permissions.roles.hasAccess) {
     orgSubmenuItems.push({
       id: 'org-roles',
       name: 'Role Management',
@@ -198,7 +189,7 @@ const getNavigationItems = (permissions) => {
   }
 
   // Permission Management
-  if (permissions.permissions.hasAccess) {
+  if (isSuperAdmin || permissions.permissions.hasAccess) {
     orgSubmenuItems.push({
       id: 'org-permissions',
       name: 'Permission Management',
@@ -211,8 +202,8 @@ const getNavigationItems = (permissions) => {
   // Sort submenu items by order
   orgSubmenuItems.sort((a, b) => a.order - b.order);
 
-  // Only show Organization menu if user has access to any org feature
-  if (orgSubmenuItems.length > 0) {
+  // Only show Organization menu if user has access to any org feature or is super admin
+  if (isSuperAdmin || orgSubmenuItems.length > 0) {
     items.push({
       id: 'organization',
       name: 'Organization',
@@ -311,15 +302,23 @@ function AdminSidebarContent() {
   // Get permission context for overall loading state
   const { isLoading: permissionContextLoading, isInitialized } = usePermissionContext();
 
+  // Check if user is super admin
+  const isSuperAdmin = React.useMemo(() => {
+    return adminProfile?.role?.name?.toLowerCase() === 'super admin' || 
+           adminProfile?.role_name?.toLowerCase() === 'super admin' ||
+           adminProfile?.is_super_admin === true;
+  }, [adminProfile]);
+
   // Generate navigation items based on permissions
   const navigationItems = React.useMemo(() => {
     if (modulePermissions.isLoading || !isInitialized) {
       return []; // Return empty array while loading
     }
-    return getNavigationItems(modulePermissions);
+    return getNavigationItems(modulePermissions, isSuperAdmin);
   }, [
     modulePermissions.isLoading,
     isInitialized,
+    isSuperAdmin,
     modulePermissions.users.hasAccess,
     modulePermissions.menus.hasAccess,
     modulePermissions.events.hasAccess,

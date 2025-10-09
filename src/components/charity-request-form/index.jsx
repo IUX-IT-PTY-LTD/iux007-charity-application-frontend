@@ -365,8 +365,8 @@ const CharityRequestForm = () => {
                                   Loading...
                                 </SelectItem>
                               ) : (
-                                countries.map((country) => (
-                                  <SelectItem key={`phone-${country.id}-${country.code}`} value={country.phone_code}>
+                                countries.map((country, index) => (
+                                  <SelectItem key={`phone-${index}-${country.id}`} value={country.phone_code}>
                                     <div className="flex items-center space-x-2">
                                       <span>{country.flag}</span>
                                       <span>{country.phone_code}</span>
@@ -818,8 +818,8 @@ const CharityRequestForm = () => {
                                   Loading...
                                 </SelectItem>
                               ) : (
-                                countries.map((country) => (
-                                  <SelectItem key={`ref-phone-${country.id}-${country.code}`} value={country.phone_code}>
+                                countries.map((country, index) => (
+                                  <SelectItem key={`ref-phone-${index}-${country.id}`} value={country.phone_code}>
                                     <div className="flex items-center space-x-2">
                                       <span>{country.flag}</span>
                                       <span>{country.phone_code}</span>
