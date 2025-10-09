@@ -103,26 +103,115 @@ const TextComponent = ({ content }) => (
   </div>
 );
 
-const ImageComponent = ({ content }) => (
-  <div className={`py-8 text-${content.alignment || 'center'}`}>
-    {content.src ? (
-      <div className={content.width === 'full' ? 'w-full' : 'inline-block'}>
-        <img 
-          src={content.src} 
-          alt={content.alt}
-          className="max-w-full h-auto rounded-lg shadow-lg"
-        />
-        {content.caption && (
-          <p className="text-sm text-gray-600 mt-4 italic">{content.caption}</p>
-        )}
-      </div>
-    ) : (
-      <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
-        <span className="text-gray-500">No image selected</span>
-      </div>
-    )}
-  </div>
-);
+const ImageComponent = ({ content }) => {
+  const getImageDimensions = () => {
+    const sizeMode = content.sizeMode || 'responsive';
+    let style = {};
+    let className = '';
+
+    switch (sizeMode) {
+      case 'custom':
+        if (content.customWidth) {
+          style.width = content.customWidth;
+        }
+        if (content.customHeight) {
+          style.height = content.customHeight;
+        }
+        break;
+      case 'preset':
+        const presetSize = content.presetSize || 'medium';
+        switch (presetSize) {
+          case 'small':
+            style = { width: '200px', height: '150px' };
+            break;
+          case 'medium':
+            style = { width: '400px', height: '300px' };
+            break;
+          case 'large':
+            style = { width: '600px', height: '450px' };
+            break;
+          case 'xlarge':
+            style = { width: '800px', height: '600px' };
+            break;
+          case 'thumbnail':
+            style = { width: '100px', height: '100px' };
+            break;
+          case 'banner':
+            style = { width: '1200px', height: '300px' };
+            break;
+        }
+        break;
+      case 'responsive':
+        className = 'max-w-full h-auto';
+        break;
+      case 'auto':
+        className = 'h-auto';
+        break;
+      default:
+        className = 'max-w-full h-auto';
+        break;
+    }
+
+    return { style, className };
+  };
+
+  const getImageClasses = () => {
+    let classes = [];
+    
+    // Add dimension classes
+    const { className } = getImageDimensions();
+    if (className) classes.push(className);
+    
+    // Add border radius
+    const borderRadius = content.borderRadius || 'none';
+    if (borderRadius !== 'none') {
+      classes.push(borderRadius);
+    }
+    
+    // Add shadow
+    const shadow = content.shadow || 'none';
+    if (shadow !== 'none') {
+      classes.push(shadow);
+    }
+    
+    // Add border
+    const border = content.border || 'none';
+    if (border !== 'none') {
+      classes.push(border);
+    }
+    
+    // Add object fit for custom/preset sizes
+    const sizeMode = content.sizeMode || 'responsive';
+    if (sizeMode === 'custom' || sizeMode === 'preset') {
+      const objectFit = content.objectFit || 'cover';
+      classes.push(`object-${objectFit}`);
+    }
+    
+    return classes.join(' ');
+  };
+
+  return (
+    <div className={`py-8 text-${content.alignment || 'center'}`}>
+      {content.src ? (
+        <div className="inline-block">
+          <img 
+            src={content.src} 
+            alt={content.alt || 'Image'}
+            style={getImageDimensions().style}
+            className={getImageClasses()}
+          />
+          {content.caption && (
+            <p className="text-sm text-gray-600 mt-4 italic">{content.caption}</p>
+          )}
+        </div>
+      ) : (
+        <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
+          <span className="text-gray-500">No image selected</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const CtaComponent = ({ content }) => (
   <div 
