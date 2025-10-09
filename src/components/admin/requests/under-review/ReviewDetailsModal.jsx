@@ -108,6 +108,14 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
   const approvalProgress = getApprovalProgress();
   const deadlinePassed = deadline ? isPast(new Date(deadline)) : false;
 
+  // Check if current admin has already taken action
+  const getCurrentAdminAction = () => {
+    if (!request.approval_summary?.current_admin_action) return null;
+    return request.approval_summary.current_admin_action;
+  };
+
+  const currentAdminAction = getCurrentAdminAction();
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -119,8 +127,15 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
         </DialogHeader>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-900 border-t-transparent"></div>
+          <div className="flex flex-col items-center justify-center py-16 space-y-4">
+            <div className="relative">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-purple-200 border-t-purple-600"></div>
+              <div className="absolute inset-0 h-12 w-12 animate-pulse rounded-full border-4 border-transparent border-t-purple-400 opacity-30"></div>
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-medium text-gray-900">Loading Request Details</h3>
+              <p className="text-sm text-gray-500">Please wait while we fetch the request information...</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -170,32 +185,58 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
               )}
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons or Current Action Display */}
             {!deadlinePassed && (
               <div className="flex flex-col sm:flex-row gap-3 p-4 bg-gray-50 rounded-lg">
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-700 mb-1">Your Review Decision</h4>
-                  <p className="text-sm text-gray-600">
-                    Please review the request details and make your decision.
-                  </p>
+                  {currentAdminAction ? (
+                    <p className="text-sm text-gray-600">
+                      You have already reviewed this request.
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      Please review the request details and make your decision.
+                    </p>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => onApprove(request)}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <ThumbsUp className="mr-2 h-4 w-4" />
-                    Approve Request
-                  </Button>
-                  <Button
-                    onClick={() => onDeny(request)}
-                    variant="outline"
-                    className="border-red-300 text-red-600 hover:bg-red-50"
-                  >
-                    <ThumbsDown className="mr-2 h-4 w-4" />
-                    Reject Request
-                  </Button>
-                </div>
+                {currentAdminAction ? (
+                  <div className="flex items-center gap-2">
+                    {currentAdminAction === 'approved' ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
+                        <CheckCircle className="h-5 w-5" />
+                        <span className="font-medium">You Approved</span>
+                      </div>
+                    ) : currentAdminAction === 'rejected' ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-lg">
+                        <AlertTriangle className="h-5 w-5" />
+                        <span className="font-medium">You Rejected</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-lg">
+                        <span className="font-medium">Action: {currentAdminAction}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => onApprove(request)}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <ThumbsUp className="mr-2 h-4 w-4" />
+                      Approve Request
+                    </Button>
+                    <Button
+                      onClick={() => onDeny(request)}
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                    >
+                      <ThumbsDown className="mr-2 h-4 w-4" />
+                      Reject Request
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -402,60 +443,77 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
                     </div>
                   )}
 
-                  {/* Approved Approvals */}
-                  {request.approved_approvals && request.approved_approvals.length > 0 && (
+                  {/* Approval History */}
+                  {request.approval_details && request.approval_details.length > 0 && (
                     <div className="mt-4">
-                      <h4 className="font-medium mb-2 flex items-center gap-2 text-green-700">
-                        <ThumbsUp className="h-4 w-4" />
-                        Approved By:
+                      <h4 className="font-medium mb-2 flex items-center gap-2 text-purple-700">
+                        <Users className="h-4 w-4" />
+                        Approval History:
                       </h4>
-                      <div className="space-y-2">
-                        {request.approved_approvals.map((approval, index) => (
+                      <div className="space-y-3">
+                        {request.approval_details.map((approval, index) => (
                           <div
                             key={index}
-                            className="p-3 bg-green-50 rounded border border-green-200"
+                            className={`p-3 rounded border ${
+                              approval.action === 'approved'
+                                ? 'bg-green-50 border-green-200'
+                                : approval.action === 'rejected'
+                                ? 'bg-red-50 border-red-200'
+                                : 'bg-gray-50 border-gray-200'
+                            }`}
                           >
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm text-green-800">
-                                {approval.admin_name || 'Admin'}
-                              </span>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className={`font-medium text-sm ${
+                                  approval.action === 'approved'
+                                    ? 'text-green-800'
+                                    : approval.action === 'rejected'
+                                    ? 'text-red-800'
+                                    : 'text-gray-800'
+                                }`}>
+                                  {approval.admin_name || 'Admin'}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {approval.action === 'approved' ? (
+                                    <ThumbsUp className="h-3 w-3 text-green-600" />
+                                  ) : approval.action === 'rejected' ? (
+                                    <ThumbsDown className="h-3 w-3 text-red-600" />
+                                  ) : (
+                                    <Clock className="h-3 w-3 text-gray-600" />
+                                  )}
+                                  <span className={`text-xs font-medium capitalize ${
+                                    approval.action === 'approved'
+                                      ? 'text-green-600'
+                                      : approval.action === 'rejected'
+                                      ? 'text-red-600'
+                                      : 'text-gray-600'
+                                  }`}>
+                                    {approval.action || 'Pending'}
+                                  </span>
+                                </div>
+                              </div>
                               {approval.created_at && (
-                                <span className="text-xs text-green-600">
+                                <span className={`text-xs ${
+                                  approval.action === 'approved'
+                                    ? 'text-green-600'
+                                    : approval.action === 'rejected'
+                                    ? 'text-red-600'
+                                    : 'text-gray-600'
+                                }`}>
                                   {formatDate(approval.created_at)}
                                 </span>
                               )}
                             </div>
                             {approval.comments && (
-                              <p className="text-sm text-green-700">{approval.comments}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Rejected Approvals */}
-                  {request.rejected_approvals && request.rejected_approvals.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="font-medium mb-2 flex items-center gap-2 text-red-700">
-                        <ThumbsDown className="h-4 w-4" />
-                        Rejected By:
-                      </h4>
-                      <div className="space-y-2">
-                        {request.rejected_approvals.map((approval, index) => (
-                          <div key={index} className="p-3 bg-red-50 rounded border border-red-200">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm text-red-800">
-                                {approval.admin_name || 'Admin'}
-                              </span>
-                              {approval.created_at && (
-                                <span className="text-xs text-red-600">
-                                  {formatDate(approval.created_at)}
-                                </span>
-                              )}
-                            </div>
-                            {approval.comments && (
-                              <p className="text-sm text-red-700">{approval.comments}</p>
+                              <p className={`text-sm ${
+                                approval.action === 'approved'
+                                  ? 'text-green-700'
+                                  : approval.action === 'rejected'
+                                  ? 'text-red-700'
+                                  : 'text-gray-700'
+                              }`}>
+                                {approval.comments}
+                              </p>
                             )}
                           </div>
                         ))}
@@ -519,7 +577,7 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
             Close
           </Button>
 
-          {!isLoading && !deadlinePassed && (
+          {!isLoading && !deadlinePassed && !currentAdminAction && (
             <div className="flex gap-2">
               <Button
                 onClick={() => onDeny(request)}

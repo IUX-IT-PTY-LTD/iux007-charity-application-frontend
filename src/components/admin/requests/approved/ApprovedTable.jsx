@@ -57,7 +57,8 @@ const ApprovedTable = ({
 
   // Get event connection status
   const getEventConnectionStatus = (request) => {
-    if (request.connected_event_id) {
+    // If status is published or has connected_event_id, show as connected
+    if (request.current_status === 'published' || request.connected_event_id) {
       return {
         badge: <Badge className="bg-green-100 text-green-800">Connected</Badge>,
         eventId: request.connected_event_id,
