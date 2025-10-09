@@ -22,23 +22,24 @@ export const uploadImage = async (file) => {
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
     if (!allowedTypes.includes(file.type)) {
-      throw new Error('Invalid file type. Please upload an image file (JPEG, PNG, GIF, WebP)');
+      throw new Error('Invalid file type. Please upload an image file (JPEG, PNG, GIF, WebP, SVG)');
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    // Validate file size (max 2MB for base64 upload)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
     if (file.size > maxSize) {
-      throw new Error('File size too large. Maximum size is 10MB');
+      throw new Error('File size too large. Maximum size is 2MB');
     }
 
-    // Create FormData for file upload
-    const formData = new FormData();
-    formData.append('image', file);
+    // Convert file to base64
+    const base64String = await convertFileToBase64(file);
 
-    // Upload to backend - Don't set Content-Type, let browser handle it
-    return await apiService.post(`/admin/${version}/upload/image`, formData);
+    // Send base64 data to backend
+    return await apiService.post(`/admin/${version}/upload/image`, {
+      image: base64String
+    });
   } catch (error) {
     console.error('Error uploading image:', error);
     throw error;
@@ -78,20 +79,20 @@ export const validateImageFile = (file) => {
   }
 
   // Check file type
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
   if (!allowedTypes.includes(file.type)) {
     return {
       isValid: false,
-      error: 'Invalid file type. Please upload an image file (JPEG, PNG, GIF, WebP)'
+      error: 'Invalid file type. Please upload an image file (JPEG, PNG, GIF, WebP, SVG)'
     };
   }
 
-  // Check file size (max 10MB)
-  const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+  // Check file size (max 2MB for base64 upload)
+  const maxSize = 2 * 1024 * 1024; // 2MB in bytes
   if (file.size > maxSize) {
     return {
       isValid: false,
-      error: 'File size too large. Maximum size is 10MB'
+      error: 'File size too large. Maximum size is 2MB'
     };
   }
 
