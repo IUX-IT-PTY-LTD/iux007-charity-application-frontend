@@ -767,6 +767,7 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                 )}
               </div>
             </div>
+            
             <div>
               <Label htmlFor="alt">Alt Text</Label>
               <Input
@@ -776,6 +777,7 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                 placeholder="Describe the image for accessibility"
               />
             </div>
+            
             <div>
               <Label htmlFor="caption">Caption (optional)</Label>
               <Input
@@ -784,6 +786,7 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                 onChange={(e) => updateContent('caption', e.target.value)}
               />
             </div>
+            
             <div>
               <Label htmlFor="alignment">Alignment</Label>
               <Select
@@ -799,6 +802,159 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                   <SelectItem value="right">Right</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Image Dimensions */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Image Dimensions</h4>
+              
+              <div>
+                <Label htmlFor="sizeMode">Size Mode</Label>
+                <Select
+                  value={localComponent.content.sizeMode || 'auto'}
+                  onValueChange={(value) => updateContent('sizeMode', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Auto (Original Size)</SelectItem>
+                    <SelectItem value="responsive">Responsive (Max Width 100%)</SelectItem>
+                    <SelectItem value="custom">Custom Dimensions</SelectItem>
+                    <SelectItem value="preset">Preset Sizes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {localComponent.content.sizeMode === 'custom' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="customWidth">Width</Label>
+                    <Input
+                      id="customWidth"
+                      value={localComponent.content.customWidth || ''}
+                      onChange={(e) => updateContent('customWidth', e.target.value)}
+                      placeholder="300px, 50%, auto"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="customHeight">Height</Label>
+                    <Input
+                      id="customHeight"
+                      value={localComponent.content.customHeight || ''}
+                      onChange={(e) => updateContent('customHeight', e.target.value)}
+                      placeholder="200px, auto"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {localComponent.content.sizeMode === 'preset' && (
+                <div>
+                  <Label htmlFor="presetSize">Preset Size</Label>
+                  <Select
+                    value={localComponent.content.presetSize || 'medium'}
+                    onValueChange={(value) => updateContent('presetSize', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small (200x150px)</SelectItem>
+                      <SelectItem value="medium">Medium (400x300px)</SelectItem>
+                      <SelectItem value="large">Large (600x450px)</SelectItem>
+                      <SelectItem value="xlarge">X-Large (800x600px)</SelectItem>
+                      <SelectItem value="thumbnail">Thumbnail (100x100px)</SelectItem>
+                      <SelectItem value="banner">Banner (1200x300px)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {(localComponent.content.sizeMode === 'custom' || localComponent.content.sizeMode === 'preset') && (
+                <div>
+                  <Label htmlFor="objectFit">Object Fit</Label>
+                  <Select
+                    value={localComponent.content.objectFit || 'cover'}
+                    onValueChange={(value) => updateContent('objectFit', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cover">Cover (Fill, may crop)</SelectItem>
+                      <SelectItem value="contain">Contain (Fit, no crop)</SelectItem>
+                      <SelectItem value="fill">Fill (Stretch to fit)</SelectItem>
+                      <SelectItem value="none">None (Original size)</SelectItem>
+                      <SelectItem value="scale-down">Scale Down</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Border & Effects */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="font-medium text-sm">Border & Effects</h4>
+              
+              <div>
+                <Label htmlFor="borderRadius">Border Radius</Label>
+                <Select
+                  value={localComponent.content.borderRadius || 'none'}
+                  onValueChange={(value) => updateContent('borderRadius', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="rounded">Small (8px)</SelectItem>
+                    <SelectItem value="rounded-lg">Medium (12px)</SelectItem>
+                    <SelectItem value="rounded-xl">Large (16px)</SelectItem>
+                    <SelectItem value="rounded-full">Full (Circle/Oval)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="shadow">Shadow</Label>
+                <Select
+                  value={localComponent.content.shadow || 'none'}
+                  onValueChange={(value) => updateContent('shadow', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="shadow-sm">Small</SelectItem>
+                    <SelectItem value="shadow">Medium</SelectItem>
+                    <SelectItem value="shadow-lg">Large</SelectItem>
+                    <SelectItem value="shadow-xl">Extra Large</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="border">Border</Label>
+                <Select
+                  value={localComponent.content.border || 'none'}
+                  onValueChange={(value) => updateContent('border', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="border">Thin Gray</SelectItem>
+                    <SelectItem value="border-2">Medium Gray</SelectItem>
+                    <SelectItem value="border-4">Thick Gray</SelectItem>
+                    <SelectItem value="border border-blue-500">Blue</SelectItem>
+                    <SelectItem value="border border-red-500">Red</SelectItem>
+                    <SelectItem value="border border-green-500">Green</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         );
@@ -1185,6 +1341,89 @@ const ComponentPreview = ({ component, onEdit, onDelete, onMoveUp, onMoveDown, i
         );
 
       case COMPONENT_TYPES.IMAGE:
+        const getImageDimensions = () => {
+          const sizeMode = component.content.sizeMode || 'auto';
+          let style = {};
+          let className = '';
+
+          switch (sizeMode) {
+            case 'custom':
+              if (component.content.customWidth) {
+                style.width = component.content.customWidth;
+              }
+              if (component.content.customHeight) {
+                style.height = component.content.customHeight;
+              }
+              break;
+            case 'preset':
+              const presetSize = component.content.presetSize || 'medium';
+              switch (presetSize) {
+                case 'small':
+                  style = { width: '200px', height: '150px' };
+                  break;
+                case 'medium':
+                  style = { width: '400px', height: '300px' };
+                  break;
+                case 'large':
+                  style = { width: '600px', height: '450px' };
+                  break;
+                case 'xlarge':
+                  style = { width: '800px', height: '600px' };
+                  break;
+                case 'thumbnail':
+                  style = { width: '100px', height: '100px' };
+                  break;
+                case 'banner':
+                  style = { width: '1200px', height: '300px' };
+                  break;
+              }
+              break;
+            case 'responsive':
+              className = 'max-w-full h-auto';
+              break;
+            default: // auto
+              className = 'h-auto';
+              break;
+          }
+
+          return { style, className };
+        };
+
+        const getImageClasses = () => {
+          let classes = [];
+          
+          // Add dimension classes
+          const { className } = getImageDimensions();
+          if (className) classes.push(className);
+          
+          // Add border radius
+          const borderRadius = component.content.borderRadius || 'none';
+          if (borderRadius !== 'none') {
+            classes.push(borderRadius);
+          }
+          
+          // Add shadow
+          const shadow = component.content.shadow || 'none';
+          if (shadow !== 'none') {
+            classes.push(shadow);
+          }
+          
+          // Add border
+          const border = component.content.border || 'none';
+          if (border !== 'none') {
+            classes.push(border);
+          }
+          
+          // Add object fit for custom/preset sizes
+          const sizeMode = component.content.sizeMode || 'auto';
+          if (sizeMode === 'custom' || sizeMode === 'preset') {
+            const objectFit = component.content.objectFit || 'cover';
+            classes.push(`object-${objectFit}`);
+          }
+          
+          return classes.join(' ');
+        };
+
         return (
           <div className={`text-${component.content.alignment || 'center'}`}>
             {component.content.src ? (
@@ -1192,7 +1431,8 @@ const ComponentPreview = ({ component, onEdit, onDelete, onMoveUp, onMoveDown, i
                 <img 
                   src={component.content.src} 
                   alt={component.content.alt}
-                  className="max-w-full h-auto rounded-lg"
+                  style={getImageDimensions().style}
+                  className={getImageClasses()}
                 />
                 {component.content.caption && (
                   <p className="text-sm text-gray-600 mt-2 italic">{component.content.caption}</p>
