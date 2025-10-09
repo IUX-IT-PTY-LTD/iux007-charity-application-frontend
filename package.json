@@ -6,7 +6,21 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project=\"Mobile Chrome\" --project=\"Mobile Safari\"",
+    "test:e2e": "playwright test tests/e2e",
+    "test:integration": "playwright test tests/integration",
+    "test:performance": "playwright test tests/integration/performance.spec.js",
+    "test:accessibility": "playwright test tests/integration/accessibility.spec.js",
+    "test:report": "playwright show-report",
+    "test:install": "playwright install"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -67,6 +81,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
     "eslint": "^8",
     "eslint-config-next": "15.5.0",
     "postcss": "^8",

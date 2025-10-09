@@ -1,0 +1,223 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        # Run tests on multiple browsers
+        browser: [chromium, firefox, webkit]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps ${{ matrix.browser }}
+    
+    - name: Create environment file
+      run: |
+        echo "NEXT_PUBLIC_API_URL=${{ secrets.TEST_API_URL || 'http://localhost:3001/api' }}" > .env.local
+        echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.TEST_STRIPE_KEY || 'pk_test_dummy_key' }}" >> .env.local
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Run Playwright tests
+      run: npx playwright test --project=${{ matrix.browser }}
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:3000
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.browser }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30
+
+  # Job for running all browsers in parallel on main/develop
+  test-all-browsers:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Create environment file
+      run: |
+        echo "NEXT_PUBLIC_API_URL=${{ secrets.TEST_API_URL || 'http://localhost:3001/api' }}" > .env.local
+        echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.TEST_STRIPE_KEY || 'pk_test_dummy_key' }}" >> .env.local
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Run Playwright tests on all browsers
+      run: npx playwright test
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:3000
+    
+    - name: Upload HTML report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-all-browsers
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30
+
+  # Mobile testing job
+  test-mobile:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Create environment file
+      run: |
+        echo "NEXT_PUBLIC_API_URL=${{ secrets.TEST_API_URL || 'http://localhost:3001/api' }}" > .env.local
+        echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.TEST_STRIPE_KEY || 'pk_test_dummy_key' }}" >> .env.local
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Run mobile tests
+      run: npx playwright test --project="Mobile Chrome" --project="Mobile Safari"
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:3000
+    
+    - name: Upload mobile test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-mobile
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30
+
+  # Performance testing job
+  test-performance:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Create environment file
+      run: |
+        echo "NEXT_PUBLIC_API_URL=${{ secrets.TEST_API_URL || 'http://localhost:3001/api' }}" > .env.local
+        echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.TEST_STRIPE_KEY || 'pk_test_dummy_key' }}" >> .env.local
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Run performance tests
+      run: npx playwright test tests/integration/performance.spec.js
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:3000
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-report
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30
+
+  # Accessibility testing job
+  test-accessibility:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Create environment file
+      run: |
+        echo "NEXT_PUBLIC_API_URL=${{ secrets.TEST_API_URL || 'http://localhost:3001/api' }}" > .env.local
+        echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.TEST_STRIPE_KEY || 'pk_test_dummy_key' }}" >> .env.local
+    
+    - name: Build application
+      run: npm run build
+    
+    - name: Run accessibility tests
+      run: npx playwright test tests/integration/accessibility.spec.js
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:3000
+    
+    - name: Upload accessibility results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-report
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 30
