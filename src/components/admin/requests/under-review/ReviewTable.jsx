@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { formatDistanceToNow, isPast, differenceInDays } from 'date-fns';
+import { formatDistanceToNow, isPast, differenceInDays, format } from 'date-fns';
 
 const ReviewTable = ({
   requests,
@@ -59,10 +59,10 @@ const ReviewTable = ({
   };
 
   // Get deadline from reviews
-  const getDeadline = (reviews) => {
-    if (!reviews || reviews.length === 0) return null;
-    const latestReview = reviews[reviews.length - 1];
-    return latestReview.deadline || null;
+  const getDeadline = (approvalSummary) => {
+    // if (!reviews || reviews.length === 0) return null;
+    // const latestReview = reviews[reviews.length - 1];
+    return approvalSummary.deadline || null;
   };
 
   // Get deadline status and styling
@@ -189,7 +189,7 @@ const ReviewTable = ({
             </TableRow>
           ) : (
             requests.map((request) => {
-              const deadline = getDeadline(request.reviews);
+              const deadline = getDeadline(request.approval_summary);
               const deadlineInfo = getDeadlineInfo(deadline);
               const approvalInfo = getApprovalInfo(request.approval_summary);
               const deadlinePassed = isDeadlinePassed(deadline);
@@ -263,9 +263,9 @@ const ReviewTable = ({
 
                   <TableCell className="text-center">
                     <div
-                      className={`flex flex-col items-center p-2 rounded-lg ${deadlineInfo.bgColor}`}
+                      className={`flex flex-col items-center p-2 rounded-lg ${deadlineInfo.bgColor} min-w-[120px]`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         {deadlineInfo.icon}
                         <span className={`text-sm font-medium ${deadlineInfo.color}`}>
                           {deadlineInfo.text}
@@ -273,7 +273,7 @@ const ReviewTable = ({
                       </div>
                       {deadline && (
                         <div className="text-xs text-gray-600 mt-1">
-                          {formatDistanceToNow(new Date(deadline), { addSuffix: true })}
+                          {format(new Date(deadline), 'MMM dd, yyyy')}
                         </div>
                       )}
                     </div>
