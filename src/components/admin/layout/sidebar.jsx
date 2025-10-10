@@ -152,16 +152,16 @@ const getNavigationItems = (permissions, isSuperAdmin = false) => {
   });
 
   // Profile - always visible (application level)
-  if (isSuperAdmin || permissions.profiles.hasAccess) {
-    items.push({
-      id: 'profile',
-      name: 'My Profile',
-      href: '/admin/profile',
-      icon: UserCircle,
-      visible: true,
-      order: 6,
-    });
-  }
+  // if (isSuperAdmin || permissions.profiles.hasAccess) {
+  //   items.push({
+  //     id: 'profile',
+  //     name: 'My Profile',
+  //     href: '/admin/profile',
+  //     icon: UserCircle,
+  //     visible: true,
+  //     order: 6,
+  //   });
+  // }
 
   // Organization submenu - only show if user has access to any org-related permissions
   const orgSubmenuItems = [];
