@@ -111,7 +111,7 @@ export default function ArchivedProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {projects.map((project) => {
-            const progressPercentage = calculateProgress(project.raised_amount, project.target_amount);
+            const progressPercentage = calculateProgress(project.total_donation, project.target_amount);
             
             return (
               <Card key={project.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
@@ -184,7 +184,7 @@ export default function ArchivedProjectsPage() {
                       <DollarSign className="h-6 w-6 text-green-600 mx-auto mb-2" />
                       <p className="text-sm text-green-600 mb-1">Total Raised</p>
                       <p className="text-xl font-bold text-green-700">
-                        {formatCurrency(project.raised_amount)}
+                        {formatCurrency(project.total_donation)}
                       </p>
                     </div>
                     
@@ -192,7 +192,7 @@ export default function ArchivedProjectsPage() {
                       <Users className="h-6 w-6 text-blue-600 mx-auto mb-2" />
                       <p className="text-sm text-blue-600 mb-1">Total Donors</p>
                       <p className="text-xl font-bold text-blue-700">
-                        {project.donors_count || 0}
+                        {project.total_donor || 0}
                       </p>
                     </div>
 

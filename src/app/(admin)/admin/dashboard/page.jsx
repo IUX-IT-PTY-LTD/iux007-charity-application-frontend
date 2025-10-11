@@ -81,6 +81,7 @@ const AdminDashboard = () => {
         const statisticsResponse = await getStatistics();
         if (statisticsResponse.status === 'success') {
           const statsData = statisticsResponse.data;
+          console.log('statsData:', statsData);
           const mappedStats = {
             totalDonations: statsData.total_donations,
             totalRaised: statsData.total_amount_raised,
@@ -137,78 +138,13 @@ const AdminDashboard = () => {
 
 
         // Generate campaign data
-        const campaignsMock = [
-          {
-            id: 1,
-            name: 'Education Fund',
-            raised: 35000,
-            target: 50000,
-            days_left: 15,
-          },
-          {
-            id: 2,
-            name: 'Clean Water Project',
-            raised: 28000,
-            target: 30000,
-            days_left: 7,
-          },
-          {
-            id: 3,
-            name: 'Medical Aid',
-            raised: 12000,
-            target: 40000,
-            days_left: 28,
-          },
-        ];
-        // setCampaigns(campaignsMock);
 
         // Generate notifications
-        const notificationsMock = [
-          {
-            id: '1',
-            type: 'donation',
-            title: 'New Donation Received',
-            message:
-              'You received a $1,200 donation from John Smith for the Education Fund campaign.',
-            timestamp: new Date(now - 12 * 60 * 1000).toISOString(),
-            read: false,
-            actionUrl: '/admin/donations/123',
-            actionText: 'View Donation',
-          },
-          {
-            id: '2',
-            type: 'user',
-            title: 'New Volunteer Registration',
-            message: 'Sarah Davis has signed up as a volunteer for your organization.',
-            timestamp: new Date(now - 60 * 60 * 1000).toISOString(),
-            read: false,
-            actionUrl: '/admin/users/456',
-            actionText: 'View Profile',
-          },
-          {
-            id: '3',
-            type: 'system',
-            title: 'Event Location Updated',
-            message:
-              "The Winter Clothes Drive event location has been updated to 'Community Center'.",
-            timestamp: new Date(now - 3 * 60 * 60 * 1000).toISOString(),
-            read: true,
-            actionUrl: '/admin/events/789',
-            actionText: 'View Event',
-          },
-        ];
-        setNotifications(notificationsMock);
 
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         // Fallback to mock stats if API call fails
-        const mockStats = {
-          totalDonations: 2834,
-          totalRaised: 367921,
-          activeEvents: 8,
-          totalDonors: 1532,
-        };
         setStats(mockStats);
         setIsLoading(false);
       }
@@ -269,32 +205,24 @@ const AdminDashboard = () => {
             value={stats.totalDonations.toLocaleString()}
             description="All time donations"
             icon={Activity}
-            trend="up"
-            trendValue="12.5%"
           />
           <StatCard
             title="Total Raised"
             value={`$${stats.totalRaised.toLocaleString()}`}
             description="Across all campaigns"
             icon={DollarSign}
-            trend="up"
-            trendValue="8.2%"
           />
           <StatCard
             title="Active Events"
             value={stats.activeEvents}
             description="Currently running events"
             icon={Calendar}
-            trend="down"
-            trendValue="3.1%"
           />
           <StatCard
             title="Total Donors"
             value={stats.totalDonors.toLocaleString()}
             description="Unique contributors"
             icon={Users}
-            trend="up"
-            trendValue="4.3%"
           />
           {stats.totalEvents && (
             <StatCard
@@ -302,8 +230,6 @@ const AdminDashboard = () => {
               value={stats.totalEvents}
               description="All events created"
               icon={Calendar}
-              trend="up"
-              trendValue="2.1%"
             />
           )}
           {stats.featuredEvents && (
@@ -312,8 +238,6 @@ const AdminDashboard = () => {
               value={stats.featuredEvents}
               description="Events in spotlight"
               icon={Calendar}
-              trend="up"
-              trendValue="5.7%"
             />
           )}
         </div>

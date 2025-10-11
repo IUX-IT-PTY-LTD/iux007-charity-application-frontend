@@ -224,27 +224,18 @@ export default function FundRequestDetailsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="border-green-200 bg-green-50">
                   <CardContent className="p-4 text-center">
-                    <DollarSign className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                    {/* <DollarSign className="h-6 w-6 text-green-600 mx-auto mb-2" /> */}
                     <p className="text-sm text-green-600">Target Amount</p>
                     <p className="text-lg font-bold text-green-700">
                       {request.currency} {parseInt(request.target_amount).toLocaleString()}
                     </p>
                   </CardContent>
                 </Card>
-                
-                <Card className="border-blue-200 bg-blue-50">
-                  <CardContent className="p-4 text-center">
-                    <DollarSign className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                    <p className="text-sm text-blue-600">Raised Amount</p>
-                    <p className="text-lg font-bold text-blue-700">
-                      {request.currency} {parseInt(request.raised_amount || 0).toLocaleString()}
-                    </p>
-                  </CardContent>
-                </Card>
+              
                 
                 <Card className="border-red-200 bg-red-50">
                   <CardContent className="p-4 text-center">
-                    <DollarSign className="h-6 w-6 text-red-600 mx-auto mb-2" />
+                    {/* <DollarSign className="h-6 w-6 text-red-600 mx-auto mb-2" /> */}
                     <p className="text-sm text-red-600">Shortage Amount</p>
                     <p className="text-lg font-bold text-red-700">
                       {request.currency} {parseInt(request.shortage_amount).toLocaleString()}

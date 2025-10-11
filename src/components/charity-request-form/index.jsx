@@ -251,11 +251,11 @@ const CharityRequestForm = () => {
         <Card className="shadow-lg">
           <CardContent className="text-center py-12">
             <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Request Submitted Successfully!</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2 ">Request Submitted Successfully!</h2>
             <p className="text-gray-600 mb-6">
               Thank you for your fundraising request. We will review your application and get back to you soon.
             </p>
-            <Button onClick={() => router.push('/profile?tab=fundraising')} className="mt-4">
+            <Button onClick={() => router.push('/profile?tab=fundraising')} className="mt-4 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
               GoTo FundRaising Requests
             </Button>
           </CardContent>
@@ -713,6 +713,12 @@ const CharityRequestForm = () => {
                         min: {
                           value: 1,
                           message: 'Amount must be greater than 0'
+                        },
+                        validate: {
+                          notGreaterThanTarget: value => {
+                            const targetAmount = getValues('target_amount');
+                            return !targetAmount || parseInt(value) <= parseInt(targetAmount) || 'Shortage amount cannot be greater than target amount';
+                          }
                         }
                       })}
                       className={errors.shortage_amount ? 'border-red-500' : ''}
