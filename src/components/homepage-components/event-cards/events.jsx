@@ -76,7 +76,7 @@ const EventCard = ({
         </Link>
         <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">{description}</p>
         {/* progress */}
-        {showDetails && (
+        {showDetails && targetAmount > 0 && (
           <div className="mb-4">
             <div className="bg-gray-50 rounded p-3">
               <div className="flex items-baseline text-sm mb-2">
@@ -94,6 +94,22 @@ const EventCard = ({
                 <span>{totalDonors || 0} Donors</span>
                 <span>{progressPercentage.toFixed(1)}%</span>
               </div>
+            </div>
+          </div>
+        )}
+        {/* donation amount for cards with no target */}
+        {showDetails && targetAmount === 0 && (
+          <div className="mb-4">
+            <div className="bg-gray-50 rounded p-3">
+              <div className="flex items-baseline justify-between text-sm mb-2">
+                <div>
+                  <span className="font-bold text-primary">${raised || 0}</span>
+                  <span className="text-gray-500 ml-1">donated</span>
+                </div>
+                <span className="text-xs text-gray-500">{totalDonors || 0} Donors</span>
+              </div>
+              <div className="h-1.5 mb-1"></div>
+              <div className="h-4"></div>
             </div>
           </div>
         )}
