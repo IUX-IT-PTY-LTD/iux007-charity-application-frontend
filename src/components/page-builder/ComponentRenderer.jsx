@@ -104,10 +104,25 @@ const TextComponent = ({ content }) => {
     // Add alignment
     classes.push(`text-${content.alignment || 'left'}`);
     
-    // Add font size (only if not custom)
+    // Add font size (only if not custom) - explicitly handle all font sizes
     const fontSize = content.fontSize || 'base';
     if (fontSize !== 'custom') {
-      classes.push(`text-${fontSize}`);
+      const fontSizeClasses = {
+        'xs': 'text-xs',
+        'sm': 'text-sm', 
+        'base': 'text-base',
+        'lg': 'text-lg',
+        'xl': 'text-xl',
+        '2xl': 'text-2xl',
+        '3xl': 'text-3xl',
+        '4xl': 'text-4xl',
+        '5xl': 'text-5xl',
+        '6xl': 'text-6xl'
+      };
+      const fontClass = fontSizeClasses[fontSize];
+      if (fontClass) {
+        classes.push(fontClass);
+      }
     }
     
     // Add line height (only if not custom)

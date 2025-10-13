@@ -39,6 +39,23 @@ import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
 // Import component types and utilities
 import { COMPONENT_TYPES, getDefaultComponent } from '../components';
 
+// Helper function to get font size class
+const getFontSizeClass = (fontSize) => {
+  const fontSizeClasses = {
+    'xs': 'text-xs',
+    'sm': 'text-sm', 
+    'base': 'text-base',
+    'lg': 'text-lg',
+    'xl': 'text-xl',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
+    '4xl': 'text-4xl',
+    '5xl': 'text-5xl',
+    '6xl': 'text-6xl'
+  };
+  return fontSizeClasses[fontSize] || '';
+};
+
 // Component Editor Modal (same as create page)
 const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
   const [localComponent, setLocalComponent] = useState(component);
@@ -942,7 +959,7 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
                   <div 
                     className={`prose max-w-none ${
                       // Font size classes
-                      localComponent.content.fontSize && localComponent.content.fontSize !== 'custom' ? `text-${localComponent.content.fontSize}` : ''
+                      localComponent.content.fontSize && localComponent.content.fontSize !== 'custom' ? getFontSizeClass(localComponent.content.fontSize) : ''
                     } ${
                       // Line height classes
                       localComponent.content.lineHeight && localComponent.content.lineHeight !== 'custom' ? `leading-${localComponent.content.lineHeight}` : ''
@@ -1688,7 +1705,10 @@ const ComponentPreview = ({ component, onEdit, onDelete, onMoveUp, onMoveDown, i
           // Add font size
           const fontSize = component.content.fontSize || 'base';
           if (fontSize !== 'custom') {
-            classes.push(`text-${fontSize}`);
+            const fontClass = getFontSizeClass(fontSize);
+            if (fontClass) {
+              classes.push(fontClass);
+            }
           }
           
           // Add line height
