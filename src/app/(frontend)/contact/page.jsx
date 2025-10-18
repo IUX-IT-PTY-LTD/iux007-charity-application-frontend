@@ -4,10 +4,24 @@ import { commonService } from '@/api/services/app/commonService';
 import { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import Loader from '@/components/shared/loader';
+import { Recaptcha } from '@/components/ui/recaptcha';
+import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 const ContactUs = () => {
   const [contactData, setContactData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const {
+    recaptchaRef,
+    token,
+    isVerified,
+    error: recaptchaError,
+    handleVerify,
+    handleExpire,
+    handleError,
+    reset,
+    validateRecaptcha,
+    setError: setRecaptchaError
+  } = useRecaptcha();
   const fetchContactData = async () => {
     const response = await commonService.getContactData();
     if (response.status === 'success') {
@@ -17,6 +31,13 @@ const ContactUs = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate reCAPTCHA first
+    if (!validateRecaptcha()) {
+      toast.error(recaptchaError || 'Please complete the reCAPTCHA verification.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -28,6 +49,7 @@ const ContactUs = () => {
         email: data.email,
         phone: data.phone,
         message: data.message,
+        recaptcha_token: token, // Include reCAPTCHA token
       };
 
       const response = await commonService.storeCustomerEnquiry(contactData);
@@ -35,12 +57,15 @@ const ContactUs = () => {
       if (response.status === 'success') {
         toast.success('Enquiry submitted successfully!');
         e.target.reset();
+        reset(); // Reset reCAPTCHA
       } else {
         toast.error('Failed to submit enquiry. Please try again later.');
+        reset(); // Reset reCAPTCHA on error
       }
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('An unexpected error occurred');
+      reset(); // Reset reCAPTCHA on error
     } finally {
       setIsLoading(false);
     }
@@ -207,12 +232,28 @@ const ContactUs = () => {
                   </div>
                 </div>
 
+                {/* reCAPTCHA Section */}
+                <div className="sm:col-span-2 flex flex-col items-center space-y-4">
+                  <Recaptcha
+                    ref={recaptchaRef}
+                    onVerify={handleVerify}
+                    onExpire={handleExpire}
+                    onError={handleError}
+                    theme="light"
+                    size="normal"
+                  />
+                  {recaptchaError && (
+                    <p className="text-sm text-red-600 font-medium">{recaptchaError}</p>
+                  )}
+                </div>
+
                 <div className="flex justify-end mt-6">
                   <button
                     type="submit"
-                    className="px-8 py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-300 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                    disabled={!isVerified || isLoading}
+                    className="px-8 py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-300 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    Send Message
+                    {isLoading ? 'Sending...' : 'Send Message'}
                   </button>
                 </div>
               </form>

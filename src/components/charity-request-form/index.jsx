@@ -14,6 +14,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ChevronLeft, ChevronRight, Upload, CheckCircle, Loader } from 'lucide-react';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
+import { Recaptcha } from '@/components/ui/recaptcha';
+import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 const CharityRequestForm = () => {
   const router = useRouter();
@@ -31,6 +33,19 @@ const CharityRequestForm = () => {
   const [fundType, setFundType] = useState('');
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  
+  // reCAPTCHA hook
+  const {
+    recaptchaRef,
+    token,
+    isVerified,
+    error: recaptchaError,
+    handleVerify,
+    handleExpire,
+    handleError,
+    reset: resetRecaptcha,
+    validateRecaptcha
+  } = useRecaptcha();
   
   const {
     register,
@@ -132,6 +147,12 @@ const CharityRequestForm = () => {
       return;
     }
 
+    // Validate reCAPTCHA
+    if (!validateRecaptcha()) {
+      alert(recaptchaError || 'Please complete the reCAPTCHA verification.');
+      return;
+    }
+
     // if (!acceptedTerms) {
     //   alert('Please accept the terms and conditions.');
     //   return;
@@ -162,6 +183,9 @@ const CharityRequestForm = () => {
       formData.append('target_amount', parseInt(data.target_amount));
       // formData.append('raised_amount', parseInt(data.raised_amount));
       formData.append('shortage_amount', parseInt(data.shortage_amount));
+      
+      // Add reCAPTCHA token
+      formData.append('recaptcha_token', token);
       
       // Calculate shortage amount
       // const shortageAmount = parseInt(data.target_amount) - parseInt(data.raised_amount);
@@ -908,6 +932,29 @@ const CharityRequestForm = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* reCAPTCHA Section */}
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="p-6">
+                    <h4 className="font-semibold text-green-800 mb-4">Security Verification</h4>
+                    <p className="text-sm text-green-700 mb-4">
+                      Please complete the reCAPTCHA verification to protect against spam and automated submissions.
+                    </p>
+                    <div className="flex flex-col items-center space-y-4">
+                      <Recaptcha
+                        ref={recaptchaRef}
+                        onVerify={handleVerify}
+                        onExpire={handleExpire}
+                        onError={handleError}
+                        theme="light"
+                        size="normal"
+                      />
+                      {recaptchaError && (
+                        <p className="text-sm text-red-600 font-medium">{recaptchaError}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
@@ -946,7 +993,7 @@ const CharityRequestForm = () => {
                       handleSubmit(onSubmit)();
                     }
                   }}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isVerified || !acceptedTerms}
                   className="flex items-center space-x-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-white"
                 >
                   {isSubmitting ? (

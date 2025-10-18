@@ -7,6 +7,8 @@ import Link from 'next/link';
 
 // Import auth service
 import { register } from '@/api/services/admin/MainauthService';
+import { Recaptcha } from '@/components/ui/recaptcha';
+import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 const RegisterCard = () => {
   const router = useRouter();
@@ -21,6 +23,19 @@ const RegisterCard = () => {
     password: '',
     confirmPassword: '',
   });
+
+  // reCAPTCHA hook
+  const {
+    recaptchaRef,
+    token,
+    isVerified,
+    error: recaptchaError,
+    handleVerify,
+    handleExpire,
+    handleError,
+    reset: resetRecaptcha,
+    validateRecaptcha
+  } = useRecaptcha();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -48,6 +63,13 @@ const RegisterCard = () => {
       return;
     }
 
+    // Validate reCAPTCHA
+    if (!validateRecaptcha()) {
+      setError(recaptchaError || 'Please complete the reCAPTCHA verification.');
+      toast.error(recaptchaError || 'Please complete the reCAPTCHA verification.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -58,6 +80,7 @@ const RegisterCard = () => {
         email: formData.email,
         password: formData.password,
         role_id: 1, // Make sure this is the correct role ID for your system
+        recaptcha_token: token,
       };
 
       const data = await register(userData);
@@ -187,7 +210,22 @@ const RegisterCard = () => {
             </div>
           </div>
 
-          <button type="submit" className="submit-button" disabled={loading}>
+          {/* reCAPTCHA Section */}
+          <div className="mb-6 flex flex-col items-center space-y-4">
+            <Recaptcha
+              ref={recaptchaRef}
+              onVerify={handleVerify}
+              onExpire={handleExpire}
+              onError={handleError}
+              theme="light"
+              size="normal"
+            />
+            {recaptchaError && (
+              <p className="text-sm text-red-600 font-medium">{recaptchaError}</p>
+            )}
+          </div>
+
+          <button type="submit" className="submit-button" disabled={loading || !isVerified}>
             {loading ? (
               'Creating account...'
             ) : (
