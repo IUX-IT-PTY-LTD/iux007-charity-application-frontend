@@ -14,6 +14,10 @@ export default function ArchivedProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  
+  const sliderFallbackImage = 'https://iux007-charity-application.s3.ap-southeast-2.amazonaws.com/staging/assets/fallback_images/slider_fallback_image.jpg';
 
   useEffect(() => {
     fetchArchivedProjects();
@@ -46,6 +50,18 @@ export default function ArchivedProjectsPage() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount || 0);
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(projects.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProjects = projects.slice(startIndex, endIndex);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -109,114 +125,169 @@ export default function ArchivedProjectsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {projects.map((project) => {
-            const progressPercentage = calculateProgress(project.total_donation, project.target_amount);
-            
-            return (
-              <Card key={project.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                {/* Project Image - Upper Section */}
-                <div className="relative h-64 w-full">
-                  {project.featured_image ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {paginatedProjects.map((project) => {
+              const progressPercentage = calculateProgress(project.total_donation, project.target_amount);
+              
+              // Format dates
+              const formatTime = (timeString) => {
+                try {
+                  const date = new Date(timeString);
+                  return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  });
+                } catch {
+                  return timeString;
+                }
+              };
+              
+              return (
+                <div key={project.id} className="bg-white rounded-2xl p-5 cursor-pointer hover:-translate-y-2 transition-all relative h-full flex flex-col shadow-lg">
+                  <div className="overflow-hidden mx-auto mb-4 h-[200px] relative">
                     <Image
-                      src={project.featured_image}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
+                      width={300}
+                      height={200}
+                      src={project.featured_image || sliderFallbackImage}
+                      alt={project.title || 'Archived Event'}
+                      className="h-full w-full object-cover rounded-md"
+                      loader={({ src }) => src}
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                      <Archive className="h-16 w-16 text-gray-400" />
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-black/80 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                        Archived
+                      </span>
                     </div>
-                  )}
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-black/80 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
-                      Archived
-                    </span>
+                  </div>
+
+                  <div className="flex flex-col flex-1">
+                    <div className="flex items-center gap-2 mb-3 text-xs">
+                      {project.end_date && (
+                        <div className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded flex-shrink-0">
+                          <Calendar className="text-xs" />
+                          <span className="whitespace-nowrap text-xs">{formatTime(project.end_date)}</span>
+                        </div>
+                      )}
+                      {project.location && (
+                        <div className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded min-w-0 flex-1">
+                          <MapPin className="text-xs flex-shrink-0" />
+                          <span className="truncate text-xs" title={project.location}>{project.location}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <h3 className="text-medium font-semibold text-gray-800 mb-3 line-clamp-2">
+                      {project.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                      {project.description}
+                    </p>
+
+                    {/* Progress section */}
+                    <div className="mb-4">
+                      <div className="bg-gray-50 rounded p-3">
+                        <div className="flex items-baseline text-sm mb-2">
+                          <span className="font-bold text-primary">{formatCurrency(project.total_donation || 0)}</span>
+                          <span className="text-gray-500 ml-1">raised of </span>
+                          <span className="font-bold text-primary ml-1">{formatCurrency(project.target_amount || 0)}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
+                          <div
+                            className="bg-green-500 h-1.5 rounded-full transition-colors duration-300"
+                            style={{ width: `${progressPercentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>{project.total_donor || 0} Donors</span>
+                          <span>{progressPercentage.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="buttons block relative w-full mt-auto">
+                      <Link
+                        href={`/archived-events/${project.uuid || project.id}`}
+                        className="bg-gray-600 text-sm h-full text-white px-5 py-2 rounded-md block text-center w-full hover:bg-gray-700 transition-colors"
+                      >
+                        Read More
+                      </Link>
+                    </div>
                   </div>
                 </div>
+              );
+            })}
+          </div>
 
-                {/* Project Content - Below Image */}
-                <div className="p-6 lg:p-8 space-y-6">
-                  {/* Project Header */}
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">{project.title}</h3>
-                    {project.location && (
-                      <div className="flex items-center text-gray-600 text-sm mb-3">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span>{project.location}</span>
-                      </div>
-                    )}
-                  </div>
+          {/* Pagination */}
+          {projects.length > itemsPerPage && (
+            <div className="flex justify-center items-center space-x-2 mt-12">
+              {/* Previous button */}
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`
+                  px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ease-in-out
+                  ${
+                    currentPage === 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-primary border-2 border-primary hover:bg-primary hover:text-white'
+                  }
+                `}
+                aria-label="Previous page"
+              >
+                ←
+              </button>
 
-                  {/* Project Description */}
-                  <p className="text-gray-600 leading-relaxed">
-                    {project.description}
-                  </p>
+              {/* Page numbers */}
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={`
+                    px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ease-in-out
+                    ${
+                      currentPage === index + 1
+                        ? 'bg-primary text-white shadow-lg transform scale-105'
+                        : 'bg-white text-primary border-2 border-primary hover:bg-primary hover:text-white'
+                    }
+                  `}
+                  aria-label={`Page ${index + 1}`}
+                >
+                  {index + 1}
+                </button>
+              ))}
 
-                   {/* Project Dates */}
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                      {project.start_date && (
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          <span>Started: {new Date(project.start_date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}</span>
-                        </div>
-                      )}
-                      {project.end_date && (
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          <span>Ended: {new Date(project.end_date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}</span>
-                        </div>
-                      )}
-                    </div>
+              {/* Next button */}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`
+                  px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ease-in-out
+                  ${
+                    currentPage === totalPages
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-primary border-2 border-primary hover:bg-primary hover:text-white'
+                  }
+                `}
+                aria-label="Next page"
+              >
+                →
+              </button>
+            </div>
+          )}
 
-                  {/* Financial Stats Row */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                      <DollarSign className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                      <p className="text-sm text-green-600 mb-1">Total Raised</p>
-                      <p className="text-xl font-bold text-green-700">
-                        {formatCurrency(project.total_donation)}
-                      </p>
-                    </div>
-                    
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                      <Users className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                      <p className="text-sm text-blue-600 mb-1">Total Donors</p>
-                      <p className="text-xl font-bold text-blue-700">
-                        {project.total_donor || 0}
-                      </p>
-                    </div>
-
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                      <p className="text-sm text-gray-600 mb-1">Target Amount</p>
-                      <p className="text-xl font-bold text-gray-700">
-                        {formatCurrency(project.target_amount)}
-                      </p>
-                    </div>
-                  </div>
-
-                        {/* Progress Bar */}
-                        {/* <div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium text-gray-600">Funding Progress</span>
-                            <span className="text-sm font-medium text-gray-600">{Math.round(progressPercentage)}%</span>
-                          </div>
-                          <Progress value={progressPercentage} className="h-3" />
-                        </div> */}
-                      </div>
-              </Card>
-            );
-          })}
-        </div>
+          {/* Results info */}
+          {projects.length > 0 && (
+            <div className="text-center mt-6">
+              <p className="text-gray-600 text-sm">
+                Showing {startIndex + 1}-{Math.min(endIndex, projects.length)} of {projects.length} archived events
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
