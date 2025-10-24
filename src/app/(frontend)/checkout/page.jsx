@@ -11,6 +11,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '@/components/stripe/CherckoutForm';
 import { setUserCart } from '@/store/features/userSlice';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { getConfigValue } from '@/utils/domainConfig';
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ const Checkout = () => {
   console.log(userInfo);
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   /** Stripe Integration */
-  const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const stripePublishableKey = getConfigValue('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY');
   const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
   useEffect(() => {
