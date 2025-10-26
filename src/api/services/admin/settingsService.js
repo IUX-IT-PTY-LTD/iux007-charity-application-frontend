@@ -419,7 +419,7 @@ export const getAccreditationSettings = (settings) => {
  */
 export const getColorSchemeSettings = async () => {
   try {
-    return await apiService.get(`${ENDPOINTS.COMMON.SETTINGS}/color-schemes`);
+    return await apiService.get(`${version}/${ENDPOINTS.COMMON.SETTINGS}/color-schemes`);
   } catch (error) {
     console.error('Error fetching color scheme settings:', error);
     throw error;
