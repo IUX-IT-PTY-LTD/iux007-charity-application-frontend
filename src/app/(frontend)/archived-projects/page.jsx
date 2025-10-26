@@ -209,7 +209,7 @@ export default function ArchivedProjectsPage() {
 
                     <div className="buttons block relative w-full mt-auto">
                       <Link
-                        href={`/archived-events/${project.uuid || project.id}`}
+                        href={`/archived-projects/${project.uuid || project.id}`}
                         className="bg-gray-600 text-sm h-full text-white px-5 py-2 rounded-md block text-center w-full hover:bg-gray-700 transition-colors"
                       >
                         Read More

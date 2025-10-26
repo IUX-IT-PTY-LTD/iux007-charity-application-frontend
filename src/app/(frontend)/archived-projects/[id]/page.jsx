@@ -78,7 +78,7 @@ const ArchivedEventDetails = props => {
         <div className="flex justify-center items-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading archived event details...</p>
+            <p className="text-gray-600">Loading archived project details...</p>
           </div>
         </div>
       </div>
@@ -91,9 +91,9 @@ const ArchivedEventDetails = props => {
         <Card className="shadow-lg">
           <CardContent className="text-center py-12">
             <p className="text-red-600 mb-4">{error}</p>
-            <Link href="/archived-events">
+            <Link href="/archived-projects">
               <Button variant="outline">
-                Back to Archived Events
+                Back to Archived Projects
               </Button>
             </Link>
           </CardContent>
@@ -110,9 +110,9 @@ const ArchivedEventDetails = props => {
             <Archive className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">Event Not Found</h3>
             <p className="text-gray-600 mb-4">The requested archived event could not be found.</p>
-            <Link href="/archived-events">
+            <Link href="/archived-projects">
               <Button variant="outline">
-                Back to Archived Events
+                Back to Archived Projects
               </Button>
             </Link>
           </CardContent>
@@ -129,11 +129,11 @@ const ArchivedEventDetails = props => {
         {/* Back button */}
         <div className="mb-6">
           <Link
-            href="/archived-events"
+            href="/archived-projects"
             className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >
             <FaArrowLeft className="mr-2" />
-            Back to Archived Events
+            Back to Archived Projects
           </Link>
         </div>
 
@@ -249,12 +249,12 @@ const ArchivedEventDetails = props => {
               Thank you to everyone who contributed to this campaign. Your support made a real difference!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/archived-events">
+              <Link href="/archived-projects">
                 <Button variant="outline" className="px-6 py-3 border-2 border-primary text-primary transition-all">
                   View More Archived Projects
                 </Button>
               </Link>
-              <Link href="/events">
+              <Link href="/projects">
                 <Button className="px-6 py-3 bg-primary text-white hover:bg-primary/90 transition-all">
                   View Active Projects
                 </Button>
