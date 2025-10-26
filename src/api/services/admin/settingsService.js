@@ -419,11 +419,7 @@ export const getAccreditationSettings = (settings) => {
  */
 export const getColorSchemeSettings = async () => {
   try {
-    if (!getAuthToken()) {
-      throw new Error('Authentication required. Please log in.');
-    }
-
-    return await apiService.get(`/admin/${version}/settings/color-schemes`);
+    return await apiService.get(`${ENDPOINTS.COMMON.SETTINGS}/color-schemes`);
   } catch (error) {
     console.error('Error fetching color scheme settings:', error);
     throw error;
