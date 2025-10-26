@@ -103,7 +103,7 @@ const FeaturedEventsCard = ({
     <>
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mx-auto max-w-sm">
       <div className="relative">
-        <Link href={`/events/${eventId}`}>
+        <Link href={`/projects/${eventId}`}>
           <Image
             width={400}
             height={300}
@@ -126,7 +126,7 @@ const FeaturedEventsCard = ({
       </div>
 
       <div className="p-6">
-        <Link href={`/events/${eventId}`}>
+        <Link href={`/projects/${eventId}`}>
           <h3 className="text-lg font-semibold text-gray-800 mb-4 line-clamp-2 cursor-pointer hover:text-primary transition-colors">
             {title}
           </h3>
