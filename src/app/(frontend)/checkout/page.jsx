@@ -8,7 +8,7 @@ import { MdOutlineEmojiPeople } from 'react-icons/md';
 import { useSelector, useDispatch } from 'react-redux';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import CheckoutForm from '@/components/stripe/CherckoutForm';
+import CustomPaymentForm from '@/components/stripe/CustomPaymentForm';
 import { setUserCart } from '@/store/features/userSlice';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getConfigValue } from '@/utils/domainConfig';
@@ -174,13 +174,13 @@ const Checkout = () => {
   //   payment methods
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState(paymentMethods[0]);
   return (
-    <div className="min-h-screen bg-gray-50 py-6 md:py-16 px-4 md:px-0">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8 md:py-16 px-4 sm:px-6 md:px-0">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white shadow-lg rounded-xl overflow-hidden">
-          <div className="p-4 md:p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             {/* Progress Steps */}
-            <div className="relative flex justify-between items-center mb-8 md:mb-12">
-              <div className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 bg-gray-200">
+            <div className="relative flex justify-between items-center mb-6 sm:mb-8 md:mb-12">
+              <div className="absolute left-0 right-0 top-1/2 h-0.5 sm:h-1 -translate-y-1/2 bg-gray-200">
                 <div
                   className={`h-full bg-primary transition-all ${
                     currentStep === 1 ? 'w-0' : currentStep === 2 ? 'w-1/2' : 'w-full'
@@ -194,9 +194,9 @@ const Checkout = () => {
                 { icon: <MdOutlineEmojiPeople />, label: 'Donor' },
                 { icon: <FaDonate />, label: 'Payment' },
               ].map((step, index) => (
-                <div key={index} className="relative z-10 text-center">
+                <div key={index} className="relative z-10 text-center flex-1">
                   <div
-                    className={`w-12 h-12 md:w-16 md:h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all ${
+                    className={`w-10 h-10 sm:w-12 md:w-14 lg:w-16 h-10 sm:h-12 md:h-14 lg:h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all ${
                       currentStep > index
                         ? 'bg-primary border-primary text-white'
                         : currentStep === index
@@ -204,14 +204,19 @@ const Checkout = () => {
                           : 'bg-white border-gray-300 text-gray-400'
                     }`}
                   >
-                    <div className="text-lg md:text-2xl">{step.icon}</div>
+                    <div className="text-sm sm:text-base md:text-lg lg:text-2xl">{step.icon}</div>
                   </div>
                   <div
-                    className={`mt-2 md:mt-3 font-medium text-xs md:text-base ${
+                    className={`mt-1 sm:mt-2 md:mt-3 font-medium text-xs sm:text-sm md:text-base ${
                       currentStep >= index + 1 ? 'text-primary' : 'text-gray-400'
                     }`}
                   >
-                    {step.label}
+                    <div className="hidden sm:block">{step.label}</div>
+                    <div className="block sm:hidden text-xs">
+                      {index === 0 && 'Cart'}
+                      {index === 1 && 'User'}
+                      {index === 2 && 'Pay'}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -219,14 +224,14 @@ const Checkout = () => {
 
             {/* Step 1: Cart */}
             {currentStep === 1 && (
-              <div className="space-y-8">
-                <div className="flex justify-center md:justify-between items-center">
+              <div className="space-y-6 sm:space-y-8">
+                <div className="flex justify-center md:justify-start items-center">
                   <Link
                     href="/events"
-                    className="inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm md:text-base"
+                    className="inline-flex items-center px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-xs sm:text-sm md:text-base w-full sm:w-auto justify-center sm:justify-start"
                   >
                     <span className="mr-2">Add More Items</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -242,13 +247,13 @@ const Checkout = () => {
                     cartItems.map((item) => (
                       <div
                         key={item.id}
-                        className="bg-white rounded-xl shadow-md overflow-hidden mb-4 md:mb-6 hover:shadow-lg transition-shadow duration-300"
+                        className="bg-white rounded-xl shadow-md overflow-hidden mb-3 sm:mb-4 md:mb-6 hover:shadow-lg transition-shadow duration-300"
                       >
-                        <div className="p-4 md:p-6">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div className="p-3 sm:p-4 md:p-6">
+                          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-6">
                             {/* Image and Details Section */}
-                            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                              <div className="w-full md:w-48 h-32 md:h-48 rounded-lg overflow-hidden flex-shrink-0">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 w-full lg:w-auto">
+                              <div className="w-full sm:w-32 lg:w-48 h-24 sm:h-32 lg:h-48 rounded-lg overflow-hidden flex-shrink-0">
                                 <Image
                                   src={item.image}
                                   alt={item.title}
@@ -259,29 +264,29 @@ const Checkout = () => {
                                 />
                               </div>
 
-                              <div className="flex-grow space-y-3 md:space-y-4">
-                                <h3 className="text-lg md:text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+                              <div className="flex-grow space-y-2 sm:space-y-3 lg:space-y-4 w-full">
+                                <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 hover:text-primary transition-colors line-clamp-2">
                                   {item.title}
                                 </h3>
 
                                 {/* Quantity Controls */}
-                                <div className="flex flex-wrap items-center gap-3 md:gap-4">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
                                   <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
                                     <button
                                       onClick={() =>
                                         item.quantity > 1 ? handleDecreaseQuantity(item.id) : null
                                       }
-                                      className="px-3 md:px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                      className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-gray-600 hover:bg-gray-100 transition-colors text-sm sm:text-base"
                                       disabled={item.quantity <= 1}
                                     >
                                       -
                                     </button>
-                                    <span className="px-4 md:px-6 py-2 font-medium border-x border-gray-200 bg-white text-sm md:text-base">
+                                    <span className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 font-medium border-x border-gray-200 bg-white text-sm sm:text-base">
                                       {item.quantity}
                                     </span>
                                     <button
                                       onClick={() => handleIncreaseQuantity(item.id)}
-                                      className="px-3 md:px-4 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                                      className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-gray-600 hover:bg-gray-100 transition-colors text-sm sm:text-base"
                                     >
                                       +
                                     </button>
@@ -290,7 +295,7 @@ const Checkout = () => {
                                   <input
                                     type="number"
                                     placeholder="Amount"
-                                    className="w-24 md:w-32 px-3 md:px-4 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
+                                    className="w-20 sm:w-24 md:w-32 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-xs sm:text-sm transition-all"
                                     disabled={item.isFixedDonation}
                                     value={item.price}
                                     onChange={(e) => {
@@ -310,7 +315,7 @@ const Checkout = () => {
                                 <div className="relative">
                                   <textarea
                                     placeholder="Add a note for this item..."
-                                    className="w-full px-3 md:px-4 py-2 md:py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all resize-none"
+                                    className="w-full px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-xs sm:text-sm transition-all resize-none"
                                     value={item.note || ''}
                                     onChange={(e) => {
                                       const note = e.target.value;
@@ -332,19 +337,19 @@ const Checkout = () => {
                             </div>
 
                             {/* Price and Actions Section */}
-                            <div className="flex flex-col items-end gap-4">
-                              <div className="text-right">
-                                <div className="text-sm text-gray-500">Total Price</div>
-                                <div className="text-2xl font-bold text-primary">
+                            <div className="flex flex-row lg:flex-col items-start lg:items-end justify-between lg:justify-start gap-3 lg:gap-4">
+                              <div className="text-left lg:text-right">
+                                <div className="text-xs sm:text-sm text-gray-500">Total Price</div>
+                                <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
                                   ${(item.price * item.quantity).toFixed(2)}
                                 </div>
                               </div>
 
                               <button
                                 onClick={() => handleRemoveItem(item.id)}
-                                className="p-3 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
+                                className="p-2 sm:p-3 text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 group"
                               >
-                                <FaTrashAlt className="w-5 h-5 transform group-hover:scale-110 transition-transform" />
+                                <FaTrashAlt className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:scale-110 transition-transform" />
                               </button>
                             </div>
                           </div>
@@ -358,19 +363,19 @@ const Checkout = () => {
                   )}
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-8 pt-8 border-t">
-                  <div className="space-y-6">
+                <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 pt-6 sm:pt-8 border-t">
+                  <div className="space-y-4 sm:space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                         Want to Contribute to Admin?
                       </h3>
-                      <span className="inline-block mt-2 px-3 py-1 text-xs font-medium text-white bg-primary rounded-full">
+                      <span className="inline-block mt-2 px-2 sm:px-3 py-1 text-xs font-medium text-white bg-primary rounded-full">
                         One Time Contribution Only
                       </span>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                         <input
                           type="text"
                           value={adminInputValue}
@@ -390,28 +395,28 @@ const Checkout = () => {
                             setAdminContributionAmount(numValue);
                           }}
                           placeholder="0.00"
-                          className="w-48 px-4 py-2 rounded-lg border border-gray-200 focus:border-primary text-sm transition-all"
+                          className="w-full sm:w-32 sm:w-40 lg:w-48 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 focus:border-primary text-sm transition-all"
                         />
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs sm:text-sm text-gray-500">
                           (Suggested: ${(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.05).toFixed(2)})
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="lg:border-l lg:pl-8">
-                    <div className="space-y-6">
-                      <h3 className="text-xl font-semibold text-gray-900">Order Summary</h3>
+                  <div className="lg:border-l lg:pl-6 sm:pl-4">
+                    <div className="space-y-4 sm:space-y-6">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Order Summary</h3>
 
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Subtotal</span>
-                          <span className="font-semibold">${totalAmount}</span>
+                          <span className="text-gray-600 text-sm sm:text-base">Subtotal</span>
+                          <span className="font-semibold text-sm sm:text-base">${totalAmount}</span>
                         </div>
 
                         <button
                           onClick={() => setCurrentStep(2)}
-                          className="w-full px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                          className="w-full px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 text-sm sm:text-base md:text-base text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                           disabled={cartItems.length === 0}
                         >
                           Proceed to Donor Details
@@ -439,11 +444,11 @@ const Checkout = () => {
                       </button>
                     </div>
 
-                    <div className="flex justify-between pt-8 border-t">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t">
                       <button
                         type="button"
                         onClick={() => setCurrentStep(1)}
-                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors order-2 sm:order-1"
                       >
                         Back to Cart
                       </button>
@@ -469,11 +474,11 @@ const Checkout = () => {
                       <p className="text-green-600 font-medium">You can proceed to payment</p>
                     </div>
 
-                    <div className="flex justify-between pt-8 border-t">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t">
                       <button
                         type="button"
                         onClick={() => setCurrentStep(1)}
-                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors order-2 sm:order-1"
                       >
                         Back to Cart
                       </button>
@@ -484,7 +489,7 @@ const Checkout = () => {
                           setShowPaymentForm(false);
                           setUserAgreed(false);
                         }}
-                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors order-1 sm:order-2"
                       >
                         Continue to Payment
                       </button>
@@ -510,29 +515,29 @@ const Checkout = () => {
                       <h4 className="text-xl font-semibold text-gray-900 border-b pb-4">Donation Summary</h4>
                       
                       {/* Cart Items Breakdown */}
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         {cartItems.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center py-4 border-b border-gray-100">
-                            <div className="flex items-center space-x-4">
+                          <div key={item.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 py-3 sm:py-4 border-b border-gray-100">
+                            <div className="flex items-start space-x-3 sm:space-x-4">
                               <Image
                                 src={item.image}
                                 alt={item.title}
                                 width={80}
                                 height={80}
-                                className="w-20 h-20 rounded-lg object-cover"
+                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0"
                                 loader={({ src }) => src}
                               />
-                              <div>
-                                <h5 className="font-semibold text-gray-900">{item.title}</h5>
-                                <p className="text-gray-600">Quantity: {item.quantity}</p>
-                                <p className="text-gray-600">Amount per item: ${Number(item.price || 0).toFixed(2)}</p>
+                              <div className="flex-1 min-w-0">
+                                <h5 className="font-semibold text-gray-900 text-sm sm:text-base line-clamp-2">{item.title}</h5>
+                                <p className="text-gray-600 text-xs sm:text-sm">Quantity: {item.quantity}</p>
+                                <p className="text-gray-600 text-xs sm:text-sm">Amount per item: ${Number(item.price || 0).toFixed(2)}</p>
                                 {item.note && (
-                                  <p className="text-sm text-gray-500 mt-1">Note: {item.note}</p>
+                                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">Note: {item.note}</p>
                                 )}
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className="text-lg font-semibold text-primary">
+                            <div className="text-right sm:text-left lg:text-right">
+                              <p className="text-base sm:text-lg font-semibold text-primary">
                                 ${(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}
                               </p>
                             </div>
@@ -576,11 +581,11 @@ const Checkout = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-between pt-8 border-t">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t">
                       <button
                         type="button"
                         onClick={() => setCurrentStep(2)}
-                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors order-2 sm:order-1"
                       >
                         Back to Donor Details
                       </button>
@@ -588,7 +593,7 @@ const Checkout = () => {
                         type="button"
                         onClick={() => setShowPaymentForm(true)}
                         disabled={!userAgreed}
-                        className={`px-6 md:px-8 py-2 md:py-3 text-sm md:text-base rounded-lg transition-colors ${
+                        className={`w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition-colors order-1 sm:order-2 ${
                           userAgreed
                             ? 'text-white bg-primary hover:bg-primary/90'
                             : 'text-gray-400 bg-gray-200 cursor-not-allowed'
@@ -607,28 +612,28 @@ const Checkout = () => {
                     </div>
 
                     {/* Payment Method Selection */}
-                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-                      <h4 className="text-xl font-semibold text-gray-900 mb-6">Select Payment Method</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+                      <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Select Payment Method</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         {paymentMethods.map((method) => (
                           <div
                             key={method.id}
                             onClick={() => setSelectedPaymentMethod(method)}
-                            className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all duration-200 ${
+                            className={`relative cursor-pointer rounded-xl border-2 p-3 sm:p-4 lg:p-6 transition-all duration-200 ${
                               selectedPaymentMethod.id === method.id
                                 ? 'border-primary bg-primary/5 shadow-lg'
                                 : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                             }`}
                           >
                             {selectedPaymentMethod.id === method.id && (
-                              <div className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-4 h-4 sm:w-6 sm:h-6 bg-primary rounded-full flex items-center justify-center">
+                                <svg className="w-2.5 h-2.5 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
                               </div>
                             )}
-                            <div className="text-center space-y-3">
-                              <div className="w-16 h-16 mx-auto rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
+                            <div className="text-center space-y-2 sm:space-y-3">
+                              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto rounded-lg overflow-hidden flex items-center justify-center bg-gray-50">
                                 <Image
                                   src={method.img}
                                   alt={method.name}
@@ -638,8 +643,8 @@ const Checkout = () => {
                                 />
                               </div>
                               <div>
-                                <h5 className="font-semibold text-gray-900">{method.name}</h5>
-                                <p className="text-sm text-gray-600">{method.description}</p>
+                                <h5 className="font-semibold text-gray-900 text-sm sm:text-base">{method.name}</h5>
+                                <p className="text-xs sm:text-sm text-gray-600">{method.description}</p>
                               </div>
                             </div>
                           </div>
@@ -671,7 +676,7 @@ const Checkout = () => {
                             </div>
                           ) : stripePromise ? (
                             <Elements stripe={stripePromise}>
-                              <CheckoutForm totalAmount={totalAmount} donationData={checkoutData} />
+                              <CustomPaymentForm totalAmount={totalAmount} donationData={checkoutData} />
                             </Elements>
                           ) : (
                             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
@@ -769,11 +774,11 @@ const Checkout = () => {
                       ) : null}
                     </div>
 
-                    <div className="flex justify-between pt-8 border-t">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t">
                       <button
                         type="button"
                         onClick={() => setShowPaymentForm(false)}
-                        className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                       >
                         Back to Review
                       </button>

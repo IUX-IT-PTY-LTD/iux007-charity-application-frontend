@@ -1,0 +1,330 @@
+/* Custom Payment Form Styles */
+
+/* Container Styles */
+.payment-form-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.payment-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Card Header */
+.card-header {
+  margin-bottom: 24px;
+}
+
+.card-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.card-logos {
+  display: flex;
+  gap: 8px;
+}
+
+.card-logos img {
+  height: 24px;
+  opacity: 0.7;
+}
+
+/* Form Layout */
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Card Number Input */
+.card-number-input {
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #cbd5e1;
+  overflow: hidden;
+}
+
+.card-number-element {
+  padding-left: 20px;
+  padding-right: 50px;
+  margin-top: 4px;
+}
+
+.card-number-element::placeholder {
+  color: #9ca3af !important;
+}
+
+.card-brand-icon {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  opacity: 0.3;
+}
+
+/* Small Card Inputs (Expiry & CVV) */
+.card-input-small {
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #cbd5e1;
+  overflow: hidden;
+}
+
+.card-element-small {
+  padding-left: 16px;
+  padding-right: 40px;
+  margin-top: 2px;
+}
+
+.card-element-small::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Legacy Input Wrapper */
+.input-wrapper {
+  position: relative;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+  background: #f9fafb;
+}
+
+.input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.stripe-input {
+  padding: 12px 12px 12px 40px;
+  font-size: 16px;
+  border: none;
+  background: transparent;
+  width: 100%;
+  outline: none;
+}
+
+.card-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+}
+
+.cvv-hint {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  cursor: help;
+}
+
+/* Security Notice */
+.security-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.security-icon {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.security-text {
+  font-size: 12px;
+  color: #15803d;
+}
+
+/* Enhanced Payment Button */
+.payment-button-enhanced {
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 56px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-button-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.payment-button-enhanced:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+}
+
+.payment-button-enhanced:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.payment-button-enhanced:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+.payment-button-enhanced:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Payment Messages */
+.payment-message {
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.payment-message.success {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+}
+
+.payment-message.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+}
+
+/* Legacy Button */
+.payment-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.payment-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .payment-card {
+    padding: 20px 16px;
+  }
+
+  .card-number-input {
+    padding: 16px;
+  }
+
+  .card-input-small {
+    padding: 12px;
+  }
+
+  .card-number-element {
+    padding-left: 16px;
+    padding-right: 40px;
+    font-size: 16px !important;
+  }
+
+  .card-element-small {
+    padding-left: 12px;
+    padding-right: 32px;
+    font-size: 16px !important;
+  }
+
+  .card-brand-icon {
+    right: 16px;
+  }
+
+  .payment-button-enhanced {
+    padding: 14px 24px;
+    font-size: 16px;
+    min-height: 52px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .card-logos {
+    justify-content: center;
+  }
+
+  .payment-form {
+    gap: 16px;
+  }
+
+  .security-notice {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
