@@ -227,7 +227,7 @@ const Checkout = () => {
               <div className="space-y-4 sm:space-y-6">
                 <div className="flex justify-center md:justify-start items-center">
                   <Link
-                    href="/events"
+                    href="/projects"
                     className="inline-flex items-center px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-xs sm:text-sm md:text-base w-full sm:w-auto justify-center sm:justify-start"
                   >
                     <span className="mr-2">Add More Items</span>
