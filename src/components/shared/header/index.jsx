@@ -22,6 +22,8 @@ const Header = () => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileDropdownState, setMobileDropdownState] = useState(null);
 
   const fetchMenus = async () => {
     try {
@@ -74,18 +76,25 @@ const Header = () => {
   }, []);
 
   const toggleBurgerMenu = () => {
-    const menu = document.getElementById('collapseMenu');
-    if (menu) {
-      menu.classList.toggle('active');
-    }
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setOpenDropdown(null);
   };
 
   const toggleDropdown = (menuId) => {
     setOpenDropdown(openDropdown === menuId ? null : menuId);
   };
 
+
   const closeDropdowns = () => {
     setOpenDropdown(null);
+  };
+
+  const handleMenuLinkClick = () => {
+    closeMobileMenu();
   };
 
   // Close dropdowns when clicking outside
@@ -114,58 +123,200 @@ const Header = () => {
             </span>
           </Link>
 
+          {/* Mobile Menu Overlay */}
+          {isMobileMenuOpen && (
+            <div
+              className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
+              onClick={closeMobileMenu}
+            />
+          )}
+
+          {/* Mobile Menu */}
           <div
-            id="collapseMenu"
-            className="max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50"
+            className={`
+              lg:hidden fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-white shadow-2xl z-50
+              transform transition-transform duration-300 ease-in-out overflow-hidden
+              ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+            `}
           >
-            <button
-              id="toggleClose"
-              onClick={toggleBurgerMenu}
-              className="lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white p-3"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 fill-black"
-                viewBox="0 0 320.591 320.591"
+            {/* Mobile Menu Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+              <Link href="./" onClick={handleMenuLinkClick}>
+                <Image
+                  src={settings?.logo || "/assets/img/logo.svg"}
+                  alt="logo"
+                  width={120}
+                  height={40}
+                  className="h-10 w-auto"
+                />
+              </Link>
+              <button
+                onClick={closeMobileMenu}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               >
-                <path
-                  d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"
-                  data-original="#000000"
-                ></path>
-                <path
-                  d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"
-                  data-original="#000000"
-                ></path>
-              </svg>
-            </button>
-
-            <ul className="nav-menu lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
-              <li className="mb-6 hidden max-lg:block">
-                <Link href="./">
-                  <Image
-                    src={settings?.logo || "/assets/img/logo.svg"}
-                    alt="logo"
-                    width={100}
-                    height={100}
-                    className="w-36"
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
                   />
-                </Link>
-              </li>
+                </svg>
+              </button>
+            </div>
 
+            {/* Mobile Menu Content */}
+            <div className="overflow-y-auto h-full pb-20">
+              <ul className="p-4 space-y-1">
+                {menus.map((menu, index) => (
+                  <li
+                    key={index}
+                    className={`border-b border-gray-100 last:border-b-0 ${
+                      pathname === '/' + menu.slug ? 'bg-primary/5' : ''
+                    }`}
+                  >
+                    {menu.children && menu.children.length > 0 ? (
+                      <div className="relative">
+                        {/* Mobile: Collapsible Parent */}
+                        <button
+                          onClick={() => {
+                            const newState = mobileDropdownState === menu.id ? null : menu.id;
+                            setMobileDropdownState(newState);
+                            setOpenDropdown(newState);
+                          }}
+                          className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <span className={`font-medium ${
+                            pathname === '/' + menu.slug ? 'text-primary' : 'text-gray-700'
+                          }`}>
+                            {menu.name}
+                          </span>
+                          <svg
+                            className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${
+                              mobileDropdownState === menu.id ? 'rotate-180' : ''
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {/* Mobile Dropdown */}
+                        <div
+                          className={`
+                            bg-gray-50 border-l-4 border-primary
+                            transition-all duration-300 ease-in-out
+                            ${mobileDropdownState === menu.id ? 'block' : 'hidden'}
+                          `}
+                        >
+                          <div className="py-3">
+                            {menu.children.map((child, childIndex) => (
+                              <Link
+                                key={childIndex}
+                                href={`/${child.slug}`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  // Close dropdown and menu, then navigate
+                                  setOpenDropdown(null);
+                                  closeMobileMenu();
+                                  router.push(`/${child.slug}`);
+                                }}
+                                className="block px-6 py-3 text-sm text-gray-700 hover:text-primary hover:bg-white transition-colors duration-200 border-b border-gray-200 last:border-b-0"
+                              >
+                                <div className="flex items-center">
+                                  <svg className="w-2 h-2 text-primary mr-3" fill="currentColor" viewBox="0 0 8 8">
+                                    <circle cx="4" cy="4" r="2"/>
+                                  </svg>
+                                  {child.name}
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/${menu.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          closeMobileMenu();
+                          router.push(`/${menu.slug}`);
+                        }}
+                        className={`block px-4 py-3 font-medium transition-colors duration-200 ${
+                          pathname === '/' + menu.slug
+                            ? 'text-primary bg-primary/5'
+                            : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                        }`}
+                      >
+                        {menu.name}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+
+                {/* User Account Section for Mobile */}
+                {isAuthenticated && (
+                  <div className="border-t border-gray-200 pt-4 mt-4">
+                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      Account
+                    </div>
+                    <Link
+                      href="./profile"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        closeMobileMenu();
+                        router.push('./profile');
+                      }}
+                      className="block px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href="./change-password"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        closeMobileMenu();
+                        router.push('./change-password');
+                      }}
+                      className="block px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      Change Password
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        handleLogout(e);
+                        closeMobileMenu();
+                      }}
+                      className="block w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </ul>
+            </div>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="max-lg:hidden">
+            <ul className="nav-menu lg:flex gap-x-5">
               {menus.map((menu, index) => (
                 <li
                   key={index}
-                  className={`relative max-lg:border-b border-gray-300 max-lg:py-3 px-3 ${
-                    pathname === '/' + menu.slug ? 'active' : ''
-                  }`}
+                  className={`relative ${pathname === '/' + menu.slug ? 'active' : ''}`}
                 >
                   {menu.children && menu.children.length > 0 ? (
-                    <div 
-                      className="relative dropdown-container"
-                    >
+                    <div className="relative dropdown-container">
                       <button
                         onClick={() => toggleDropdown(menu.id)}
-                        className="hover:text-primary text-gray-500 font-semibold text-[15px] flex items-center gap-1 w-full text-left"
+                        className="hover:text-primary text-gray-500 font-semibold text-[15px] flex items-center gap-1"
                       >
                         {menu.name}
                         <svg
@@ -179,10 +330,10 @@ const Header = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </button>
-                      
+
                       {/* Desktop Dropdown */}
                       <div
-                        className={`absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200 max-lg:hidden ${
+                        className={`absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200 ${
                           openDropdown === menu.id ? 'block' : 'hidden'
                         }`}
                       >
@@ -192,24 +343,6 @@ const Header = () => {
                             href={`/${child.slug}`}
                             onClick={() => closeDropdowns()}
                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors duration-200 no-underline hover:no-underline"
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
-                      
-                      {/* Mobile Dropdown */}
-                      <div
-                        className={`lg:hidden mt-2 pl-4 space-y-2 ${
-                          openDropdown === menu.id ? 'block' : 'hidden'
-                        }`}
-                      >
-                        {menu.children.map((child, childIndex) => (
-                          <Link
-                            key={childIndex}
-                            href={`/${child.slug}`}
-                            onClick={() => closeDropdowns()}
-                            className="block py-2 text-gray-600 hover:text-primary transition-colors duration-200 border-l-2 border-gray-200 pl-3 no-underline hover:no-underline"
                           >
                             {child.name}
                           </Link>
