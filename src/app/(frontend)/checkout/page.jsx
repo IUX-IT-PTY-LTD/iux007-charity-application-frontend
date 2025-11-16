@@ -174,12 +174,12 @@ const Checkout = () => {
   //   payment methods
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState(paymentMethods[0]);
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-8 md:py-16 px-4 sm:px-6 md:px-0">
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white shadow-lg rounded-xl overflow-hidden">
-          <div className="p-4 sm:p-6 md:p-8">
-            {/* Progress Steps */}
-            <div className="relative flex justify-between items-center mb-6 sm:mb-8 md:mb-12">
+    <div className="min-h-screen bg-gray-50 py-3 sm:py-4 px-3 sm:px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white shadow-xl rounded-xl overflow-hidden">
+          <div className="p-3 sm:p-4 lg:p-6">
+            {/* Compact Progress Steps */}
+            <div className="relative flex justify-between items-center mb-4 sm:mb-6">
               <div className="absolute left-0 right-0 top-1/2 h-0.5 sm:h-1 -translate-y-1/2 bg-gray-200">
                 <div
                   className={`h-full bg-primary transition-all ${
@@ -196,7 +196,7 @@ const Checkout = () => {
               ].map((step, index) => (
                 <div key={index} className="relative z-10 text-center flex-1">
                   <div
-                    className={`w-10 h-10 sm:w-12 md:w-14 lg:w-16 h-10 sm:h-12 md:h-14 lg:h-16 mx-auto flex items-center justify-center rounded-full border-2 transition-all ${
+                    className={`w-8 h-8 sm:w-10 sm:h-10 mx-auto flex items-center justify-center rounded-full border-2 transition-all ${
                       currentStep > index
                         ? 'bg-primary border-primary text-white'
                         : currentStep === index
@@ -204,10 +204,10 @@ const Checkout = () => {
                           : 'bg-white border-gray-300 text-gray-400'
                     }`}
                   >
-                    <div className="text-sm sm:text-base md:text-lg lg:text-2xl">{step.icon}</div>
+                    <div className="text-sm sm:text-base">{step.icon}</div>
                   </div>
                   <div
-                    className={`mt-1 sm:mt-2 md:mt-3 font-medium text-xs sm:text-sm md:text-base ${
+                    className={`mt-1 sm:mt-2 font-medium text-xs sm:text-sm ${
                       currentStep >= index + 1 ? 'text-primary' : 'text-gray-400'
                     }`}
                   >
@@ -224,7 +224,7 @@ const Checkout = () => {
 
             {/* Step 1: Cart */}
             {currentStep === 1 && (
-              <div className="space-y-6 sm:space-y-8">
+              <div className="space-y-4 sm:space-y-6">
                 <div className="flex justify-center md:justify-start items-center">
                   <Link
                     href="/events"
@@ -247,13 +247,13 @@ const Checkout = () => {
                     cartItems.map((item) => (
                       <div
                         key={item.id}
-                        className="bg-white rounded-xl shadow-md overflow-hidden mb-3 sm:mb-4 md:mb-6 hover:shadow-lg transition-shadow duration-300"
+                        className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-3 sm:mb-4 hover:shadow-md transition-shadow duration-200"
                       >
-                        <div className="p-3 sm:p-4 md:p-6">
+                        <div className="p-3 sm:p-4">
                           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-6">
                             {/* Image and Details Section */}
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 w-full lg:w-auto">
-                              <div className="w-full sm:w-32 lg:w-48 h-24 sm:h-32 lg:h-48 rounded-lg overflow-hidden flex-shrink-0">
+                              <div className="w-full sm:w-24 h-20 sm:h-24 rounded-lg overflow-hidden flex-shrink-0">
                                 <Image
                                   src={item.image}
                                   alt={item.title}
@@ -295,7 +295,7 @@ const Checkout = () => {
                                   <input
                                     type="number"
                                     placeholder="Amount"
-                                    className="w-20 sm:w-24 md:w-32 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-xs sm:text-sm transition-all"
+                                    className="w-20 sm:w-24 px-2 py-1.5 sm:py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-xs sm:text-sm transition-all"
                                     disabled={item.isFixedDonation}
                                     value={item.price}
                                     onChange={(e) => {
@@ -363,8 +363,8 @@ const Checkout = () => {
                   )}
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 pt-6 sm:pt-8 border-t">
-                  <div className="space-y-4 sm:space-y-6">
+                <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 border-t">
+                  <div className="space-y-3 sm:space-y-4">
                     <div>
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                         Want to Contribute to Admin?
@@ -395,7 +395,7 @@ const Checkout = () => {
                             setAdminContributionAmount(numValue);
                           }}
                           placeholder="0.00"
-                          className="w-full sm:w-32 sm:w-40 lg:w-48 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 focus:border-primary text-sm transition-all"
+                          className="w-full sm:w-32 lg:w-40 px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
                         />
                         <span className="text-xs sm:text-sm text-gray-500">
                           (Suggested: ${(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.05).toFixed(2)})
@@ -404,8 +404,8 @@ const Checkout = () => {
                     </div>
                   </div>
 
-                  <div className="lg:border-l lg:pl-6 sm:pl-4">
-                    <div className="space-y-4 sm:space-y-6">
+                  <div className="border-t lg:border-t-0 lg:border-l lg:pl-4 sm:pl-2 lg:pl-6 pt-4 lg:pt-0">
+                    <div className="space-y-3 sm:space-y-4">
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Order Summary</h3>
 
                       <div className="space-y-3 sm:space-y-4">
@@ -459,15 +459,15 @@ const Checkout = () => {
                     <div className="text-center space-y-4">
                       <h3 className="text-xl font-semibold">Welcome, {userInfo?.name}</h3>
                       <p className="text-gray-600">Please review your information below</p>
-                      <div className="bg-gray-50 p-6 rounded-lg">
-                        <div className="grid grid-cols-2 gap-4 text-left">
+                      <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-left">
                           <div>
                             <p className="text-sm text-gray-500">Name</p>
-                            <p className="font-medium">{userInfo?.name}</p>
+                            <p className="font-medium break-words">{userInfo?.name}</p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Email</p>
-                            <p className="font-medium">{userInfo?.email}</p>
+                            <p className="font-medium break-words text-sm">{userInfo?.email}</p>
                           </div>
                         </div>
                       </div>
@@ -511,20 +511,20 @@ const Checkout = () => {
                     </div>
 
                     {/* Order Summary */}
-                    <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
-                      <h4 className="text-xl font-semibold text-gray-900 border-b pb-4">Donation Summary</h4>
+                    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-5 space-y-4 sm:space-y-5">
+                      <h4 className="text-lg sm:text-xl font-semibold text-gray-900 border-b pb-3">Donation Summary</h4>
                       
                       {/* Cart Items Breakdown */}
                       <div className="space-y-3 sm:space-y-4">
                         {cartItems.map((item) => (
                           <div key={item.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 py-3 sm:py-4 border-b border-gray-100">
-                            <div className="flex items-start space-x-3 sm:space-x-4">
+                            <div className="flex items-start space-x-3">
                               <Image
                                 src={item.image}
                                 alt={item.title}
-                                width={80}
-                                height={80}
-                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0"
+                                width={60}
+                                height={60}
+                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                                 loader={({ src }) => src}
                               />
                               <div className="flex-1 min-w-0">
@@ -563,17 +563,17 @@ const Checkout = () => {
                       </div>
 
                       {/* Terms and Agreement */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                        <div className="flex items-start space-x-3">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                        <div className="flex items-start space-x-2 sm:space-x-3">
                           <input
                             type="checkbox"
                             id="agreement"
                             checked={userAgreed}
                             onChange={(e) => setUserAgreed(e.target.checked)}
-                            className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                            className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded flex-shrink-0"
                           />
-                          <label htmlFor="agreement" className="text-sm text-gray-700 leading-relaxed">
-                            I agree to the terms and conditions and confirm that all donation details are correct. 
+                          <label htmlFor="agreement" className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                            I agree to the terms and conditions and confirm that all donation details are correct.
                             I understand that this donation is final and will be processed immediately upon payment confirmation.
                           </label>
                         </div>
@@ -581,7 +581,7 @@ const Checkout = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-4 sm:pt-6 border-t">
                       <button
                         type="button"
                         onClick={() => setCurrentStep(2)}
@@ -612,14 +612,14 @@ const Checkout = () => {
                     </div>
 
                     {/* Payment Method Selection */}
-                    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
-                      <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Select Payment Method</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                      <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Select Payment Method</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         {paymentMethods.map((method) => (
                           <div
                             key={method.id}
                             onClick={() => setSelectedPaymentMethod(method)}
-                            className={`relative cursor-pointer rounded-xl border-2 p-3 sm:p-4 lg:p-6 transition-all duration-200 ${
+                            className={`relative cursor-pointer rounded-xl border-2 p-3 sm:p-4 transition-all duration-200 ${
                               selectedPaymentMethod.id === method.id
                                 ? 'border-primary bg-primary/5 shadow-lg'
                                 : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
@@ -653,8 +653,8 @@ const Checkout = () => {
                     </div>
 
                     {/* Payment Form Based on Selected Method */}
-                    <div className="bg-white rounded-xl shadow-lg p-6">
-                      <h4 className="text-xl font-semibold text-gray-900 mb-6">
+                    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-5">
+                      <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-5">
                         Pay with {selectedPaymentMethod.name}
                       </h4>
                       
