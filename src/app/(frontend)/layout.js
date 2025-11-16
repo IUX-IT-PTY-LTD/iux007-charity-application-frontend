@@ -1,4 +1,5 @@
 'use client';
+import DynamicHead from '@/components/shared/DynamicHead';
 import Header from '@/components/shared/header';
 import Footer from '@/components/shared/footer';
 import { Poppins } from 'next/font/google';
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={poppins.className}>
+        <DynamicHead />
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <ColorSchemeProvider>

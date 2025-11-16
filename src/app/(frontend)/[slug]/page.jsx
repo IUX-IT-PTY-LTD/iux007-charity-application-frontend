@@ -27,6 +27,57 @@ export default function DynamicPage() {
           }
           
           setPageData(response.data);
+
+          // Update head tags using direct DOM manipulation
+          if (typeof document !== 'undefined') {
+            const pageTitle = response.data.meta_title || response.data.title;
+            const pageDescription = response.data.meta_description || `${response.data.title} page`;
+
+            // Update title
+            document.title = pageTitle;
+
+            // Update meta description
+            let metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+              metaDesc.content = pageDescription;
+            } else {
+              metaDesc = document.createElement('meta');
+              metaDesc.name = 'description';
+              metaDesc.content = pageDescription;
+              document.head.appendChild(metaDesc);
+            }
+
+            // Update OG tags
+            let ogTitle = document.querySelector('meta[property="og:title"]');
+            if (ogTitle) {
+              ogTitle.content = pageTitle;
+            } else {
+              ogTitle = document.createElement('meta');
+              ogTitle.property = 'og:title';
+              ogTitle.content = pageTitle;
+              document.head.appendChild(ogTitle);
+            }
+
+            let ogDesc = document.querySelector('meta[property="og:description"]');
+            if (ogDesc) {
+              ogDesc.content = pageDescription;
+            } else {
+              ogDesc = document.createElement('meta');
+              ogDesc.property = 'og:description';
+              ogDesc.content = pageDescription;
+              document.head.appendChild(ogDesc);
+            }
+
+            let ogType = document.querySelector('meta[property="og:type"]');
+            if (ogType) {
+              ogType.content = 'website';
+            } else {
+              ogType = document.createElement('meta');
+              ogType.property = 'og:type';
+              ogType.content = 'website';
+              document.head.appendChild(ogType);
+            }
+          }
         } else {
           throw new Error(response.message || 'Page not found');
         }
@@ -84,16 +135,7 @@ export default function DynamicPage() {
 
   return (
     <>
-      {/* SEO Meta Tags */}
-      <head>
-        <title>{pageData.meta_title || pageData.title}</title>
-        <meta name="description" content={pageData.meta_description || `${pageData.title} page`} />
-        <meta property="og:title" content={pageData.meta_title || pageData.title} />
-        <meta property="og:description" content={pageData.meta_description || `${pageData.title} page`} />
-        <meta property="og:type" content="website" />
-      </head>
-
-      {/* Page Content */}
+      {/* SEO Meta Tags - Note: Head tags are now handled via DOM manipulation in useEffect */}
       <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto">
           {pageData.content_data && pageData.content_data.length > 0 ? (
