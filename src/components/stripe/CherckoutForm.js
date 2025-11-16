@@ -74,8 +74,8 @@ const createPaymentIntent = async (amount) => {
 };
 
 // Process donation
-const processDonation = async (clientSecret) => {
-  donationData.payment_intent_id = clientSecret;
+const processDonation = async (paymentIntentId) => {
+  donationData.payment_intent_id = paymentIntentId;
   const response = await apiService.post(ENDPOINTS.DONATIONS.CREATE, donationData);
   
   if (response.status === 'success') {
