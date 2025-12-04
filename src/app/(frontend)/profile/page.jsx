@@ -367,14 +367,14 @@ export default function ProfilePage() {
                         <div className="flex justify-between items-start mb-4">
                           <div>
                             <h3 className="text-xl font-semibold text-gray-800">
-                              {donation.invoice.invoice_no}
+                              {donation.invoice?.invoice_no || 'N/A'}
                             </h3>
                             <p className="text-sm text-gray-500">
-                              {new Date(donation.invoice.invoice_date).toLocaleDateString('en-US', {
+                              {donation.invoice?.invoice_date ? new Date(donation.invoice.invoice_date).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
-                              })}
+                              }) : 'Date not available'}
                             </p>
                           </div>
                           <button
