@@ -41,6 +41,7 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
     e.preventDefault();
     setIsProcessing(true);
     setErrors({});
+    setMessage(''); // Clear any previous messages
 
     try {
       const amount = validateAmount(totalAmount);
@@ -51,7 +52,17 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
         await processStripePayment(paymentIntent.client_secret);
       }
     } catch (err) {
-      handleError(err);
+      const customMessage = getCustomErrorMessage(err);
+      setMessage(customMessage);
+      console.error('Payment error:', err);
+      
+      // Ensure the error message is visible by scrolling to it
+      setTimeout(() => {
+        const messageElement = document.querySelector('.payment-message.error');
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 100);
     } finally {
       setIsProcessing(false);
     }
@@ -97,7 +108,16 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
     });
 
     if (result.error) {
-      setMessage(result.error.message);
+      const customMessage = getCustomErrorMessage(result.error);
+      setMessage(customMessage);
+      
+      // Ensure the error message is visible by scrolling to it
+      setTimeout(() => {
+        const messageElement = document.querySelector('.payment-message.error');
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 100);
       return;
     }
 
@@ -159,10 +179,53 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
     }
   };
 
-  const handleError = (error) => {
-    setMessage('An error occurred while processing your payment.');
-    console.error('Payment error:', error);
+  const getCustomErrorMessage = (error) => {
+    // Map different types of errors to user-friendly messages
+    if (error && error.code) {
+      switch (error.code) {
+        case 'card_declined':
+        case 'generic_decline':
+          return 'Your card was declined. Please try a different payment method.';
+        case 'expired_card':
+          return 'Your card has expired. Please use a different card.';
+        case 'insufficient_funds':
+          return 'Transaction declined due to insufficient funds.';
+        case 'incorrect_cvc':
+        case 'cvc_check_failed':
+          return 'The security code you entered is incorrect.';
+        case 'processing_error':
+        case 'issuer_not_available':
+          return 'We encountered an issue processing your payment. Please try again.';
+        case 'incorrect_number':
+        case 'invalid_number':
+          return 'The card number you entered is invalid.';
+        case 'incomplete_number':
+          return 'Please enter a complete card number.';
+        case 'incomplete_cvc':
+          return 'Please enter a complete security code.';
+        case 'incomplete_expiry':
+          return 'Please enter a complete expiry date.';
+        case 'invalid_expiry_month':
+        case 'invalid_expiry_year':
+          return 'Please enter a valid expiry date.';
+        default:
+          return 'We encountered an issue processing your payment. Please check your card details and try again.';
+      }
+    }
+    
+    // Handle network errors or other generic errors
+    if (error && error.message) {
+      if (error.message.includes('network') || error.message.includes('connection')) {
+        return 'Connection issue detected. Please check your internet connection and try again.';
+      }
+      if (error.message.includes('timeout')) {
+        return 'Payment processing timed out. Please try again.';
+      }
+    }
+    
+    return 'We encountered an issue processing your payment. Please try again or use a different payment method.';
   };
+
 
   return (
     <div className="payment-form-container">
@@ -293,9 +356,40 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
 
           {message && (
             <div
-              className={`payment-message ${message.includes('succeeded') ? 'success' : 'error'}`}
+              className={`payment-message ${message.includes('succeeded') || message.includes('Payment succeeded') ? 'success' : 'error'}`}
+              style={{
+                marginTop: '16px',
+                padding: '16px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                textAlign: 'center',
+                fontWeight: '500',
+                ...(message.includes('succeeded') || message.includes('Payment succeeded') 
+                  ? {
+                      background: '#f0fdf4',
+                      color: '#15803d',
+                      border: '1px solid #dcfce7'
+                    }
+                  : {
+                      background: '#fef2f2',
+                      color: '#dc2626',
+                      border: '1px solid #fee2e2'
+                    }
+                )
+              }}
             >
-              {message}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                {message.includes('succeeded') || message.includes('Payment succeeded') ? (
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                )}
+                <span>{message}</span>
+              </div>
             </div>
           )}
         </form>
