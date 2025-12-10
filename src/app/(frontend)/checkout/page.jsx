@@ -95,8 +95,9 @@ const Checkout = () => {
       const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
       const newAdminContribution = newSubtotal * 0.05;
 
-      // Update admin contribution first
+      // Update admin contribution and input value
       setAdminContributionAmount(newAdminContribution);
+      setAdminInputValue(newAdminContribution.toFixed(2));
 
       // Update total with new subtotal and new admin contribution
       setTotalAmount(newSubtotal + newAdminContribution);
@@ -123,7 +124,10 @@ const Checkout = () => {
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
       const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
       const newAdminContribution = newSubtotal * 0.05;
+      
+      // Update admin contribution and input value
       setAdminContributionAmount(newAdminContribution);
+      setAdminInputValue(newAdminContribution.toFixed(2));
 
       setTotalAmount(newSubtotal + newAdminContribution);
       setCheckoutData({
@@ -134,19 +138,25 @@ const Checkout = () => {
           donation.event_id === itemId ? { ...donation, quantity: donation.quantity - 1 } : donation
         ),
       });
-      setAdminContributionAmount(newSubtotal * 0.05);
+      
       return updatedCart;
     });
   };
 
   const handleRemoveItem = (itemId) => {
-    setCartItems((prev) => prev.filter((i) => i.id !== itemId));
     const updatedCart = cartItems.filter((i) => i.id !== itemId);
+    
+    setCartItems(updatedCart);
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    setTotalAmount(updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0));
-    setAdminContributionAmount(
-      updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.05
-    );
+    
+    // Recalculate totals
+    const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const newAdminContribution = newSubtotal * 0.05;
+    
+    setAdminContributionAmount(newAdminContribution);
+    setAdminInputValue(newAdminContribution.toFixed(2));
+    setTotalAmount(newSubtotal + newAdminContribution);
+    
     dispatch(setUserCart(updatedCart));
   };
 
@@ -295,18 +305,71 @@ const Checkout = () => {
                                   <input
                                     type="number"
                                     placeholder="Amount"
+                                    min="0"
+                                    step="0.01"
                                     className="w-20 sm:w-24 px-2 py-1.5 sm:py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-xs sm:text-sm transition-all"
                                     disabled={item.isFixedDonation}
                                     value={item.price}
                                     onChange={(e) => {
                                       const value = e.target.value;
-                                      setCartItems((prev) =>
-                                        prev.map((i) =>
-                                          i.id === item.id
-                                            ? { ...i, price: value ? parseFloat(value) : i.price }
-                                            : i
-                                        )
+                                      
+                                      // Allow empty string for user to clear and type new value
+                                      if (value === '') {
+                                        const updatedCartItems = cartItems.map((i) =>
+                                          i.id === item.id ? { ...i, price: 0 } : i
+                                        );
+                                        setCartItems(updatedCartItems);
+                                        return;
+                                      }
+                                      
+                                      const numericValue = parseFloat(value);
+                                      
+                                      // Prevent negative values
+                                      if (isNaN(numericValue) || numericValue < 0) {
+                                        return;
+                                      }
+                                      
+                                      // Update cart items
+                                      const updatedCartItems = cartItems.map((i) =>
+                                        i.id === item.id ? { ...i, price: numericValue } : i
                                       );
+                                      
+                                      setCartItems(updatedCartItems);
+                                      
+                                      // Update localStorage
+                                      localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+                                      
+                                      // Recalculate totals
+                                      const newSubtotal = updatedCartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+                                      const newAdminContribution = newSubtotal * 0.05;
+                                      
+                                      setAdminContributionAmount(newAdminContribution);
+                                      setAdminInputValue(newAdminContribution.toFixed(2));
+                                      setTotalAmount(newSubtotal + newAdminContribution);
+                                      
+                                      // Update checkout data
+                                      setCheckoutData(prevData => ({
+                                        ...prevData,
+                                        total_price: newSubtotal,
+                                        admin_contribution: newAdminContribution,
+                                        donations: prevData.donations.map((donation) =>
+                                          donation.event_id === item.id 
+                                            ? { ...donation, amount: numericValue }
+                                            : donation
+                                        ),
+                                      }));
+                                    }}
+                                    onBlur={(e) => {
+                                      // Format the value to 2 decimal places when user finishes editing
+                                      const value = e.target.value;
+                                      if (value !== '' && !isNaN(parseFloat(value))) {
+                                        const formattedValue = parseFloat(value).toFixed(2);
+                                        const updatedCartItems = cartItems.map((i) =>
+                                          i.id === item.id ? { ...i, price: parseFloat(formattedValue) } : i
+                                        );
+                                        setCartItems(updatedCartItems);
+                                        localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+                                      }
                                     }}
                                   />
                                 </div>

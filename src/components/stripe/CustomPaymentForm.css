@@ -227,6 +227,28 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+/* Card Validation Status Styles */
+.card-validation-status {
+  transition: all 0.3s ease;
+}
+
+.card-validation-status.valid {
+  border-color: #10b981;
+  background-color: #ecfdf5;
+}
+
+/* Individual field validation feedback */
+.card-input-valid {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.card-input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
 }
 
 /* Payment Messages */

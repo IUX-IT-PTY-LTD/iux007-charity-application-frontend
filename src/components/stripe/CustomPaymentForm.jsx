@@ -1,6 +1,6 @@
 'use client';
 import { useStripe, useElements, CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 import { useRouter } from 'next/navigation';
@@ -36,9 +36,108 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
   const [message, setMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState({});
+  const [cardValidation, setCardValidation] = useState({
+    cardNumber: { complete: false, error: null },
+    expiry: { complete: false, error: null },
+    cvc: { complete: false, error: null }
+  });
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Validation functions
+  const handleCardNumberChange = (event) => {
+    setCardValidation(prev => ({
+      ...prev,
+      cardNumber: {
+        complete: event.complete,
+        error: event.error
+      }
+    }));
+    
+    if (event.error) {
+      setMessage(getCustomErrorMessage(event.error));
+    } else if (event.complete && !validateCardBrand(event)) {
+      // Brand validation failed, message already set
+    } else if (message && !message.includes('succeeded')) {
+      setMessage(''); // Clear error message when user fixes the issue
+    }
+  };
+
+  const handleExpiryChange = (event) => {
+    setCardValidation(prev => ({
+      ...prev,
+      expiry: {
+        complete: event.complete,
+        error: event.error
+      }
+    }));
+    
+    if (event.error) {
+      setMessage(getCustomErrorMessage(event.error));
+    } else if (message && !message.includes('succeeded')) {
+      setMessage(''); // Clear error message when user fixes the issue
+    }
+  };
+
+  const handleCvcChange = (event) => {
+    setCardValidation(prev => ({
+      ...prev,
+      cvc: {
+        complete: event.complete,
+        error: event.error
+      }
+    }));
+    
+    if (event.error) {
+      setMessage(getCustomErrorMessage(event.error));
+    } else if (message && !message.includes('succeeded')) {
+      setMessage(''); // Clear error message when user fixes the issue
+    }
+  };
+
+  // Additional validation for card brand acceptance
+  const validateCardBrand = (event) => {
+    if (event.brand) {
+      const acceptedBrands = ['visa', 'mastercard', 'amex', 'discover', 'diners', 'jcb', 'unionpay'];
+      if (!acceptedBrands.includes(event.brand)) {
+        setMessage('This card type is not accepted. Please use Visa, Mastercard, or American Express.');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Check if all card fields are valid
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const allFieldsComplete = cardValidation.cardNumber.complete && 
+                              cardValidation.expiry.complete && 
+                              cardValidation.cvc.complete;
+    
+    const noErrors = !cardValidation.cardNumber.error && 
+                     !cardValidation.expiry.error && 
+                     !cardValidation.cvc.error;
+    
+    const hasValidAmount = totalAmount && parseFloat(totalAmount) > 0;
+    
+    setIsFormValid(allFieldsComplete && noErrors && stripe && !isProcessing && hasValidAmount);
+  }, [cardValidation, stripe, isProcessing, totalAmount, isMounted]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent submission if form is not valid
+    if (!isFormValid) {
+      setMessage('Please complete all card details before proceeding.');
+      return;
+    }
+    
     setIsProcessing(true);
     setErrors({});
     setMessage(''); // Clear any previous messages
@@ -55,14 +154,6 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
       const customMessage = getCustomErrorMessage(err);
       setMessage(customMessage);
       console.error('Payment error:', err);
-      
-      // Ensure the error message is visible by scrolling to it
-      setTimeout(() => {
-        const messageElement = document.querySelector('.payment-message.error');
-        if (messageElement) {
-          messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, 100);
     } finally {
       setIsProcessing(false);
     }
@@ -110,14 +201,6 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
     if (result.error) {
       const customMessage = getCustomErrorMessage(result.error);
       setMessage(customMessage);
-      
-      // Ensure the error message is visible by scrolling to it
-      setTimeout(() => {
-        const messageElement = document.querySelector('.payment-message.error');
-        if (messageElement) {
-          messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, 100);
       return;
     }
 
@@ -227,6 +310,27 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
   };
 
 
+  // Prevent hydration issues by ensuring client-side rendering
+  if (!isMounted) {
+    return (
+      <div className="payment-form-container">
+        <div className="payment-card">
+          <div className="card-header">
+            <h3>Enter Payment Details</h3>
+            <div className="card-logos">
+              <img src="/assets/img/visa.svg" alt="visa" />
+              <img src="/assets/img/mastercard.svg" alt="mastercard" />
+              <img src="/assets/img/american-express.svg" alt="american-express" />
+            </div>
+          </div>
+          <div className="payment-form" style={{ textAlign: 'center', padding: '40px 0' }}>
+            <p>Loading payment form...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="payment-form-container">
       {isProcessing && <Loader title="Processing Payment"/>}
@@ -258,6 +362,7 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
                   },
                 }}
                 className="card-number-element"
+                onChange={handleCardNumberChange}
               />
               <div className="card-brand-icon">
                 <svg width="32" height="20" viewBox="0 0 32 20" fill="currentColor">
@@ -286,6 +391,7 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
                     },
                   }}
                   className="card-element-small"
+                  onChange={handleExpiryChange}
                 />
               </div>
             </div>
@@ -307,6 +413,7 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
                     },
                   }}
                   className="card-element-small"
+                  onChange={handleCvcChange}
                 />
                 <div className="cvv-hint">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -319,6 +426,83 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
           </div>
 
           
+          {/* Card Validation Status */}
+          {isMounted && (
+          <div className="card-validation-status" style={{
+            display: 'flex',
+            gap: '12px',
+            marginBottom: '16px',
+            padding: '12px',
+            backgroundColor: isFormValid ? '#ecfdf5' : '#f8fafc',
+            borderRadius: '6px',
+            border: `1px solid ${isFormValid ? '#10b981' : '#e2e8f0'}`,
+            transition: 'all 0.3s ease'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              fontSize: '12px',
+              color: cardValidation.cardNumber.complete ? '#16a34a' : '#6b7280'
+            }}>
+              {cardValidation.cardNumber.complete ? (
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+              )}
+              Card Number
+            </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              fontSize: '12px',
+              color: cardValidation.expiry.complete ? '#16a34a' : '#6b7280'
+            }}>
+              {cardValidation.expiry.complete ? (
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+              )}
+              Expiry Date
+            </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              fontSize: '12px',
+              color: cardValidation.cvc.complete ? '#16a34a' : '#6b7280'
+            }}>
+              {cardValidation.cvc.complete ? (
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+              )}
+              CVV
+            </div>
+            <div style={{ 
+              marginLeft: 'auto',
+              fontSize: '12px',
+              fontWeight: '500',
+              color: isFormValid ? '#16a34a' : '#ef4444'
+            }}>
+              {isFormValid ? '✓ Ready to pay' : 'Complete all card details'}
+            </div>
+          </div>
+          )}
+
           <div className="security-notice">
             <div className="security-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -333,7 +517,7 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
           <button
             className="payment-button-enhanced"
             type="submit"
-            disabled={!stripe || isProcessing}
+            disabled={!stripe || isProcessing || (isMounted && !isFormValid)}
           >
             {isProcessing ? (
               <span className="flex items-center justify-center gap-2">
@@ -349,47 +533,16 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
                   <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                   <line x1="1" y1="10" x2="23" y2="10"/>
                 </svg>
-                Pay ${totalAmount}
+{isMounted && !isFormValid ? 'Complete Card Details' : `Pay $${totalAmount || '0.00'}`}
               </span>
             )}
           </button>
 
           {message && (
             <div
-              className={`payment-message ${message.includes('succeeded') || message.includes('Payment succeeded') ? 'success' : 'error'}`}
-              style={{
-                marginTop: '16px',
-                padding: '16px',
-                borderRadius: '8px',
-                fontSize: '14px',
-                textAlign: 'center',
-                fontWeight: '500',
-                ...(message.includes('succeeded') || message.includes('Payment succeeded') 
-                  ? {
-                      background: '#f0fdf4',
-                      color: '#15803d',
-                      border: '1px solid #dcfce7'
-                    }
-                  : {
-                      background: '#fef2f2',
-                      color: '#dc2626',
-                      border: '1px solid #fee2e2'
-                    }
-                )
-              }}
+              className={`payment-message ${message.includes('succeeded') ? 'success' : 'error'}`}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                {message.includes('succeeded') || message.includes('Payment succeeded') ? (
-                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                )}
-                <span>{message}</span>
-              </div>
+              {message}
             </div>
           )}
         </form>
