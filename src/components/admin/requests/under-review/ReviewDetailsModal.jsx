@@ -504,7 +504,7 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
                                     ? 'text-red-800'
                                     : 'text-gray-800'
                                 }`}>
-                                  {approval.admin_name || 'Admin'}
+                                  {approval.admin_info.name || 'Admin'}
                                 </span>
                                 <div className="flex items-center gap-1">
                                   {approval.action === 'approved' ? (
@@ -580,7 +580,7 @@ const ReviewDetailsModal = ({ request, isOpen, onClose, onApprove, onDeny, isLoa
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium text-sm">
-                            {review.admin_name || 'Admin'}
+                            {review.admin_info.name || 'Admin'}
                           </span>
                           {review.created_at && (
                             <span className="text-xs text-gray-500">

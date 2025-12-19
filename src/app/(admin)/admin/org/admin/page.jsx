@@ -5,7 +5,7 @@ import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { toast } from 'sonner';
 
 // Import services
-import { getAllAdmins } from '@/api/services/admin/adminService';
+import { getAllAdmins, resetAdminPassword } from '@/api/services/admin/adminService';
 
 // Import components
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import AdminsTable from '@/components/admin/org/admin/AdminsTable';
 import AdminsPagination from '@/components/admin/org/admin/AdminsPagination';
 import CreateAdminModal from '@/components/admin/org/admin/modals/CreateAdminModal';
 import EditAdminModal from '@/components/admin/org/admin/modals/EditAdminModal';
+import PasswordResetModal from '@/components/admin/users/PasswordResetModal';
 
 const AdminsPage = () => {
   const { setPageTitle, setPageSubtitle } = useAdminContext();
@@ -29,7 +30,9 @@ const AdminsPage = () => {
   // Modal states
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [passwordResetModalOpen, setPasswordResetModalOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -99,6 +102,33 @@ const AdminsPage = () => {
     setEditModalOpen(true);
   };
 
+  // Handle reset password button click
+  const handleResetPasswordClick = (admin) => {
+    setSelectedAdmin(admin);
+    setPasswordResetModalOpen(true);
+  };
+
+  // Handle password reset
+  const handlePasswordReset = async (adminId, newPassword) => {
+    setIsResettingPassword(true);
+    
+    try {
+      const response = await resetAdminPassword(adminId, newPassword);
+      
+      if (response.status === 'success') {
+        toast.success('Admin password reset successfully');
+      } else {
+        throw new Error(response.message || 'Failed to reset password');
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast.error(error.message || 'Failed to reset password. Please try again.');
+      throw error; // Re-throw to prevent modal from closing
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
   // Sort and filter admins
   const filteredAdmins = [...admins].filter((admin) => {
     if (!searchQuery) return true;
@@ -156,6 +186,7 @@ const AdminsPage = () => {
               handleUpdateAdmin={handleUpdateAdmin}
               handleDeleteAdmin={handleDeleteAdmin}
               handleEditClick={handleEditClick}
+              handleResetPassword={handleResetPasswordClick}
             />
           </CardContent>
 
@@ -189,6 +220,19 @@ const AdminsPage = () => {
           }}
           admin={selectedAdmin}
           onAdminUpdated={handleUpdateAdmin}
+        />
+      )}
+
+      {selectedAdmin && (
+        <PasswordResetModal
+          user={selectedAdmin}
+          isOpen={passwordResetModalOpen}
+          onClose={() => {
+            setPasswordResetModalOpen(false);
+            setSelectedAdmin(null);
+          }}
+          onResetPassword={handlePasswordReset}
+          isLoading={isResettingPassword}
         />
       )}
     </div>

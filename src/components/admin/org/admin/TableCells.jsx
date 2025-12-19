@@ -1,7 +1,7 @@
 // components/admin/org/admin/AdminsPagination.jsx
 
 import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -67,7 +67,7 @@ export const StatusCell = ({ admin, onStatusChange }) => {
   );
 };
 
-export const ActionsCell = ({ admin, onEdit, onDelete }) => {
+export const ActionsCell = ({ admin, onEdit, onDelete, onResetPassword }) => {
   const handleDelete = async () => {
     try {
       const response = await deleteAdmin(admin.id);
@@ -89,6 +89,17 @@ export const ActionsCell = ({ admin, onEdit, onDelete }) => {
       <Button variant="ghost" size="icon" onClick={onEdit}>
         <Edit className="h-4 w-4" />
         <span className="sr-only">Edit</span>
+      </Button>
+
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        onClick={() => onResetPassword(admin)}
+        className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+        title="Reset Password"
+      >
+        <Key className="h-4 w-4" />
+        <span className="sr-only">Reset Password</span>
       </Button>
 
       <AlertDialog>

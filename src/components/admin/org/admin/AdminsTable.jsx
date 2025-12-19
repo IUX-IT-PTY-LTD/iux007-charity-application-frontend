@@ -21,6 +21,7 @@ const AdminsTable = ({
   handleUpdateAdmin,
   handleDeleteAdmin,
   handleEditClick,
+  handleResetPassword,
 }) => {
   // Column definitions for sortable headers
   const columns = [
@@ -85,6 +86,7 @@ const AdminsTable = ({
                     admin={admin}
                     onEdit={() => handleEditClick(admin)}
                     onDelete={handleDeleteAdmin}
+                    onResetPassword={handleResetPassword}
                   />
                 </TableCell>
               </TableRow>

@@ -412,3 +412,29 @@ export const getMonthlyDonationsStatistics = async () => {
     throw error;
   }
 };
+
+/**
+ * Reset admin password
+ * @param {number} id - Admin ID
+ * @param {string} newPassword - New password for the admin
+ * @returns {Promise} - Promise resolving to password reset result
+ */
+export const resetAdminPassword = async (id, newPassword) => {
+  try {
+    // Check authentication
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    console.log('Resetting password for admin:', id);
+
+    return await apiService.patch(`/admin/${version}/admins/reset-password`, {
+      admin_id: id,
+      password: newPassword,
+    });
+  } catch (error) {
+    console.error(`Reset admin password ${id} error:`, error);
+    throw error;
+  }
+};
