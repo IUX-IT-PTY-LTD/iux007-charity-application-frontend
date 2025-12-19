@@ -41,11 +41,23 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
     }
   };
 
-  // Handle file download
-  const handleFileDownload = (file) => {
-    console.log('Downloading file:', file.name);
-    if (file.url) {
-      window.open(file.url, '_blank');
+  // Handle document download
+  const handleDocumentDownload = async (documentPath) => {
+    try {
+      const response = await fetch(documentPath);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = documentPath.split('/').pop() || 'document';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback to opening in new tab if download fails
+      window.open(documentPath, '_blank');
     }
   };
 
@@ -286,29 +298,38 @@ const ApprovedDetailsModal = ({ request, isOpen, onClose, onConnectEvent }) => {
               </h3>
 
               <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-8 w-8 text-gray-500" />
-                    <div>
-                      <div className="font-medium text-sm">{request.attached_file.name}</div>
-                      <div className="text-xs text-gray-500">{request.attached_file.size}</div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-6 w-6 text-gray-500" />
+                      <div>
+                        <div className="text-xs text-gray-500">Supporting documents</div>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDocumentDownload(request.attached_file.url || request.attached_file.name)}
+                      className="text-emerald-600 hover:text-emerald-800"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleFileDownload(request.attached_file)}
-                    className="text-emerald-600 hover:text-emerald-800"
-                  >
-                    <Download className="h-4 w-4 mr-1" />
-                    Download
-                  </Button>
+                  
+                  <div className="w-full">
+                    <img
+                      src={request.attached_file.url || request.attached_file.name}
+                      alt="Supporting document"
+                      className="w-full max-h-80 object-contain rounded-md border"
+                      onError={(e) => {
+                        e.target.src = '/images/document-placeholder.png';
+                        e.target.onerror = null;
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-
-              <p className="text-xs text-gray-500">
-                This file contains all supporting documents for the request.
-              </p>
             </div>
           )}
 
