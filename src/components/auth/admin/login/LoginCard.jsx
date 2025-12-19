@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
@@ -7,6 +7,9 @@ import Link from 'next/link';
 
 // Import auth service
 import { login } from '@/api/services/admin/authService';
+
+// Import settings service
+import { getAllSettings, getSettingByKey } from '@/api/services/admin/settingsService';
 
 const LoginCard = () => {
   const router = useRouter();
@@ -17,10 +20,46 @@ const LoginCard = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Settings state
+  const [companyLogo, setCompanyLogo] = useState('/assets/img/logo.svg');
+  const [companyName, setCompanyName] = useState('Admin Panel');
+  const [settingsLoading, setSettingsLoading] = useState(true);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  // Fetch company settings
+  const fetchCompanySettings = async () => {
+    try {
+      const response = await getAllSettings();
+      
+      if (response.status === 'success' && response.data) {
+        // Get company logo
+        const logoSetting = getSettingByKey(response.data, 'company_logo');
+        if (logoSetting && logoSetting.value) {
+          setCompanyLogo(logoSetting.value);
+        }
+
+        // Get company name
+        const nameSetting = getSettingByKey(response.data, 'company_name');
+        if (nameSetting && nameSetting.value) {
+          setCompanyName(nameSetting.value);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load company settings:', error);
+      // Keep default values if settings fail to load
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  // Load settings on component mount
+  useEffect(() => {
+    fetchCompanySettings();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,12 +94,31 @@ const LoginCard = () => {
       <div className="card-content">
         <div className="logo-container">
           <div className="logo-circle">
-            <Image src="/assets/img/logo.svg" alt="Logo" width={32} height={32} className="logo" />
+            {settingsLoading ? (
+              <div className="animate-pulse bg-gray-200 rounded-full w-8 h-8"></div>
+            ) : (
+              <Image 
+                src={companyLogo} 
+                alt={`${companyName} Logo`} 
+                width={32} 
+                height={32} 
+                className="logo"
+                onError={(e) => {
+                  e.target.src = '/assets/img/logo.svg';
+                }}
+              />
+            )}
           </div>
         </div>
 
-        <h1 className="title">Welcome back</h1>
-        <p className="subtitle">Please enter your details to sign in.</p>
+        <h1 className="title">
+          {settingsLoading ? (
+            <div className="animate-pulse bg-gray-200 rounded h-8 w-48 mx-auto"></div>
+          ) : (
+            `Welcome to ${companyName}`
+          )}
+        </h1>
+        <p className="subtitle">Please enter your details to sign in to your admin account.</p>
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
