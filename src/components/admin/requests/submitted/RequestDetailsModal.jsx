@@ -295,7 +295,7 @@ const RequestDetailsModal = ({
                           alt="Supporting document"
                           className="w-full max-h-80 object-contain rounded-md border"
                           onError={(e) => {
-                            e.target.src = '/images/document-placeholder.png';
+                            e.target.src = 'https://iux007-charity-application.s3.ap-southeast-2.amazonaws.com/staging/assets/fallback_images/slider_fallback_image.jpg';
                             e.target.onerror = null;
                           }}
                         />
