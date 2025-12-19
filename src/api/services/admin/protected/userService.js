@@ -27,6 +27,16 @@ export const getUserDetails = userPermissions.withViewPermission(
   }
 );
 
+/**
+ * Reset user password (requires user_edit permission)
+ */
+export const resetUserPassword = userPermissions.withViewPermission(
+  userService.resetUserPassword.bind(userService),
+  {
+    context: { operation: 'resetUserPassword' },
+  }
+);
+
 // ==================== DIRECT EXPORT OF USER SERVICE INSTANCE ====================
 
 /**

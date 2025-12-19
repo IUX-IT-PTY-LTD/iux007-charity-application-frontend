@@ -17,6 +17,7 @@ import {
   Clock,
   Lock,
   Eye,
+  Key,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -42,6 +43,10 @@ import { toast } from 'sonner';
 
 // Import permission hooks
 import { useUserPermissions } from '@/api/hooks/useModulePermissions';
+
+// Import password reset functionality
+import { resetUserPassword } from '@/api/services/admin/protected/userService';
+import PasswordResetModal from '@/components/admin/users/PasswordResetModal';
 
 // Permission-aware view button component
 const PermissionAwareViewButton = ({ user, onViewUser }) => {
@@ -77,6 +82,8 @@ const UserRow = ({ user, onDelete }) => {
   const router = useRouter();
   const userPermissions = useUserPermissions();
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  const [showPasswordReset, setShowPasswordReset] = React.useState(false);
+  const [isResettingPassword, setIsResettingPassword] = React.useState(false);
 
   // Format date
   const registeredDate = user.created_at ? format(parseISO(user.created_at), 'MMM d, yyyy') : 'N/A';
@@ -123,6 +130,32 @@ const UserRow = ({ user, onDelete }) => {
   const handleRowClick = () => {
     if (userPermissions.canView) {
       handleViewUser();
+    }
+  };
+
+  // Handle password reset
+  const handlePasswordReset = async (userId, newPassword) => {
+    if (!userPermissions.canView) {
+      toast.error("You don't have permission to reset user passwords");
+      return;
+    }
+
+    setIsResettingPassword(true);
+    
+    try {
+      const response = await resetUserPassword(userId, newPassword);
+      
+      if (response.status === 'success') {
+        toast.success('Password reset successfully');
+      } else {
+        throw new Error(response.message || 'Failed to reset password');
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast.error(error.message || 'Failed to reset password. Please try again.');
+      throw error; // Re-throw to prevent modal from closing
+    } finally {
+      setIsResettingPassword(false);
     }
   };
 
@@ -259,57 +292,30 @@ const UserRow = ({ user, onDelete }) => {
               </div>
             </div>
 
+            {/* Reset Password Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={!userPermissions.canView}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPasswordReset(true);
+              }}
+              title="Reset Password"
+            >
+              {userPermissions.canView ? (
+                <>
+                  <Key className="mr-2 h-4 w-4" />
+                  Reset Password
+                </>
+              ) : (
+                <Lock className="h-4 w-4" />
+              )}
+            </Button>
+
             {/* View details indicator */}
             <PermissionAwareViewButton user={user} onViewUser={handleViewUser} />
-
-            {/* Dropdown menu - commented out as per requirement, but would need permission checks */}
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  disabled={!userPermissions.canView}
-                >
-                  {userPermissions.canView ? (
-                    <MoreHorizontal className="h-5 w-5" />
-                  ) : (
-                    <Lock className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleViewUser} disabled={!userPermissions.canView}>
-                  {userPermissions.canView ? (
-                    <User className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Lock className="mr-2 h-4 w-4" />
-                  )}
-                  View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleEditUser} disabled={!userPermissions.canEdit}>
-                  {userPermissions.canEdit ? (
-                    <Edit className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Lock className="mr-2 h-4 w-4" />
-                  )}
-                  Edit User
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-600 dark:text-red-400"
-                  onClick={() => setShowDeleteDialog(true)}
-                  disabled={!userPermissions.canDelete}
-                >
-                  {userPermissions.canDelete ? (
-                    <Trash2 className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Lock className="mr-2 h-4 w-4" />
-                  )}
-                  Delete User
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
           </div>
         </div>
 
@@ -324,6 +330,15 @@ const UserRow = ({ user, onDelete }) => {
           <div className="absolute inset-0 bg-white/10 dark:bg-gray-900/10 pointer-events-none" />
         )}
       </div>
+
+      {/* Password Reset Modal */}
+      <PasswordResetModal
+        user={user}
+        isOpen={showPasswordReset}
+        onClose={() => setShowPasswordReset(false)}
+        onResetPassword={handlePasswordReset}
+        isLoading={isResettingPassword}
+      />
 
       {/* Delete Confirmation Dialog - commented out as per requirement, but would include permission checks */}
       {/* <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

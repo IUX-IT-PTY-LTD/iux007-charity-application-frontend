@@ -73,6 +73,38 @@ class UserService {
       throw error;
     }
   }
+
+  /**
+   * Reset user password
+   * @param {number} userId - User ID
+   * @param {string} newPassword - New password
+   * @returns {Promise<Object>} - Response from API
+   */
+  async resetUserPassword(userId, newPassword) {
+    if (!getAuthToken()) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      throw new Error('Password must be at least 8 characters long');
+    }
+
+    try {
+      const endpoint = `/${this.baseEndpoint}/users/reset-password`;
+      const response = await apiService.patch(endpoint, {
+        user_id: userId,
+        password: newPassword,
+      });
+      return response;
+    } catch (error) {
+      console.error(`Error resetting password for user ID ${userId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export const userService = new UserService();
