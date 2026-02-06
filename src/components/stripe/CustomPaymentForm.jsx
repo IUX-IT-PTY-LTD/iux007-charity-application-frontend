@@ -28,7 +28,7 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-export default function CustomPaymentForm({ totalAmount, donationData }) {
+export default function CustomPaymentForm({ totalAmount, donationData, guestUserData }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const stripe = useStripe();
@@ -168,14 +168,32 @@ export default function CustomPaymentForm({ totalAmount, donationData }) {
   };
 
   const createPaymentIntent = async (amount) => {
-    const response = await apiService.post(ENDPOINTS.PAYMENTS.STRIPE_PAYMENT_INTENT, {
+    const paymentData = {
       total_amount: amount,
-    });
+    };
+
+    // Add guest email if it's a guest user
+    if (guestUserData && guestUserData.email) {
+      paymentData.guest_email = guestUserData.email;
+    }
+
+    const response = await apiService.post(ENDPOINTS.PAYMENTS.STRIPE_PAYMENT_INTENT, paymentData);
     return response.data;
   };
 
   const processDonation = async (paymentIntentId) => {
     donationData.payment_intent_id = paymentIntentId;
+    
+    // Add guest user data if provided
+    if (guestUserData && guestUserData.name && guestUserData.email) {
+      donationData.guest_user = {
+        name: guestUserData.name,
+        email: guestUserData.email,
+        phone: guestUserData.phone || '',
+        address: guestUserData.address || ''
+      };
+    }
+    
     const response = await apiService.post(ENDPOINTS.DONATIONS.CREATE, donationData);
 
     if (response.status === 'success') {

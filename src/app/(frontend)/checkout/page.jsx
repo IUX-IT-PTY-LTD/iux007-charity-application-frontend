@@ -12,6 +12,7 @@ import CustomPaymentForm from '@/components/stripe/CustomPaymentForm';
 import { setUserCart } from '@/store/features/userSlice';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getConfigValue } from '@/utils/domainConfig';
+import { getAllSettings } from '@/api/services/admin/settingsService';
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -25,6 +26,14 @@ const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [checkoutData, setCheckoutData] = useState(null);
+  const [allowGuestDonations, setAllowGuestDonations] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestUserData, setGuestUserData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
+  });
   const userInfo = useSelector((state) => state.user.user);
   console.log(userInfo);
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -38,6 +47,21 @@ const Checkout = () => {
     if (stepParam) {
       setCurrentStep(parseInt(stepParam));
     }
+
+    // Fetch settings to check if guest donations are allowed
+    const fetchSettings = async () => {
+      try {
+        const response = await getAllSettings();
+        const settings = response.data || [];
+        const guestDonationSetting = settings.find(setting => setting.key === 'allow_guest_donations');
+        setAllowGuestDonations(guestDonationSetting && guestDonationSetting.value === '1');
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        setAllowGuestDonations(false);
+      }
+    };
+
+    fetchSettings();
 
     // Get cart items from localStorage when component mounts
     const cart = localStorage.getItem('cartItems');
@@ -74,6 +98,23 @@ const Checkout = () => {
       setCheckoutData(checkoutDataObj);
     }
   }, [searchParams]);
+
+  const handleGuestDataChange = (field, value) => {
+    setGuestUserData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSkipLogin = () => {
+    setIsGuest(true);
+    // Stay on step 2 to show the guest form
+  };
+
+  const validateGuestData = () => {
+    return guestUserData.name.trim() && guestUserData.email.trim() && 
+           guestUserData.email.includes('@') && guestUserData.email.includes('.');
+  };
 
   // Update total amount whenever admin contribution changes
   useEffect(() => {
@@ -494,7 +535,7 @@ const Checkout = () => {
             {/* Step 2: Donor Details */}
             {currentStep === 2 && (
               <>
-                {!isAuthenticated ? (
+                {!isAuthenticated && !isGuest ? (
                   <div className="max-w-3xl mx-auto space-y-8">
                     <div className="text-center space-y-4">
                       <h3 className="text-xl font-semibold">Please Sign In to Continue</h3>
@@ -507,6 +548,25 @@ const Checkout = () => {
                       </button>
                     </div>
 
+                    {allowGuestDonations && (
+                      <div className="text-center space-y-4">
+                        <div className="flex items-center">
+                          <div className="flex-1 border-t border-gray-300"></div>
+                          <span className="px-4 text-gray-500 text-sm">OR</span>
+                          <div className="flex-1 border-t border-gray-300"></div>
+                        </div>
+                        <button
+                          onClick={handleSkipLogin}
+                          className="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                          Continue as Guest
+                        </button>
+                        <p className="text-xs text-gray-500">
+                          You can donate without creating an account
+                        </p>
+                      </div>
+                    )}
+
                     <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t">
                       <button
                         type="button"
@@ -514,6 +574,108 @@ const Checkout = () => {
                         className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors order-2 sm:order-1"
                       >
                         Back to Cart
+                      </button>
+                    </div>
+                  </div>
+                ) : isGuest ? (
+                  <div className="max-w-3xl mx-auto space-y-8">
+                    <div className="text-center space-y-4">
+                      <h3 className="text-xl font-semibold">Guest Donation Details</h3>
+                      <p className="text-gray-600">Please provide your information for the donation receipt</p>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 sm:p-6 rounded-lg space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Full Name <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={guestUserData.name}
+                            onChange={(e) => handleGuestDataChange('name', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            placeholder="Enter your full name"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="email"
+                            value={guestUserData.email}
+                            onChange={(e) => handleGuestDataChange('email', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            placeholder="Enter your email"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Phone Number
+                          </label>
+                          <input
+                            type="tel"
+                            value={guestUserData.phone}
+                            onChange={(e) => handleGuestDataChange('phone', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            placeholder="Enter your phone number (optional)"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Address
+                          </label>
+                          <input
+                            type="text"
+                            value={guestUserData.address}
+                            onChange={(e) => handleGuestDataChange('address', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            placeholder="Enter your address (optional)"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        * Required fields. Your information will be used only for donation receipts and records.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t">
+                      <div className="flex flex-col sm:flex-row gap-2 order-2 sm:order-1">
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(1)}
+                          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                          Back to Cart
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsGuest(false)}
+                          className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Back to Sign In
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (validateGuestData()) {
+                            setCurrentStep(3);
+                            setShowPaymentForm(false);
+                            setUserAgreed(false);
+                          }
+                        }}
+                        disabled={!validateGuestData()}
+                        className={`w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition-colors order-1 sm:order-2 ${
+                          validateGuestData()
+                            ? 'text-white bg-primary hover:bg-primary/90'
+                            : 'text-gray-400 bg-gray-200 cursor-not-allowed'
+                        }`}
+                      >
+                        Continue to Payment
                       </button>
                     </div>
                   </div>
@@ -571,6 +733,28 @@ const Checkout = () => {
                     <div className="text-center mb-8">
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">Review Your Donation</h3>
                       <p className="text-gray-600">Please review your donation details before proceeding to payment</p>
+                      
+                      {/* Show user info */}
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-2">
+                          {isGuest ? 'Guest Donation' : `Welcome, ${userInfo?.name}`}
+                        </h4>
+                        <div className="text-sm text-gray-600">
+                          {isGuest ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <p><strong>Name:</strong> {guestUserData.name}</p>
+                              <p><strong>Email:</strong> {guestUserData.email}</p>
+                              {guestUserData.phone && <p><strong>Phone:</strong> {guestUserData.phone}</p>}
+                              {guestUserData.address && <p><strong>Address:</strong> {guestUserData.address}</p>}
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <p><strong>Name:</strong> {userInfo?.name}</p>
+                              <p><strong>Email:</strong> {userInfo?.email}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Order Summary */}
@@ -739,7 +923,11 @@ const Checkout = () => {
                             </div>
                           ) : stripePromise ? (
                             <Elements stripe={stripePromise}>
-                              <CustomPaymentForm totalAmount={totalAmount} donationData={checkoutData} />
+                              <CustomPaymentForm 
+                                totalAmount={totalAmount} 
+                                donationData={checkoutData} 
+                                guestUserData={isGuest ? guestUserData : null}
+                              />
                             </Elements>
                           ) : (
                             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
