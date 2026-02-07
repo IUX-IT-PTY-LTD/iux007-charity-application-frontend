@@ -9,22 +9,55 @@ import { set } from 'date-fns';
 
 const FAQ = () => {
   const [faqData, setFaqData] = useState([]);
-  useEffect(() => {
-    
-  })
-  const fetchFAQData = async () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastFetch, setLastFetch] = useState(null);
+  
+  const fetchFAQData = async (forceFresh = false) => {
     try {
-      const response = await apiService.get(ENDPOINTS.COMMON.FAQ);
-      console.log(response.status);
+      setIsLoading(true);
+      
+      // Add cache busting parameter for fresh data
+      const cacheParam = forceFresh ? `?_refresh=${Date.now()}` : `?_t=${Date.now()}`;
+      const endpoint = `${ENDPOINTS.COMMON.FAQ}${cacheParam}`;
+      
+      const response = await apiService.get(endpoint, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+      
+      console.log('FAQ API Response:', response);
+      
       if(response.status === 'success') {
-        setFaqData(response.data);
+        setFaqData(response.data || []);
+        setLastFetch(Date.now());
         return response.data;
       }
     } catch (error) {
       console.error('Error fetching FAQ data:', error);
       return [];
+    } finally {
+      setIsLoading(false);
     }
   }
+
+  // Auto-refresh data periodically when page is visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && lastFetch) {
+        const timeSinceLastFetch = Date.now() - lastFetch;
+        // Refresh if it's been more than 5 minutes
+        if (timeSinceLastFetch > 5 * 60 * 1000) {
+          fetchFAQData(true);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [lastFetch]);
   const handleAccordion = (e) => {
     const accordion = e.target.closest("[role='accordion']");
     // hide all other accordions
@@ -48,17 +81,56 @@ const FAQ = () => {
   };
 
   useEffect(() => {
-    fetchFAQData();
+    fetchFAQData(true); // Force fresh data on initial load
   }, []);
+
+  // Clear all caches and force refresh
+  const clearCacheAndRefresh = async () => {
+    try {
+      // Clear service worker caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }
+      
+      // Clear session storage
+      sessionStorage.clear();
+      
+      // Force fresh data fetch
+      await fetchFAQData(true);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      // Still try to fetch fresh data even if cache clearing fails
+      await fetchFAQData(true);
+    }
+  };
 
   return (
     <div className="rounded-lg container mx-auto py-16 flex flex-col items-center">
       <div className="mb-8 text-center">
-        <h2 className="sm:text-4xl text-2xl font-bold text-primary">FAQ</h2>
+        <div className="flex items-center justify-center gap-4">
+          <h2 className="sm:text-4xl text-2xl font-bold text-primary">FAQ</h2>
+          {process.env.NODE_ENV === 'development' && (
+            <button
+              onClick={clearCacheAndRefresh}
+              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+              title="Clear cache and refresh data"
+            >
+              🔄 Refresh
+            </button>
+          )}
+        </div>
       </div>
       <div className="grid grid-cols-1 gap-6 max-w-2xl w-full">
         <div className="grid-item space-y-4 w-full">
-          {faqData.length > 0 ? (
+          {isLoading ? (
+            <div className="border border-gray-200 rounded-lg shadow-sm p-6 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-gray-700">Loading FAQs...</p>
+            </div>
+          ) : faqData.length > 0 ? (
             faqData.map((faq) => (
               <div 
                 key={faq.id} 
