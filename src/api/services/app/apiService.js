@@ -16,8 +16,16 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
           ...this.getAuthHeader(),
           ...options.headers,
+        },
+        // Add timestamp to prevent caching
+        params: {
+          _t: Date.now(),
+          ...options.params,
         },
       });
       return response.data;

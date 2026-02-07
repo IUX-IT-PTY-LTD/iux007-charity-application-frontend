@@ -1,6 +1,20 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const loadInitialState = () => {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    return {
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
+      cart: {
+        cartItems: [],
+        cartCount: 0,
+      }
+    };
+  }
+
   try {
     const savedUser = localStorage.getItem('user');
     const savedAccessToken = localStorage.getItem('accessToken');
@@ -25,8 +39,10 @@ const loadInitialState = () => {
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
-      cartItems: [],
-      cartCount: 0,
+      cart: {
+        cartItems: [],
+        cartCount: 0,
+      }
     };
   }
 };
@@ -46,10 +62,16 @@ const userSlice = createSlice({
       const refreshToken = action.payload?.refresh_token;
       const userData = action.payload?.user || action.payload;
 
-      // Update localStorage
-      if (accessToken) localStorage.setItem('accessToken', accessToken);
-      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      if (userData) localStorage.setItem('user', JSON.stringify(userData));
+      // Update localStorage only if in browser environment
+      if (typeof window !== 'undefined') {
+        try {
+          if (accessToken) localStorage.setItem('accessToken', accessToken);
+          if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+          if (userData) localStorage.setItem('user', JSON.stringify(userData));
+        } catch (error) {
+          console.warn('Could not access localStorage during setUser:', error);
+        }
+      }
 
       // Update state
       state.user = userData;
@@ -70,14 +92,27 @@ const userSlice = createSlice({
     updateUser: (state, action) => {
       // Update user data
       state.user = { ...state.user, ...action.payload };
-      // Update localStorage
-      localStorage.setItem('user', JSON.stringify(state.user));
+      
+      // Update localStorage only if in browser environment
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('user', JSON.stringify(state.user));
+        } catch (error) {
+          console.warn('Could not access localStorage during updateUser:', error);
+        }
+      }
     },
     logout: (state) => {
-      // Clear localStorage
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      // Clear localStorage only if in browser environment
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('user');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        } catch (error) {
+          console.warn('Could not access localStorage during logout:', error);
+        }
+      }
 
       // Clear state
       state.user = null;
