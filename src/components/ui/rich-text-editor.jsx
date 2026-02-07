@@ -48,6 +48,7 @@ const RichTextEditor = ({
   const [imageAlt, setImageAlt] = useState('');
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [lastValue, setLastValue] = useState(value);
 
   // Common colors for text
   const textColors = [
@@ -57,19 +58,82 @@ const RichTextEditor = ({
     '#66FF66', '#00CCFF', '#9966FF', '#FF66CC', '#FF9999'
   ];
 
+  // Save cursor position
+  const saveCursorPosition = useCallback(() => {
+    if (!editorRef.current) return null;
+    
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return null;
+    
+    const range = selection.getRangeAt(0);
+    return {
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset
+    };
+  }, []);
+
+  // Restore cursor position
+  const restoreCursorPosition = useCallback((position) => {
+    if (!position || !editorRef.current) return;
+    
+    try {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      
+      range.setStart(position.startContainer, position.startOffset);
+      range.setEnd(position.endContainer, position.endOffset);
+      
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } catch (error) {
+      // If restoration fails, place cursor at the end
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }, []);
+
   // Execute formatting commands
   const execCommand = useCallback((command, value = null) => {
     if (isPreviewMode) return;
     
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
-    
-    // Update content after command
-    setTimeout(() => {
-      if (editorRef.current && onChange) {
-        onChange(editorRef.current.innerHTML);
-      }
-    }, 0);
+    // Special handling for lists
+    if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+      const selection = window.getSelection();
+      if (selection.rangeCount === 0) return;
+      
+      const range = selection.getRangeAt(0);
+      editorRef.current?.focus();
+      
+      // Execute the command
+      document.execCommand(command, false, value);
+      
+      // Update content and maintain focus
+      setTimeout(() => {
+        if (editorRef.current && onChange) {
+          const newValue = editorRef.current.innerHTML;
+          setLastValue(newValue);
+          onChange(newValue);
+        }
+      }, 10);
+    } else {
+      document.execCommand(command, false, value);
+      editorRef.current?.focus();
+      
+      // Update content after command
+      setTimeout(() => {
+        if (editorRef.current && onChange) {
+          const newValue = editorRef.current.innerHTML;
+          setLastValue(newValue);
+          onChange(newValue);
+        }
+      }, 0);
+    }
   }, [isPreviewMode, onChange]);
 
   // Format block commands
@@ -104,10 +168,50 @@ const RichTextEditor = ({
     setIsColorPopoverOpen(false);
   }, [execCommand]);
 
+  // Handle list creation manually for better reliability
+  const createList = useCallback((type) => {
+    if (isPreviewMode) return;
+    
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return;
+    
+    editorRef.current?.focus();
+    
+    // Try the standard command first
+    const listCommand = type === 'ul' ? 'insertUnorderedList' : 'insertOrderedList';
+    
+    try {
+      const success = document.execCommand(listCommand, false);
+      
+      if (!success) {
+        // Fallback: manually create list
+        const selectedText = selection.toString() || 'List item';
+        const listHTML = type === 'ul' 
+          ? `<ul><li>${selectedText}</li></ul>`
+          : `<ol><li>${selectedText}</li></ol>`;
+        
+        document.execCommand('insertHTML', false, listHTML);
+      }
+      
+      // Update content
+      setTimeout(() => {
+        if (editorRef.current && onChange) {
+          const newValue = editorRef.current.innerHTML;
+          setLastValue(newValue);
+          onChange(newValue);
+        }
+      }, 10);
+    } catch (error) {
+      console.error('Error creating list:', error);
+    }
+  }, [isPreviewMode, onChange]);
+
   // Handle input changes
   const handleInput = useCallback(() => {
     if (editorRef.current && onChange) {
-      onChange(editorRef.current.innerHTML);
+      const newValue = editorRef.current.innerHTML;
+      setLastValue(newValue);
+      onChange(newValue);
     }
   }, [onChange]);
 
@@ -140,6 +244,33 @@ const RichTextEditor = ({
   const togglePreview = useCallback(() => {
     setIsPreviewMode(!isPreviewMode);
   }, [isPreviewMode]);
+
+  // Initialize editor content
+  React.useEffect(() => {
+    if (editorRef.current && !editorRef.current.innerHTML) {
+      editorRef.current.innerHTML = value || '';
+      setLastValue(value);
+    }
+  }, []);
+
+  // Handle external value changes (from form)
+  React.useEffect(() => {
+    if (editorRef.current && value !== lastValue) {
+      // Only update if the content is different from what we have
+      if (editorRef.current.innerHTML !== value) {
+        const cursorPosition = saveCursorPosition();
+        editorRef.current.innerHTML = value;
+        
+        // Restore cursor position after a brief delay
+        setTimeout(() => {
+          if (cursorPosition) {
+            restoreCursorPosition(cursorPosition);
+          }
+        }, 0);
+      }
+      setLastValue(value);
+    }
+  }, [value, lastValue, saveCursorPosition, restoreCursorPosition]);
 
   // Toolbar button component
   const ToolbarButton = ({ onClick, children, isActive = false, title, disabled = false }) => (
@@ -266,10 +397,10 @@ const RichTextEditor = ({
           <Separator orientation="vertical" className="h-6 mx-1" />
 
           {/* Lists */}
-          <ToolbarButton onClick={() => execCommand('insertUnorderedList')} title="Bullet List">
+          <ToolbarButton onClick={() => createList('ul')} title="Bullet List">
             <List className="h-4 w-4" />
           </ToolbarButton>
-          <ToolbarButton onClick={() => execCommand('insertOrderedList')} title="Numbered List">
+          <ToolbarButton onClick={() => createList('ol')} title="Numbered List">
             <ListOrdered className="h-4 w-4" />
           </ToolbarButton>
 
@@ -382,7 +513,7 @@ const RichTextEditor = ({
         {isPreviewMode ? (
           // Preview Mode
           <div 
-            className="p-4 prose prose-lg max-w-none dark:prose-invert"
+            className="p-4 prose prose-lg max-w-none dark:prose-invert [&>ul]:list-disc [&>ul]:ml-6 [&>ol]:list-decimal [&>ol]:ml-6 [&>ul>li]:mb-1 [&>ol>li]:mb-1"
             style={{ minHeight }}
           >
             <div dangerouslySetInnerHTML={{ __html: value }} />
@@ -399,7 +530,7 @@ const RichTextEditor = ({
           <div
             ref={editorRef}
             contentEditable
-            className="p-4 focus:outline-none prose prose-lg max-w-none dark:prose-invert text-left"
+            className="p-4 focus:outline-none prose prose-lg max-w-none dark:prose-invert text-left [&>ul]:list-disc [&>ul]:ml-6 [&>ol]:list-decimal [&>ol]:ml-6 [&>ul>li]:mb-1 [&>ol>li]:mb-1"
             style={{ 
               minHeight,
               direction: 'ltr',
@@ -408,7 +539,6 @@ const RichTextEditor = ({
               writingMode: 'horizontal-tb',
               caretColor: 'currentColor'
             }}
-            dangerouslySetInnerHTML={{ __html: value }}
             onInput={handleInput}
             onPaste={handlePaste}
             onFocus={() => {

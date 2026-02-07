@@ -94,7 +94,10 @@ const FAQ = () => {
                 </button>
                 <div className="overflow-hidden transition-all duration-300 ease-in-out hidden">
                   <div className="p-6 bg-gray-50 rounded-b-lg">
-                    <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                    <div 
+                      className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: faq.answer }}
+                    />
                   </div>
                 </div>
               </div>
