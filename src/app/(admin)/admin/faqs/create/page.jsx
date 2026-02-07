@@ -31,6 +31,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text-editor';
 import {
   Select,
   SelectContent,
@@ -59,9 +60,15 @@ const formSchema = z.object({
   question: z.string().min(5, {
     message: 'Question must be at least 5 characters.',
   }),
-  answer: z.string().min(10, {
-    message: 'Answer must be at least 10 characters.',
-  }),
+  answer: z.string()
+    .min(1, { message: 'Answer is required.' })
+    .refine((value) => {
+      // Remove HTML tags and check text content length
+      const textContent = value.replace(/<[^>]*>/g, '').trim();
+      return textContent.length >= 10;
+    }, {
+      message: 'Answer must contain at least 10 characters of text content.',
+    }),
   ordering: z.coerce.number().int().positive({
     message: 'Ordering must be a positive number.',
   }),
@@ -222,14 +229,16 @@ const AdminCreateFAQ = () => {
                           <FormItem>
                             <FormLabel>Answer</FormLabel>
                             <FormControl>
-                              <Textarea
+                              <RichTextEditor
+                                value={field.value}
+                                onChange={field.onChange}
                                 placeholder="Provide a clear and helpful answer..."
-                                className="min-h-32"
-                                {...field}
+                                minHeight="300px"
+                                className="w-full"
                               />
                             </FormControl>
                             <FormDescription>
-                              The detailed response to the question above.
+                              The detailed response to the question above. Use the toolbar to format your text with bold, italic, lists, links, and more.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -349,9 +358,16 @@ const AdminCreateFAQ = () => {
                     </div>
 
                     <div className="border rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-                      <p className="text-sm whitespace-pre-wrap">
-                        {formPreview.answer || 'Your answer will appear here...'}
-                      </p>
+                      {formPreview.answer ? (
+                        <div 
+                          className="text-sm prose prose-sm max-w-none dark:prose-invert"
+                          dangerouslySetInnerHTML={{ __html: formPreview.answer }}
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">
+                          Your answer will appear here...
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>

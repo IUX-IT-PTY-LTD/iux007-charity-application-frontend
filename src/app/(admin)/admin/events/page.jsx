@@ -37,12 +37,13 @@ const AdminEventsContent = () => {
 
   // State management
   const [events, setEvents] = useState([]);
+  const [allEvents, setAllEvents] = useState([]); // Store all events for total counts
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('start_date');
   const [sortDirection, setSortDirection] = useState('desc');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('active');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,6 +78,20 @@ const AdminEventsContent = () => {
       router.push('/admin/dashboard');
     }
   }, [eventPermissions.isLoading, eventPermissions.hasAccess, router]);
+
+  // Fetch all events for total counts (without pagination/filters)
+  const fetchAllEvents = async () => {
+    if (!eventPermissions.canView) return;
+
+    try {
+      const response = await getEvents({ per_page: 1000 }); // Get all events for counting
+      if (response.status === 'success') {
+        setAllEvents(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching all events for counts:', error);
+    }
+  };
 
   // Fetch events from API with permission handling
   const fetchEvents = async (page = 1, perPage = 10, searchQuery = '', filterStatus = 'all') => {
@@ -141,6 +156,13 @@ const AdminEventsContent = () => {
       setIsLoading(false);
     }
   };
+
+  // Initial fetch for all events (for counts)
+  useEffect(() => {
+    if (!eventPermissions.isLoading && eventPermissions.canView) {
+      fetchAllEvents();
+    }
+  }, [eventPermissions.isLoading, eventPermissions.canView]);
 
   // Initial fetch and when pagination, search, or filter changes
   useEffect(() => {
@@ -248,10 +270,10 @@ const AdminEventsContent = () => {
     setCurrentPage(1); // Reset to first page when changing filter
   };
 
-  // Calculate counts for the filter dropdown
-  const activeEvents = events.filter((event) => event.status === 1).length;
-  const inactiveEvents = events.filter((event) => event.status === 0).length;
-  const featuredEvents = events.filter((event) => event.is_featured === 1).length;
+  // Calculate counts from all events (not filtered)
+  const activeEvents = allEvents.filter((event) => event.status === 1).length;
+  const inactiveEvents = allEvents.filter((event) => event.status === 0).length;
+  const featuredEvents = allEvents.filter((event) => event.is_featured === 1).length;
 
   // Column definitions for the table
   const columns = [

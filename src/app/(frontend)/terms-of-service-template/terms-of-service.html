@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Charity Fund</title>
+    <style>
+        /* Admin Page Builder Style */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #374151;
+            background-color: #f9fafb;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .page-header {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 12px;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+
+        .last-updated {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        /* Content Section */
+        .content-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-number {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .section h2 {
+            color: #1f2937;
+            font-size: 1.875rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .section-content {
+            margin-left: 64px;
+        }
+
+        .section p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        /* List Styling */
+        .terms-list {
+            margin-top: 24px;
+        }
+
+        .term-item {
+            background: #f0fdf4;
+            border-left: 4px solid #059669;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+        }
+
+        .term-item h4 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .term-item h4::before {
+            content: "§";
+            color: #059669;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .term-item p {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .term-item ul {
+            margin-top: 12px;
+            padding-left: 20px;
+        }
+
+        .term-item li {
+            margin-bottom: 6px;
+        }
+
+        /* Important Notice */
+        .important-notice {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .important-notice h3 {
+            color: #92400e;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .important-notice h3::before {
+            content: "⚠";
+            background: #f59e0b;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .important-notice p {
+            color: #92400e;
+            margin: 0;
+        }
+
+        /* Highlight Boxes */
+        .highlight-box {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #ef4444;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .highlight-box h4 {
+            color: #dc2626;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .highlight-box p {
+            color: #7f1d1d;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 40px;
+        }
+
+        .contact-section h2 {
+            color: #0c4a6e;
+            font-size: 1.875rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-section h2::before {
+            content: "📞";
+            margin-right: 12px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .contact-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #0ea5e9;
+        }
+
+        .contact-card h3 {
+            color: #0c4a6e;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .contact-info {
+            line-height: 1.6;
+        }
+
+        .contact-info p {
+            margin-bottom: 8px;
+        }
+
+        .contact-info a {
+            color: #0ea5e9;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 32px;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .footer-note a {
+            color: #059669;
+            text-decoration: none;
+        }
+
+        .footer-note a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .page-header {
+                padding: 40px 20px;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .section-content {
+                margin-left: 0;
+            }
+
+            .section-header {
+                flex-direction: column;
+                text-align: center;
+                align-items: center;
+            }
+
+            .section-number {
+                margin-bottom: 12px;
+                margin-right: 0;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="page-header">
+            <h1>Terms of Service</h1>
+            <p>Please read these terms carefully before using our charity platform and services.</p>
+            <div class="last-updated">
+                Last Updated: January 1, 2025
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <div class="content">
+                <!-- Important Notice -->
+                <div class="important-notice">
+                    <h3>Legal Agreement</h3>
+                    <p>By accessing and using our charity platform, making donations, volunteering, or engaging with our services, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree with any part of these terms, please do not use our services.</p>
+                </div>
+
+                <!-- Section 1: Definitions and Acceptance -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">1</div>
+                        <h2>Definitions and Acceptance</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>These Terms of Service ("Terms") constitute a binding legal agreement between you ("User," "you," or "your") and Charity Fund ("we," "us," "our," or the "Organization") governing your use of our website, mobile applications, and all related services (collectively, the "Platform").</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Platform</h4>
+                                <p>Refers to our website, mobile applications, and all digital services provided by Charity Fund for charitable donations, volunteering, and related activities.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>User</h4>
+                                <p>Any individual or entity that accesses or uses our Platform, including donors, volunteers, beneficiaries, and visitors.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Donation</h4>
+                                <p>Any voluntary contribution of money, goods, or services made through our Platform to support charitable causes.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Services</h4>
+                                <p>All charitable services, programs, and activities offered through our Platform, including but not limited to donation processing, volunteer coordination, and beneficiary support.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Eligibility and User Accounts -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">2</div>
+                        <h2>Eligibility and User Accounts</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>To use our Platform and services, you must meet certain eligibility requirements and maintain an accurate account.</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Age Requirements</h4>
+                                <p>You must be at least 13 years old to create an account. Users under 18 require parental consent for certain activities such as volunteering or making donations.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Account Registration</h4>
+                                <p>You must provide accurate, current, and complete information during registration and keep your account information updated. You are responsible for maintaining the confidentiality of your account credentials.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Account Security</h4>
+                                <p>You are solely responsible for all activities that occur under your account. Immediately notify us of any unauthorized access or security breaches.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Account Termination</h4>
+                                <p>We reserve the right to suspend or terminate accounts that violate these Terms or engage in fraudulent, harmful, or illegal activities.</p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-box">
+                            <h4>Guest Donations</h4>
+                            <p>Our Platform may allow guest donations without account creation. Guest users are still bound by these Terms and must provide accurate information for donation processing and receipts.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Donations and Financial Transactions -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">3</div>
+                        <h2>Donations and Financial Transactions</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>All donations made through our Platform are subject to the following terms and conditions:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Voluntary Nature</h4>
+                                <p>All donations are voluntary and made without expectation of goods, services, or benefits in return, except for tax receipts as applicable by law.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Final and Non-Refundable</h4>
+                                <p>Donations are generally final and non-refundable. Refund requests will only be considered in cases of technical errors, fraudulent transactions, or as required by law.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Payment Processing</h4>
+                                <p>We use secure third-party payment processors. By making a donation, you agree to the terms and conditions of our payment partners and authorize the processing of your payment information.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Tax Receipts</h4>
+                                <p>Tax-deductible receipts will be provided for eligible donations as required by applicable tax laws. You are responsible for determining the tax-deductibility of your donations.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Fund Allocation</h4>
+                                <p>While we strive to use donations for their designated purposes, we reserve the right to allocate funds to similar charitable purposes if the original designation becomes impractical or impossible.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Administrative Costs</h4>
+                                <p>A portion of donations may be used to cover legitimate administrative and operational expenses necessary for our charitable activities.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Volunteer Services -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">4</div>
+                        <h2>Volunteer Services</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>Volunteer participation is subject to specific terms to ensure safety and effective service delivery:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Volunteer Application</h4>
+                                <p>Volunteers must complete our application process, which may include background checks, references, and training requirements depending on the nature of volunteer activities.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Code of Conduct</h4>
+                                <p>All volunteers must adhere to our code of conduct, which includes professional behavior, respect for beneficiaries and staff, and compliance with all applicable laws and policies.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Safety and Liability</h4>
+                                <p>Volunteers participate at their own risk. We provide reasonable safety measures but cannot guarantee complete safety during volunteer activities.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Confidentiality</h4>
+                                <p>Volunteers must maintain confidentiality regarding beneficiary information, organizational operations, and any sensitive information encountered during service.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Termination of Volunteer Status</h4>
+                                <p>We reserve the right to terminate volunteer relationships for violation of policies, misconduct, or any behavior that compromises our mission or the safety of others.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Platform Use and Prohibited Activities -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">5</div>
+                        <h2>Platform Use and Prohibited Activities</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>Users must comply with acceptable use policies and are prohibited from engaging in harmful activities:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Acceptable Use</h4>
+                                <p>The Platform may only be used for lawful purposes related to charitable giving, volunteering, and supporting our mission. Users must respect the rights of others and use the Platform responsibly.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Prohibited Activities</h4>
+                                <p>Users are prohibited from:</p>
+                                <ul>
+                                    <li>Engaging in fraudulent, deceptive, or illegal activities</li>
+                                    <li>Attempting to hack, damage, or disrupt Platform operations</li>
+                                    <li>Uploading malicious software or content</li>
+                                    <li>Violating intellectual property rights</li>
+                                    <li>Harassing, threatening, or abusing other users</li>
+                                    <li>Creating false or misleading information</li>
+                                    <li>Using the Platform for commercial purposes without authorization</li>
+                                </ul>
+                            </div>
+                            <div class="term-item">
+                                <h4>Content Responsibility</h4>
+                                <p>Users are responsible for all content they submit, including personal information, comments, and communications. Content must not be offensive, inappropriate, or harmful.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Monitoring and Enforcement</h4>
+                                <p>We reserve the right to monitor Platform usage and enforce these Terms through warnings, account suspension, or legal action as appropriate.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 6: Intellectual Property -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">6</div>
+                        <h2>Intellectual Property Rights</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>Intellectual property rights are protected and governed by the following terms:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Our Content</h4>
+                                <p>All Platform content, including text, graphics, logos, images, software, and design elements, are owned by or licensed to Charity Fund and protected by copyright, trademark, and other intellectual property laws.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Limited License</h4>
+                                <p>We grant you a limited, non-exclusive, non-transferable license to access and use the Platform for its intended charitable purposes only.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>User Content</h4>
+                                <p>By submitting content to the Platform, you grant us a non-exclusive, royalty-free license to use, display, and distribute your content for our charitable purposes.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Trademark Policy</h4>
+                                <p>Our name, logo, and trademarks may not be used without explicit written permission. Unauthorized use may result in legal action.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 7: Privacy and Data Protection -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">7</div>
+                        <h2>Privacy and Data Protection</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>Your privacy is important to us. Data collection and usage are governed by these terms:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Privacy Policy</h4>
+                                <p>Our Privacy Policy, which is incorporated by reference into these Terms, explains how we collect, use, and protect your personal information.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Data Collection</h4>
+                                <p>We collect personal information necessary for donation processing, volunteer coordination, and service delivery. All data collection complies with applicable privacy laws.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Data Security</h4>
+                                <p>We implement appropriate security measures to protect your personal information, but cannot guarantee absolute security against all potential threats.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Third-Party Services</h4>
+                                <p>We may use third-party services for payment processing, analytics, and other functions. These services have their own privacy policies and terms.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 8: Disclaimers and Limitation of Liability -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">8</div>
+                        <h2>Disclaimers and Limitation of Liability</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>Important limitations on our liability and service warranties:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Service Availability</h4>
+                                <p>We strive to maintain Platform availability but do not guarantee uninterrupted service. Maintenance, technical issues, or external factors may cause temporary disruptions.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>No Warranties</h4>
+                                <p>The Platform is provided "as is" without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Limitation of Liability</h4>
+                                <p>To the maximum extent permitted by law, Charity Fund shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Platform.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Maximum Liability</h4>
+                                <p>Our total liability to you for any claims arising from these Terms or your use of the Platform shall not exceed the amount of donations you have made through our Platform in the 12 months preceding the claim.</p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-box">
+                            <h4>Important Legal Notice</h4>
+                            <p>Some jurisdictions do not allow the exclusion or limitation of certain warranties or damages. In such jurisdictions, our liability will be limited to the maximum extent permitted by law.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 9: Indemnification -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">9</div>
+                        <h2>Indemnification</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>You agree to indemnify, defend, and hold harmless Charity Fund, its officers, directors, employees, volunteers, and agents from and against any and all claims, damages, losses, costs, and expenses (including reasonable attorney's fees) arising from:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>User Conduct</h4>
+                                <p>Your use or misuse of the Platform, violation of these Terms, or infringement of any intellectual property or other rights of any person or entity.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Content Liability</h4>
+                                <p>Any content you submit, post, or transmit through the Platform, including any claims of defamation, invasion of privacy, or copyright infringement.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Volunteer Activities</h4>
+                                <p>Any injury, damage, or loss arising from your participation in volunteer activities, except in cases of gross negligence or willful misconduct by the Organization.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 10: Dispute Resolution -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">10</div>
+                        <h2>Dispute Resolution</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>Disputes arising from these Terms or your use of our Platform will be resolved according to the following process:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Informal Resolution</h4>
+                                <p>Before pursuing formal legal action, parties agree to attempt good faith resolution through direct communication for at least 30 days.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Governing Law</h4>
+                                <p>These Terms shall be governed by and construed in accordance with the laws of Bangladesh, without regard to conflict of law principles.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Jurisdiction</h4>
+                                <p>Any legal proceedings must be brought exclusively in the courts located in Dhaka, Bangladesh, and you consent to the personal jurisdiction of such courts.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Arbitration</h4>
+                                <p>For disputes involving amounts less than $10,000 USD, parties may elect binding arbitration as an alternative to court proceedings.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 11: Modifications and Updates -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">11</div>
+                        <h2>Modifications and Updates</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>These Terms may be updated periodically to reflect changes in our services, legal requirements, or business practices:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Right to Modify</h4>
+                                <p>We reserve the right to modify these Terms at any time. Material changes will be communicated through email notification and prominent website notices.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Effective Date</h4>
+                                <p>Updated Terms become effective 30 days after notification, unless immediate changes are required by law or for security purposes.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Continued Use</h4>
+                                <p>Your continued use of the Platform after Terms updates constitutes acceptance of the new Terms. If you disagree with changes, you must discontinue use of our services.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Version Control</h4>
+                                <p>We maintain records of previous Terms versions and will provide access to historical versions upon reasonable request.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 12: General Provisions -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-number">12</div>
+                        <h2>General Provisions</h2>
+                    </div>
+                    <div class="section-content">
+                        <p>Additional important terms governing our relationship:</p>
+                        
+                        <div class="terms-list">
+                            <div class="term-item">
+                                <h4>Entire Agreement</h4>
+                                <p>These Terms, together with our Privacy Policy and any additional policies referenced herein, constitute the entire agreement between you and Charity Fund.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Severability</h4>
+                                <p>If any provision of these Terms is found to be invalid or unenforceable, the remaining provisions will continue in full force and effect.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Waiver</h4>
+                                <p>Our failure to enforce any provision of these Terms does not constitute a waiver of that provision or any other provision.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Assignment</h4>
+                                <p>You may not assign or transfer your rights under these Terms without our written consent. We may assign our rights and obligations without restriction.</p>
+                            </div>
+                            <div class="term-item">
+                                <h4>Survival</h4>
+                                <p>Provisions that by their nature should survive termination will remain in effect after termination of these Terms, including intellectual property rights, disclaimers, and limitation of liability.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
