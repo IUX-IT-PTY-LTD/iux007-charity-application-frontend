@@ -15,9 +15,9 @@ const Hero = ({ data }) => {
       const vw = window.innerWidth;
       
       if (vw < 640) { // Mobile
-        setSliderHeight('h-[50vh] min-h-[300px] max-h-[400px]');
+        setSliderHeight('h-[300px] sm:h-[350px]');
       } else if (vw < 768) { // Small tablet
-        setSliderHeight('h-[55vh] min-h-[350px] max-h-[450px]');
+        setSliderHeight('h-[400px]');
       } else if (vw < 1024) { // Medium tablet/small desktop
         setSliderHeight('h-[60vh] min-h-[400px] max-h-[500px]');
       } else if (vw < 1280) { // Desktop
@@ -53,7 +53,7 @@ const Hero = ({ data }) => {
               <Image
                 src={slider.image || silderFallbackImage} // Fallback image if slider.image is not available
                 fill
-                className="object-cover rounded-lg shadow-lg hover:scale-105 transition-transform duration-300"
+                className="object-contain rounded-lg shadow-lg hover:scale-105 transition-transform duration-300"
                 alt={slider.title || 'Slider Image'}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
                 priority={index === 0}
@@ -69,7 +69,7 @@ const Hero = ({ data }) => {
             <Image
               src={silderFallbackImage}
               fill
-              className="object-cover rounded-lg shadow-lg hover:scale-105 transition-transform duration-300"
+              className="object-contain rounded-lg shadow-lg hover:scale-105 transition-transform duration-300"
               alt="Fallback Slider Image"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
               priority
