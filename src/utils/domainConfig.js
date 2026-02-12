@@ -30,8 +30,8 @@ const DOMAIN_CONFIGS = {
   },
 
   // Custom domain configuration
-  'bicnsw.iuxit.com.au': {
-    API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL_BICNSW,
+  'charity-staging.iuxit.com.au': {
+    API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL_CHARITY_STAGING,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_BICNSW,
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
     NEXT_PUBLIC_GOOGLE_CLIENT_SECRET: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET
