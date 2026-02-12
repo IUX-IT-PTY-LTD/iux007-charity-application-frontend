@@ -7,6 +7,8 @@ import { ENDPOINTS } from '@/api/config';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import Loader from '@/components/shared/loader';
+import { Recaptcha } from '@/components/ui/recaptcha';
+import { useRecaptcha } from '@/hooks/useRecaptcha';
 
 const Register = () => {
   const router = useRouter();
@@ -24,6 +26,18 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const {
+    recaptchaRef,
+    token,
+    isVerified,
+    error: recaptchaError,
+    handleVerify,
+    handleExpire,
+    handleError,
+    reset,
+    validateRecaptcha,
+    setError: setRecaptchaError
+  } = useRecaptcha();
 
   useEffect(() => {
     let timer;
@@ -119,6 +133,12 @@ const Register = () => {
       return;
     }
 
+    // Validate reCAPTCHA first
+    if (!validateRecaptcha()) {
+      toast.error(recaptchaError || 'Please complete the reCAPTCHA verification.');
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await apiService.post(ENDPOINTS.AUTH.REGISTER, {
@@ -128,20 +148,24 @@ const Register = () => {
         confirm_password: formData.confirmPassword,
         phone: formData.phone,
         address: formData.address,
+        recaptcha_token: token,
       });
 
       if (response && response.status === 'success') {
         toast.success('Registration successful! Please login to continue.');
+        reset(); // Reset reCAPTCHA
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       } else {
         setError(response.errors);
         toast.error('Registration failed. Please try again.');
+        reset(); // Reset reCAPTCHA on error
       }
     } catch (err) {
       console.error('Registration error:', err);
       toast.error(err.message || 'Registration failed');
+      reset(); // Reset reCAPTCHA on error
     } finally {
       setIsLoading(false);
     }
@@ -375,11 +399,27 @@ const Register = () => {
                       </Link>
                     </label>
                   </div>
+
+                  {/* reCAPTCHA Section */}
+                  <div className="flex flex-col items-start space-y-2">
+                    <Recaptcha
+                      ref={recaptchaRef}
+                      onVerify={handleVerify}
+                      onExpire={handleExpire}
+                      onError={handleError}
+                      theme="light"
+                      size="normal"
+                    />
+                    {recaptchaError && (
+                      <p className="text-sm text-red-600 font-medium">{recaptchaError}</p>
+                    )}
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full mt-6 py-3 px-4 text-white bg-primary hover:bg-primary/90 rounded-md transition duration-200"
+                  disabled={!isVerified || isLoading}
+                  className="w-full mt-6 py-3 px-4 text-white bg-primary hover:bg-primary/90 rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Complete Registration
                 </button>
