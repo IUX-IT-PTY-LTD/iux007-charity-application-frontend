@@ -8,6 +8,7 @@ import FeaturedEvents from '@/components/homepage-components/featured-events';
 import FundRaising from '@/components/homepage-components/operations';
 import FAQ from '@/components/shared/faq';
 import CharityRequestForm from '@/components/charity-request-form';
+import MasjidIframe from '@/components/shared/masjid-iframe';
 import { apiService } from '@/api/services/app/apiService';
 import { ENDPOINTS } from '@/api/config';
 
@@ -56,6 +57,7 @@ const Home = () => {
       <Events data={eventsData} />
       <FundRaising />
       <FAQ />
+      <MasjidIframe />
     </div>
   );
 };

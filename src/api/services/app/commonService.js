@@ -40,4 +40,14 @@ export const commonService = {
       throw error;
     }
   },
+
+  getSettings: async () => {
+    try {
+      const response = await apiService.get(ENDPOINTS.COMMON.SETTINGS);
+      return response;
+    } catch (error) {
+      console.error('Settings error:', error);
+      throw error;
+    }
+  },
 }
