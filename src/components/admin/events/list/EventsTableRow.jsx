@@ -2,12 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { Calendar, Check, X, Edit, ImageIcon, Lock } from 'lucide-react';
+import { Calendar, Check, X, Edit, ImageIcon, Lock, CreditCard } from 'lucide-react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import DeleteEventDialog from './DeleteEventDialog';
+import { useState } from 'react';
+import BankTransferForm from '@/components/admin/donations/BankTransferForm';
 
 // Import permission hooks
 import { useEventPermissions } from '@/api/hooks/useModulePermissions';
@@ -61,9 +63,10 @@ const PermissionAwareActionButton = ({ permission, children, disabledFallback, .
   return <Button {...props}>{children}</Button>;
 };
 
-const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDelete }) => {
+const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDelete, onDonationAdded }) => {
   const router = useRouter();
   const eventPermissions = useEventPermissions();
+  const [isBankTransferOpen, setIsBankTransferOpen] = useState(false);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -81,6 +84,13 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
   const handleViewDetails = () => {
     if (eventPermissions.canView) {
       router.push(`/admin/events/${event.id}/details`);
+    }
+  };
+
+  // Handle bank transfer donation success
+  const handleBankTransferSuccess = () => {
+    if (onDonationAdded) {
+      onDonationAdded();
     }
   };
 
@@ -182,6 +192,16 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
       </TableCell>
       <TableCell className="text-center">
         <div className="flex justify-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsBankTransferOpen(true)}
+            title="Add Bank Transfer Donation"
+          >
+            <CreditCard className="h-4 w-4" />
+            <span className="sr-only">Add Bank Transfer</span>
+          </Button>
+
           <PermissionAwareActionButton
             permission="edit"
             variant="ghost"
@@ -196,6 +216,15 @@ const EventsTableRow = ({ event, index, rowNumber, handleStatusChange, handleDel
           <DeleteEventDialog event={event} onDelete={handleDelete} />
         </div>
       </TableCell>
+
+      {/* Bank Transfer Form Modal */}
+      <BankTransferForm
+        isOpen={isBankTransferOpen}
+        onClose={() => setIsBankTransferOpen(false)}
+        eventId={event.id}
+        eventTitle={event.title}
+        onSuccess={handleBankTransferSuccess}
+      />
     </TableRow>
   );
 };
