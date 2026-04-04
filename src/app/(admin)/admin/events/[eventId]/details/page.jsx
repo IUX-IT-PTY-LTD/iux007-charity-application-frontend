@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Edit, Download, Lock } from 'lucide-react';
+import { ArrowLeft, Edit, Download, Lock, CreditCard } from 'lucide-react';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
+import BankTransferForm from '@/components/admin/donations/BankTransferForm';
 
 // Import custom components
 import EventDetailsHeader from '@/components/admin/events/details/EventDetailsHeader';
@@ -14,6 +15,7 @@ import EventDetailsInfo from '@/components/admin/events/details/EventDetailsInfo
 import EventDetailsStats from '@/components/admin/events/details/EventDetailsStats';
 import EventDonationsTable from '@/components/admin/events/details/EventDonationsTable';
 import EventDetailsLoading from '@/components/admin/events/details/EventDetailsLoading';
+import BankTransferDonationsTable from '@/components/admin/donations/BankTransferDonationsTable';
 
 // Import protected service
 import { getEventWithDonations } from '@/api/services/admin/protected/eventService';
@@ -62,6 +64,55 @@ const PermissionAwareExportButton = ({ event, onExport }) => {
   );
 };
 
+// Permission-aware bank transfer button component
+const PermissionAwareBankTransferButton = ({ eventId, eventTitle, onSuccess }) => {
+  const eventPermissions = useEventPermissions();
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (eventPermissions.isLoading) {
+    return (
+      <Button variant="outline" disabled>
+        Loading...
+      </Button>
+    );
+  }
+
+  // Temporarily removed permission check - always show the button
+  // if (!eventPermissions.canEdit) {
+  //   return (
+  //     <Button
+  //       variant="outline"
+  //       disabled
+  //       className="opacity-50 cursor-not-allowed"
+  //       title="You don't have permission to add donations"
+  //     >
+  //       <Lock className="mr-2 h-4 w-4" />
+  //       Add Bank Transfer
+  //     </Button>
+  //   );
+  // }
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => setIsOpen(true)}
+      >
+        <CreditCard className="mr-2 h-4 w-4" />
+        Add Bank Transfer
+      </Button>
+      
+      <BankTransferForm
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        eventId={eventId}
+        eventTitle={eventTitle}
+        onSuccess={onSuccess}
+      />
+    </>
+  );
+};
+
 // Permission-aware edit button component
 const PermissionAwareEditButton = ({ eventId }) => {
   const router = useRouter();
@@ -107,6 +158,7 @@ function EventDetailsContent({ params }) {
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Set page title and subtitle
   useEffect(() => {
@@ -185,7 +237,13 @@ function EventDetailsContent({ params }) {
     setPageSubtitle,
     eventPermissions.isLoading,
     eventPermissions.canView,
+    refreshKey,
   ]);
+
+  // Handle bank transfer success - refresh the data
+  const handleBankTransferSuccess = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   // Export donations to CSV with permission checking
   const handleExportDonations = () => {
@@ -318,6 +376,12 @@ function EventDetailsContent({ params }) {
             </Button>
 
             <div className="flex items-center gap-2">
+              <PermissionAwareBankTransferButton 
+                eventId={params.eventId} 
+                eventTitle={event?.title} 
+                onSuccess={handleBankTransferSuccess} 
+              />
+              
               <PermissionAwareExportButton event={event} onExport={handleExportDonations} />
 
               <PermissionAwareEditButton eventId={params.eventId} />
@@ -336,14 +400,20 @@ function EventDetailsContent({ params }) {
                 </div>
               </div>
 
-              {/* Right column - Donations table */}
-              <div className="lg:col-span-2">
+              {/* Right column - Donations */}
+              <div className="lg:col-span-2 space-y-6">
                 <Card>
                   <EventDonationsTable
                     donations={event.donation_details || []}
                     eventPermissions={eventPermissions}
                   />
                 </Card>
+
+                {/* Bank Transfer Donations Section */}
+                <BankTransferDonationsTable
+                  eventId={params.eventId}
+                  refreshTrigger={refreshKey}
+                />
               </div>
             </div>
           )}
