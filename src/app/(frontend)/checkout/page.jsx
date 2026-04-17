@@ -96,6 +96,11 @@ const Checkout = () => {
             donation.units = item.qurbaniData.units;
           }
           
+          // Add Qurbani day if available
+          if (item.isQurbaniDonation && item.qurbaniDay) {
+            donation.qurbani_day = item.qurbaniDay;
+          }
+          
           return donation;
         }),
         currency_id: 1, // Assuming default currency ID is 1
@@ -171,6 +176,11 @@ const Checkout = () => {
             donation.units = item.qurbaniData.units;
           }
           
+          // Add Qurbani day if available
+          if (item.isQurbaniDonation && item.qurbaniDay) {
+            donation.qurbani_day = item.qurbaniDay;
+          }
+          
           return donation;
         }),
       });
@@ -210,6 +220,11 @@ const Checkout = () => {
           if (item.isQurbaniDonation && item.qurbaniData) {
             donation.animal_type = item.qurbaniData.animal_type;
             donation.units = item.qurbaniData.units;
+          }
+          
+          // Add Qurbani day if available
+          if (item.isQurbaniDonation && item.qurbaniDay) {
+            donation.qurbani_day = item.qurbaniDay;
           }
           
           return donation;

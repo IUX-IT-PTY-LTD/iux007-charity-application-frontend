@@ -93,11 +93,16 @@ function EditEventContent({ params }) {
       end_date: new Date(),
       price: 0,
       target_amount: 0,
-      is_fixed_donation: 0,
+      is_fixed_donation: false,
       location: '',
-      status: 1,
-      is_featured: 0,
+      status: true,
+      is_featured: false,
       featured_image: null,
+      // Qurbani donation fields
+      is_qurbani_donation: false,
+      cow_price: null,
+      goat_price: null,
+      lamb_price: null,
     },
     mode: 'onChange',
   });
@@ -133,15 +138,16 @@ function EditEventContent({ params }) {
             end_date: endDate,
             price: Number(fetchedEvent.price) || 0,
             target_amount: Number(fetchedEvent.target_amount) || 0,
-            is_fixed_donation:
-              fetchedEvent.is_fixed_donation === 1 || fetchedEvent.is_fixed_donation === true
-                ? 1
-                : 0,
+            is_fixed_donation: fetchedEvent.is_fixed_donation === 1 || fetchedEvent.is_fixed_donation === true,
             location: fetchedEvent.location || '',
-            status: Number(fetchedEvent.status) || 0,
-            is_featured:
-              fetchedEvent.is_featured === 1 || fetchedEvent.is_featured === true ? 1 : 0,
+            status: fetchedEvent.status === 1 || fetchedEvent.status === true,
+            is_featured: fetchedEvent.is_featured === 1 || fetchedEvent.is_featured === true,
             featured_image: fetchedEvent.featured_image || null,
+            // Qurbani donation fields
+            is_qurbani_donation: fetchedEvent.is_qurbani_donation === 1 || fetchedEvent.is_qurbani_donation === true,
+            cow_price: fetchedEvent.qurbani_pricing?.cow_price ? Number(fetchedEvent.qurbani_pricing.cow_price) : null,
+            goat_price: fetchedEvent.qurbani_pricing?.goat_price ? Number(fetchedEvent.qurbani_pricing.goat_price) : null,
+            lamb_price: fetchedEvent.qurbani_pricing?.lamb_price ? Number(fetchedEvent.qurbani_pricing.lamb_price) : null,
           };
 
           // Set form values

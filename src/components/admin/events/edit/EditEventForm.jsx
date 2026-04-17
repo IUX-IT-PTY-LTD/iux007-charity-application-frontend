@@ -285,8 +285,8 @@ const EditEventForm = ({
                   <FormItem>
                     <FormLabel>Status</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value, 10))}
-                      value={field.value.toString()}
+                      onValueChange={(value) => field.onChange(value === "true")}
+                      value={field.value ? "true" : "false"}
                       disabled={isFormDisabled}
                     >
                       <FormControl>
@@ -295,8 +295,8 @@ const EditEventForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="1">Active</SelectItem>
-                        <SelectItem value="0">Inactive</SelectItem>
+                        <SelectItem value="true">Active</SelectItem>
+                        <SelectItem value="false">Inactive</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>Is this event currently active?</FormDescription>
@@ -313,8 +313,8 @@ const EditEventForm = ({
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
                         <Checkbox
-                          checked={field.value === 1}
-                          onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                          checked={field.value === true}
+                          onCheckedChange={(checked) => field.onChange(checked)}
                           disabled={isFormDisabled}
                         />
                       </FormControl>
@@ -333,8 +333,8 @@ const EditEventForm = ({
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
                         <Checkbox
-                          checked={field.value === 1}
-                          onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                          checked={field.value === true}
+                          onCheckedChange={(checked) => field.onChange(checked)}
                           disabled={isFormDisabled}
                         />
                       </FormControl>
@@ -345,8 +345,114 @@ const EditEventForm = ({
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="is_qurbani_donation"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value === true}
+                          onCheckedChange={(checked) => field.onChange(checked)}
+                          disabled={isFormDisabled}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Qurbani Donation</FormLabel>
+                        <FormDescription>Enable Qurbani animal donation options</FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
+
+            {/* Qurbani Pricing Section - Only show when Qurbani donation is enabled */}
+            <FormField
+              control={form.control}
+              name="is_qurbani_donation"
+              render={({ field }) => (
+                (field.value === true || Number(field.value) === 1) && (
+                  <div className="space-y-4">
+                    <Separator />
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Qurbani Animal Pricing</h3>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <FormField
+                          control={form.control}
+                          name="cow_price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>🐄 Cow Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  disabled={isFormDisabled}
+                                  {...field}
+                                  value={field.value || ''}
+                                />
+                              </FormControl>
+                              <FormDescription>Price for cow qurbani</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="goat_price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>🐐 Goat Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  disabled={isFormDisabled}
+                                  {...field}
+                                  value={field.value || ''}
+                                />
+                              </FormControl>
+                              <FormDescription>Price for goat qurbani</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="lamb_price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>🐑 Lamb Price ($)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  disabled={isFormDisabled}
+                                  {...field}
+                                  value={field.value || ''}
+                                />
+                              </FormControl>
+                              <FormDescription>Price for lamb qurbani</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
+            />
 
             <div>
               <FormLabel>Featured Image</FormLabel>

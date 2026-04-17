@@ -55,6 +55,8 @@ const FeaturedEvents = ({ data }) => {
                     fixedDonation={event.is_fixed_donation}
                     donationAmount={event.price}
                     showDetails={false}
+                    isQurbaniDonation={event.is_qurbani_donation}
+                    qurbaniPricing={event.qurbani_pricing}
                   />
                 </div>
               </SwiperSlide>

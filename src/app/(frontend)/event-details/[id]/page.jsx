@@ -14,6 +14,7 @@ const EventDetails = props => {
 
   const [event, setEvent] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [qurbaniDay, setQurbaniDay] = useState('');
 
   const fetchEventDetails = async () => {
     try {
@@ -153,6 +154,19 @@ const EventDetails = props => {
                     <option value="PKR">🇵🇰 PKR</option>
                     <option value="EUR">🇪🇺 EUR</option>
                   </select>
+                  
+                  {/* Qurbani Day Dropdown - Only show for Qurbani donations */}
+                  {event.is_qurbani_donation === 1 && (
+                    <select
+                      className="flex-1 min-w-[160px] border px-4 py-2.5 rounded-lg bg-white appearance-none"
+                      value={qurbaniDay}
+                      onChange={(e) => setQurbaniDay(e.target.value)}
+                    >
+                      <option value="">Select Qurbani Day</option>
+                      <option value="midnight_qurbani">🌙 Midnight Qurbani</option>
+                      <option value="qurbani_with_anc">🕌 Qurbani with ANC</option>
+                    </select>
+                  )}
                   <input
                     name="donation_amount"
                     id="donation_amount"
@@ -164,6 +178,13 @@ const EventDetails = props => {
                   <button
                     onClick={(e) => {
                       e.preventDefault();
+                      
+                      // Validate Qurbani day selection for Qurbani donations
+                      if (event.is_qurbani_donation === 1 && !qurbaniDay) {
+                        alert('Please select a Qurbani day before proceeding.');
+                        return;
+                      }
+                      
                       const donationItem = {
                         id: event.uuid,
                         title: event.title,
@@ -173,6 +194,8 @@ const EventDetails = props => {
                         quantity: 1,
                         price: event.price,
                         isFixedDonation: event.is_fixed_donation,
+                        isQurbaniDonation: event.is_qurbani_donation === 1,
+                        ...(event.is_qurbani_donation === 1 && { qurbaniDay: qurbaniDay }),
                       };
 
                       // Add donation item to cart state
