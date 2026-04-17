@@ -24,21 +24,41 @@ export const eventFormSchema = z
     }),
     target_amount: z.coerce.number().min(0, {
       message: 'Target amount must be a positive number.',
-    }),
-    is_fixed_donation: z.number().default(0),
+    }).nullable(),
+    is_fixed_donation: z.boolean().default(false),
     location: z
       .string()
       .min(2, {
         message: 'Location must be at least 2 characters.',
       })
       .nullable(),
-    status: z.number().default(1),
-    is_featured: z.number().default(0),
+    status: z.boolean().default(true),
+    is_featured: z.boolean().default(false),
     featured_image: z.any().optional(),
+    // Qurbani donation fields
+    is_qurbani_donation: z.boolean().default(false),
+    cow_price: z.coerce.number().min(0, {
+      message: 'Cow price must be a positive number.',
+    }).nullable(),
+    goat_price: z.coerce.number().min(0, {
+      message: 'Goat price must be a positive number.',
+    }).nullable(),
+    lamb_price: z.coerce.number().min(0, {
+      message: 'Lamb price must be a positive number.',
+    }).nullable(),
   })
   .refine((data) => data.end_date >= data.start_date, {
     message: 'End date must be after start date',
     path: ['end_date'],
+  })
+  .refine((data) => {
+    if (data.is_qurbani_donation) {
+      return data.cow_price > 0 || data.goat_price > 0 || data.lamb_price > 0;
+    }
+    return true;
+  }, {
+    message: 'At least one Qurbani price must be set when Qurbani donation is enabled',
+    path: ['is_qurbani_donation'],
   });
 
 // Default form values
@@ -48,10 +68,15 @@ export const defaultEventValues = {
   start_date: new Date(),
   end_date: new Date(),
   price: 0,
-  target_amount: 0,
-  is_fixed_donation: 0,
+  target_amount: null,
+  is_fixed_donation: false,
   location: '',
-  status: 1,
-  is_featured: 0,
+  status: true,
+  is_featured: false,
   featured_image: null,
+  // Qurbani donation defaults
+  is_qurbani_donation: false,
+  cow_price: null,
+  goat_price: null,
+  lamb_price: null,
 };

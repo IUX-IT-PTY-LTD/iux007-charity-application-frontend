@@ -60,7 +60,7 @@ const EventDetailsInfo = ({ event }) => {
           <Target className="h-5 w-5 text-gray-400" />
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Target Amount</p>
-            <p className="font-medium">${event.target_amount.toLocaleString()}</p>
+            <p className="font-medium">${event.target_amount?.toLocaleString() || '0'}</p>
           </div>
         </div>
       </CardContent>

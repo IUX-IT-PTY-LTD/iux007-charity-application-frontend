@@ -268,7 +268,7 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                   <FormItem>
                     <FormLabel>Status</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value, 10))}
+                      onValueChange={(value) => field.onChange(value === "true")}
                       value={field.value.toString()}
                       disabled={isFormDisabled}
                     >
@@ -278,8 +278,8 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="1">Active</SelectItem>
-                        <SelectItem value="0">Inactive</SelectItem>
+                        <SelectItem value="true">Active</SelectItem>
+                        <SelectItem value="false">Inactive</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>Is this event currently active?</FormDescription>
@@ -296,8 +296,8 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
                         <Checkbox
-                          checked={field.value === 1}
-                          onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                           disabled={isFormDisabled}
                         />
                       </FormControl>
@@ -316,8 +316,8 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
                         <Checkbox
-                          checked={field.value === 1}
-                          onCheckedChange={(checked) => field.onChange(checked ? 1 : 0)}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                           disabled={isFormDisabled}
                         />
                       </FormControl>
@@ -328,8 +328,127 @@ const EventForm = ({ form, onSubmit, submitButtonText = 'Create Event', isSubmit
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="is_qurbani_donation"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isFormDisabled}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Qurbani Donation</FormLabel>
+                        <FormDescription>Enable Qurbani options (cow, goat, lamb)</FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
+
+            {/* Qurbani Options Section */}
+            {form.watch('is_qurbani_donation') && (
+              <div className="space-y-6">
+                <Separator />
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Qurbani Options</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Set prices for Qurbani animals
+                  </p>
+
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    {/* Cow Options */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-sm text-center p-2 bg-blue-50 rounded-md">
+                        Cow
+                      </h4>
+                      <FormField
+                        control={form.control}
+                        name="cow_price"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Price per Unit ($)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                                disabled={isFormDisabled}
+                                {...field}
+                                value={field.value || ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Goat Options */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-sm text-center p-2 bg-green-50 rounded-md">
+                        Goat
+                      </h4>
+                      <FormField
+                        control={form.control}
+                        name="goat_price"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Price per Unit ($)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                                disabled={isFormDisabled}
+                                {...field}
+                                value={field.value || ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Lamb Options */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-sm text-center p-2 bg-orange-50 rounded-md">
+                        Lamb
+                      </h4>
+                      <FormField
+                        control={form.control}
+                        name="lamb_price"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Price per Unit ($)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                                disabled={isFormDisabled}
+                                {...field}
+                                value={field.value || ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <FormLabel>Featured Image</FormLabel>
