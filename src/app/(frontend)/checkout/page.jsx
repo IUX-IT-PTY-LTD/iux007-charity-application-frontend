@@ -82,12 +82,28 @@ const Checkout = () => {
 
       // Build checkout data structure
       const checkoutDataObj = {
-        donations: parsedCart.map((item) => ({
-          event_id: item.id,
-          quantity: item.quantity,
-          amount: item.price,
-          notes: item.note || '',
-        })),
+        donations: parsedCart.map((item) => {
+          const donation = {
+            event_id: item.id,
+            quantity: item.quantity,
+            amount: item.price,
+            notes: item.note || '',
+          };
+          
+          // Add Qurbani-specific fields if this is a Qurbani donation
+          if (item.isQurbaniDonation && item.qurbaniData) {
+            donation.animal_type = item.qurbaniData.animal_type;
+            donation.qurbani_location = item.qurbaniData.qurbani_location;
+            donation.units = item.qurbaniData.units;
+          }
+          
+          // Add Qurbani day if available
+          if (item.isQurbaniDonation && item.qurbaniDay) {
+            donation.qurbani_day = item.qurbaniDay;
+          }
+          
+          return donation;
+        }),
         currency_id: 1, // Assuming default currency ID is 1
         total_price: subtotal,
         type: 'single',
@@ -147,9 +163,28 @@ const Checkout = () => {
         ...checkoutData,
         total_price: newSubtotal,
         admin_contribution: newAdminContribution,
-        donations: checkoutData.donations.map((donation) =>
-          donation.event_id === itemId ? { ...donation, quantity: donation.quantity + 1 } : donation
-        ),
+        donations: updatedCart.map((item) => {
+          const donation = {
+            event_id: item.id,
+            quantity: item.quantity,
+            amount: item.price,
+            notes: item.note || '',
+          };
+          
+          // Add Qurbani-specific fields if this is a Qurbani donation
+          if (item.isQurbaniDonation && item.qurbaniData) {
+            donation.animal_type = item.qurbaniData.animal_type;
+            donation.qurbani_location = item.qurbaniData.qurbani_location;
+            donation.units = item.qurbaniData.units;
+          }
+          
+          // Add Qurbani day if available
+          if (item.isQurbaniDonation && item.qurbaniDay) {
+            donation.qurbani_day = item.qurbaniDay;
+          }
+          
+          return donation;
+        }),
       });
 
       return updatedCart;
@@ -175,9 +210,28 @@ const Checkout = () => {
         ...checkoutData,
         total_price: newSubtotal,
         admin_contribution: newAdminContribution,
-        donations: checkoutData.donations.map((donation) =>
-          donation.event_id === itemId ? { ...donation, quantity: donation.quantity - 1 } : donation
-        ),
+        donations: updatedCart.map((item) => {
+          const donation = {
+            event_id: item.id,
+            quantity: item.quantity,
+            amount: item.price,
+            notes: item.note || '',
+          };
+          
+          // Add Qurbani-specific fields if this is a Qurbani donation
+          if (item.isQurbaniDonation && item.qurbaniData) {
+            donation.animal_type = item.qurbaniData.animal_type;
+            donation.qurbani_location = item.qurbaniData.qurbani_location;
+            donation.units = item.qurbaniData.units;
+          }
+          
+          // Add Qurbani day if available
+          if (item.isQurbaniDonation && item.qurbaniDay) {
+            donation.qurbani_day = item.qurbaniDay;
+          }
+          
+          return donation;
+        }),
       });
       
       return updatedCart;
@@ -393,11 +447,23 @@ const Checkout = () => {
                                         ...prevData,
                                         total_price: newSubtotal,
                                         admin_contribution: newAdminContribution,
-                                        donations: prevData.donations.map((donation) =>
-                                          donation.event_id === item.id 
-                                            ? { ...donation, amount: numericValue }
-                                            : donation
-                                        ),
+                                        donations: updatedCartItems.map((cartItem) => {
+                                          const donation = {
+                                            event_id: cartItem.id,
+                                            quantity: cartItem.quantity,
+                                            amount: cartItem.price,
+                                            notes: cartItem.note || '',
+                                          };
+                                          
+                                          // Add Qurbani-specific fields if this is a Qurbani donation
+                                          if (cartItem.isQurbaniDonation && cartItem.qurbaniData) {
+                                            donation.animal_type = cartItem.qurbaniData.animal_type;
+                                            donation.qurbani_location = cartItem.qurbaniData.qurbani_location;
+                                            donation.units = cartItem.qurbaniData.units;
+                                          }
+                                          
+                                          return donation;
+                                        }),
                                       }));
                                     }}
                                     onBlur={(e) => {

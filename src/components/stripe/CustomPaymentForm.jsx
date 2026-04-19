@@ -224,22 +224,60 @@ export default function CustomPaymentForm({ totalAmount, donationData, guestUser
 
     if (result.paymentIntent.status === 'succeeded') {
       setMessage('Payment succeeded!');
+      
+      // Check if any donation is a Qurbani donation
+      const qurbaniDonations = donationData.donations.filter(donation => donation.animal_type);
+      const isQurbaniDonation = qurbaniDonations.length > 0;
+      
+      // Get animal info for display
+      const getAnimalIcon = (animalType) => {
+        switch(animalType) {
+          case 'cow': return '🐄';
+          case 'goat': return '🐐';
+          case 'lamb': return '🐑';
+          default: return '🐄';
+        }
+      };
+      
+      const getAnimalName = (animalType) => {
+        switch(animalType) {
+          case 'cow': return 'Cow';
+          case 'goat': return 'Goat';
+          case 'lamb': return 'Lamb';
+          default: return 'Animal';
+        }
+      };
+
       // Show charity-themed success popup
       await Swal.fire({
         html: `
           <div class="charity-popup-content">
             <div class="charity-popup-header">
               <div class="charity-popup-icon">
-                <svg width="40" height="40" fill="white" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
+                ${isQurbaniDonation ? 
+                  `<div style="font-size: 40px;">${getAnimalIcon(qurbaniDonations[0].animal_type)}</div>` :
+                  `<svg width="40" height="40" fill="white" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>`
+                }
               </div>
               <h2 class="charity-popup-title">
-                Thank You for Your Generosity! 🙏
+                ${isQurbaniDonation ? 'Thank You for Your Qurbani Donation! 🙏' : 'Thank You for Your Generosity! 🙏'}
               </h2>
               <p class="charity-popup-description">
                 Your donation of <strong class="charity-popup-amount">$${totalAmount}</strong> has been processed successfully
               </p>
+              ${isQurbaniDonation ? `
+                <div style="margin-top: 16px; padding: 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #22c55e;">
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 18px; font-weight: 600; color: #15803d;">
+                    <span style="font-size: 24px;">${getAnimalIcon(qurbaniDonations[0].animal_type)}</span>
+                    <span>${getAnimalName(qurbaniDonations[0].animal_type)} Qurbani</span>
+                  </div>
+                  <p style="margin: 8px 0 0 0; font-size: 14px; color: #16a34a; text-align: center;">
+                    ${qurbaniDonations[0].units ? qurbaniDonations[0].units.length : 1} unit${qurbaniDonations[0].units && qurbaniDonations[0].units.length > 1 ? 's' : ''} donated
+                  </p>
+                </div>
+              ` : ''}
             </div>
 
             <div class="charity-popup-impact">
@@ -248,7 +286,10 @@ export default function CustomPaymentForm({ totalAmount, donationData, guestUser
                 <span class="charity-popup-impact-title">Your Impact</span>
               </div>
               <p class="charity-popup-impact-text">
-                Your generous contribution will help make a real difference in people's lives. Every donation, no matter the size, brings hope and positive change to those who need it most.
+                ${isQurbaniDonation ? 
+                  'Your Qurbani donation will provide blessed meat to families in need during this sacred time. May your generosity be rewarded and bring you closer to Allah.' :
+                  'Your generous contribution will help make a real difference in people\'s lives. Every donation, no matter the size, brings hope and positive change to those who need it most.'
+                }
               </p>
             </div>
 

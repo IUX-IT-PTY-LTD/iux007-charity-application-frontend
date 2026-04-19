@@ -73,6 +73,8 @@ const Events = () => {
                         totalDonors={event.total_donor || 0}
                         remainingPercentage={event.remaining_percentage || 0}
                         showDetails={true}
+                        isQurbaniDonation={event.is_qurbani_donation}
+                        qurbaniPricing={event.qurbani_pricing}
                       />
                     </div>
                   ))}

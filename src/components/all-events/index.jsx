@@ -31,6 +31,8 @@ const Events = ({ data }) => {
                   totalDonors={event.total_donor}
                   remainingPercentage={event.remaining_percentage}
                   showDetails={true}
+                  isQurbaniDonation={event.is_qurbani_donation}
+                  qurbaniPricing={event.qurbani_pricing}
                 />
               ))
             ) : (

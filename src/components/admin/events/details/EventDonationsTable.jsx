@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -19,20 +19,95 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { Search, Lock, DollarSign, Users, Calendar, TrendingUp } from 'lucide-react';
+import { Search, Lock, DollarSign, Users, Calendar, TrendingUp, Eye, UserCheck } from 'lucide-react';
 
 // Import permission hooks
 import { useEventPermissions } from '@/api/hooks/useModulePermissions';
 
-const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissions }) => {
+const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissions, event }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Participants popup component
+  const ParticipantsPopup = ({ participants, animalType }) => {
+    if (!participants || participants.length === 0) {
+      return null;
+    }
+
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+            <Eye className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5" />
+              Qurbani Participants ({participants.length})
+            </DialogTitle>
+            <DialogDescription>
+              List of participants for this {animalType} Qurbani donation
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {participants.map((participant, index) => (
+              <div key={index} className="p-4 bg-gray-50 rounded-lg border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Full Name</label>
+                    <p className="text-sm text-gray-900">{participant.participant_name || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Address</label>
+                    <p className="text-sm text-gray-900">{participant.address || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Father's Name</label>
+                    <p className="text-sm text-gray-900">{participant.father_name || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Mother's Name</label>
+                    <p className="text-sm text-gray-900">{participant.mother_name || 'N/A'}</p>
+                  </div>
+                  {participant.phone && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Phone</label>
+                      <p className="text-sm text-gray-900">{participant.phone}</p>
+                    </div>
+                  )}
+                  {participant.email && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Email</label>
+                      <p className="text-sm text-gray-900">{participant.email}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   // Use passed permissions if available, otherwise use hook
   const hookPermissions = useEventPermissions();
   const eventPermissions = passedPermissions || hookPermissions;
+
+  // Check if this is a Qurbani event
+  const isQurbaniEvent = event?.is_qurbani_donation === 1;
 
   // Filter donations based on search term
   const filteredDonations = donations.filter((donation) => {
@@ -42,7 +117,8 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
       searchRegex.test(donation.user_email) ||
       searchRegex.test(donation.notes || '') ||
       searchRegex.test(donation.status) ||
-      searchRegex.test(donation.total_price?.toString())
+      searchRegex.test(donation.total_price?.toString()) ||
+      (donation.animal_type && searchRegex.test(donation.animal_type))
     );
   });
 
@@ -145,6 +221,16 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
     }).format(amount || 0);
   };
 
+  // Get animal icon for Qurbani donations
+  const getAnimalIcon = (animalType) => {
+    switch(animalType?.toLowerCase()) {
+      case 'cow': return '🐄';
+      case 'goat': return '🐐';
+      case 'lamb': return '🐑';
+      default: return '';
+    }
+  };
+
   return (
     <>
       <CardHeader>
@@ -217,13 +303,14 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
           </div>
         )}
 
+
         {/* Search bar */}
         {donations.length > 0 && eventPermissions.canView && (
           <div className="mb-4 relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
               type="search"
-              placeholder="Search by name, email, or status..."
+              placeholder={isQurbaniEvent ? "Search by name, email, status, or animal type..." : "Search by name, email, or status..."}
               className="pl-8"
               value={searchTerm}
               onChange={(e) => {
@@ -260,6 +347,8 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   <TableHead>#</TableHead>
                   <TableHead>Donor</TableHead>
                   <TableHead>Amount</TableHead>
+                  {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
+                  {isQurbaniEvent && <TableHead>Participants</TableHead>}
                   <TableHead>Date</TableHead>
                   <TableHead>Notes</TableHead>
                   <TableHead>Status</TableHead>
@@ -268,7 +357,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
               <TableBody>
                 {currentDonations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6">
+                    <TableCell colSpan={isQurbaniEvent ? 8 : 6} className="text-center py-6">
                       No donations match your search
                     </TableCell>
                   </TableRow>
@@ -299,6 +388,35 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                           </div>
                         )}
                       </TableCell>
+                      {isQurbaniEvent && (
+                        <TableCell>
+                          {donation.animal_type ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{getAnimalIcon(donation.animal_type)}</span>
+                              <span className="capitalize font-medium">{donation.animal_type}</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </TableCell>
+                      )}
+                      {isQurbaniEvent && (
+                        <TableCell>
+                          {donation.qurbani_participants && donation.qurbani_participants.length > 0 ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600">
+                                {donation.qurbani_participants.length} participant{donation.qurbani_participants.length > 1 ? 's' : ''}
+                              </span>
+                              <ParticipantsPopup 
+                                participants={donation.qurbani_participants} 
+                                animalType={donation.animal_type}
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">No participants</span>
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell>{formatDate(donation.donated_at)}</TableCell>
                       <TableCell>
                         <div className="max-w-[200px] truncate">
@@ -327,6 +445,8 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   <TableHead>#</TableHead>
                   <TableHead>Donor</TableHead>
                   <TableHead>Amount</TableHead>
+                  {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
+                  {isQurbaniEvent && <TableHead>Participants</TableHead>}
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -344,6 +464,16 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                     <TableCell>
                       <div className="font-medium">$***</div>
                     </TableCell>
+                    {isQurbaniEvent && (
+                      <TableCell>
+                        <span className="text-gray-400">***</span>
+                      </TableCell>
+                    )}
+                    {isQurbaniEvent && (
+                      <TableCell>
+                        <span className="text-gray-400">***</span>
+                      </TableCell>
+                    )}
                     <TableCell>***</TableCell>
                     <TableCell>
                       <Badge className="bg-gray-100 text-gray-800">***</Badge>
@@ -352,7 +482,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                 ))}
                 {donations.length > 3 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={isQurbaniEvent ? 7 : 5} className="text-center py-4 text-gray-500">
                       ... and {donations.length - 3} more donations
                     </TableCell>
                   </TableRow>

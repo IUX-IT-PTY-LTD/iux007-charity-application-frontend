@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import { FaClock, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaClock, FaMapMarkerAlt, FaStar } from 'react-icons/fa';
 
 const EventCard = ({
   eventId,
@@ -16,6 +16,8 @@ const EventCard = ({
   totalDonors,
   showDetails,
   buttonText,
+  isQurbaniDonation,
+  qurbaniPricing,
 }) => {
   // Calculate progress percentage
   // const progressPercentage = targetAmount > 0 ? Math.min((raised / targetAmount) * 100, 100) : 0;
@@ -44,7 +46,8 @@ const EventCard = ({
   };
   return (
     <div className="bg-white rounded-2xl p-5 cursor-pointer hover:-translate-y-2 transition-all relative h-full flex flex-col">
-      <div className="overflow-hidden mx-auto md:mb-2 mb-4 h-[200px]">
+      <Link href={`/projects/${eventId}`}>
+      <div className="overflow-hidden mx-auto md:mb-2 mb-4 h-[200px] relative">
         <Image
           width={300}
           height={300}
@@ -53,9 +56,17 @@ const EventCard = ({
           className="h-full w-full object-cover rounded-md"
           loader={({ src }) => src}
         />
+        {/* Qurbani Badge */}
+        {isQurbaniDonation === 1 && (
+          <div className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+            <FaStar className="text-xs" />
+            <span className="text-xs font-semibold">Qurbani</span>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col flex-1">
+        {/* Qurbani Pricing Section */}
         <div className="flex items-center gap-2 mb-3 text-xs">
           <div className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded flex-shrink-0">
             <FaClock className="text-xs" />
@@ -75,8 +86,42 @@ const EventCard = ({
           </h3>
         </Link>
         <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">{description}</p>
+
+        {isQurbaniDonation === 1 && qurbaniPricing && (
+          <div className="mb-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+            <div className="grid grid-cols-3 gap-2">
+              {qurbaniPricing.cow_price && (
+                <div className="text-center p-2 bg-white rounded-lg border border-blue-200 shadow-sm">
+                  <div className="text-xl mb-1">🐄</div>
+                  <div className="text-xs font-medium text-blue-700 mb-1">Cow</div>
+                  <div className="text-sm font-bold text-blue-900">
+                    ${Number.parseFloat(qurbaniPricing.cow_price).toFixed(0)}
+                  </div>
+                </div>
+              )}
+              {qurbaniPricing.goat_price && (
+                <div className="text-center p-2 bg-white rounded-lg border border-green-200 shadow-sm">
+                  <div className="text-xl mb-1">🐐</div>
+                  <div className="text-xs font-medium text-green-700 mb-1">Goat</div>
+                  <div className="text-sm font-bold text-green-900">
+                    ${Number.parseFloat(qurbaniPricing.goat_price).toFixed(0)}
+                  </div>
+                </div>
+              )}
+              {qurbaniPricing.lamb_price && (
+                <div className="text-center p-2 bg-white rounded-lg border border-orange-200 shadow-sm">
+                  <div className="text-xl mb-1">🐑</div>
+                  <div className="text-xs font-medium text-orange-700 mb-1">Lamb</div>
+                  <div className="text-sm font-bold text-orange-900">
+                    ${Number.parseFloat(qurbaniPricing.lamb_price).toFixed(0)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {/* progress */}
-        {showDetails && targetAmount > 0 && (
+        {showDetails && targetAmount > 0 && !isQurbaniDonation && (
           <div className="mb-4">
             <div className="bg-gray-50 rounded p-3">
               <div className="flex items-baseline text-sm mb-2">
@@ -122,6 +167,7 @@ const EventCard = ({
           </Link>
         </div>
       </div>
+      </Link>
     </div>
   );
 };
