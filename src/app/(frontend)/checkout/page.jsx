@@ -93,6 +93,7 @@ const Checkout = () => {
           // Add Qurbani-specific fields if this is a Qurbani donation
           if (item.isQurbaniDonation && item.qurbaniData) {
             donation.animal_type = item.qurbaniData.animal_type;
+            donation.qurbani_location = item.qurbaniData.qurbani_location;
             donation.units = item.qurbaniData.units;
           }
           
@@ -173,6 +174,7 @@ const Checkout = () => {
           // Add Qurbani-specific fields if this is a Qurbani donation
           if (item.isQurbaniDonation && item.qurbaniData) {
             donation.animal_type = item.qurbaniData.animal_type;
+            donation.qurbani_location = item.qurbaniData.qurbani_location;
             donation.units = item.qurbaniData.units;
           }
           
@@ -219,6 +221,7 @@ const Checkout = () => {
           // Add Qurbani-specific fields if this is a Qurbani donation
           if (item.isQurbaniDonation && item.qurbaniData) {
             donation.animal_type = item.qurbaniData.animal_type;
+            donation.qurbani_location = item.qurbaniData.qurbani_location;
             donation.units = item.qurbaniData.units;
           }
           
@@ -455,6 +458,7 @@ const Checkout = () => {
                                           // Add Qurbani-specific fields if this is a Qurbani donation
                                           if (cartItem.isQurbaniDonation && cartItem.qurbaniData) {
                                             donation.animal_type = cartItem.qurbaniData.animal_type;
+                                            donation.qurbani_location = cartItem.qurbaniData.qurbani_location;
                                             donation.units = cartItem.qurbaniData.units;
                                           }
                                           

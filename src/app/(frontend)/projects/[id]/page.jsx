@@ -18,12 +18,14 @@ const EventDetails = props => {
   const [event, setEvent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState(0);
+  const [qurbaniDay, setQurbaniDay] = useState('');
   
   // Qurbani-specific state
   const [selectedAnimal, setSelectedAnimal] = useState('');
   const [selectedAnimalPrice, setSelectedAnimalPrice] = useState(0);
   const [qurbaniUnits, setQurbaniUnits] = useState(1);
   const [qurbaniNames, setQurbaniNames] = useState([{ name: '', address: '', motherName: '', fatherName: '' }]);
+  const [qurbaniLocation, setQurbaniLocation] = useState('australia'); // 'australia' or 'overseas'
 
   const handleDonation = async (e) => {
     e.preventDefault();
@@ -39,9 +41,9 @@ const EventDetails = props => {
       }
       
       // Validate names are filled
-      const incompleteNames = qurbaniNames.some(entry => !entry.name.trim() || !entry.address.trim() || !entry.motherName.trim() || !entry.fatherName.trim());
+      const incompleteNames = qurbaniNames.some(entry => !entry.name.trim() || !entry.address.trim());
       if (incompleteNames) {
-        alert('Please fill in all required fields (Full name, Address, Mother\'s name, Father\'s name)');
+        alert('Please fill in all required fields (Full name, Address)');
         return;
       }
 
@@ -49,11 +51,13 @@ const EventDetails = props => {
       qurbaniData = {
         animal_type: selectedAnimal,
         animalPrice: selectedAnimalPrice,
+        qurbani_location: qurbaniLocation,
         units: qurbaniNames.map(nameEntry => ({
           name: nameEntry.name,
           address: nameEntry.address,
           father_name: nameEntry.fatherName,
-          mother_name: nameEntry.motherName
+          mother_name: nameEntry.motherName,
+          qurbani_day: nameEntry.qurbaniDay,
         })),
         totalAmount: donationAmountValue
       };
@@ -75,13 +79,16 @@ const EventDetails = props => {
       quantity: event.is_qurbani_donation === 1 ? qurbaniUnits : 1,
       price: event.is_fixed_donation
         ? event.price
-        : donationAmountValue,
+        : event.is_qurbani_donation === 1
+          ? selectedAnimalPrice
+          : donationAmountValue,
       isFixedDonation: event.is_fixed_donation,
       isQurbaniDonation: event.is_qurbani_donation === 1,
       qurbaniData: qurbaniData,
       // Qurbani-specific payload fields
       ...(event.is_qurbani_donation === 1 && {
         animal_type: selectedAnimal,
+        qurbani_location: qurbaniLocation,
         units: qurbaniNames.map(nameEntry => ({
           name: nameEntry.name,
           address: nameEntry.address,
@@ -316,6 +323,37 @@ const EventDetails = props => {
                         )}
                       </div>
 
+                      {/* Qurbani Location Toggle */}
+                      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Select Qurbani Location</h4>
+                        <div className="flex items-center justify-center">
+                          <div className="relative bg-gray-100 rounded-lg p-1 flex">
+                            <button
+                              type="button"
+                              onClick={() => setQurbaniLocation('australia')}
+                              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                                qurbaniLocation === 'australia'
+                                  ? 'bg-blue-600 text-white shadow-md'
+                                  : 'text-gray-600 hover:text-gray-800'
+                              }`}
+                            >
+                              🇦🇺 Qurbani in Australia
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQurbaniLocation('overseas')}
+                              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                                qurbaniLocation === 'overseas'
+                                  ? 'bg-green-600 text-white shadow-md'
+                                  : 'text-gray-600 hover:text-gray-800'
+                              }`}
+                            >
+                              🌍 Qurbani Overseas
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Qurbani Configuration */}
                       {selectedAnimal && (
                         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -400,33 +438,21 @@ const EventDetails = props => {
                                       />
                                     </div>
                                     <div>
-                                      <label className="block text-xs text-gray-600 mb-1">Mother's Name</label>
-                                      <input
-                                        type="text"
-                                        value={nameEntry.motherName}
+                                      <select
+                                        className="flex-1 min-w-[160px] border px-4 py-2.5 rounded-lg bg-white appearance-none"
+                                        value={nameEntry.qurbaniDay}
                                         onChange={(e) => {
                                           const newNames = [...qurbaniNames];
-                                          newNames[index].motherName = e.target.value;
-                                          setQurbaniNames(newNames);
+                                          newNames[index].qurbaniDay = e.target.value;
+                                          setQurbaniDay(newNames);
                                         }}
-                                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                                        placeholder="Enter mother's name"
-                                      />
+                                      >
+                                        <option value="">Select Qurbani Day</option>
+                                        <option value="Qurbani as per Moon Sighting">🌙 Qurbani as per Moon Sighting</option>
+                                        <option value="Qurbani As per ANIC">🕌 Qurbani As per ANIC</option>
+                                      </select>
                                     </div>
-                                    <div>
-                                      <label className="block text-xs text-gray-600 mb-1">Father's Name</label>
-                                      <input
-                                        type="text"
-                                        value={nameEntry.fatherName}
-                                        onChange={(e) => {
-                                          const newNames = [...qurbaniNames];
-                                          newNames[index].fatherName = e.target.value;
-                                          setQurbaniNames(newNames);
-                                        }}
-                                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                                        placeholder="Enter father's name"
-                                      />
-                                    </div>
+                                   
                                   </div>
                                 </div>
                               ))}

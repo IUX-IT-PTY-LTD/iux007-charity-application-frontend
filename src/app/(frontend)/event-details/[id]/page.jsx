@@ -163,8 +163,8 @@ const EventDetails = props => {
                       onChange={(e) => setQurbaniDay(e.target.value)}
                     >
                       <option value="">Select Qurbani Day</option>
-                      <option value="midnight_qurbani">🌙 Midnight Qurbani</option>
-                      <option value="qurbani_with_anc">🕌 Qurbani with ANC</option>
+                      <option value="midnight_qurbani">🌙 Qurbani as per Moon Sighting</option>
+                      <option value="qurbani_with_anc">🕌 Qurbani As per ANIC</option>
                     </select>
                   )}
                   <input
