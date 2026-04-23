@@ -36,7 +36,220 @@ import { useEventPermissions } from '@/api/hooks/useModulePermissions';
 const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissions, event }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedDonation, setSelectedDonation] = useState(null);
   const itemsPerPage = 10;
+
+  // Donation Details popup component
+  const DonationDetailsPopup = ({ donation, isOpen, onClose }) => {
+    if (!donation) return null;
+
+    const formatDate = (dateString) => {
+      try {
+        return format(new Date(dateString), 'PPP p');
+      } catch (error) {
+        return dateString || 'N/A';
+      }
+    };
+
+    const getStatusColor = (status) => {
+      switch (status?.toLowerCase()) {
+        case 'completed': return 'text-green-700 bg-green-50 border-green-200';
+        case 'pending': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+        case 'failed': return 'text-red-700 bg-red-50 border-red-200';
+        case 'cancelled': return 'text-gray-700 bg-gray-50 border-gray-200';
+        default: return 'text-gray-700 bg-gray-50 border-gray-200';
+      }
+    };
+
+    const getAnimalIcon = (animalType) => {
+      switch(animalType?.toLowerCase()) {
+        case 'cow': return '🐄';
+        case 'goat': return '🐐';
+        case 'lamb': return '🐑';
+        default: return '';
+      }
+    };
+
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                <Eye className="h-5 w-5" />
+              </div>
+              Donation Details
+            </DialogTitle>
+            <DialogDescription>
+              Complete information for donation #{donation.id}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Donor Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                  <span className="text-xl">👤</span>
+                  Donor Information
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-blue-700">Full Name</label>
+                    <p className="text-sm font-semibold text-blue-900">{donation.user_name || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-blue-700">Email</label>
+                    <p className="text-sm text-blue-900">{donation.user_email || 'N/A'}</p>
+                  </div>
+                  {donation.user_phone_number && (
+                    <div>
+                      <label className="text-sm font-medium text-blue-700">Phone</label>
+                      <p className="text-sm text-blue-900">{donation.user_phone_number}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Financial Information */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center gap-2">
+                  <span className="text-xl">💰</span>
+                  Financial Details
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-green-700">Total Amount</label>
+                    <p className="text-lg font-bold text-green-900">${donation.total_price}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-green-700">Admin Contribution</label>
+                    <p className="text-sm font-semibold text-green-900">
+                      ${donation.admin_contribution_amount ? Number(donation.admin_contribution_amount).toFixed(2) : '0.00'}
+                    </p>
+                  </div>
+                  {donation.quantity && (
+                    <div>
+                      <label className="text-sm font-medium text-green-700">Quantity & Price</label>
+                      <p className="text-sm text-green-900">
+                        {donation.quantity} × ${donation.per_unit_price} = ${donation.total_price}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Qurbani Information - Only show if it's a Qurbani event */}
+            {event?.is_qurbani_donation === 1 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                  <span className="text-xl">🕌</span>
+                  Qurbani Details
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {donation.animal_type && (
+                    <div>
+                      <label className="text-sm font-medium text-amber-700">Animal Type</label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{getAnimalIcon(donation.animal_type)}</span>
+                        <p className="text-sm font-semibold text-amber-900 capitalize">{donation.animal_type}</p>
+                      </div>
+                    </div>
+                  )}
+                  {donation.qurbani_location && (
+                    <div>
+                      <label className="text-sm font-medium text-amber-700">Qurbani Location</label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{donation.qurbani_location === 'australia' ? '🇦🇺' : '🌍'}</span>
+                        <p className="text-sm font-semibold text-amber-900 capitalize">
+                          {donation.qurbani_location === 'australia' ? 'Australia' : 'Overseas'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Qurbani Participants */}
+                {donation.qurbani_participants && donation.qurbani_participants.length > 0 && (
+                  <div>
+                    <label className="text-sm font-medium text-amber-700 mb-2 block">
+                      Participants ({donation.qurbani_participants.length})
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {donation.qurbani_participants.map((participant, index) => (
+                        <div key={index} className="bg-white border border-amber-200 rounded-lg p-3">
+                          <div className="font-medium text-amber-900 mb-2">Participant {index + 1}</div>
+                          <div className="text-xs space-y-1 text-amber-800">
+                            <div><strong>Name:</strong> {participant.participant_name || 'N/A'}</div>
+                            <div><strong>Address:</strong> {participant.address || 'N/A'}</div>
+                            {participant.qurbani_day && (
+                              <div className="bg-amber-100 px-2 py-1 rounded mt-2">
+                                <strong>Qurbani Day:</strong> {participant.qurbani_day}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Status and Date Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <span className="text-xl">📅</span>
+                  Timeline
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Donation Date</label>
+                    <p className="text-sm text-gray-900">{formatDate(donation.donated_at)}</p>
+                  </div>
+                  {donation.created_at && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Created</label>
+                      <p className="text-sm text-gray-900">{formatDate(donation.created_at)}</p>
+                    </div>
+                  )}
+                  {donation.updated_at && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Last Updated</label>
+                      <p className="text-sm text-gray-900">{formatDate(donation.updated_at)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <span className="text-xl">📋</span>
+                  Status & Notes
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Status</label>
+                    <div className={`inline-block px-3 py-1 rounded-lg text-sm font-medium border ${getStatusColor(donation.status)}`}>
+                      {donation.status || 'Unknown'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Notes</label>
+                    <p className="text-sm text-gray-900 bg-white p-2 rounded border min-h-[60px]">
+                      {donation.notes || 'No notes available'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   // Participants popup component
   const ParticipantsPopup = ({ participants, animalType }) => {
@@ -381,12 +594,13 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   <TableHead>Date</TableHead>
                   <TableHead>Notes</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentDonations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 10 : 7} className="text-center py-6">
+                    <TableCell colSpan={isQurbaniEvent ? 11 : 8} className="text-center py-6">
                       No donations match your search
                     </TableCell>
                   </TableRow>
@@ -486,6 +700,16 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(donation.status)}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => setSelectedDonation(donation)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -509,6 +733,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   {isQurbaniEvent && <TableHead>Participants</TableHead>}
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -546,11 +771,16 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                     <TableCell>
                       <Badge className="bg-gray-100 text-gray-800">***</Badge>
                     </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {donations.length > 3 && (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 9 : 6} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={isQurbaniEvent ? 10 : 7} className="text-center py-4 text-gray-500">
                       ... and {donations.length - 3} more donations
                     </TableCell>
                   </TableRow>
@@ -615,6 +845,13 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
           </div>
         </CardFooter>
       )}
+
+      {/* Donation Details Popup */}
+      <DonationDetailsPopup
+        donation={selectedDonation}
+        isOpen={!!selectedDonation}
+        onClose={() => setSelectedDonation(null)}
+      />
     </>
   );
 };
