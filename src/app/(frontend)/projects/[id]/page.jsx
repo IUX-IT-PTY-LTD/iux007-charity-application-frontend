@@ -479,8 +479,8 @@ const EventDetails = props => {
                 
                 <div className="max-w-2xl mx-auto">
 
-                {/* Regular Donation Section - Only show if NOT Qurbani or no animal selected */}
-                {(event.is_qurbani_donation !== 1 || (event.is_qurbani_donation === 1 && !selectedAnimal)) && (
+                {/* Regular Donation Section - Only show if NOT Qurbani */}
+                {event.is_qurbani_donation !== 1 && (
                   <>
                     {shouldShowQuickAmounts ? (
                       <div className="flex flex-wrap justify-center gap-3 mb-6">
@@ -539,16 +539,14 @@ const EventDetails = props => {
                           }
                         }}
                         value={event.is_fixed_donation ? event.price : amount || undefined}
-                        disabled={event.is_fixed_donation || event.is_qurbani_donation === 1}
+                        disabled={event.is_fixed_donation}
                       />
-                      {event.is_qurbani_donation !== 1 && (
-                        <button
-                          onClick={handleDonation}
-                          className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-                        >
-                          Donate Now
-                        </button>
-                      )}
+                      <button
+                        onClick={handleDonation}
+                        className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                      >
+                        Donate Now
+                      </button>
                     </div>
                   </>
                 )}
