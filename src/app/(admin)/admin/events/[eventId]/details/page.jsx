@@ -406,6 +406,7 @@ function EventDetailsContent({ params }) {
                   <EventDonationsTable
                     donations={event.donation_details || []}
                     eventPermissions={eventPermissions}
+                    event={event}
                   />
                 </Card>
 
