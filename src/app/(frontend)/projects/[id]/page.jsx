@@ -606,9 +606,9 @@ const EventDetails = props => {
         <div className="max-w-4xl mx-auto mt-16 mb-10">
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Secure Payment Methods</h3>
-            <p className="text-gray-600">We accept all major payment methods for your convenience</p>
+            <p className="text-gray-600">Payments processed securely by Stripe. We accept all major payment methods for your convenience</p>
           </div>
-          <div className="flex justify-center items-center gap-8 mb-12">
+          <div className="flex justify-center items-center gap-6 mb-12 flex-wrap">
             <div className="flex items-center justify-center">
               <Image
                 src="/assets/img/visa.png"
@@ -625,6 +625,24 @@ const EventDetails = props => {
                 height={80}
                 alt="Mastercard"
                 className="w-auto h-[80px]"
+              />
+            </div>
+            <div className="flex items-center justify-center">
+              <Image
+                src="/assets/img/amex.png"
+                width={120}
+                height={80}
+                alt="American Express"
+                className="w-auto h-[60px]"
+              />
+            </div>
+            <div className="flex items-center justify-center">
+              <Image
+                src="/assets/img/stripe.png"
+                width={120}
+                height={80}
+                alt="Powered by Stripe"
+                className="w-auto h-[60px]"
               />
             </div>
               {/* <div className="col-span-2 px-1 md:px-4">
