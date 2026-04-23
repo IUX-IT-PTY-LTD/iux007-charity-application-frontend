@@ -64,32 +64,59 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
           <div className="space-y-4">
             {participants.map((participant, index) => (
               <div key={index} className="p-4 bg-gray-50 rounded-lg border">
+                <div className="mb-4">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </span>
+                    Participant {index + 1}
+                  </h4>
+                </div>
+                
+                {/* Highlighted Qurbani Day Section */}
+                {participant.qurbani_day && (
+                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">🕌</span>
+                      <label className="text-sm font-semibold text-amber-800">Qurbani Day Preference</label>
+                    </div>
+                    <p className="text-sm font-medium text-amber-900 bg-amber-100 px-3 py-1 rounded-md inline-block">
+                      {participant.qurbani_day}
+                    </p>
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Full Name</label>
-                    <p className="text-sm text-gray-900">{participant.participant_name || 'N/A'}</p>
+                    <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                      <span className="text-blue-600">👤</span>
+                      Full Name
+                    </label>
+                    <p className="text-sm text-gray-900 font-medium">{participant.participant_name || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Address</label>
+                    <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                      <span className="text-green-600">🏠</span>
+                      Address
+                    </label>
                     <p className="text-sm text-gray-900">{participant.address || 'N/A'}</p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Father's Name</label>
-                    <p className="text-sm text-gray-900">{participant.father_name || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Mother's Name</label>
-                    <p className="text-sm text-gray-900">{participant.mother_name || 'N/A'}</p>
-                  </div>
+                  
                   {participant.phone && (
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Phone</label>
+                      <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                        <span className="text-orange-600">📞</span>
+                        Phone
+                      </label>
                       <p className="text-sm text-gray-900">{participant.phone}</p>
                     </div>
                   )}
                   {participant.email && (
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Email</label>
+                      <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                        <span className="text-cyan-600">📧</span>
+                        Email
+                      </label>
                       <p className="text-sm text-gray-900">{participant.email}</p>
                     </div>
                   )}
@@ -348,6 +375,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   <TableHead>Donor</TableHead>
                   <TableHead>Amount</TableHead>
                   {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
+                  {isQurbaniEvent && <TableHead>Qurbani Location</TableHead>}
                   {isQurbaniEvent && <TableHead>Participants</TableHead>}
                   <TableHead>Date</TableHead>
                   <TableHead>Notes</TableHead>
@@ -357,7 +385,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
               <TableBody>
                 {currentDonations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 8 : 6} className="text-center py-6">
+                    <TableCell colSpan={isQurbaniEvent ? 9 : 6} className="text-center py-6">
                       No donations match your search
                     </TableCell>
                   </TableRow>
@@ -394,6 +422,20 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                             <div className="flex items-center gap-2">
                               <span className="text-xl">{getAnimalIcon(donation.animal_type)}</span>
                               <span className="capitalize font-medium">{donation.animal_type}</span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </TableCell>
+                      )}
+                      {isQurbaniEvent && (
+                        <TableCell>
+                          {donation.qurbani_location ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{donation.qurbani_location === 'australia' ? '🇦🇺' : '🌍'}</span>
+                              <span className="capitalize font-medium">
+                                {donation.qurbani_location === 'australia' ? 'Australia' : 'Overseas'}
+                              </span>
                             </div>
                           ) : (
                             <span className="text-gray-400">-</span>
@@ -446,6 +488,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   <TableHead>Donor</TableHead>
                   <TableHead>Amount</TableHead>
                   {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
+                  {isQurbaniEvent && <TableHead>Qurbani Location</TableHead>}
                   {isQurbaniEvent && <TableHead>Participants</TableHead>}
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
@@ -474,6 +517,11 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                         <span className="text-gray-400">***</span>
                       </TableCell>
                     )}
+                    {isQurbaniEvent && (
+                      <TableCell>
+                        <span className="text-gray-400">***</span>
+                      </TableCell>
+                    )}
                     <TableCell>***</TableCell>
                     <TableCell>
                       <Badge className="bg-gray-100 text-gray-800">***</Badge>
@@ -482,7 +530,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                 ))}
                 {donations.length > 3 && (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 7 : 5} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={isQurbaniEvent ? 8 : 5} className="text-center py-4 text-gray-500">
                       ... and {donations.length - 3} more donations
                     </TableCell>
                   </TableRow>
