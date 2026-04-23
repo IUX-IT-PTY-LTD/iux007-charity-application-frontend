@@ -374,6 +374,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   <TableHead>#</TableHead>
                   <TableHead>Donor</TableHead>
                   <TableHead>Amount</TableHead>
+                  <TableHead>Admin Contribution</TableHead>
                   {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
                   {isQurbaniEvent && <TableHead>Qurbani Location</TableHead>}
                   {isQurbaniEvent && <TableHead>Participants</TableHead>}
@@ -385,7 +386,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
               <TableBody>
                 {currentDonations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 9 : 6} className="text-center py-6">
+                    <TableCell colSpan={isQurbaniEvent ? 10 : 7} className="text-center py-6">
                       No donations match your search
                     </TableCell>
                   </TableRow>
@@ -413,6 +414,21 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                         {donation.quantity && (
                           <div className="text-xs text-gray-500">
                             {donation.quantity} × ${donation.per_unit_price}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {donation.admin_contribution_amount && Number(donation.admin_contribution_amount) > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-green-600 text-sm">🏛️</span>
+                            <div>
+                              <div className="font-medium text-green-700">${Number(donation.admin_contribution_amount).toFixed(2)}</div>
+                              <div className="text-xs text-green-600">Admin added</div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="font-medium text-gray-600">
+                            ${donation.admin_contribution_amount ? Number(donation.admin_contribution_amount).toFixed(2) : '0.00'}
                           </div>
                         )}
                       </TableCell>
@@ -487,6 +503,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                   <TableHead>#</TableHead>
                   <TableHead>Donor</TableHead>
                   <TableHead>Amount</TableHead>
+                  <TableHead>Admin Contribution</TableHead>
                   {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
                   {isQurbaniEvent && <TableHead>Qurbani Location</TableHead>}
                   {isQurbaniEvent && <TableHead>Participants</TableHead>}
@@ -506,6 +523,9 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">$***</div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-400">***</span>
                     </TableCell>
                     {isQurbaniEvent && (
                       <TableCell>
@@ -530,7 +550,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                 ))}
                 {donations.length > 3 && (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 8 : 5} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={isQurbaniEvent ? 9 : 6} className="text-center py-4 text-gray-500">
                       ... and {donations.length - 3} more donations
                     </TableCell>
                   </TableRow>
