@@ -32,7 +32,7 @@ const Events = ({ data }) => {
                   remainingPercentage={event.remaining_percentage}
                   showDetails={true}
                   isQurbaniDonation={event.is_qurbani_donation}
-                  qurbaniPricing={event.qurbani_pricing}
+                  qurbaniPricing={event.qurbani_pricing?.qurbani_in_australia}
                 />
               ))
             ) : (

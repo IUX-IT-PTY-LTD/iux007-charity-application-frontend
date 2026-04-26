@@ -93,6 +93,12 @@ export const validateEventData = eventService.validateEventData.bind(eventServic
 export const formatEventDataForSubmission =
   eventService.formatEventDataForSubmission.bind(eventService);
 
+/**
+ * Format event data for API update (utility function - no permission required)
+ */
+export const formatEventDataForUpdate =
+  eventService.formatEventDataForUpdate.bind(eventService);
+
 // ==================== DIRECT EXPORT OF EVENT SERVICE INSTANCE ====================
 
 /**

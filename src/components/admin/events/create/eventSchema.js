@@ -37,6 +37,7 @@ export const eventFormSchema = z
     featured_image: z.any().optional(),
     // Qurbani donation fields
     is_qurbani_donation: z.boolean().default(false),
+    // Australia Qurbani pricing
     cow_price: z.coerce.number().min(0, {
       message: 'Cow price must be a positive number.',
     }).nullable(),
@@ -46,6 +47,16 @@ export const eventFormSchema = z
     lamb_price: z.coerce.number().min(0, {
       message: 'Lamb price must be a positive number.',
     }).nullable(),
+    // Overseas Qurbani pricing
+    overseas_cow_price: z.coerce.number().min(0, {
+      message: 'Overseas cow price must be a positive number.',
+    }).nullable(),
+    overseas_goat_price: z.coerce.number().min(0, {
+      message: 'Overseas goat price must be a positive number.',
+    }).nullable(),
+    overseas_lamb_price: z.coerce.number().min(0, {
+      message: 'Overseas lamb price must be a positive number.',
+    }).nullable(),
   })
   .refine((data) => data.end_date >= data.start_date, {
     message: 'End date must be after start date',
@@ -53,11 +64,13 @@ export const eventFormSchema = z
   })
   .refine((data) => {
     if (data.is_qurbani_donation) {
-      return data.cow_price > 0 || data.goat_price > 0 || data.lamb_price > 0;
+      const hasAustraliaPrice = data.cow_price > 0 || data.goat_price > 0 || data.lamb_price > 0;
+      const hasOverseasPrice = data.overseas_cow_price > 0 || data.overseas_goat_price > 0 || data.overseas_lamb_price > 0;
+      return hasAustraliaPrice || hasOverseasPrice;
     }
     return true;
   }, {
-    message: 'At least one Qurbani price must be set when Qurbani donation is enabled',
+    message: 'At least one Qurbani price must be set for Australia or Overseas when Qurbani donation is enabled',
     path: ['is_qurbani_donation'],
   });
 
@@ -76,7 +89,12 @@ export const defaultEventValues = {
   featured_image: null,
   // Qurbani donation defaults
   is_qurbani_donation: false,
+  // Australia pricing
   cow_price: null,
   goat_price: null,
   lamb_price: null,
+  // Overseas pricing
+  overseas_cow_price: null,
+  overseas_goat_price: null,
+  overseas_lamb_price: null,
 };

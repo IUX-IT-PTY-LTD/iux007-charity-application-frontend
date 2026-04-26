@@ -31,7 +31,7 @@ import {
   updateEvent,
   deleteEvent,
   validateEventData,
-  formatEventDataForSubmission,
+  formatEventDataForUpdate,
 } from '@/api/services/admin/protected/eventService';
 import { isAuthenticated } from '@/api/services/admin/authService';
 
@@ -100,9 +100,14 @@ function EditEventContent({ params }) {
       featured_image: null,
       // Qurbani donation fields
       is_qurbani_donation: false,
+      // Australia pricing
       cow_price: null,
       goat_price: null,
       lamb_price: null,
+      // Overseas pricing
+      overseas_cow_price: null,
+      overseas_goat_price: null,
+      overseas_lamb_price: null,
     },
     mode: 'onChange',
   });
@@ -145,9 +150,14 @@ function EditEventContent({ params }) {
             featured_image: fetchedEvent.featured_image || null,
             // Qurbani donation fields
             is_qurbani_donation: fetchedEvent.is_qurbani_donation === 1 || fetchedEvent.is_qurbani_donation === true,
-            cow_price: fetchedEvent.qurbani_pricing?.cow_price ? Number(fetchedEvent.qurbani_pricing.cow_price) : null,
-            goat_price: fetchedEvent.qurbani_pricing?.goat_price ? Number(fetchedEvent.qurbani_pricing.goat_price) : null,
-            lamb_price: fetchedEvent.qurbani_pricing?.lamb_price ? Number(fetchedEvent.qurbani_pricing.lamb_price) : null,
+            // Australia pricing
+            cow_price: fetchedEvent.qurbani_pricing?.qurbani_in_australia?.cow_price ?? null,
+            goat_price: fetchedEvent.qurbani_pricing?.qurbani_in_australia?.goat_price ?? null,
+            lamb_price: fetchedEvent.qurbani_pricing?.qurbani_in_australia?.lamb_price ?? null,
+            // Overseas pricing
+            overseas_cow_price: fetchedEvent.qurbani_pricing?.qurbani_overseas?.cow_price ?? null,
+            overseas_goat_price: fetchedEvent.qurbani_pricing?.qurbani_overseas?.goat_price ?? null,
+            overseas_lamb_price: fetchedEvent.qurbani_pricing?.qurbani_overseas?.lamb_price ?? null,
           };
 
           // Set form values
@@ -180,8 +190,11 @@ function EditEventContent({ params }) {
 
   // Track form changes
   useEffect(() => {
-    const subscription = form.watch(() => {
-      setHasUnsavedChanges(true);
+    const subscription = form.watch((value, { name, type }) => {
+      // Only track changes, not form submission
+      if (type === 'change') {
+        setHasUnsavedChanges(true);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -205,6 +218,11 @@ function EditEventContent({ params }) {
   const onSubmit = async (data) => {
     if (!eventPermissions.canEdit) {
       toast.error("You don't have permission to edit events");
+      return;
+    }
+
+    // Prevent double submission
+    if (isSubmitting) {
       return;
     }
 
@@ -233,7 +251,7 @@ function EditEventContent({ params }) {
       }
 
       // Format data for API submission
-      const formattedData = formatEventDataForSubmission(submissionData);
+      const formattedData = formatEventDataForUpdate(submissionData);
 
       // Submit to protected API
       const response = await updateEvent(params.eventId, formattedData);
@@ -440,7 +458,8 @@ function EditEventContent({ params }) {
               </AlertDialog>
 
               <Button
-                onClick={form.handleSubmit(onSubmit)}
+                type="submit"
+                form="edit-event-form"
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={isSubmitting || !eventPermissions.canEdit}
               >

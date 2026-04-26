@@ -374,79 +374,182 @@ const EditEventForm = ({
               name="is_qurbani_donation"
               render={({ field }) => (
                 (field.value === true || Number(field.value) === 1) && (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <Separator />
                     <div>
-                      <h3 className="text-lg font-semibold mb-4">Qurbani Animal Pricing</h3>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <FormField
-                          control={form.control}
-                          name="cow_price"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>🐄 Cow Price ($)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  placeholder="0.00"
-                                  disabled={isFormDisabled}
-                                  {...field}
-                                  value={field.value || ''}
-                                />
-                              </FormControl>
-                              <FormDescription>Price for cow qurbani</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <h3 className="text-lg font-semibold mb-4">Qurbani Options</h3>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Set prices for Qurbani animals in different locations
+                      </p>
 
-                        <FormField
-                          control={form.control}
-                          name="goat_price"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>🐐 Goat Price ($)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  placeholder="0.00"
-                                  disabled={isFormDisabled}
-                                  {...field}
-                                  value={field.value || ''}
-                                />
-                              </FormControl>
-                              <FormDescription>Price for goat qurbani</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      {/* Australia Qurbani Section */}
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-medium text-base mb-4 text-blue-900">🇦🇺 Qurbani in Australia</h4>
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            {/* Australia Cow */}
+                            <FormField
+                              control={form.control}
+                              name="cow_price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🐄 Cow Price ($)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      disabled={isFormDisabled}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value === '' ? null : e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>Price for cow qurbani in Australia</FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
-                        <FormField
-                          control={form.control}
-                          name="lamb_price"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>🐑 Lamb Price ($)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  placeholder="0.00"
-                                  disabled={isFormDisabled}
-                                  {...field}
-                                  value={field.value || ''}
-                                />
-                              </FormControl>
-                              <FormDescription>Price for lamb qurbani</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            {/* Australia Goat */}
+                            <FormField
+                              control={form.control}
+                              name="goat_price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🐐 Goat Price ($)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      disabled={isFormDisabled}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value === '' ? null : e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>Price for goat qurbani in Australia</FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            {/* Australia Lamb */}
+                            <FormField
+                              control={form.control}
+                              name="lamb_price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🐑 Lamb Price ($)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      disabled={isFormDisabled}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value === '' ? null : e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>Price for lamb qurbani in Australia</FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Overseas Qurbani Section */}
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-medium text-base mb-4 text-green-900">🌍 Qurbani Overseas</h4>
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            {/* Overseas Cow */}
+                            <FormField
+                              control={form.control}
+                              name="overseas_cow_price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🐄 Cow Price ($)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      disabled={isFormDisabled}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value === '' ? null : e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>Price for cow qurbani overseas</FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            {/* Overseas Goat */}
+                            <FormField
+                              control={form.control}
+                              name="overseas_goat_price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🐐 Goat Price ($)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      disabled={isFormDisabled}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value === '' ? null : e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>Price for goat qurbani overseas</FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            {/* Overseas Lamb */}
+                            <FormField
+                              control={form.control}
+                              name="overseas_lamb_price"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🐑 Lamb Price ($)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.01"
+                                      placeholder="0.00"
+                                      disabled={isFormDisabled}
+                                      value={field.value || ''}
+                                      onChange={(e) => {
+                                        field.onChange(e.target.value === '' ? null : e.target.value);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>Price for lamb qurbani overseas</FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
