@@ -300,12 +300,18 @@ class EventService {
 
     // Add qurbani pricing if qurbani donation is enabled
     if (data.is_qurbani_donation) {
-      formattedData.qurbani_pricing =
-        {
+      formattedData.qurbani_pricing = {
+        qurbani_in_australia: {
           cow_price: data.cow_price && data.cow_price !== '' ? parseFloat(data.cow_price) : null,
           lamb_price: data.lamb_price && data.lamb_price !== '' ? parseFloat(data.lamb_price) : null,
           goat_price: data.goat_price && data.goat_price !== '' ? parseFloat(data.goat_price) : null,
+        },
+        qurbani_overseas: {
+          cow_price: data.overseas_cow_price && data.overseas_cow_price !== '' ? parseFloat(data.overseas_cow_price) : null,
+          lamb_price: data.overseas_lamb_price && data.overseas_lamb_price !== '' ? parseFloat(data.overseas_lamb_price) : null,
+          goat_price: data.overseas_goat_price && data.overseas_goat_price !== '' ? parseFloat(data.overseas_goat_price) : null,
         }
+      };
     }
 
     return formattedData;
@@ -344,19 +350,27 @@ class EventService {
         typeof data.is_qurbani_donation === 'boolean'
           ? data.is_qurbani_donation ? 1 : 0
           : data.is_qurbani_donation || null,
-          cow_price: data.cow_price !== null && data.cow_price !== undefined && data.cow_price !== '' ? parseFloat(data.cow_price) : null,
-          lamb_price: data.lamb_price !== null && data.lamb_price !== undefined && data.lamb_price !== '' ? parseFloat(data.lamb_price) : null,
-          goat_price: data.goat_price !== null && data.goat_price !== undefined && data.goat_price !== '' ? parseFloat(data.goat_price) : null,
+          cow_price: data.cow_price && data.cow_price !== '' ? parseFloat(data.cow_price) : null,
+          lamb_price: data.lamb_price && data.lamb_price !== '' ? parseFloat(data.lamb_price) : null,
+          goat_price: data.goat_price && data.goat_price !== '' ? parseFloat(data.goat_price) : null,
+          overseas_cow_price: data.overseas_cow_price && data.overseas_cow_price !== '' ? parseFloat(data.overseas_cow_price) : null,
+          overseas_lamb_price: data.overseas_lamb_price && data.overseas_lamb_price !== '' ? parseFloat(data.overseas_lamb_price) : null,
+          overseas_goat_price: data.overseas_goat_price && data.overseas_goat_price !== '' ? parseFloat(data.overseas_goat_price) : null,
     };
 
     // Add qurbani pricing if qurbani donation is enabled
-    // if (data.is_qurbani_donation) {
-    //   formattedData.qurbani_pricing = {
-    //     cow_price: data.cow_price !== null && data.cow_price !== undefined && data.cow_price !== '' ? parseFloat(data.cow_price) : null,
-    //     lamb_price: data.lamb_price !== null && data.lamb_price !== undefined && data.lamb_price !== '' ? parseFloat(data.lamb_price) : null,
-    //     goat_price: data.goat_price !== null && data.goat_price !== undefined && data.goat_price !== '' ? parseFloat(data.goat_price) : null,
-    //   };
-    // }
+    formattedData.qurbani_pricing = {
+      qurbani_in_australia: {
+        cow_price: data.cow_price && data.cow_price !== '' ? parseFloat(data.cow_price) : null,
+        lamb_price: data.lamb_price && data.lamb_price !== '' ? parseFloat(data.lamb_price) : null,
+        goat_price: data.goat_price && data.goat_price !== '' ? parseFloat(data.goat_price) : null,
+      },
+      qurbani_overseas: {
+        cow_price: data.overseas_cow_price && data.overseas_cow_price !== '' ? parseFloat(data.overseas_cow_price) : null,
+        lamb_price: data.overseas_lamb_price && data.overseas_lamb_price !== '' ? parseFloat(data.overseas_lamb_price) : null,
+        goat_price: data.overseas_goat_price && data.overseas_goat_price !== '' ? parseFloat(data.overseas_goat_price) : null,
+      }
+    };
 
     console.log(formattedData);
 

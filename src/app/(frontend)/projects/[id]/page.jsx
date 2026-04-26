@@ -27,6 +27,11 @@ const EventDetails = props => {
   const [qurbaniNames, setQurbaniNames] = useState([{ name: '', address: '', motherName: '', fatherName: '' }]);
   const [qurbaniLocation, setQurbaniLocation] = useState('australia'); // 'australia' or 'overseas'
 
+  const currentPricing =
+  qurbaniLocation === 'australia'
+    ? event.qurbani_pricing?.qurbani_in_australia
+    : event.qurbani_pricing?.qurbani_overseas;
+
   const handleDonation = async (e) => {
     e.preventDefault();
     
@@ -233,21 +238,21 @@ const EventDetails = props => {
                       
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                         {/* Cow Option */}
-                        {event.qurbani_pricing.cow_price && (
+                        {currentPricing?.cow_price && (
                           <div 
                             className={`bg-white p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
                               selectedAnimal === 'cow' ? 'border-blue-500 bg-blue-50' : 'border-blue-200 hover:border-blue-300'
                             }`}
                             onClick={() => {
                               setSelectedAnimal('cow');
-                              setSelectedAnimalPrice(Number.parseFloat(event.qurbani_pricing.cow_price));
+                              setSelectedAnimalPrice(Number.parseFloat(currentPricing?.cow_price));
                             }}
                           >
                             <div className="text-center">
                               <div className="text-4xl mb-3">🐄</div>
                               <p className="text-lg font-semibold text-blue-700 mb-2">Cow</p>
                               <p className="text-2xl font-bold text-blue-900">
-                                ${Number.parseFloat(event.qurbani_pricing.cow_price).toFixed(2)}
+                                ${Number.parseFloat(currentPricing?.cow_price).toFixed(2)}
                               </p>
                               {selectedAnimal === 'cow' && (
                                 <div className="mt-3">
@@ -263,21 +268,21 @@ const EventDetails = props => {
                         )}
 
                         {/* Goat Option */}
-                        {event.qurbani_pricing.goat_price && (
+                        {currentPricing?.goat_price && (
                           <div 
                             className={`bg-white p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
                               selectedAnimal === 'goat' ? 'border-green-500 bg-green-50' : 'border-green-200 hover:border-green-300'
                             }`}
                             onClick={() => {
                               setSelectedAnimal('goat');
-                              setSelectedAnimalPrice(Number.parseFloat(event.qurbani_pricing.goat_price));
+                              setSelectedAnimalPrice(Number.parseFloat(currentPricing?.goat_price));
                             }}
                           >
                             <div className="text-center">
                               <div className="text-4xl mb-3">🐐</div>
                               <p className="text-lg font-semibold text-green-700 mb-2">Goat</p>
                               <p className="text-2xl font-bold text-green-900">
-                                ${Number.parseFloat(event.qurbani_pricing.goat_price).toFixed(2)}
+                                ${Number.parseFloat(currentPricing?.goat_price).toFixed(2)}
                               </p>
                               {selectedAnimal === 'goat' && (
                                 <div className="mt-3">
@@ -293,21 +298,21 @@ const EventDetails = props => {
                         )}
 
                         {/* Lamb Option */}
-                        {event.qurbani_pricing.lamb_price && (
+                        {currentPricing?.lamb_price && (
                           <div 
                             className={`bg-white p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
                               selectedAnimal === 'lamb' ? 'border-orange-500 bg-orange-50' : 'border-orange-200 hover:border-orange-300'
                             }`}
                             onClick={() => {
                               setSelectedAnimal('lamb');
-                              setSelectedAnimalPrice(Number.parseFloat(event.qurbani_pricing.lamb_price));
+                              setSelectedAnimalPrice(Number.parseFloat(currentPricing?.lamb_price));
                             }}
                           >
                             <div className="text-center">
                               <div className="text-4xl mb-3">🐑</div>
                               <p className="text-lg font-semibold text-orange-700 mb-2">Lamb</p>
                               <p className="text-2xl font-bold text-orange-900">
-                                ${Number.parseFloat(event.qurbani_pricing.lamb_price).toFixed(2)}
+                                ${Number.parseFloat(currentPricing?.lamb_price).toFixed(2)}
                               </p>
                               {selectedAnimal === 'lamb' && (
                                 <div className="mt-3">
@@ -330,7 +335,11 @@ const EventDetails = props => {
                           <div className="relative bg-gray-100 rounded-lg p-1 flex">
                             <button
                               type="button"
-                              onClick={() => setQurbaniLocation('australia')}
+                              onClick={() => {
+                                setQurbaniLocation('australia');
+                                setSelectedAnimal('');
+                                setSelectedAnimalPrice(0);
+                              }}
                               className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
                                 qurbaniLocation === 'australia'
                                   ? 'bg-blue-600 text-white shadow-md'
@@ -341,7 +350,11 @@ const EventDetails = props => {
                             </button>
                             <button
                               type="button"
-                              onClick={() => setQurbaniLocation('overseas')}
+                              onClick={() => {
+                                setQurbaniLocation('overseas');
+                                setSelectedAnimal('');
+                                setSelectedAnimalPrice(0);
+                              }}
                               className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
                                 qurbaniLocation === 'overseas'
                                   ? 'bg-green-600 text-white shadow-md'

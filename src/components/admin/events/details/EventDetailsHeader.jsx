@@ -67,45 +67,93 @@ const EventDetailsHeader = ({ event }) => {
             <div className="flex items-center gap-2 mb-4">
               <Star className="h-5 w-5 text-amber-500" />
               <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
-                Qurbani Pricing Options
+              Qurbani In Australia
               </h3>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Cow Price */}
-              {event.qurbani_pricing.cow_price && (
+              {event.qurbani_pricing.qurbani_in_australia.cow_price && (
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm hover:shadow-md transition-shadow">
                   <div className="text-center">
                     <div className="text-3xl mb-2">🐄</div>
                     <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">Cow</p>
                     <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                      ${Number.parseFloat(event.qurbani_pricing.cow_price).toFixed(2)}
+                      ${Number.parseFloat(event.qurbani_pricing.qurbani_in_australia.cow_price).toFixed(2)}
                     </p>
                   </div>
                 </div>
               )}
 
               {/* Goat Price */}
-              {event.qurbani_pricing.goat_price && (
+              {event.qurbani_pricing.qurbani_in_australia.goat_price && (
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-green-200 dark:border-green-700 shadow-sm hover:shadow-md transition-shadow">
                   <div className="text-center">
                     <div className="text-3xl mb-2">🐐</div>
                     <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-2">Goat</p>
                     <p className="text-lg font-bold text-green-900 dark:text-green-100">
-                      ${Number.parseFloat(event.qurbani_pricing.goat_price).toFixed(2)}
+                      ${Number.parseFloat(event.qurbani_pricing.qurbani_in_australia.goat_price).toFixed(2)}
                     </p>
                   </div>
                 </div>
               )}
 
               {/* Lamb Price */}
-              {event.qurbani_pricing.lamb_price && (
+              {event.qurbani_pricing.qurbani_in_australia.lamb_price && (
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-orange-200 dark:border-orange-700 shadow-sm hover:shadow-md transition-shadow">
                   <div className="text-center">
                     <div className="text-3xl mb-2">🐑</div>
                     <p className="text-sm font-medium text-orange-700 dark:text-orange-300 mb-2">Lamb</p>
                     <p className="text-lg font-bold text-orange-900 dark:text-orange-100">
-                      ${Number.parseFloat(event.qurbani_pricing.lamb_price).toFixed(2)}
+                      ${Number.parseFloat(event.qurbani_pricing.qurbani_in_australia.lamb_price).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="h-5 w-5 text-amber-500" />
+              <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
+              Qurbani Overseas
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Cow Price */}
+              {event.qurbani_pricing.qurbani_overseas.cow_price && (
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">🐄</div>
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">Cow</p>
+                    <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                      ${Number.parseFloat(event.qurbani_pricing.qurbani_overseas.cow_price).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Goat Price */}
+              {event.qurbani_pricing.qurbani_overseas.goat_price && (
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-green-200 dark:border-green-700 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">🐐</div>
+                    <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-2">Goat</p>
+                    <p className="text-lg font-bold text-green-900 dark:text-green-100">
+                      ${Number.parseFloat(event.qurbani_pricing.qurbani_overseas.goat_price).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Lamb Price */}
+              {event.qurbani_pricing.qurbani_overseas.lamb_price && (
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-orange-200 dark:border-orange-700 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">🐑</div>
+                    <p className="text-sm font-medium text-orange-700 dark:text-orange-300 mb-2">Lamb</p>
+                    <p className="text-lg font-bold text-orange-900 dark:text-orange-100">
+                      ${Number.parseFloat(event.qurbani_pricing.qurbani_overseas.lamb_price).toFixed(2)}
                     </p>
                   </div>
                 </div>

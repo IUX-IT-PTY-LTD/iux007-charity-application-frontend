@@ -100,9 +100,14 @@ function EditEventContent({ params }) {
       featured_image: null,
       // Qurbani donation fields
       is_qurbani_donation: false,
+      // Australia pricing
       cow_price: null,
       goat_price: null,
       lamb_price: null,
+      // Overseas pricing
+      overseas_cow_price: null,
+      overseas_goat_price: null,
+      overseas_lamb_price: null,
     },
     mode: 'onChange',
   });
@@ -145,9 +150,14 @@ function EditEventContent({ params }) {
             featured_image: fetchedEvent.featured_image || null,
             // Qurbani donation fields
             is_qurbani_donation: fetchedEvent.is_qurbani_donation === 1 || fetchedEvent.is_qurbani_donation === true,
-            cow_price: fetchedEvent.qurbani_pricing?.cow_price ?? null,
-            goat_price: fetchedEvent.qurbani_pricing?.goat_price ?? null,
-            lamb_price: fetchedEvent.qurbani_pricing?.lamb_price ?? null,
+            // Australia pricing
+            cow_price: fetchedEvent.qurbani_pricing?.qurbani_in_australia?.cow_price ?? null,
+            goat_price: fetchedEvent.qurbani_pricing?.qurbani_in_australia?.goat_price ?? null,
+            lamb_price: fetchedEvent.qurbani_pricing?.qurbani_in_australia?.lamb_price ?? null,
+            // Overseas pricing
+            overseas_cow_price: fetchedEvent.qurbani_pricing?.qurbani_overseas?.cow_price ?? null,
+            overseas_goat_price: fetchedEvent.qurbani_pricing?.qurbani_overseas?.goat_price ?? null,
+            overseas_lamb_price: fetchedEvent.qurbani_pricing?.qurbani_overseas?.lamb_price ?? null,
           };
 
           // Set form values
