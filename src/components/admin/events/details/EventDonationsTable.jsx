@@ -637,7 +637,6 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                             <span className="text-green-600 text-sm">🏛️</span>
                             <div>
                               <div className="font-medium text-green-700">${Number(donation.admin_contribution_amount).toFixed(2)}</div>
-                              <div className="text-xs text-green-600">Admin added</div>
                             </div>
                           </div>
                         ) : (
