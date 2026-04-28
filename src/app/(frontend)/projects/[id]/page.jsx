@@ -24,7 +24,7 @@ const EventDetails = props => {
   const [selectedAnimal, setSelectedAnimal] = useState('');
   const [selectedAnimalPrice, setSelectedAnimalPrice] = useState(0);
   const [qurbaniUnits, setQurbaniUnits] = useState(1);
-  const [qurbaniNames, setQurbaniNames] = useState([{ name: '', address: '', motherName: '', fatherName: '' }]);
+  const [qurbaniNames, setQurbaniNames] = useState([{ name: '', address: '', motherName: '', fatherName: '', qurbaniDay: '' }]);
   const [qurbaniLocation, setQurbaniLocation] = useState('australia'); // 'australia' or 'overseas'
 
   const currentPricing =
@@ -46,9 +46,9 @@ const EventDetails = props => {
       }
       
       // Validate names are filled
-      const incompleteNames = qurbaniNames.some(entry => !entry.name.trim() || !entry.address.trim());
+      const incompleteNames = qurbaniNames.some(entry => !entry.name.trim() || !entry.address.trim() || !entry.qurbaniDay.trim());
       if (incompleteNames) {
-        alert('Please fill in all required fields (Full name, Address)');
+        alert('Please fill in all required fields (Full name, Address, Qurbani Day)');
         return;
       }
 
@@ -98,7 +98,8 @@ const EventDetails = props => {
           name: nameEntry.name,
           address: nameEntry.address,
           father_name: nameEntry.fatherName,
-          mother_name: nameEntry.motherName
+          mother_name: nameEntry.motherName,
+          qurbani_day: nameEntry.qurbaniDay,
         }))
       })
     };
@@ -383,7 +384,7 @@ const EventDetails = props => {
                                     const units = Math.max(1, qurbaniUnits - 1);
                                     setQurbaniUnits(units);
                                     const newNames = Array.from({ length: units }, (_, i) =>
-                                      qurbaniNames[i] || { name: '', address: '', motherName: '', fatherName: '' }
+                                      qurbaniNames[i] || { name: '', address: '', motherName: '', fatherName: '', qurbaniDay: '' }
                                     );
                                     setQurbaniNames(newNames);
                                   }}
@@ -401,7 +402,7 @@ const EventDetails = props => {
                                     const units = qurbaniUnits + 1;
                                     setQurbaniUnits(units);
                                     const newNames = Array.from({ length: units }, (_, i) =>
-                                      qurbaniNames[i] || { name: '', address: '', motherName: '', fatherName: '' }
+                                      qurbaniNames[i] || { name: '', address: '', motherName: '', fatherName: '', qurbaniDay: '' }
                                     );
                                     setQurbaniNames(newNames);
                                   }}
@@ -454,6 +455,7 @@ const EventDetails = props => {
                                       <select
                                         className="flex-1 min-w-[160px] border px-4 py-2.5 rounded-lg bg-white appearance-none"
                                         value={nameEntry.qurbaniDay}
+                                        required="true"
                                         onChange={(e) => {
                                           const newNames = [...qurbaniNames];
                                           newNames[index].qurbaniDay = e.target.value;
@@ -461,8 +463,8 @@ const EventDetails = props => {
                                         }}
                                       >
                                         <option value="">Select Qurbani Day</option>
-                                        <option value="Qurbani as per Moon Sighting">🌙 Qurbani as per Moon Sighting</option>
-                                        <option value="Qurbani As per ANIC">🕌 Qurbani As per ANIC</option>
+                                        <option value="Qurbani as per Moon Sighting">Qurbani as per Moon Sighting</option>
+                                        <option value="Qurbani As per ANIC">Qurbani As per ANIC</option>
                                       </select>
                                     </div>
                                    
