@@ -401,16 +401,67 @@ export default function ProfilePage() {
                         <div className="border-t border-gray-100 pt-4">
                           <div className="space-y-3">
                             {donation.donation_details.map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex justify-between items-center text-sm"
-                              >
-                                <span className="text-gray-600">
-                                  {item.event.title} (x{item.quantity})
-                                </span>
-                                <span className="font-medium">
-                                  ${item.quantity * item.per_unit_price}
-                                </span>
+                              <div key={index} className="space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-gray-600">
+                                    {item.event.title} (x{item.quantity})
+                                  </span>
+                                  <span className="font-medium">
+                                    ${item.quantity * item.per_unit_price}
+                                  </span>
+                                </div>
+                                
+                                {/* Show Qurbani participants if this is a Qurbani donation */}
+                                {donation.is_qurbani_donation && donation.qurbani_participants && donation.qurbani_participants.length > 0 && (
+                                  <div className="ml-4 mt-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                    {/* Highlighted Event Name */}
+                                    <div className="bg-amber-100 border-l-4 border-amber-500 p-3 rounded mb-3">
+                                      <h4 className="text-base font-bold text-amber-900 flex items-center">
+                                        <span className="text-amber-600 mr-2 text-lg">🐄</span>
+                                        {item.event.title}
+                                      </h4>
+                                      <div className="text-xs text-amber-700 mt-1 flex gap-4">
+                                        {item.animal_type && (
+                                          <span><span className="font-medium">Animal:</span> {item.animal_type.charAt(0).toUpperCase() + item.animal_type.slice(1)}</span>
+                                        )}
+                                        <span><span className="font-medium">Total Units:</span> {donation.qurbani_participants.length}</span>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Participants Table */}
+                                    <div className="bg-white rounded-lg overflow-hidden border border-amber-200">
+                                      <div className="bg-amber-100 px-3 py-2">
+                                        <h5 className="text-sm font-semibold text-amber-900">Qurbani Participants</h5>
+                                      </div>
+                                      <div className="overflow-x-auto">
+                                        <table className="w-full text-xs">
+                                          <thead className="bg-amber-50">
+                                            <tr>
+                                              <th className="px-3 py-2 text-left font-medium text-amber-900 border-b border-amber-200">#</th>
+                                              <th className="px-3 py-2 text-left font-medium text-amber-900 border-b border-amber-200">Participant Name</th>
+                                              <th className="px-3 py-2 text-left font-medium text-amber-900 border-b border-amber-200">Address</th>
+                                              <th className="px-3 py-2 text-left font-medium text-amber-900 border-b border-amber-200">Qurbani Day</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {donation.qurbani_participants.map((participant, pIndex) => (
+                                              <tr key={pIndex} className={`${pIndex % 2 === 0 ? 'bg-white' : 'bg-amber-25'} hover:bg-amber-50 transition-colors`}>
+                                                <td className="px-3 py-2 text-gray-700 border-b border-gray-100">{pIndex + 1}</td>
+                                                <td className="px-3 py-2 text-gray-800 font-medium border-b border-gray-100">{participant.participant_name}</td>
+                                                <td className="px-3 py-2 text-gray-600 border-b border-gray-100">{participant.address}</td>
+                                                <td className="px-3 py-2 text-gray-600 border-b border-gray-100">
+                                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                                                    {participant.qurbani_day}
+                                                  </span>
+                                                </td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             ))}
                             <div className="flex justify-between items-center text-sm text-primary">
