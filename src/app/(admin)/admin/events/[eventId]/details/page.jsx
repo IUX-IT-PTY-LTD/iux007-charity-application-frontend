@@ -258,33 +258,155 @@ function EventDetailsContent({ params }) {
     }
 
     try {
-      // Get field names from the first donation
-      const fields = Object.keys(event.donation_details[0]);
+      // Check if this is a Qurbani event
+      const isQurbaniEvent = event.is_qurbani_donation === 1;
 
-      // Create CSV header row
-      let csv = fields.join(',') + '\n';
+      if (isQurbaniEvent) {
+        // Qurbani-specific export with hierarchical structure
+        // Main donation row + participant sub-rows
+        const headers = [
+          'Row Type',
+          'Donation ID',
+          'User Name',
+          'User Email', 
+          'User Phone',
+          'Animal Type',
+          'Per Unit Price',
+          'Total Price',
+          'Admin Contribution',
+          'Donation Amount',
+          'Donation Total Price',
+          'Total Participants',
+          'Participant Name',
+          'Delivery Address',
+          'Qurbani Day',
+          'Donation Status',
+          'Donated At'
+        ];
 
-      // Add data rows
-      event.donation_details.forEach((donation) => {
-        const row = fields.map((field) => {
-          // Handle values that might need escaping (like strings with commas)
-          const value = donation[field] === null ? '' : donation[field];
-          return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+        let csv = headers.join(',') + '\n';
+
+        // Add data rows for Qurbani donations
+        event.donation_details.forEach((donation) => {
+          try {
+            // Get participants from the API response
+            const participants = donation.qurbani_participants || [];
+            const participantCount = participants.length;
+
+            // First, add the main donation row
+            const donationRow = [
+              '"DONATION"', // Row Type
+              donation.id || '',
+              `"${donation.user_name || ''}"`,
+              `"${donation.user_email || ''}"`,
+              `"${donation.user_phone_number || ''}"`,
+              `"${donation.animal_type || ''}"`,
+              donation.per_unit_price || 0,
+              donation.total_price || 0,
+              donation.admin_contribution_amount || 0,
+              donation.donation_amount || 0,
+              donation.donation_total_price || 0,
+              participantCount,
+              '""', // Participant fields empty for main donation row
+              '""',
+              '""',
+              `"${donation.status || ''}"`,
+              `"${donation.donated_at || ''}"`
+            ];
+
+            csv += donationRow.join(',') + '\n';
+
+            // Then add participant rows (if any)
+            participants.forEach((participant, index) => {
+              const participantRow = [
+                '"PARTICIPANT"', // Row Type
+                donation.id || '', // Same donation ID for reference
+                '""', // User fields empty for participant rows
+                '""',
+                '""',
+                '""', // Animal type empty for participant rows
+                '""', // Financial fields empty for participant rows
+                '""',
+                '""',
+                '""',
+                '""',
+                '""', // Participant count empty for participant rows
+                `"${participant.participant_name || ''}"`,
+                `"${participant.address || ''}"`,
+                `"${participant.qurbani_day || ''}"`,
+                '""', // Status empty for participant rows
+                '""'  // Date empty for participant rows
+              ];
+
+              csv += participantRow.join(',') + '\n';
+            });
+
+            // Add a blank row between donations for better readability
+            if (event.donation_details.indexOf(donation) < event.donation_details.length - 1) {
+              csv += Array(headers.length).fill('""').join(',') + '\n';
+            }
+
+          } catch (parseError) {
+            console.error('Error processing donation data:', parseError);
+            // Add a basic donation row if parsing fails
+            const errorRow = [
+              '"DONATION"',
+              donation.id || '',
+              `"${donation.user_name || ''}"`,
+              `"${donation.user_email || ''}"`,
+              `"${donation.user_phone_number || ''}"`,
+              `"${donation.animal_type || ''}"`,
+              donation.per_unit_price || 0,
+              donation.total_price || 0,
+              donation.admin_contribution_amount || 0,
+              donation.donation_amount || 0,
+              donation.donation_total_price || 0,
+              0, // Error case participant count
+              '"ERROR PARSING PARTICIPANTS"',
+              '""',
+              '""',
+              `"${donation.status || ''}"`,
+              `"${donation.donated_at || ''}"`
+            ];
+            csv += errorRow.join(',') + '\n';
+          }
         });
-        csv += row.join(',') + '\n';
-      });
 
-      // Create download link
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${event.title}-donations.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${event.title}-qurbani-donations.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-      toast.success('Donations exported successfully');
+        toast.success('Qurbani donations exported successfully');
+      } else {
+        // Regular donation export (existing logic)
+        const fields = Object.keys(event.donation_details[0]);
+        let csv = fields.join(',') + '\n';
+
+        event.donation_details.forEach((donation) => {
+          const row = fields.map((field) => {
+            const value = donation[field] === null ? '' : donation[field];
+            return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+          });
+          csv += row.join(',') + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${event.title}-donations.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast.success('Donations exported successfully');
+      }
     } catch (error) {
       console.error('Error exporting donations:', error);
       toast.error('Failed to export donations');

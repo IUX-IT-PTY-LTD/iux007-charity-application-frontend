@@ -29,8 +29,8 @@ const EventDetails = props => {
 
   const currentPricing =
   qurbaniLocation === 'australia'
-    ? event.qurbani_pricing?.qurbani_in_australia
-    : event.qurbani_pricing?.qurbani_overseas;
+    ? event.qurbani_pricing?.qurbani_in_australia || {}
+    : event.qurbani_pricing?.qurbani_overseas || {};
 
   const handleDonation = async (e) => {
     e.preventDefault();
