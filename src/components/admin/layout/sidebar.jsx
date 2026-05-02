@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAdminContext } from '@/components/admin/layout/admin-context';
 import { logout } from '@/api/services/admin/authService';
+import { getAllSettings } from '@/api/services/admin/settingsService';
 
 // Import permission hooks
 import { PermissionProvider, usePermissionContext } from '@/api/contexts/PermissionContext';
@@ -294,6 +295,8 @@ function AdminSidebarContent() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [expandedMenus, setExpandedMenus] = React.useState(new Set());
+  const [logoUrl, setLogoUrl] = React.useState(null);
+  const [isLoadingLogo, setIsLoadingLogo] = React.useState(true);
   const { adminProfile, isLoadingProfile, clearProfile } = useAdminContext();
 
   // Get all module permissions
@@ -301,6 +304,26 @@ function AdminSidebarContent() {
 
   // Get permission context for overall loading state
   const { isLoading: permissionContextLoading, isInitialized } = usePermissionContext();
+
+  // Fetch logo from settings
+  React.useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        setIsLoadingLogo(true);
+        const response = await getAllSettings();
+        const settings = response.data || [];
+        const logoSetting = settings.find(setting => setting.key === 'company_logo');
+        setLogoUrl(logoSetting?.value || null);
+      } catch (error) {
+        console.error('Error fetching logo from settings:', error);
+        setLogoUrl(null);
+      } finally {
+        setIsLoadingLogo(false);
+      }
+    };
+
+    fetchLogo();
+  }, []);
 
   // Check if user is super admin
   const isSuperAdmin = React.useMemo(() => {
@@ -482,9 +505,9 @@ function AdminSidebarContent() {
         <div className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center flex-1 gap-3">
             <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
-              <AvatarImage src="/assets/img/avatar.jpg" alt="Admin" />
+              {logoUrl && <AvatarImage src={logoUrl} alt="Logo" />}
               <AvatarFallback className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-                {isLoadingProfile ? 'SA' : getInitials()}
+                {isLoadingLogo ? '...' : 'L'}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col text-sm">
@@ -530,9 +553,9 @@ function AdminSidebarContent() {
       <div className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center flex-1 gap-3">
           <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
-            <AvatarImage src="/assets/img/avatar.jpg" alt="Admin" />
+            {logoUrl && <AvatarImage src={logoUrl} alt="Logo" />}
             <AvatarFallback className="bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-              {isLoadingProfile ? 'SA' : getInitials()}
+              {isLoadingLogo ? '...' : 'L'}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col text-sm">
