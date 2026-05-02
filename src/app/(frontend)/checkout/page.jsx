@@ -132,11 +132,17 @@ const Checkout = () => {
            guestUserData.email.includes('@') && guestUserData.email.includes('.');
   };
 
-  // Update total amount whenever admin contribution changes
+  // Update total amount and checkout data whenever admin contribution changes
   useEffect(() => {
     if (cartItems.length > 0) {
       const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
       setTotalAmount(subtotal + adminContributionAmount);
+      
+      // Update checkout data with new admin contribution
+      setCheckoutData(prevData => ({
+        ...prevData,
+        admin_contribution: adminContributionAmount,
+      }));
     }
   }, [adminContributionAmount, cartItems]);
 

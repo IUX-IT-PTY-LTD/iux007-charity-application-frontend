@@ -584,23 +584,23 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Donor</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Admin Contribution</TableHead>
-                  {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
-                  {isQurbaniEvent && <TableHead>Qurbani Location</TableHead>}
-                  {isQurbaniEvent && <TableHead>Participants</TableHead>}
-                  <TableHead>Date</TableHead>
-                  <TableHead>Notes</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead className="w-32">Donor</TableHead>
+                  <TableHead className="w-24">Amount</TableHead>
+                  <TableHead className="w-28">Admin Contribution</TableHead>
+                  <TableHead className="w-28">Total Amount</TableHead>
+                  {isQurbaniEvent && <TableHead className="w-24">Animal Type</TableHead>}
+                  {isQurbaniEvent && <TableHead className="w-28">Qurbani Location</TableHead>}
+                  {isQurbaniEvent && <TableHead className="w-24">Participants</TableHead>}
+                  <TableHead className="w-40">Date</TableHead>
+                  <TableHead className="w-20">Status</TableHead>
+                  <TableHead className="w-16">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentDonations.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 11 : 8} className="text-center py-6">
+                    <TableCell colSpan={isQurbaniEvent ? 12 : 9} className="text-center py-6">
                       No donations match your search
                     </TableCell>
                   </TableRow>
@@ -609,18 +609,13 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                     <TableRow key={donation.id}>
                       <TableCell className="font-medium">{indexOfFirstItem + index + 1}</TableCell>
                       <TableCell>
-                        <div>
-                          <div className="font-medium">
+                        <div className="max-w-32">
+                          <div className="font-medium truncate" title={maskSensitiveData(donation.user_name, 'name')}>
                             {maskSensitiveData(donation.user_name, 'name')}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 truncate" title={maskSensitiveData(donation.user_email, 'email')}>
                             {maskSensitiveData(donation.user_email, 'email')}
                           </div>
-                          {donation.user_phone_number && (
-                            <div className="text-xs text-gray-500">
-                              {maskSensitiveData(donation.user_phone_number, 'phone')}
-                            </div>
-                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -644,6 +639,22 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                             ${donation.admin_contribution_amount ? Number(donation.admin_contribution_amount).toFixed(2) : '0.00'}
                           </div>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const donationAmount = Number(donation.total_price || 0);
+                          const adminContribution = Number(donation.admin_contribution_amount || 0);
+                          const totalAmount = donationAmount + adminContribution;
+                          
+                          return (
+                            <div className="flex items-center gap-2">
+                              <span className="text-blue-600 text-sm">💰</span>
+                              <div className="font-bold text-blue-900">
+                                ${totalAmount.toFixed(2)}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       {isQurbaniEvent && (
                         <TableCell>
@@ -689,15 +700,6 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                         </TableCell>
                       )}
                       <TableCell>{formatDate(donation.donated_at)}</TableCell>
-                      <TableCell>
-                        <div className="max-w-[200px] truncate">
-                          {donation.notes ? (
-                            maskSensitiveData(donation.notes, 'notes')
-                          ) : (
-                            <span className="text-gray-400">No notes</span>
-                          )}
-                        </div>
-                      </TableCell>
                       <TableCell>{getStatusBadge(donation.status)}</TableCell>
                       <TableCell>
                         <Button
@@ -723,16 +725,17 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Donor</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Admin Contribution</TableHead>
-                  {isQurbaniEvent && <TableHead>Animal Type</TableHead>}
-                  {isQurbaniEvent && <TableHead>Qurbani Location</TableHead>}
-                  {isQurbaniEvent && <TableHead>Participants</TableHead>}
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead className="w-32">Donor</TableHead>
+                  <TableHead className="w-24">Amount</TableHead>
+                  <TableHead className="w-28">Admin Contribution</TableHead>
+                  <TableHead className="w-28">Total Amount</TableHead>
+                  {isQurbaniEvent && <TableHead className="w-24">Animal Type</TableHead>}
+                  {isQurbaniEvent && <TableHead className="w-28">Qurbani Location</TableHead>}
+                  {isQurbaniEvent && <TableHead className="w-24">Participants</TableHead>}
+                  <TableHead className="w-40">Date</TableHead>
+                  <TableHead className="w-20">Status</TableHead>
+                  <TableHead className="w-16">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -750,6 +753,9 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                     </TableCell>
                     <TableCell>
                       <span className="text-gray-400">***</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-gray-400">$***</span>
                     </TableCell>
                     {isQurbaniEvent && (
                       <TableCell>
@@ -779,7 +785,7 @@ const EventDonationsTable = ({ donations = [], eventPermissions: passedPermissio
                 ))}
                 {donations.length > 3 && (
                   <TableRow>
-                    <TableCell colSpan={isQurbaniEvent ? 10 : 7} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={isQurbaniEvent ? 11 : 8} className="text-center py-4 text-gray-500">
                       ... and {donations.length - 3} more donations
                     </TableCell>
                   </TableRow>
