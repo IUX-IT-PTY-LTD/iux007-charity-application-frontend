@@ -237,11 +237,11 @@ const EventDetails = props => {
                         <FaStar className="text-amber-500 text-xl" />
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
                         {/* Cow Option */}
                         {currentPricing?.cow_price && (
                           <div 
-                            className={`bg-white p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
+                            className={`bg-white p-4 sm:p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
                               selectedAnimal === 'cow' ? 'border-blue-500 bg-blue-50' : 'border-blue-200 hover:border-blue-300'
                             }`}
                             onClick={() => {
@@ -250,9 +250,9 @@ const EventDetails = props => {
                             }}
                           >
                             <div className="text-center">
-                              <div className="text-4xl mb-3">🐄</div>
-                              <p className="text-lg font-semibold text-blue-700 mb-2">Cow</p>
-                              <p className="text-2xl font-bold text-blue-900">
+                              <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🐄</div>
+                              <p className="text-base sm:text-lg font-semibold text-blue-700 mb-1 sm:mb-2">Cow</p>
+                              <p className="text-xl sm:text-2xl font-bold text-blue-900">
                                 ${Number.parseFloat(currentPricing?.cow_price).toFixed(2)}
                               </p>
                               {selectedAnimal === 'cow' && (
@@ -271,7 +271,7 @@ const EventDetails = props => {
                         {/* Goat Option */}
                         {currentPricing?.goat_price && (
                           <div 
-                            className={`bg-white p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
+                            className={`bg-white p-4 sm:p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
                               selectedAnimal === 'goat' ? 'border-green-500 bg-green-50' : 'border-green-200 hover:border-green-300'
                             }`}
                             onClick={() => {
@@ -280,9 +280,9 @@ const EventDetails = props => {
                             }}
                           >
                             <div className="text-center">
-                              <div className="text-4xl mb-3">🐐</div>
-                              <p className="text-lg font-semibold text-green-700 mb-2">Goat</p>
-                              <p className="text-2xl font-bold text-green-900">
+                              <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🐐</div>
+                              <p className="text-base sm:text-lg font-semibold text-green-700 mb-1 sm:mb-2">Goat</p>
+                              <p className="text-xl sm:text-2xl font-bold text-green-900">
                                 ${Number.parseFloat(currentPricing?.goat_price).toFixed(2)}
                               </p>
                               {selectedAnimal === 'goat' && (
@@ -301,7 +301,7 @@ const EventDetails = props => {
                         {/* Lamb Option */}
                         {currentPricing?.lamb_price && (
                           <div 
-                            className={`bg-white p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
+                            className={`bg-white p-4 sm:p-6 rounded-lg border-2 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
                               selectedAnimal === 'lamb' ? 'border-orange-500 bg-orange-50' : 'border-orange-200 hover:border-orange-300'
                             }`}
                             onClick={() => {
@@ -310,9 +310,9 @@ const EventDetails = props => {
                             }}
                           >
                             <div className="text-center">
-                              <div className="text-4xl mb-3">🐑</div>
-                              <p className="text-lg font-semibold text-orange-700 mb-2">Lamb</p>
-                              <p className="text-2xl font-bold text-orange-900">
+                              <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🐑</div>
+                              <p className="text-base sm:text-lg font-semibold text-orange-700 mb-1 sm:mb-2">Lamb</p>
+                              <p className="text-xl sm:text-2xl font-bold text-orange-900">
                                 ${Number.parseFloat(currentPricing?.lamb_price).toFixed(2)}
                               </p>
                               {selectedAnimal === 'lamb' && (
@@ -330,10 +330,10 @@ const EventDetails = props => {
                       </div>
 
                       {/* Qurbani Location Toggle */}
-                      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Select Qurbani Location</h4>
+                      <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
+                        <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Select Qurbani Location</h4>
                         <div className="flex items-center justify-center">
-                          <div className="relative bg-gray-100 rounded-lg p-1 flex">
+                          <div className="relative bg-gray-100 rounded-lg p-1 flex flex-col sm:flex-row w-full sm:w-auto">
                             <button
                               type="button"
                               onClick={() => {
@@ -341,7 +341,7 @@ const EventDetails = props => {
                                 setSelectedAnimal('');
                                 setSelectedAnimalPrice(0);
                               }}
-                              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                              className={`px-4 sm:px-6 py-2 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all mb-1 sm:mb-0 ${
                                 qurbaniLocation === 'australia'
                                   ? 'bg-blue-600 text-white shadow-md'
                                   : 'text-gray-600 hover:text-gray-800'
@@ -356,7 +356,7 @@ const EventDetails = props => {
                                 setSelectedAnimal('');
                                 setSelectedAnimalPrice(0);
                               }}
-                              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                              className={`px-4 sm:px-6 py-2 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
                                 qurbaniLocation === 'overseas'
                                   ? 'bg-green-600 text-white shadow-md'
                                   : 'text-gray-600 hover:text-gray-800'
@@ -370,14 +370,14 @@ const EventDetails = props => {
 
                       {/* Qurbani Configuration */}
                       {selectedAnimal && (
-                        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                          <h4 className="text-lg font-semibold text-gray-800 mb-4">Configure Your {selectedAnimal.charAt(0).toUpperCase() + selectedAnimal.slice(1)} Qurbani</h4>
+                        <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 shadow-sm">
+                          <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Configure Your {selectedAnimal.charAt(0).toUpperCase() + selectedAnimal.slice(1)} Qurbani</h4>
                           
                           <div className="grid grid-cols-1 gap-6 mb-6">
                             {/* Units Selection */}
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Number of Units</label>
-                              <div className="flex items-center gap-4">
+                              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Number of Units</label>
+                              <div className="flex items-center gap-2 sm:gap-4 justify-center">
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -388,13 +388,13 @@ const EventDetails = props => {
                                     );
                                     setQurbaniNames(newNames);
                                   }}
-                                  className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center text-lg font-bold transition-colors"
+                                  className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center text-base sm:text-lg font-bold transition-colors"
                                   disabled={qurbaniUnits <= 1}
                                 >
                                   -
                                 </button>
-                                <div className="flex-1 text-center">
-                                  <span className="text-2xl font-bold text-gray-800">{qurbaniUnits}</span>
+                                <div className="flex-1 text-center min-w-[60px]">
+                                  <span className="text-xl sm:text-2xl font-bold text-gray-800">{qurbaniUnits}</span>
                                 </div>
                                 <button
                                   type="button"
@@ -406,28 +406,29 @@ const EventDetails = props => {
                                     );
                                     setQurbaniNames(newNames);
                                   }}
-                                  className="w-10 h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-lg flex items-center justify-center text-lg font-bold transition-colors"
+                                  className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-lg flex items-center justify-center text-base sm:text-lg font-bold transition-colors"
                                 >
                                   +
                                 </button>
                               </div>
-                              <p className="text-sm text-gray-500 mt-1">Each unit costs ${selectedAnimalPrice.toFixed(2)}</p>
+                              <p className="text-xs sm:text-sm text-gray-500 mt-1 text-center">Each unit costs ${selectedAnimalPrice.toFixed(2)}</p>
                             </div>
                           </div>
 
                           {/* Names and Addresses */}
                           <div>
-                            <h5 className="text-md font-medium text-gray-800 mb-3">Names and Addresses</h5>
-                            <div className="space-y-4">
+                            <h5 className="text-sm sm:text-md font-medium text-gray-800 mb-3">Names and Addresses</h5>
+                            <div className="space-y-3 sm:space-y-4">
                               {qurbaniNames.map((nameEntry, index) => (
-                                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                                  <h6 className="text-sm font-medium text-gray-700 mb-2">Person {index + 1}</h6>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div key={index} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                                  <h6 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Person {index + 1}</h6>
+                                  <div className="grid grid-cols-1 gap-3 sm:gap-4">
                                     <div>
-                                      <label className="block text-xs text-gray-600 mb-1">Full Name</label>
+                                      <label className="block text-xs text-gray-600 mb-1">Full Name <span className="text-red-500">*</span></label>
                                       <input
                                         type="text"
                                         value={nameEntry.name}
+                                        required
                                         onChange={(e) => {
                                           const newNames = [...qurbaniNames];
                                           newNames[index].name = e.target.value;
@@ -438,24 +439,26 @@ const EventDetails = props => {
                                       />
                                     </div>
                                     <div>
-                                      <label className="block text-xs text-gray-600 mb-1">Address</label>
+                                      <label className="block text-xs text-gray-600 mb-1">Delivery address <span className="text-red-500">*</span></label>
                                       <input
                                         type="text"
                                         value={nameEntry.address}
+                                        required
                                         onChange={(e) => {
                                           const newNames = [...qurbaniNames];
                                           newNames[index].address = e.target.value;
                                           setQurbaniNames(newNames);
                                         }}
                                         className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                                        placeholder="Enter address"
+                                        placeholder="Enter delivery address"
                                       />
                                     </div>
                                     <div>
+                                      <label className="block text-xs text-gray-600 mb-1">Qurbani Day <span className="text-red-500">*</span></label>
                                       <select
-                                        className="flex-1 min-w-[160px] border px-4 py-2.5 rounded-lg bg-white appearance-none"
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
                                         value={nameEntry.qurbaniDay}
-                                        required="true"
+                                        required
                                         onChange={(e) => {
                                           const newNames = [...qurbaniNames];
                                           newNames[index].qurbaniDay = e.target.value;
@@ -475,13 +478,13 @@ const EventDetails = props => {
                           </div>
 
                           {/* Total Price Display */}
-                          <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-amber-50 rounded-lg border border-amber-200">
                             <div className="text-center">
-                              <p className="text-sm text-amber-700">Total Cost</p>
-                              <p className="text-2xl font-bold text-amber-900">
+                              <p className="text-xs sm:text-sm text-amber-700">Total Cost</p>
+                              <p className="text-xl sm:text-2xl font-bold text-amber-900">
                                 ${(selectedAnimalPrice * qurbaniUnits).toFixed(2)}
                               </p>
-                              <p className="text-sm text-amber-600">
+                              <p className="text-xs sm:text-sm text-amber-600">
                                 {qurbaniUnits} × {selectedAnimal} at ${selectedAnimalPrice.toFixed(2)} each
                               </p>
                             </div>
@@ -571,9 +574,10 @@ const EventDetails = props => {
                   <div className="flex justify-center mb-6">
                     <button
                       onClick={handleDonation}
-                      className="px-8 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-lg font-semibold shadow-lg"
+                      className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-base sm:text-lg font-semibold shadow-lg"
                     >
-                      Donate ${(selectedAnimalPrice * qurbaniUnits).toFixed(2)} for {qurbaniUnits} {selectedAnimal}{qurbaniUnits > 1 ? 's' : ''}
+                      <span className="block sm:hidden">Donate ${(selectedAnimalPrice * qurbaniUnits).toFixed(2)}</span>
+                      <span className="hidden sm:block">Donate ${(selectedAnimalPrice * qurbaniUnits).toFixed(2)} for {qurbaniUnits} {selectedAnimal}{qurbaniUnits > 1 ? 's' : ''}</span>
                     </button>
                   </div>
                 )}
