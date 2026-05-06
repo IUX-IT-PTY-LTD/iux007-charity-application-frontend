@@ -576,8 +576,8 @@ const EventDetails = props => {
                       onClick={handleDonation}
                       className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-base sm:text-lg font-semibold shadow-lg"
                     >
-                      <span className="block sm:hidden">Donate ${(selectedAnimalPrice * qurbaniUnits).toFixed(2)}</span>
-                      <span className="hidden sm:block">Donate ${(selectedAnimalPrice * qurbaniUnits).toFixed(2)} for {qurbaniUnits} {selectedAnimal}{qurbaniUnits > 1 ? 's' : ''}</span>
+                      <span className="block sm:hidden">Book Qurbani</span>
+                      <span className="hidden sm:block">Book Qurbani</span>
                     </button>
                   </div>
                 )}
