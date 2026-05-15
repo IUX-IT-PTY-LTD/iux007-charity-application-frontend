@@ -1,5 +1,6 @@
 import { API_BASE_URL, API_VERSION } from '../../config';
 import axios from 'axios';
+import { isFacebookBrowser, getFacebookSafeHeaders, getFacebookSafeFetchOptions } from '../../../utils/browserUtils';
 
 class ApiService {
   constructor() {
@@ -12,21 +13,28 @@ class ApiService {
   // Generic GET request
   async get(endpoint, options = {}) {
     try {
+      const baseHeaders = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        ...this.getAuthHeader(),
+        ...options.headers,
+      };
+
       const response = await axios.get(`${this.baseUrl}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-          ...this.getAuthHeader(),
-          ...options.headers,
-        },
+        headers: getFacebookSafeHeaders(baseHeaders),
         // Add timestamp to prevent caching
         params: {
           _t: Date.now(),
           ...options.params,
         },
+        // Facebook-safe axios config
+        ...(isFacebookBrowser() ? {
+          timeout: 30000,
+          withCredentials: true,
+        } : {}),
       });
       return response.data;
     } catch (error) {
@@ -38,17 +46,21 @@ class ApiService {
   // Generic POST request
   async post(endpoint, data, options = {}) {
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const baseHeaders = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        ...this.getAuthHeader(),
+        ...options.headers,
+      };
+
+      const fetchOptions = getFacebookSafeFetchOptions({
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          ...this.getAuthHeader(),
-          ...options.headers,
-        },
+        headers: baseHeaders,
         body: JSON.stringify(data),
       });
+
+      const response = await fetch(`${this.baseUrl}${endpoint}`, fetchOptions);
       return await response.json();
     } catch (error) {
       console.error('API POST Error:', error);
