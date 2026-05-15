@@ -11,9 +11,15 @@ const TRACKING_PARAMS = [
   'utm_content',
 ];
 
+// Check if request is from Facebook's in-app browser
+function isFacebookBrowser(userAgent) {
+  return userAgent.includes('FBAN') || userAgent.includes('FBAV') || userAgent.includes('Instagram');
+}
+
 export function middleware(request) {
   const url = request.nextUrl.clone();
   const { searchParams } = url;
+  const userAgent = request.headers.get('user-agent') || '';
   
   // Check if any tracking parameters exist
   const hasTrackingParams = TRACKING_PARAMS.some(param => 
@@ -21,12 +27,22 @@ export function middleware(request) {
   );
   
   if (hasTrackingParams) {
-    // Remove all tracking parameters
+    // For Facebook in-app browser, use rewrite instead of redirect to avoid CORS issues
+    if (isFacebookBrowser(userAgent)) {
+      // Remove tracking parameters
+      TRACKING_PARAMS.forEach(param => {
+        searchParams.delete(param);
+      });
+      
+      // Rewrite the URL instead of redirecting
+      return NextResponse.rewrite(url);
+    }
+    
+    // For regular browsers, use redirect
     TRACKING_PARAMS.forEach(param => {
       searchParams.delete(param);
     });
     
-    // Redirect to clean URL
     return NextResponse.redirect(url);
   }
   
