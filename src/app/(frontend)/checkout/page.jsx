@@ -72,8 +72,8 @@ const Checkout = () => {
       // Calculate subtotal from cart items
       const subtotal = parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-      // Set admin contribution amount (5% of subtotal)
-      const adminContrib = subtotal * 0.05;
+      // Set admin contribution amount (1.5% of subtotal)
+      const adminContrib = subtotal * 0.015;
       setAdminContributionAmount(adminContrib);
       setAdminInputValue(adminContrib.toFixed(2));
 
@@ -129,7 +129,8 @@ const Checkout = () => {
 
   const validateGuestData = () => {
     return guestUserData.name.trim() && guestUserData.email.trim() && 
-           guestUserData.email.includes('@') && guestUserData.email.includes('.');
+           guestUserData.email.includes('@') && guestUserData.email.includes('.') &&
+           guestUserData.phone.trim();
   };
 
   // Update total amount and checkout data whenever admin contribution changes
@@ -156,7 +157,7 @@ const Checkout = () => {
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
 
       const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      const newAdminContribution = newSubtotal * 0.05;
+      const newAdminContribution = newSubtotal * 0.015;
 
       // Update admin contribution and input value
       setAdminContributionAmount(newAdminContribution);
@@ -205,7 +206,7 @@ const Checkout = () => {
       // Update localStorage with new cart data
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
       const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      const newAdminContribution = newSubtotal * 0.05;
+      const newAdminContribution = newSubtotal * 0.015;
       
       // Update admin contribution and input value
       setAdminContributionAmount(newAdminContribution);
@@ -252,7 +253,7 @@ const Checkout = () => {
     
     // Recalculate totals
     const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const newAdminContribution = newSubtotal * 0.05;
+    const newAdminContribution = newSubtotal * 0.015;
     
     setAdminContributionAmount(newAdminContribution);
     setAdminInputValue(newAdminContribution.toFixed(2));
@@ -442,7 +443,7 @@ const Checkout = () => {
                                       
                                       // Recalculate totals
                                       const newSubtotal = updatedCartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-                                      const newAdminContribution = newSubtotal * 0.05;
+                                      const newAdminContribution = newSubtotal * 0.015;
                                       
                                       setAdminContributionAmount(newAdminContribution);
                                       setAdminInputValue(newAdminContribution.toFixed(2));
@@ -545,9 +546,14 @@ const Checkout = () => {
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                         Want to Contribute to Admin?
                       </h3>
-                      <span className="inline-block mt-2 px-2 sm:px-3 py-1 text-xs font-medium text-white bg-primary rounded-full">
-                        One Time Contribution Only
-                      </span>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="inline-block px-2 sm:px-3 py-1 text-xs font-medium text-white bg-primary rounded-full">
+                          One Time Contribution Only
+                        </span>
+                        <span className="inline-block px-2 sm:px-3 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
+                          Default: 1.5% of total
+                        </span>
+                      </div>
                     </div>
 
                     <div className="space-y-3 sm:space-y-4">
@@ -574,7 +580,7 @@ const Checkout = () => {
                           className="w-full sm:w-32 lg:w-40 px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
                         />
                         <span className="text-xs sm:text-sm text-gray-500">
-                          (Suggested: ${(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.05).toFixed(2)})
+                          (Suggested 1.5%: ${(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.015).toFixed(2)})
                         </span>
                       </div>
                     </div>
@@ -686,14 +692,15 @@ const Checkout = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Phone Number
+                            Phone Number <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="tel"
                             value={guestUserData.phone}
                             onChange={(e) => handleGuestDataChange('phone', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20"
-                            placeholder="Enter your phone number (optional)"
+                            placeholder="Enter your phone number"
+                            required
                           />
                         </div>
                         <div>
@@ -710,7 +717,7 @@ const Checkout = () => {
                         </div>
                       </div>
                       <p className="text-xs text-gray-500">
-                        * Required fields. Your information will be used only for donation receipts and records.
+                        * Required fields: Name, Email, and Phone Number. Your information will be used only for donation receipts and records.
                       </p>
                     </div>
 

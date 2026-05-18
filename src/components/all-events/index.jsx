@@ -33,6 +33,7 @@ const Events = ({ data }) => {
                   showDetails={true}
                   isQurbaniDonation={event.is_qurbani_donation}
                   qurbaniPricing={event.qurbani_pricing?.qurbani_in_australia}
+                  buttonText={event.is_qurbani_donation ? 'Book Qurbani' : 'Donate'}
                 />
               ))
             ) : (
