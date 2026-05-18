@@ -253,7 +253,7 @@ const FeaturedEventsCard = ({
                   : 'bg-primary'
               } text-sm h-full text-white px-5 py-2 rounded-md block text-center w-full`}
             >
-              {buttonText || 'Quick Donate'}
+              {buttonText || (isQurbaniDonation ? 'Book Qurbani' : 'Quick Donate')}
             </button>
 
             ) : (
@@ -261,7 +261,7 @@ const FeaturedEventsCard = ({
               href={`/projects/${eventId}`}
               className="bg-primary text-sm h-full text-white px-5 py-2 rounded-md block text-center w-full"
             >
-              {buttonText || 'Donate'}
+              {buttonText || 'Book Qurbani'}
             </Link>
           )} 
             
