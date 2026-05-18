@@ -72,8 +72,8 @@ const Checkout = () => {
       // Calculate subtotal from cart items
       const subtotal = parsedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-      // Set admin contribution amount (1.5% of subtotal)
-      const adminContrib = subtotal * 0.015;
+      // Set admin contribution amount (1.5% of subtotal, rounded down)
+      const adminContrib = Math.floor(subtotal * 0.015);
       setAdminContributionAmount(adminContrib);
       setAdminInputValue(adminContrib.toFixed(2));
 
@@ -157,7 +157,7 @@ const Checkout = () => {
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
 
       const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      const newAdminContribution = newSubtotal * 0.015;
+      const newAdminContribution = Math.floor(newSubtotal * 0.015);
 
       // Update admin contribution and input value
       setAdminContributionAmount(newAdminContribution);
@@ -206,7 +206,7 @@ const Checkout = () => {
       // Update localStorage with new cart data
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
       const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      const newAdminContribution = newSubtotal * 0.015;
+      const newAdminContribution = Math.floor(newSubtotal * 0.015);
       
       // Update admin contribution and input value
       setAdminContributionAmount(newAdminContribution);
@@ -253,7 +253,7 @@ const Checkout = () => {
     
     // Recalculate totals
     const newSubtotal = updatedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const newAdminContribution = newSubtotal * 0.015;
+    const newAdminContribution = Math.floor(newSubtotal * 0.015);
     
     setAdminContributionAmount(newAdminContribution);
     setAdminInputValue(newAdminContribution.toFixed(2));
@@ -443,7 +443,7 @@ const Checkout = () => {
                                       
                                       // Recalculate totals
                                       const newSubtotal = updatedCartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-                                      const newAdminContribution = newSubtotal * 0.015;
+                                      const newAdminContribution = Math.floor(newSubtotal * 0.015);
                                       
                                       setAdminContributionAmount(newAdminContribution);
                                       setAdminInputValue(newAdminContribution.toFixed(2));
@@ -580,7 +580,7 @@ const Checkout = () => {
                           className="w-full sm:w-32 lg:w-40 px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
                         />
                         <span className="text-xs sm:text-sm text-gray-500">
-                          (Suggested 1.5%: ${(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.015).toFixed(2)})
+                          (Suggested 1.5%: ${Math.floor(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.015).toFixed(2)})
                         </span>
                       </div>
                     </div>
