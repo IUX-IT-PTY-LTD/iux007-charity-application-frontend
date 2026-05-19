@@ -548,7 +548,7 @@ const Checkout = () => {
                       </h3>
                       <div className="flex flex-wrap gap-2 mt-2">
                         <span className="inline-block px-2 sm:px-3 py-1 text-xs font-medium text-white bg-primary rounded-full">
-                          One Time Contribution Only
+                          Optional
                         </span>
                         <span className="inline-block px-2 sm:px-3 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
                           Default: 1.5% of total
@@ -579,6 +579,16 @@ const Checkout = () => {
                           placeholder="0.00"
                           className="w-full sm:w-32 lg:w-40 px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all"
                         />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdminInputValue('0.00');
+                            setAdminContributionAmount(0);
+                          }}
+                          className="px-3 py-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                        >
+                          Remove
+                        </button>
                         <span className="text-xs sm:text-sm text-gray-500">
                           (Suggested 1.5%: ${Math.floor(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.015).toFixed(2)})
                         </span>
