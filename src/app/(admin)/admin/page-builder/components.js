@@ -10,6 +10,7 @@ export const COMPONENT_TYPES = {
   COLUMNS: 'columns',
   VIDEO: 'video',
   FORM: 'form',
+  FILE: 'file',
 };
 
 // Default component templates
@@ -151,6 +152,15 @@ export const getDefaultComponent = (type) => {
           { type: 'textarea', label: 'Message', required: true },
         ],
         submitText: 'Send Message',
+      },
+    },
+    [COMPONENT_TYPES.FILE]: {
+      id: Date.now(),
+      type: COMPONENT_TYPES.FILE,
+      content: {
+        title: 'Downloads',
+        description: '',
+        files: [],
       },
     },
   };
