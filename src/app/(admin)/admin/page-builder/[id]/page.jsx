@@ -38,6 +38,7 @@ import { useMenuPermissions } from '@/api/hooks/useModulePermissions';
 
 // Import component types and utilities
 import { COMPONENT_TYPES, getDefaultComponent } from '../components';
+import { FileEditor, FilePreview } from '@/components/page-builder/FileComponent';
 
 // Helper function to get font size class
 const getFontSizeClass = (fontSize) => {
@@ -1570,6 +1571,9 @@ const ComponentEditor = ({ component, onUpdate, onClose, isOpen }) => {
           </div>
         );
 
+      case COMPONENT_TYPES.FILE:
+        return <FileEditor content={localComponent.content} updateContent={updateContent} />;
+
       default:
         return <p>No editor available for this component type.</p>;
     }
@@ -1994,6 +1998,9 @@ const ComponentPreview = ({ component, onEdit, onDelete, onMoveUp, onMoveDown, i
           </div>
         );
 
+      case COMPONENT_TYPES.FILE:
+        return <FilePreview content={component.content} />;
+
       default:
         return <div className="p-4 bg-gray-100 rounded border-2 border-dashed">Unknown component type: {component.type}</div>;
     }
@@ -2300,6 +2307,13 @@ const EditPageBuilderContent = () => {
                   onClick={() => addComponent(COMPONENT_TYPES.SPACER)}
                 >
                   ⬜ Spacer
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => addComponent(COMPONENT_TYPES.FILE)}
+                >
+                  📎 Files / Documents
                 </Button>
               </CardContent>
             </Card>
