@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { COMPONENT_TYPES } from '@/app/(admin)/admin/page-builder/components';
+import { FileDisplay } from './FileComponent';
 
 // Individual component renderers
 const HeroComponent = ({ content }) => {
@@ -539,6 +540,9 @@ const ComponentRenderer = ({ component }) => {
     
     case COMPONENT_TYPES.FORM:
       return <FormComponent content={component.content} />;
+
+    case COMPONENT_TYPES.FILE:
+      return <FileDisplay content={component.content} />;
     
     default:
       return (
