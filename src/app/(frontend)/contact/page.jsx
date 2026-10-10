@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import Script from 'next/script';
 import { commonService } from '@/api/services/app/commonService';
 import { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
@@ -258,6 +259,22 @@ const ContactUs = () => {
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+
+        <div className="mt-16">
+          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-8">
+            Book an Appointment
+          </h2>
+          <div className="bg-white shadow-2xl rounded-2xl overflow-hidden p-8">
+            <div id="eva365-booking"></div>
+            <Script
+              src="https://booking-staging.eva365.app/widget/embed.js?v=1"
+              data-key="wk_live_NWH6GfQ5e0k8Gfg2T0qmMwHM11xZClx5"
+              data-mode="inline"
+              data-lang="en"
+              strategy="lazyOnload"
+            />
           </div>
         </div>
       </div>

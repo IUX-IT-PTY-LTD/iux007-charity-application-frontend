@@ -7,6 +7,7 @@ import Hero from '@/components/homepage-components/hero';
 import FeaturedEvents from '@/components/homepage-components/featured-events';
 import FundRaising from '@/components/homepage-components/operations';
 import FAQ from '@/components/shared/faq';
+import BookAppointment from '@/components/shared/book-appointment';
 import CharityRequestForm from '@/components/charity-request-form';
 import MasjidIframe from '@/components/shared/masjid-iframe';
 import { apiService } from '@/api/services/app/apiService';
@@ -56,6 +57,7 @@ const Home = () => {
       <FeaturedEvents data={featuredEventsData} />
       <Events data={eventsData} />
       <FundRaising />
+      <BookAppointment />
       <FAQ />
       <MasjidIframe />
     </div>
