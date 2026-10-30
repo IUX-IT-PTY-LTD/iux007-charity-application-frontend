@@ -10,11 +10,11 @@ export const eventFormSchema = z
       message: 'Description must be at least 10 characters.',
     }),
     start_date: z.date({
-      required_error: 'Start date is required.',
+      error: (issue) => (issue.input === undefined ? 'Start date is required.' : undefined),
     }),
     end_date: z
       .date({
-        required_error: 'End date is required.',
+        error: (issue) => (issue.input === undefined ? 'End date is required.' : undefined),
       })
       .refine((data) => data >= new Date(), {
         message: 'End date cannot be in the past.',

@@ -68,12 +68,12 @@ const formSchema = z.object({
     message: 'Content must be at least 50 characters.',
   }),
   category_id: z.string({
-    required_error: 'Please select a category.',
+    error: (issue) => (issue.input === undefined ? 'Please select a category.' : undefined),
   }),
   tag_ids: z.array(z.string()).optional().default([]),
   featured_image: z.any().optional(),
   publish_date: z.date({
-    required_error: 'Please select a date.',
+    error: (issue) => (issue.input === undefined ? 'Please select a date.' : undefined),
   }),
   status: z.string().default('draft'),
   is_featured: z.boolean().default(false),
